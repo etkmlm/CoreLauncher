@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.cdev.corelauncher.ui.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+
+<?import javafx.scene.image.ImageView?>
+<AnchorPane prefHeight="600" prefWidth="600" stylesheets="@../style/main.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.Main">
+    <background>
+        <Background>
+            <fills>
+                <BackgroundFill fill="#202020" />
+            </fills>
+        </Background>
+    </background>
+
+    <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="0">
+        <HBox alignment="CENTER_LEFT">
+            <Label fx:id="lblState" text="Durum" textFill="white" />
+        </HBox>
+        <Rectangle height="20" />
+
+        <!--<ProgressBar fx:id="prg" prefWidth="200" progress="0" />-->
+    </VBox>
+    <HBox alignment="CENTER" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="20.0">
+        <TextField fx:id="txtPro" maxWidth="100.0" prefHeight="12.0" />
+
+    </HBox>
+    <ProgressIndicator fx:id="prg" minHeight="100" minWidth="100" progress="0" AnchorPane.bottomAnchor="16.0" AnchorPane.rightAnchor="16.0" />
+    <CButton fx:id="btnPro" maxHeight="80" maxWidth="70" prefHeight="70" prefWidth="70" styleClass="cb" text="Tıkla" AnchorPane.bottomAnchor="40" AnchorPane.rightAnchor="31" />
+    <ListView fx:id="test" layoutX="262.0" layoutY="131.0" prefHeight="269.0" prefWidth="264.0">
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+        <HBox prefHeight="20">
+            <Label text="gkjrebngkjerbngjer"/>
+        </HBox>
+
+    </ListView>
+</AnchorPane>

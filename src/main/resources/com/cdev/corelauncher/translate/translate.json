@@ -1,0 +1,18 @@
+{
+  "languages": [
+    {
+      "key": "TR",
+      "local": "Türkçe"
+    },
+    {
+      "key": "EN",
+      "local": "English"
+    }
+  ],
+  "translates": {
+    "demo": {
+      "TR": "Deneme",
+      "EN": "Demo"
+    }
+  }
+}

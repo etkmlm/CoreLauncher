@@ -1,0 +1,59 @@
+.progress-bar{
+    -fx-background-color: transparent;
+}
+
+.progress-bar > .track{
+    -fx-background-color: #303030;
+}
+
+.progress-bar > .bar{
+    -fx-background-color: aqua;
+}
+
+.progress-indicator{
+    -fx-progress-color: teal;
+}
+
+.progress-indicator .indicator{
+    -fx-padding: 0;
+}
+
+.progress-indicator .percentage{
+    -fx-fill: none;
+}
+
+.progress-indicator .tick{
+    -fx-background-color: none;
+}
+
+.text-field{
+    -fx-background-color: #303030;
+    -fx-text-fill: white;
+}
+
+.cb{
+    -fx-background-radius: 50%;
+    -fx-background-color: teal;
+    -fx-font-size: 15pt;
+}
+
+.list-view{
+    -fx-background-color: #303030;
+}
+
+.list-view .list-cell{
+    -fx-background-color: none;
+}
+
+.scroll-bar{
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.scroll-bar .thumb{
+    -fx-background-color: aqua;
+}
+
+.scroll-bar .decrement-button, .scroll-bar .increment-button{
+    -fx-background-color: transparent;
+}

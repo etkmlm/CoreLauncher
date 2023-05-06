@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.control.Label?>
+<AnchorPane styleClass="main" stylesheets="@../style/controls/cprofile.css" prefHeight="75" prefWidth="200.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="0">
+        <ImageView fx:id="profileImage" fitHeight="30" fitWidth="30" />
+    </VBox>
+    <Label styleClass="title" text="Title of Profile" AnchorPane.leftAnchor="50" AnchorPane.topAnchor="2" fx:id="lblProfileName"/>
+    <Label styleClass="version" text="Version of Profile" AnchorPane.leftAnchor="50" AnchorPane.topAnchor="22" fx:id="lblProfileVersion"/>
+</AnchorPane>
