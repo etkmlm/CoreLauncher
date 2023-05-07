@@ -1,6 +1,7 @@
 package com.cdev.corelauncher.minecraft;
 
 import com.cdev.corelauncher.CoreLauncher;
+import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.entities.*;
 import com.cdev.corelauncher.ui.utils.EventHandler;
 import com.cdev.corelauncher.utils.JavaManager;
@@ -181,6 +182,11 @@ public class Launcher {
             handleState("asset" + i + "/" + count);
             handleProgress(i * 1.0 / count);
         }
+    }
+
+
+    public void launch(Profile profile){
+        launch(profile.getVersionId(), "IA", "T", null, null);
     }
 
     public void launch(String versionId, String username, String accessToken, Java java, Path dir)

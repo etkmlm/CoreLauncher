@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.cdev.corelauncher.ui.controls.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
-
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<AnchorPane prefHeight="600" prefWidth="600" stylesheets="@../style/main.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.Main">
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.layout.Background?>
+<?import javafx.scene.layout.BackgroundFill?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import com.cdev.corelauncher.ui.controls.CButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<AnchorPane stylesheets="@../style/main.css" prefHeight="600" prefWidth="600" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.cdev.corelauncher.ui.controller.Main">
     <background>
         <Background>
             <fills>
@@ -15,54 +23,40 @@
         </Background>
     </background>
 
-    <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="0">
-        <HBox alignment="CENTER_LEFT">
-            <Label fx:id="lblState" text="Durum" textFill="white" />
-        </HBox>
-        <Rectangle height="20" />
+    <AnchorPane styleClass="launch-bar" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" prefWidth="100" >
+        <ImageView fx:id="playerHeadView" fitHeight="161.0" fitWidth="222.0" layoutX="43.0" layoutY="43.0"
+                   pickOnBounds="true" preserveRatio="true">
+            <Image url="@../images/BuyukMuhittin.png"/>
+        </ImageView>
+        <Label fx:id="playerName" alignment="CENTER" contentDisplay="CENTER" layoutY="197.0"
+               prefHeight="53.0" prefWidth="308.0" text="Muhittin" textAlignment="CENTER">
+            <font>
+                <Font name="Cooper Black" size="26.0"/>
+            </font>
+        </Label>
+        <Label fx:id="gameVersion" alignment="CENTER" contentDisplay="CENTER" layoutX="1.0" layoutY="387.0"
+               prefHeight="53.0" prefWidth="308.0" text="Mucuklu Sürüm" textAlignment="CENTER">
+            <font>
+                <Font name="Cooper Black" size="26.0"/>
+            </font>
+        </Label>
 
-        <!--<ProgressBar fx:id="prg" prefWidth="200" progress="0" />-->
-    </VBox>
-    <HBox alignment="CENTER" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="20.0">
-        <TextField fx:id="txtPro" maxWidth="100.0" prefHeight="12.0" />
+        <Label fx:id="gameDescription" alignment="CENTER" contentDisplay="CENTER" layoutX="1.0"
+               layoutY="440.0" prefHeight="53.0" prefWidth="308.0" text="-----" textAlignment="CENTER">
+            <font>
+                <Font name="Cooper Black" size="20.0"/>
+            </font>
+        </Label>
+        <HBox alignment="CENTER"  AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+            <VBox alignment="CENTER">
+                <AnchorPane>
+                    <ProgressIndicator fx:id="prg" minHeight="100" minWidth="100" progress="0" />
+                    <CButton fx:id="btnStart" AnchorPane.leftAnchor="15" AnchorPane.topAnchor="5.5" maxHeight="80" maxWidth="80" prefHeight="70" prefWidth="70" styleClass="play-button" text="⯈"/>
+                </AnchorPane>
+            </VBox>
 
-    </HBox>
-    <ProgressIndicator fx:id="prg" minHeight="100" minWidth="100" progress="0" AnchorPane.bottomAnchor="16.0" AnchorPane.rightAnchor="16.0" />
-    <CButton fx:id="btnPro" maxHeight="80" maxWidth="70" prefHeight="70" prefWidth="70" styleClass="cb" text="Tıkla" AnchorPane.bottomAnchor="40" AnchorPane.rightAnchor="31" />
-    <ListView fx:id="test" layoutX="262.0" layoutY="131.0" prefHeight="269.0" prefWidth="264.0">
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
-        <HBox prefHeight="20">
-            <Label text="gkjrebngkjerbngjer"/>
-        </HBox>
 
-    </ListView>
+        </HBox>
+    </AnchorPane>
+    <ListView fx:id="lvProfiles" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" />
 </AnchorPane>

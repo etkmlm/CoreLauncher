@@ -17,7 +17,20 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 
-public class Path implements JsonSerializer<Path>, JsonDeserializer<Path> {
+public class Path{
+
+    public static final class PathFactory implements JsonSerializer<Path>, JsonDeserializer<Path> {
+        @Override
+        public JsonElement serialize(Path path, Type type, JsonSerializationContext jsonSerializationContext) {
+            return new JsonPrimitive(path.root.toString());
+        }
+
+        @Override
+        public Path deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            return new Path(java.nio.file.Path.of(jsonElement.getAsString()));
+        }
+    }
+
     private java.nio.file.Path root;
 
     public Path(){
@@ -37,9 +50,16 @@ public class Path implements JsonSerializer<Path>, JsonDeserializer<Path> {
         return new Path(r);
     }
 
+    /**
+     * Concat multiple paths.
+     */
     public Path to(String... keys){
         return new Path(java.nio.file.Path.of(root.toString(), keys));
     }
+
+    /**
+     * Concat path;
+     */
     public Path to(String key){
         return new Path(root.resolve(key));
     }
@@ -204,16 +224,5 @@ public class Path implements JsonSerializer<Path>, JsonDeserializer<Path> {
         }
         else if (getExtension().equals("zip") || getExtension().equals("jar"))
             extractZip(destination, exclude);
-    }
-
-    @Override
-    public JsonElement serialize(Path path, Type type, JsonSerializationContext jsonSerializationContext) {
-        return new JsonPrimitive(root.toString());
-    }
-
-    @Override
-    public Path deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        root = java.nio.file.Path.of(jsonElement.getAsString());
-        return this;
     }
 }

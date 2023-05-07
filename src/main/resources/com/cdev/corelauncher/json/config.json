@@ -1,0 +1,18 @@
+{
+  "gamePath": null,
+  "user": "IAMUSER",
+  "language": "EN",
+  "background": {
+    "color": "#202020",
+    "image": ""
+  },
+  "defaultJVMArgs": "",
+  "lastSelectedProfile": "",
+  "defaultMinRAM": 2048,
+  "defaultMaxRAM": 4096,
+  "showOldReleases": false,
+  "showSnapshots": false
+}
+
+
+

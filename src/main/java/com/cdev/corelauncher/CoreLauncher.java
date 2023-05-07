@@ -1,5 +1,6 @@
 package com.cdev.corelauncher;
 
+import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Translator;
 import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.minecraft.Launcher;
@@ -12,15 +13,14 @@ import com.cdev.corelauncher.utils.entities.Path;
 public class CoreLauncher {
 
     public static final OS SYSTEM_OS = OS.getSystemOS();
-    public static Config config;
-    public static Translator translator;
-
 
     public static void main(String[] args){
-        config = new Config(Path.begin(java.nio.file.Path.of(System.getProperty("user.dir"))))
-                .setGamePath(new Path(OSUtils.getAppFolder()));
-        translator = Translator.generateTranslator();
-        var mainDir = config.getGamePath();
+        var configPath = Path.begin(java.nio.file.Path.of(System.getProperty("user.dir")));
+
+        new Configurator(configPath).reloadConfig();
+
+        Translator.generateTranslator();
+        var mainDir = Configurator.getConfig().getGamePath();
 
         new Logger(mainDir.to("launcher").to("launcherlog"), false);
         new Launcher(mainDir).reload();

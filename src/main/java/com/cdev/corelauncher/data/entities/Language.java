@@ -1,11 +1,28 @@
 package com.cdev.corelauncher.data.entities;
 
+import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 
+import java.lang.reflect.Type;
+
 public class Language {
-    private String key;
+
+    public static final class LanguageFactory implements JsonSerializer<Language>, JsonDeserializer<Language> {
+
+        @Override
+        public Language deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            return Language.fromKey(jsonElement.getAsString());
+        }
+
+        @Override
+        public JsonElement serialize(Language languageFactory, Type type, JsonSerializationContext jsonSerializationContext) {
+            return new JsonPrimitive(languageFactory.key);
+        }
+    }
+
+    private final String key;
     @SerializedName("local")
-    private String localizedName;
+    private final String localizedName;
 
     public Language(String key, String localizedName){
         this.key = key;

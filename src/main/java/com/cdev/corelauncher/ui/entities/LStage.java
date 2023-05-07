@@ -19,16 +19,7 @@ public class LStage extends Stage {
     private static final InputStream LOGO32 = CoreLauncherFX.class.getResourceAsStream("/com/cdev/corelauncher/logo32x32.png");
     private static final InputStream LOGO64 = CoreLauncherFX.class.getResourceAsStream("/com/cdev/corelauncher/logo64x64.png");
 
-    private final Thread eventHandlerThread;
-    private final List<Task<Void>> eventHandleQueue;
-
     public LStage(){
-        eventHandleQueue = new ArrayList<>();
-        eventHandlerThread = new Thread(() -> {
-            int queue = 0;
-
-        });
-
         getIcons().add(new Image(LOGO16));
         getIcons().add(new Image(LOGO32));
         getIcons().add(new Image(LOGO64));

@@ -33,16 +33,6 @@ public class FXManager {
         return LStage.open(name, w, h).setStageTitle(title).showStage();
     }
 
-    public static void load(URL u){
-        FXMLLoader loader = new FXMLLoader(u);
-        try{
-            loader.load();
-        }
-        catch (IOException e){
-            throw new RuntimeException(e);
-        }
-    }
-
     public static FXManager getManager(){
         return instance;
     }

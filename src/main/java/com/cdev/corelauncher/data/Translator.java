@@ -5,11 +5,13 @@ import com.cdev.corelauncher.data.entities.Translate;
 import com.google.gson.*;
 
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Translator {
+
+    private static Translator instance;
+
     private List<Language> languages;
     private List<Translate> translates;
 
@@ -17,6 +19,8 @@ public class Translator {
 
     public Translator(){
         selectedLanguage = Language.fromKey("EN");
+
+        instance = this;
     }
 
     public Language findLanguage(String key){
@@ -56,10 +60,14 @@ public class Translator {
             return t;
         }).create();
 
-        var s = Translator.class.getResourceAsStream("/com/cdev/corelauncher/translate/translate.json");
+        var s = Translator.class.getResourceAsStream("/com/cdev/corelauncher/json/translate.json");
         if (s == null)
             throw new RuntimeException("Translate file can't found.");
 
         return gson.fromJson(new InputStreamReader(s), Translator.class);
+    }
+
+    public static Translator getTranslator(){
+        return instance;
     }
 }

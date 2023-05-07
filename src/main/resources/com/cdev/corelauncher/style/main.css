@@ -31,12 +31,6 @@
     -fx-text-fill: white;
 }
 
-.cb{
-    -fx-background-radius: 50%;
-    -fx-background-color: teal;
-    -fx-font-size: 15pt;
-}
-
 .list-view{
     -fx-background-color: #303030;
 }
@@ -56,4 +50,19 @@
 
 .scroll-bar .decrement-button, .scroll-bar .increment-button{
     -fx-background-color: transparent;
+}
+
+.launch-bar{
+    -fx-background-color: #304040;
+    -fx-background-radius: 0 15px 15px 0;
+}
+
+.progress-indicator{
+    -fx-padding: 0;
+}
+
+.play-button{
+    -fx-background-radius: 50%;
+    -fx-background-color: violet;
+    -fx-font-size: 15pt;
 }
