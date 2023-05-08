@@ -2,6 +2,7 @@ package com.cdev.corelauncher.ui.controller;
 
 import com.cdev.corelauncher.CoreLauncher;
 import com.cdev.corelauncher.data.Configurator;
+import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.Launcher;
@@ -10,6 +11,7 @@ import com.cdev.corelauncher.ui.controls.CProfile;
 import com.cdev.corelauncher.utils.JavaManager;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.entities.Java;
+import com.cdev.corelauncher.utils.entities.Path;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,6 +24,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 
 public class Main{
 
@@ -55,22 +59,21 @@ public class Main{
     private final ObservableList<Profile> profiles;
 
     public Main(){
-        profiles = FXCollections.observableArrayList();
-        var p = new Profile(Configurator.getConfig().getGamePath());
+        profiles = FXCollections.observableArrayList(Profiler.getProfiler().getAllProfiles());
 
-        profiles.add(p);
-        profiles.add(p);
-        profiles.add(p);
-        profiles.add(p);
-        profiles.add(p);
-        profiles.add(p);
+        Profiler.getProfiler().getHandler().addHandler("mainWindow", (a) -> {
+            if (a.getKey().equals("profileCreate"))
+                profiles.add((Profile) a.getNewValue());
+            else if (a.getKey().equals("profileDelete"))
+                profiles.remove((Profile) a.getOldValue());
+        });
+
+        //Profiler.getProfiler().deleteProfile(Profiler.getProfiler().getProfile("testprofile3"));
     }
 
     @FXML
     private void initialize(){
-
-
-        /*Launcher.getLauncher().getHandler().addHandler("main", (a) -> {
+        Launcher.getLauncher().getHandler().addHandler("main", (a) -> {
             switch (a.getType()) {
                 case NEED -> {
                     if (a.getKey().startsWith("java")) {
@@ -80,9 +83,9 @@ public class Main{
                     }
                 }
                 case PROGRESS -> Platform.runLater(() -> prg.setProgress((double) a.getValue()));
-                case STATE -> Platform.runLater(() -> lblState.setText(a.getKey()));
+                //case STATE -> Platform.runLater(() -> .setText(a.getKey()));
             }
-        });*/
+        });
 
         /*btnPro.setOnMouseClicked((a) -> {
             String vId = txtPro.getText();
@@ -92,20 +95,21 @@ public class Main{
         txtPro.setOnKeyPressed((a) -> {
             if (a.getCode() == KeyCode.ENTER)
                 l(txtPro.getText());
-        });
-
-         */
-
+        });*/
         lvProfiles.setItems(profiles);
         lvProfiles.setCellFactory((x) -> new CProfile());
 
+        btnStart.setOnMouseClicked((a) -> {
+            String ver = "1.12.2";
+            l(ver);
+        });
 
     }
 
     private void l(String vId){
         new Thread(() -> {
             Launcher.getLauncher().downloadVersion(vId);
-            Launcher.getLauncher().launch(vId, "EvilMonster", "T", JavaManager.getDefault(), null);
+            Launcher.getLauncher().launch(vId, Configurator.getConfig().getUser().getUsername(), "T", JavaManager.getDefault(), null);
         }).start();
     }
 

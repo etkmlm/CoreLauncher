@@ -1,6 +1,8 @@
 package com.cdev.corelauncher.minecraft;
 
 import com.cdev.corelauncher.CoreLauncher;
+import com.cdev.corelauncher.data.Configurator;
+import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.entities.*;
 import com.cdev.corelauncher.ui.utils.EventHandler;
@@ -26,9 +28,20 @@ public class Launcher {
     private MainInfo _info;
     private Path gameDir;
     private final EventHandler<LauncherEvent> handler;
+
+    private boolean isGameRunning;
+
     public Launcher(Path gameDir){
         this.gameDir = gameDir;
         handler = new EventHandler<>();
+
+        Configurator.getConfigurator().getHandler().addHandler("launcher", (a) -> {
+            if (!a.getKey().equals("gamePathChange"))
+                return;
+
+            setGameDir((Path) a.getNewValue());
+        });
+
         instance = this;
     }
 
@@ -184,6 +197,9 @@ public class Launcher {
         }
     }
 
+    public boolean isGameRunning(){
+        return isGameRunning;
+    }
 
     public void launch(Profile profile){
         launch(profile.getVersionId(), "IA", "T", null, null);
@@ -215,6 +231,8 @@ public class Launcher {
             String c = String.valueOf(File.pathSeparatorChar);
             String cp = launchInfo.clientPath + c + String.join(c, launchInfo.libraries);
 
+            isGameRunning = true;
+
             var process = new ProcessBuilder()
                     .directory(dir.toFile())
                     .inheritIO()
@@ -231,6 +249,8 @@ public class Launcher {
                             "--username", username)
                     .start();
             process.waitFor();
+
+            isGameRunning = false;
 
             Logger.getLogger().log(LogType.INFO, "-------LAUNCH END-------");
         }

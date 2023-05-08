@@ -1,6 +1,7 @@
 package com.cdev.corelauncher.utils;
 
 import com.cdev.corelauncher.CoreLauncher;
+import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.google.gson.Gson;
@@ -18,6 +19,14 @@ public class JavaManager {
 
     public JavaManager(Path javaDir){
         this.javaDir = javaDir;
+
+        Configurator.getConfigurator().getHandler().addHandler("jvman", (a) -> {
+            if (!a.getKey().equals("gamePathChange"))
+                return;
+
+            setJavaDir((Path) a.getNewValue());
+        });
+
         instance = this;
     }
 

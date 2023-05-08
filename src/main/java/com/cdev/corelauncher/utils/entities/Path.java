@@ -6,6 +6,7 @@ import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
+import org.apache.commons.compress.utils.FileNameUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,16 +69,29 @@ public class Path{
         return root.toFile();
     }
 
+    public void move(Path newPath, boolean deleteExisting){
+        var f = newPath.to(getName()).prepare().toFile();
+
+        root.toFile().renameTo(f);
+
+        if (deleteExisting)
+            delete();
+
+        root = f.toPath();
+    }
+
     public boolean exists(){
         return toFile().exists();
     }
 
-    public void prepare(){
+    public Path prepare(){
         var file = toFile();
         if (file.isDirectory())
             file.mkdirs();
         else
             new File(file.getParent()).mkdirs();
+
+        return this;
     }
 
     public List<Path> getFiles(){
@@ -132,7 +146,14 @@ public class Path{
             return "";
         }
     }
+
     public void delete(){
+        boolean f = root.toFile().delete();
+        if (f || !toFile().isDirectory())
+            return;
+
+        getFiles().forEach(Path::delete);
+
         root.toFile().delete();
     }
 

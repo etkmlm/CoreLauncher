@@ -1,5 +1,6 @@
 package com.cdev.corelauncher.utils;
 
+import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.utils.entities.LogType;
 import com.cdev.corelauncher.utils.entities.Path;
 
@@ -19,6 +20,13 @@ public class Logger {
     public Logger(Path logDir, boolean efl){
         this.logDir = logDir;
         this.enableFileLogging = efl;
+
+        Configurator.getConfigurator().getHandler().addHandler("logger", (a) -> {
+            if (!a.getKey().equals("gamePathChange"))
+                return;
+
+            setLogDir((Path)a.getNewValue());
+        });
 
         instance = this;
     }

@@ -1,6 +1,7 @@
 package com.cdev.corelauncher;
 
 import com.cdev.corelauncher.data.Configurator;
+import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.data.Translator;
 import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.minecraft.Launcher;
@@ -22,6 +23,7 @@ public class CoreLauncher {
         Translator.generateTranslator();
         var mainDir = Configurator.getConfig().getGamePath();
 
+        new Profiler().reload();
         new Logger(mainDir.to("launcher").to("launcherlog"), false);
         new Launcher(mainDir).reload();
         new JavaManager(mainDir.to("launcher").to("java"));

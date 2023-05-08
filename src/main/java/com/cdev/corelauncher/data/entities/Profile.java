@@ -11,30 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Profile {
+    private transient boolean isEmpty;
     private String name;
     private String versionId;
     private Account customUser;
     private String icon;
-    /*
-    private final List<Mod> mods;
-    private final Path folder;
-    private final Path profileInfo;
-    */
+    private List<Mod> mods;
+    private Path path;
+
     private Profile(){
-        
-    }
 
-    public Profile(Path folder){
-        //this.folder = folder;
-        name = folder.getName();
-        //profileInfo = folder.to("profileInfo.json");
-        //mods = new ArrayList<>();
-        versionId = "0.0.0";
-    }
-
-    public Profile reload(){
-
-        return this;
     }
 
     public String getName() {
@@ -50,22 +36,33 @@ public class Profile {
         return this;
     }
 
-//----------------------------------------------
+    public static Profile empty(){
+        var p = new Profile();
+        p.isEmpty = true;
+        return p;
+    }
 
+    public Profile save() {
+        if (isEmpty)
+            return null;
 
-    public Profile writeToJson() {
         String json = GsonUtils.DEFAULT_GSON.toJson(this);
 
-        //profileInfo.write(json);
+        path.to("profile.json").write(json);
 
         return this;
     }
 
-    public static Profile get(Path profilePath) {
-
-       return null;
+    private Profile setProfilePath(Path path){
+        this.path = path;
+        this.name = path.getName();
+        return this;
     }
 
-
+    public static Profile get(Path profilePath) {
+        var file = profilePath.to("profile.json");
+        return (file.exists() ? GsonUtils.DEFAULT_GSON.fromJson(file.read(), Profile.class) : new Profile())
+                .setProfilePath(profilePath).save();
+    }
 
 }

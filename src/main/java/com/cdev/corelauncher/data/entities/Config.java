@@ -31,4 +31,8 @@ public class Config {
         this.gamePath = gamePath;
     }
 
+    public Account getUser(){
+        return user;
+    }
+
 }
