@@ -45,6 +45,10 @@ public class Main{
     private ListView<Profile> lvProfiles;
     @FXML
     private Label gameDescription;
+    @FXML
+    private Label status;
+    @FXML
+    private Label detailedStatus;
 
 
 
@@ -64,6 +68,8 @@ public class Main{
 
     @FXML
     private void initialize(){
+
+
         /*Launcher.getLauncher().getHandler().addHandler("main", (a) -> {
             switch (a.getType()) {
                 case NEED -> {
@@ -87,9 +93,11 @@ public class Main{
             if (a.getCode() == KeyCode.ENTER)
                 l(txtPro.getText());
         });
-        test.setItems(profiles);
-        test.setCellFactory((x) -> new CProfile());*/
 
+         */
+
+        lvProfiles.setItems(profiles);
+        lvProfiles.setCellFactory((x) -> new CProfile());
 
 
     }

@@ -4,12 +4,17 @@ import com.cdev.corelauncher.CoreLauncher;
 import com.cdev.corelauncher.CoreLauncherFX;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.ui.utils.FXManager;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import org.controlsfx.control.action.Action;
 
 import java.io.IOException;
 
@@ -35,6 +40,12 @@ public class CProfile extends ListCell<Profile> {
     private Label lblProfileName;
     @FXML
     private Label lblProfileVersion;
+    @FXML
+    private Label lblProfileDescription;
+    @FXML
+    private ContextMenu contextMenu;
+    @FXML
+    private Button btnContextMenu;
 
     @Override
     protected void updateItem(Profile profile, boolean empty) {
@@ -49,4 +60,23 @@ public class CProfile extends ListCell<Profile> {
         lblProfileVersion.setText(profile.getVersionId());
         setGraphic(gr);
     }
+
+    //------------------------
+
+    public void sayHi(ActionEvent event)
+    {
+        System.out.printf("selam");
+    }
+
+    public void onBtnCMClicked(MouseEvent event)
+    {
+        if (event.isPrimaryButtonDown())
+        {
+
+        }
+
+
+    }
+
+
 }

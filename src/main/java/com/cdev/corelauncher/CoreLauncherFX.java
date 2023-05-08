@@ -19,7 +19,7 @@ public class CoreLauncherFX extends Application {
     public void start(Stage stage) {
         stage.close();
         new FXManager();
-        FXManager.getManager().openScene("main", "Hoş geldin uşağum!", 600, 600);
+        FXManager.getManager().openScene("main", "Hoş geldin uşağum!", 720, 600);
     }
 
     public static void launchFX(){

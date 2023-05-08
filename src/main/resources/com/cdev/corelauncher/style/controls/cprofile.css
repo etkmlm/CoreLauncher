@@ -12,3 +12,10 @@
     -fx-background-color: #404040;
     -fx-background-radius: 10px;
 }
+
+.btnCM{
+    -fx-background-color: #505050;
+    -fx-background-radius: 20px;
+}
+
+

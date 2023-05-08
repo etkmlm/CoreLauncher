@@ -2,6 +2,7 @@ package com.cdev.corelauncher.data.entities;
 
 import com.cdev.corelauncher.minecraft.curseforge.entities.Mod;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.entities.Path;
 import javafx.fxml.FXML;
 import javafx.scene.image.ImageView;
@@ -14,19 +15,20 @@ public class Profile {
     private String versionId;
     private Account customUser;
     private String icon;
+    /*
     private final List<Mod> mods;
     private final Path folder;
     private final Path profileInfo;
-
+    */
     private Profile(){
         
     }
 
     public Profile(Path folder){
-        this.folder = folder;
+        //this.folder = folder;
         name = folder.getName();
-        profileInfo = folder.to("profileInfo.json");
-        mods = new ArrayList<>();
+        //profileInfo = folder.to("profileInfo.json");
+        //mods = new ArrayList<>();
         versionId = "0.0.0";
     }
 
@@ -54,14 +56,14 @@ public class Profile {
     public Profile writeToJson() {
         String json = GsonUtils.DEFAULT_GSON.toJson(this);
 
-        profileInfo.write(json);
+        //profileInfo.write(json);
 
         return this;
     }
 
     public static Profile get(Path profilePath) {
 
-        GsonUtils.DEFAULT_GSON.fromJson()
+       return null;
     }
 
 
