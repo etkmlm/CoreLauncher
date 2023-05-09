@@ -3,17 +3,18 @@ package com.cdev.corelauncher.ui.controls;
 import com.cdev.corelauncher.CoreLauncher;
 import com.cdev.corelauncher.CoreLauncherFX;
 import com.cdev.corelauncher.data.entities.Profile;
+import com.cdev.corelauncher.ui.controller.Main;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Paint;
 import org.controlsfx.control.action.Action;
 
 import java.io.IOException;
@@ -46,6 +47,10 @@ public class CProfile extends ListCell<Profile> {
     private ContextMenu contextMenu;
     @FXML
     private Button btnContextMenu;
+    @FXML
+    private Button btnActive;
+
+
 
     @Override
     protected void updateItem(Profile profile, boolean empty) {
@@ -58,24 +63,64 @@ public class CProfile extends ListCell<Profile> {
 
         lblProfileName.setText(profile.getName());
         lblProfileVersion.setText(profile.getVersionId());
+
+
         setGraphic(gr);
     }
 
     //------------------------
 
-    public void sayHi(ActionEvent event)
+    public void sayHi(MouseEvent event)
     {
         System.out.printf("selam");
     }
 
-    public void onBtnCMClicked(MouseEvent event)
+    public void onBtnCMClicked(ActionEvent event)
     {
-        if (event.isPrimaryButtonDown())
-        {
 
+        double screenX = btnContextMenu.localToScreen(btnContextMenu.getBoundsInLocal()).getMinX();
+        double screenY = btnContextMenu.localToScreen(btnContextMenu.getBoundsInLocal()).getMinY();
+        contextMenu.show((Button)event.getSource(), screenX + 10, screenY + 10);
+
+    }
+
+    public void onBtnActiveClicked(ActionEvent event) {
+
+        if (btnActive.getTextFill() == Paint.valueOf("red")) {
+            btnActive.setTextFill(Paint.valueOf("White"));
+
+        } else {
+            btnActive.setTextFill(Paint.valueOf("red"));
         }
 
+        System.out.println("btnActive clicked");
 
+    }
+
+    public void MenuItemCompleteB(ActionEvent event) {
+
+        System.out.println("Complete Backup");
+
+    }
+
+    public void MenuItemSend(ActionEvent event) {
+
+        System.out.println("send");
+
+    }
+
+    public void MenuItemOpenFolder(ActionEvent event) {
+
+        System.out.println("Open Folder");
+    }
+
+    public void MenuItemEdit(ActionEvent event) {
+
+        System.out.println("edit");
+    }
+
+    public void MenuItemDelete(ActionEvent event) {
+        System.out.printf("delete profile '" + lblProfileName.getText() + "'");
     }
 
 

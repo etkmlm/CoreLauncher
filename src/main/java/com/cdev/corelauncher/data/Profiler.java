@@ -14,6 +14,7 @@ public class Profiler {
     private Path profilesDir;
     private List<Profile> profiles;
     private EventHandler<ChangeEvent> handler;
+    private Profile selectedProfile; //uwu
 
     public Profiler() {
         profilesDir = Configurator.getConfig().getGamePath().to("profiles");

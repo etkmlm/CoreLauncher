@@ -12,18 +12,30 @@
     <Label fx:id="lblProfileName" layoutX="62.0" layoutY="2.0" styleClass="title" text="Title of Profile" AnchorPane.leftAnchor="62.0" AnchorPane.topAnchor="2.0" />
     <Label fx:id="lblProfileVersion" layoutX="62.0" layoutY="30.0" styleClass="version" text="Version of Profile" AnchorPane.leftAnchor="62.0" AnchorPane.topAnchor="25.0" />
     <Label fx:id="lblProfileDescription" layoutX="62.0" layoutY="53.0" prefHeight="17.0" prefWidth="99.0" text="Desctiption" textFill="#f84545" />
-    <Button onAction="#onBtnCMClicked" fx:id="btnContextMenu" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="10.0" prefHeight="16.0" prefWidth="30.0" style="-fx-background-color: #505050; -fx-background-radius: 10px;" styleClass="btnCM" text="..." textFill="WHITE">
+    <Button fx:id="btnContextMenu" onAction="#onBtnCMClicked" prefHeight="16.0" prefWidth="30.0" style="-fx-background-color: #505050; -fx-background-radius: 10px;" styleClass="btnCM" text="..." textFill="WHITE" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="10.0">
+
         <font>
             <Font size="15.0" />
         </font>
         <contextMenu>
-            <ContextMenu fx:id="contextMenu">
+            <ContextMenu fx:id="contextMenu" style="-fx-background-color: #505050;-fx-background-radius: 3px;">
                 <items>
-                    <MenuItem onAction="#sayHi" text="selam" />
+                    <MenuItem onAction="#MenuItemCompleteB" style="-fx-text-fill: white;" text="Complete Backup" />
+                    <MenuItem onAction="#MenuItemSend" style="-fx-text-fill: white;" text="Send" />
+                    <MenuItem onAction="#MenuItemOpenFolder" style="-fx-text-fill: white;" text="Open Folder" />
+                    <MenuItem onAction="#MenuItemEdit" style="-fx-text-fill: white;" text="Edit" />
+                    <MenuItem onAction="#MenuItemDelete" style="-fx-text-fill: white;" text="Delete Profile"/>
                 </items>
             </ContextMenu>
         </contextMenu>
 
     </Button>
+
+    <Button fx:id="btnActive" onAction="#onBtnActiveClicked"
+            prefHeight="16.0" prefWidth="30.0"
+            style="-fx-background-color: #505050; -fx-background-radius: 10px;-fx-font-size: 10pt;"
+            styleClass="btnCM" text="▶" textFill="WHITE"
+            AnchorPane.rightAnchor="8.0" AnchorPane.bottomAnchor="10.0"/>
+
 
 </AnchorPane>

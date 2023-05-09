@@ -63,6 +63,11 @@
 
 .play-button{
     -fx-background-radius: 50%;
-    -fx-background-color: violet;
+    -fx-background-color: teal;
     -fx-font-size: 15pt;
+}
+
+.btnCM{
+    -fx-background-color: #505050;
+    -fx-background-radius: 20px;
 }

@@ -20,18 +20,18 @@
         <ImageView fx:id="playerHeadView" fitHeight="161.0" fitWidth="222.0" layoutX="43.0" layoutY="43.0" pickOnBounds="true" preserveRatio="true">
             <Image url="@../images/BuyukMuhittin.png" />
         </ImageView>
-        <Label fx:id="playerName" alignment="CENTER" contentDisplay="CENTER" layoutY="197.0" prefHeight="53.0" prefWidth="308.0" text="Muhittin" textAlignment="CENTER">
+        <Label fx:id="playerName" alignment="CENTER" contentDisplay="CENTER" layoutY="197.0" prefHeight="53.0" prefWidth="308.0" text="Muhittin" textAlignment="CENTER" textFill="WHITE">
             <font>
                 <Font name="Cooper Black" size="26.0" />
             </font>
         </Label>
-        <Label fx:id="gameVersion" alignment="CENTER" contentDisplay="CENTER" layoutX="1.0" layoutY="387.0" prefHeight="53.0" prefWidth="308.0" text="Mucuklu Sürüm" textAlignment="CENTER">
+        <Label fx:id="gameVersion" alignment="CENTER" contentDisplay="CENTER" layoutX="1.0" layoutY="387.0" prefHeight="53.0" prefWidth="308.0" text="Mucuklu Sürüm" textAlignment="CENTER" textFill="WHITE">
             <font>
                 <Font name="Cooper Black" size="26.0" />
             </font>
         </Label>
 
-        <Label fx:id="gameDescription" alignment="CENTER" contentDisplay="CENTER" layoutX="1.0" layoutY="440.0" prefHeight="53.0" prefWidth="308.0" text="-----" textAlignment="CENTER">
+        <Label fx:id="gameDescription" alignment="CENTER" contentDisplay="CENTER" layoutX="1.0" layoutY="440.0" prefHeight="53.0" prefWidth="308.0" text="-----" textAlignment="CENTER" textFill="WHITE">
             <font>
                 <Font name="Cooper Black" size="20.0" />
             </font>
@@ -47,16 +47,34 @@
 
         </HBox>
     </AnchorPane>
-    <ListView fx:id="lvProfiles" layoutX="323.0" layoutY="14.0" prefHeight="423.0" prefWidth="376.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
+    <ListView fx:id="lvProfiles" layoutX="323.0" layoutY="14.0" prefHeight="423.0" prefWidth="376.0" style="-fx-background-radius: 10px;" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0" />
    <Label fx:id="status" layoutX="325.0" layoutY="462.0" prefHeight="42.0" prefWidth="376.0" text="Status" textFill="WHITE">
       <font>
          <Font size="28.0" />
       </font>
    </Label>
-   <Line endX="245.0" layoutX="439.0" layoutY="515.0" startX="-100.0" stroke="#54cdf5" />
+   <Line endX="180.0" layoutX="439.0" layoutY="515.0" startX="-100.0" stroke="#54cdf5" />
    <Label fx:id="detailedStatus" layoutX="325.0" layoutY="529.0" prefHeight="42.0" prefWidth="376.0" text="Detailed Status" textFill="WHITE">
       <font>
          <Font size="22.0" />
       </font>
    </Label>
+
+    <Button layoutX="649.0" layoutY="462.0" onAction="#onBtnSettings" prefHeight="42.0" prefWidth="45.0" style="-fx-background-color: #505050; -fx-background-radius: 10px;-fx-font-size: 10pt;" styleClass="btnCM" text="⚙" textFill="WHITE" AnchorPane.bottomAnchor="96.0" AnchorPane.rightAnchor="26.0">
+      <font>
+         <Font size="20.0" />
+      </font></Button>
+
+    <Button layoutX="649.0" layoutY="529.0" onAction="#onBtnAbout" prefHeight="42.0" prefWidth="45.0" style="-fx-background-color: #505050; -fx-background-radius: 10px;-fx-font-size: 10pt;" styleClass="btnCM" text="🛈" textFill="WHITE">
+      <font>
+         <Font size="20.0" />
+      </font>
+   </Button>
+   <Button layoutX="338.0" layoutY="386.0" onAction="#onBtnAddProfile" prefHeight="42.0" prefWidth="45.0" style="-fx-background-color: rgba(100,100,100, 0.3);-fx-background-radius: 50%; -fx-border-radius: 50%;-fx-border-color: white" styleClass="btnCM" text="+" textFill="WHITE">
+      <font>
+         <Font size="18.0" />
+      </font>
+   </Button>
+
+
 </AnchorPane>

@@ -85,6 +85,7 @@ public class Main{
                 case PROGRESS -> Platform.runLater(() -> prg.setProgress((double) a.getValue()));
                 //case STATE -> Platform.runLater(() -> .setText(a.getKey()));
             }
+
         });
 
         /*btnPro.setOnMouseClicked((a) -> {
@@ -99,10 +100,15 @@ public class Main{
         lvProfiles.setItems(profiles);
         lvProfiles.setCellFactory((x) -> new CProfile());
 
+        Profiler.getProfiler().createProfile("uwu");
+        Profiler.getProfiler().createProfile("uwu2");
+        Profiler.getProfiler().createProfile("uwu3");
+
         btnStart.setOnMouseClicked((a) -> {
             String ver = "1.12.2";
             l(ver);
         });
+
 
     }
 
@@ -113,9 +119,17 @@ public class Main{
         }).start();
     }
 
+    public void onBtnSettings(ActionEvent event) {
+        System.out.println("Settings");
+    }
 
+    public void onBtnAbout(ActionEvent event) {
+        System.out.printf("About");
+    }
 
-
+    public void onBtnAddProfile(ActionEvent event) {
+        System.out.println("btnAddProfile clicked");
+    }
 
 
 }
