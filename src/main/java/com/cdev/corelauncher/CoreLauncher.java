@@ -3,11 +3,11 @@ package com.cdev.corelauncher;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.data.Translator;
-import com.cdev.corelauncher.data.entities.Config;
+import com.cdev.corelauncher.data.entities.Account;
 import com.cdev.corelauncher.minecraft.Launcher;
-import com.cdev.corelauncher.utils.JavaManager;
+import com.cdev.corelauncher.minecraft.utils.Authenticator;
+import com.cdev.corelauncher.utils.JavaMan;
 import com.cdev.corelauncher.utils.Logger;
-import com.cdev.corelauncher.utils.OSUtils;
 import com.cdev.corelauncher.utils.entities.OS;
 import com.cdev.corelauncher.utils.entities.Path;
 
@@ -21,12 +21,16 @@ public class CoreLauncher {
         new Configurator(configPath).reloadConfig();
 
         Translator.generateTranslator();
-        var mainDir = Configurator.getConfig().getGamePath();
 
+        // Needs to be initialized after initialization of configurator
+        new Logger();
         new Profiler().reload();
-        new Logger(mainDir.to("launcher").to("launcherlog"), false);
-        new Launcher(mainDir).reload();
-        new JavaManager(mainDir.to("launcher").to("java"));
+        new Launcher().reload();
+        new JavaMan().reload();
+        //
+
+        //Authenticator t = new Authenticator();
+        //var acc = t.authenticate(Account.fromUsername("EvilM3nster"));
 
         CoreLauncherFX.launchFX();
 

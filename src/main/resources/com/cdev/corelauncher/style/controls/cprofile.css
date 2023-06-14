@@ -13,5 +13,21 @@
     -fx-background-radius: 10px;
 }
 
+.label{
+    -fx-text-fill: white;
+}
 
+.button{
+    -fx-background-color: #505050;
+    -fx-background-radius: 50%;
+}
 
+.profile-unsel{
+    -fx-background-color: #505050;
+    -fx-font-size: 11pt;
+}
+
+.profile-sel{
+    -fx-background-color: teal;
+    -fx-font-size: 11pt;
+}

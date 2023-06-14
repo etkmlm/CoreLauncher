@@ -1,0 +1,17 @@
+.title{
+    -fx-font-size: 18pt;
+    -fx-text-fill: aqua;
+}
+
+.label{
+    -fx-text-fill: white;
+}
+
+.all{
+    -fx-background-color: #252525;
+    -fx-padding: 10px;
+}
+
+.prop-key{
+    -fx-font-size: 12pt;
+}

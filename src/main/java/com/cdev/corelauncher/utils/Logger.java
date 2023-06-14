@@ -15,20 +15,23 @@ public class Logger {
     private static Logger instance;
 
     private Path logDir;
-    private boolean enableFileLogging;
 
-    public Logger(Path logDir, boolean efl){
-        this.logDir = logDir;
-        this.enableFileLogging = efl;
+    public Logger(){
+        this.logDir = gameDirToLogDir(Configurator.getConfig().getGamePath());
 
         Configurator.getConfigurator().getHandler().addHandler("logger", (a) -> {
             if (!a.getKey().equals("gamePathChange"))
                 return;
 
-            setLogDir((Path)a.getNewValue());
+            setLogDir(gameDirToLogDir((Path)a.getNewValue()));
         });
 
         instance = this;
+    }
+
+
+    private static Path gameDirToLogDir(Path gameDir){
+        return gameDir.to("launcher", "logger");
     }
 
     public static Logger getLogger(){
@@ -45,10 +48,6 @@ public class Logger {
         return logDir.to(name);
     }
 
-    public void setFileLogging(boolean efl) {
-        enableFileLogging = efl;
-    }
-
     private String generate(LogType type, String content){
         return "[" + type + "] " + content;
     }
@@ -60,7 +59,7 @@ public class Logger {
     public void log(LogType type, String content){
         String message = generate(type, content);
         System.out.println(message);
-        if (enableFileLogging)
+        if (Configurator.getConfig().getLogMode())
             todayLogFile().append("\n" + message);
     }
 

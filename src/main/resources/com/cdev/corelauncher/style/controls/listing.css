@@ -1,0 +1,26 @@
+.list-view{
+    -fx-background-color: #303030;
+    -fx-background-radius: 10px;
+}
+
+.list-cell{
+    -fx-background-color: none;
+    -fx-text-fill: white;
+}
+
+.list-view .list-cell:hover{
+    -fx-opacity: 0.8;
+}
+
+.scroll-bar{
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.scroll-bar .thumb{
+    -fx-background-color: aqua;
+}
+
+.scroll-bar .decrement-button, .scroll-bar .increment-button{
+    -fx-background-color: transparent;
+}

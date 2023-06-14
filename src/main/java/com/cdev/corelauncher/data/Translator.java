@@ -1,70 +1,88 @@
 package com.cdev.corelauncher.data;
 
-import com.cdev.corelauncher.data.entities.Language;
-import com.cdev.corelauncher.data.entities.Translate;
-import com.google.gson.*;
-
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Translator {
 
     private static Translator instance;
 
-    private List<Language> languages;
-    private List<Translate> translates;
-
-    private Language selectedLanguage;
+    private List<ResourceBundle> bundles;
+    private ResourceBundle bundle;
 
     public Translator(){
-        selectedLanguage = Language.fromKey("EN");
-
         instance = this;
     }
 
-    public Language findLanguage(String key){
-        return languages.stream().filter(x -> x.getKey().equals(key)).findFirst().orElse(Language.fromKey(key));
+    public List<Locale> getAllLanguages(){
+        return bundles.stream().map(ResourceBundle::getLocale).collect(Collectors.toList());
     }
 
-    public List<Language> getAllLanguages(){
-        return languages;
+    public void setLanguage(Locale selectedLanguage){
+        bundle = bundles.stream().filter(x -> x.getLocale().toLanguageTag().equals(selectedLanguage.toLanguageTag())).findFirst().orElse(null);
     }
 
-    public void setLanguage(Language selectedLanguage){
-        this.selectedLanguage = selectedLanguage;
+    public static String translate(String key){
+        return getTranslator().getTranslate(key);
+    }
+
+    public static String translateFormat(String key, Object... args){
+        return getTranslator().getTranslateFormat(key, args);
     }
 
     public String getTranslate(String key){
-        return translates.stream().filter(x -> x.check(selectedLanguage, key)).findFirst().orElse(Translate.empty()).getValue();
+        return bundle.containsKey(key) ? bundle.getString(key) : null;
+    }
+
+    public String getTranslateFormat(String key, Object... args){
+        var translate = getTranslate(key);
+        if (translate == null)
+            return null;
+
+        int i = 0;
+
+        try{
+            while (true){
+                int index = translate.indexOf("%");
+                if (index == -1)
+                    break;
+                else
+                    translate = translate.replaceFirst("%", args[i++].toString());
+            }
+        }
+        catch (Exception ignored){
+
+        }
+
+        return translate;
     }
 
     public static Translator generateTranslator(){
+        Translator t = new Translator().reload();
+        t.setLanguage(Configurator.getConfig().getLanguage());
+        return t;
+    }
 
-        var gson = new GsonBuilder().registerTypeAdapter(Translator.class, (JsonDeserializer<Translator>) (jsonElement, type, jsonDeserializationContext) -> {
-            var obj = jsonElement.getAsJsonObject();
-            Translator t = new Translator();
-            t.languages = obj.get("languages").getAsJsonArray().asList().stream().map(x -> (Language)jsonDeserializationContext.deserialize(x, Language.class)).toList();
-            t.translates = new ArrayList<>();
+    public Translator reload(){
+        bundles = new ArrayList<>();
 
-            for(var s : obj.get("translates").getAsJsonObject().entrySet()){
-
-                String key = s.getKey();
-
-                var val = s.getValue().getAsJsonObject();
-                for(var l : val.entrySet()){
-                    t.translates.add(new Translate(key, t.findLanguage(l.getKey()), l.getValue().getAsString()));
-                }
+        for (var l : Locale.getAvailableLocales()){
+            try{
+                var x = ResourceBundle.getBundle("com.cdev.corelauncher.data.Translate", l);
+                bundles.add(x);
             }
+            catch (MissingResourceException ignored){
 
-            return t;
-        }).create();
+            }
+        }
 
-        var s = Translator.class.getResourceAsStream("/com/cdev/corelauncher/json/translate.json");
-        if (s == null)
-            throw new RuntimeException("Translate file can't found.");
+        bundles = bundles.stream().distinct().toList();
 
-        return gson.fromJson(new InputStreamReader(s), Translator.class);
+        return this;
+    }
+
+    public ResourceBundle getBundle(){
+        return bundle;
     }
 
     public static Translator getTranslator(){

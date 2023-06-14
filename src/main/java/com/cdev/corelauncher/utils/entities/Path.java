@@ -33,6 +33,7 @@ public class Path{
     }
 
     private java.nio.file.Path root;
+    private Boolean isDirLocal;
 
     public Path(){
 
@@ -40,6 +41,11 @@ public class Path{
 
     public Path(java.nio.file.Path root){
         this.root = root;
+    }
+
+    public Path forceSetDir(boolean isDirectory){
+        isDirLocal = isDirectory;
+        return this;
     }
 
     @Override
@@ -56,6 +62,10 @@ public class Path{
      */
     public Path to(String... keys){
         return new Path(java.nio.file.Path.of(root.toString(), keys));
+    }
+
+    public Path parent(){
+        return new Path(root.getParent());
     }
 
     /**
@@ -86,8 +96,10 @@ public class Path{
 
     public Path prepare(){
         var file = toFile();
-        if (file.isDirectory())
+        if (isDirectory()){
             file.mkdirs();
+            file.mkdir();
+        }
         else
             new File(file.getParent()).mkdirs();
 
@@ -97,7 +109,7 @@ public class Path{
     public List<Path> getFiles(){
         var file = toFile();
 
-        if (!file.isDirectory())
+        if (!isDirectory())
             return List.of();
 
         var files = file.listFiles();
@@ -149,7 +161,7 @@ public class Path{
 
     public void delete(){
         boolean f = root.toFile().delete();
-        if (f || !toFile().isDirectory())
+        if (f || !isDirectory())
             return;
 
         getFiles().forEach(Path::delete);
@@ -162,6 +174,8 @@ public class Path{
     }
 
     public String getExtension(){
+        if (!getName().contains("."))
+            return null;
         String[] all = getName().split("\\.");
         return all[all.length - 1];
     }
@@ -245,5 +259,30 @@ public class Path{
         }
         else if (getExtension().equals("zip") || getExtension().equals("jar"))
             extractZip(destination, exclude);
+    }
+
+    public boolean isDirectory(){
+        return isDirLocal != null ? isDirLocal : (exists() ? root.toFile().isDirectory() : getExtension() == null);
+    }
+
+    public void copy(Path destination){
+        try{
+            //destination.prepare();
+            if (destination.exists() && !isDirectory())
+                return;
+            if (isDirectory())
+                getFiles().forEach(x -> x.copy(destination.to(getName()).to(x.getName())));
+            else{
+                destination.prepare();
+                Files.copy(root, destination.root);
+            }
+        }catch (IOException e){
+            Logger.getLogger().log(e);
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        return obj != null && obj.toString().equals(toString());
     }
 }

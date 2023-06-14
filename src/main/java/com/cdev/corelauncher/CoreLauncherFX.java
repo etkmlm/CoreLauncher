@@ -1,17 +1,9 @@
 package com.cdev.corelauncher;
 
-import com.cdev.corelauncher.minecraft.Launcher;
 import com.cdev.corelauncher.ui.utils.FXManager;
-import com.cdev.corelauncher.utils.JavaManager;
-import com.cdev.corelauncher.utils.Logger;
-import com.cdev.corelauncher.utils.entities.OS;
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 
 public class CoreLauncherFX extends Application {
 
@@ -19,7 +11,11 @@ public class CoreLauncherFX extends Application {
     public void start(Stage stage) {
         stage.close();
         new FXManager();
-        FXManager.getManager().openScene("main", "Hoş geldin uşağum!", 720, 600);
+
+        Font.loadFont(CoreLauncherFX.class.getResource("/com/cdev/corelauncher/font/Minecraft.ttf").toExternalForm(), 16);
+
+
+        FXManager.getManager().applyStage("main", "Hoş geldin uşağum!").showStage();
     }
 
     public static void launchFX(){

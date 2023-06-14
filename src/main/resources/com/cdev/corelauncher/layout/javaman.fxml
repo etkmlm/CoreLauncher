@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.shape.Rectangle?>
+<?import com.cdev.corelauncher.ui.controls.CButton?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.cdev.corelauncher.ui.controller.JavaManager"
+            styleClass="all" prefHeight="400.0" prefWidth="600.0" stylesheets="@../style/controls/defcontrols.css,@../style/controls/listing.css,@../style/javaman.css">
+    <ListView fx:id="lvJava" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.bottomAnchor="10" />
+    <CButton fx:id="btnAdd" styleClass="circle-button,add-button" text="+" AnchorPane.rightAnchor="30" AnchorPane.bottomAnchor="30" prefWidth="40" prefHeight="40"/>
+</AnchorPane>

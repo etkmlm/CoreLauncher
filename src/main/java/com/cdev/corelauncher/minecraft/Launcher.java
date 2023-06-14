@@ -2,13 +2,15 @@ package com.cdev.corelauncher.minecraft;
 
 import com.cdev.corelauncher.CoreLauncher;
 import com.cdev.corelauncher.data.Configurator;
-import com.cdev.corelauncher.data.entities.Config;
+import com.cdev.corelauncher.data.entities.Account;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.entities.*;
+import com.cdev.corelauncher.minecraft.utils.CommandConcat;
 import com.cdev.corelauncher.ui.utils.EventHandler;
-import com.cdev.corelauncher.utils.JavaManager;
+import com.cdev.corelauncher.utils.ConditionConcat;
+import com.cdev.corelauncher.utils.JavaMan;
 import com.cdev.corelauncher.utils.Logger;
-import com.cdev.corelauncher.utils.StreamUtils;
+import com.cdev.corelauncher.utils.NetUtils;
 import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.LogType;
 import com.cdev.corelauncher.utils.entities.Path;
@@ -31,8 +33,8 @@ public class Launcher {
 
     private boolean isGameRunning;
 
-    public Launcher(Path gameDir){
-        this.gameDir = gameDir;
+    public Launcher(){
+        this.gameDir = Configurator.getConfig().getGamePath();
         handler = new EventHandler<>();
 
         Configurator.getConfigurator().getHandler().addHandler("launcher", (a) -> {
@@ -69,14 +71,13 @@ public class Launcher {
         handler.execute(new LauncherEvent(LauncherEvent.LauncherEventType.STATE, key, null));
     }
 
-    public Launcher reload() {
-        _info = new Gson().fromJson(StreamUtils.urlToString(INFO_URL), MainInfo.class);
-        return this;
+    public void reload() {
+        _info = new Gson().fromJson(NetUtils.urlToString(INFO_URL), MainInfo.class);
     }
 
     private String getVersionString(String id){
         var v = _info.versions.stream().filter(x -> x.id.equals(id)).findFirst();
-        return v.map(version -> StreamUtils.urlToString(version.url)).orElse(null);
+        return v.map(version -> NetUtils.urlToString(version.url)).orElse(null);
     }
 
     public void downloadVersion(String id)
@@ -98,10 +99,10 @@ public class Launcher {
         else
             info = new Gson().fromJson(jsonPath.read(), Version.class);
 
-        if (!clientPath.exists() || StreamUtils.getContentLength(info.downloads.client.url) != clientPath.getSize()){
+        if (!clientPath.exists() || NetUtils.getContentLength(info.downloads.client.url) != clientPath.getSize()){
             handleState("clientDownload");
             Logger.getLogger().log(LogType.INFO, "Downloading client...");
-            StreamUtils.download(info.downloads.client.url, clientPath, false, this::handleProgress);
+            NetUtils.download(info.downloads.client.url, clientPath, false, this::handleProgress);
         }
 
         Logger.getLogger().printLog(LogType.INFO, "Version up to date!");
@@ -110,6 +111,10 @@ public class Launcher {
         downloadAssets(info);
 
         Logger.getLogger().log(LogType.INFO, "-------RETRIEVING VERSION END: " + id + "-------\n");
+    }
+
+    public List<Version> getAllVersions(){
+        return _info.versions;
     }
 
     private void downloadLibraries(Version v)
@@ -147,7 +152,7 @@ public class Launcher {
         Path libPath = libDir.to(asset.path.split("/"));
         if (!libPath.exists())
         {
-            StreamUtils.download(asset.url, libPath, false, null);
+            NetUtils.download(asset.url, libPath, false, null);
         }
 
         if (exclude != null)
@@ -163,10 +168,12 @@ public class Launcher {
         Path assetDir = gameDir.to("assets", "objects");
         Path fileDir = gameDir.to("assets", "indexes");
         Path assetFile = fileDir.to(v.assetIndex.id + ".json");
+        Path legacyDir = gameDir.to("assets", "virtual", "legacy");
+        Path veryLegacyDir = gameDir.to("assets", "virtual", "verylegacy");
 
         String asstText;
         if (!assetFile.exists())
-            assetFile.write(asstText = StreamUtils.urlToString(v.assetIndex.url));
+            assetFile.write(asstText = NetUtils.urlToString(v.assetIndex.url));
         else
             asstText = assetFile.read();
 
@@ -176,9 +183,8 @@ public class Launcher {
         index.objects = new ArrayList<>();
 
         for (var x : n.getAsJsonObject("objects").entrySet())
-            index.objects.add(new Asset(x.getValue().getAsJsonObject().get("hash").getAsString(), x.getValue().getAsJsonObject().get("size").getAsInt()));
+            index.objects.add(new Asset(x.getKey(), x.getValue().getAsJsonObject().get("hash").getAsString(), x.getValue().getAsJsonObject().get("size").getAsInt()));
 
-        System.out.println();
         int count = index.objects.size();
         int i = 1;
         for (var asset : index.objects)
@@ -189,7 +195,16 @@ public class Launcher {
 
             Path path = assetDir.to(nhash, hash);
             if (!path.exists())
-                StreamUtils.download(url, path, false, null);
+                NetUtils.download(url, path.forceSetDir(false), false, null);
+
+            if (v.assetIndex.isLegacy()){
+                var f = legacyDir.to(asset.path);
+                path.copy(f);
+            }
+            else if (v.assetIndex.isVeryLegacy()){
+                var f = veryLegacyDir.to(asset.path);
+                path.copy(f);
+            }
 
             Logger.getLogger().printLog(LogType.INFO, i++ + " / " + count);
             handleState("asset" + i + "/" + count);
@@ -201,58 +216,100 @@ public class Launcher {
         return isGameRunning;
     }
 
-    public void launch(Profile profile){
-        launch(profile.getVersionId(), "IA", "T", null, null);
-    }
-
-    public void launch(String versionId, String username, String accessToken, Java java, Path dir)
+    public void launch(ExecutionInfo info)
     {
-        if (dir == null)
-            dir = gameDir;
+        if (info.versionId == null)
+            return;
+        if (info.dir == null)
+            info.dir = gameDir;
+        if (info.args == null)
+            info.args = new String[0];
+
+        var linfo = info.new LaunchInfo();
 
         try {
 
-            var launchInfo = new LaunchInfo(this, versionId);
+            if (info.account == null)
+                info.account = Configurator.getConfig().getUser();
 
-            if (java == null){
-                java = JavaManager.getManager().tryGet(launchInfo.java);
-                if (java == null){
-                    java = JavaManager.getDefault();
-                    if (java.majorVersion != launchInfo.java.majorVersion){
-                        handler.execute(new LauncherEvent(LauncherEvent.LauncherEventType.NEED, "java" + launchInfo.java.majorVersion, launchInfo));
-                        return;
+            if (info.java == null){
+                info.java = Configurator.getConfig().getDefaultJava();
+
+                if (info.java == null || info.java.majorVersion != linfo.java.majorVersion){
+                    info.java = JavaMan.getManager().tryGet(linfo.java);
+                    if (info.java == null){
+                        info.java = JavaMan.getDefault();
+                        if (info.java.majorVersion != linfo.java.majorVersion){
+                            handler.execute(new LauncherEvent(LauncherEvent.LauncherEventType.NEED, "java" + linfo.java.majorVersion, info));
+                            return;
+                        }
                     }
                 }
+
             }
 
-            Logger.getLogger().log(LogType.INFO, "-------LAUNCH START: " + versionId + "-------");
+            handleState("gameStart");
+            Logger.getLogger().log(LogType.INFO, "-------LAUNCH START: " + info.versionId + "-------");
 
-            String libPath = "-Djava.library.path=" + launchInfo.nativePath;
+            String libPath = "-Djava.library.path=" + linfo.nativePath;
             String c = String.valueOf(File.pathSeparatorChar);
-            String cp = launchInfo.clientPath + c + String.join(c, launchInfo.libraries);
+            String cp = linfo.clientPath + c + String.join(c, linfo.libraries);
+
+            String[] rootCmds = {
+                    info.java.getExecutable().toString(),
+                    "-cp", cp,
+                    libPath,
+                    "-Dorg.lwjgl.util.Debug=true"
+            };
+
+            String[] gameCmds;
+
+            if (linfo.assets.isVeryLegacy()){
+                gameCmds = new String[] {
+                        linfo.mainClass,
+                        info.account.getUsername(),
+                        "verylegacy",
+                        //"--assetsDir", gameDir.to("assets", "virtual", "verylegacy").toString(),
+                        "--gameDir", info.dir.toString(),
+                };
+                var resources = info.dir.to("resources");
+                gameDir.to("assets", "virtual", "verylegacy").copy(resources);
+            }
+            else if (linfo.assets.isLegacy())
+                gameCmds = new String[] {
+                        linfo.mainClass,
+                        "--assetIndex", linfo.assets.id,
+                        "--assetsDir", gameDir.to("assets", "virtual", "legacy").toString(),
+                        "--version", info.versionId,
+                        "--gameDir", info.dir.toString(),
+                        "--username", info.account.getUsername()
+                };
+            else
+                gameCmds = new String[] {
+                        linfo.mainClass,
+                        "--assetIndex", linfo.assets.id,
+                        "--assetsDir", gameDir.to("assets").toString(),
+                        "--version", info.versionId,
+                        "--gameDir", info.dir.toString(),
+                        "--accessToken", "T",
+                        "--username", info.account.getUsername()
+                };
+
+
 
             isGameRunning = true;
 
             var process = new ProcessBuilder()
-                    .directory(dir.toFile())
+                    .directory(info.dir.toFile())
                     .inheritIO()
-                    .command(
-                            java.getPath().toString(),
-                            "-cp", cp,
-                            libPath,
-                            "-Dorg.lwjgl.util.Debug=true",
-                            launchInfo.mainClass,
-                            "--assetIndex", launchInfo.assetVersion,
-                            "--version", versionId,
-                            "--gameDir", gameDir.toString(),
-                            "--accessToken", accessToken,
-                            "--username", username)
+                    .command(new CommandConcat().add(rootCmds).add(info.args).add(gameCmds).generate())
                     .start();
             process.waitFor();
 
             isGameRunning = false;
 
             Logger.getLogger().log(LogType.INFO, "-------LAUNCH END-------");
+            handleState("gameEnd");
         }
         catch (Exception e){
             Logger.getLogger().log(e);

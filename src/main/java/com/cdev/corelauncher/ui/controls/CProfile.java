@@ -1,27 +1,30 @@
 package com.cdev.corelauncher.ui.controls;
 
-import com.cdev.corelauncher.CoreLauncher;
 import com.cdev.corelauncher.CoreLauncherFX;
+import com.cdev.corelauncher.data.Profiler;
+import com.cdev.corelauncher.data.entities.ChangeEvent;
 import com.cdev.corelauncher.data.entities.Profile;
-import com.cdev.corelauncher.ui.controller.Main;
-import com.cdev.corelauncher.ui.utils.FXManager;
+import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
+import com.cdev.corelauncher.ui.controller.ProfileEdit;
+import com.cdev.corelauncher.ui.entities.LProfile;
+import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
-import org.controlsfx.control.action.Action;
+//import java.awt.*;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
-public class CProfile extends ListCell<Profile> {
+public class CProfile extends ListCell<LProfile> {
 
     private final Node gr;
+    private LProfile profile;
 
     public CProfile(){
         var n = CoreLauncherFX.class.getResource("/com/cdev/corelauncher/entities/cprofile.fxml");
@@ -36,7 +39,7 @@ public class CProfile extends ListCell<Profile> {
     }
 
     @FXML
-    private ImageView profileImage;
+    private ImageView imgProfile;
     @FXML
     private Label lblProfileName;
     @FXML
@@ -46,14 +49,22 @@ public class CProfile extends ListCell<Profile> {
     @FXML
     private ContextMenu contextMenu;
     @FXML
-    private Button btnContextMenu;
+    private Button btnMenu;
     @FXML
-    private Button btnActive;
-
-
+    private Button btnPlay;
+    @FXML
+    private MenuItem btnEdit;
+    @FXML
+    private MenuItem btnBackup;
+    @FXML
+    private MenuItem btnSend;
+    @FXML
+    private MenuItem btnOpenFolder;
+    @FXML
+    private MenuItem btnDelete;
 
     @Override
-    protected void updateItem(Profile profile, boolean empty) {
+    protected void updateItem(LProfile profile, boolean empty) {
         super.updateItem(profile, empty);
 
         if (profile == null || empty){
@@ -61,67 +72,38 @@ public class CProfile extends ListCell<Profile> {
             return;
         }
 
-        lblProfileName.setText(profile.getName());
-        lblProfileVersion.setText(profile.getVersionId());
+        this.profile = profile;
 
+        imgProfile.setImage(profile.getProfile().getWrapper().getIcon());
+        lblProfileName.setText(profile.getProfile().getName());
+        lblProfileVersion.setText(profile.getProfile().getVersionId());
+
+        btnPlay.getStyleClass().set(1, profile.selected() ? "profile-sel" : "profile-unsel");
+        //btnPlay.setStyle(profile.selected() ? "-fx-background-color: aqua!important;" : "-fx-background-color: #303030!important;");
+        btnPlay.setText(profile.selected() ? "▶" : ">");
+
+        btnEdit.setOnAction(a -> ProfileEdit.open(profile.getProfile()));
+
+        /*if (profile.getMods() != null)
+            lblProfileDescription.setText(profile.getMods().size() + " mods");*/
 
         setGraphic(gr);
     }
 
-    //------------------------
+    @FXML
+    private void initialize(){
+        btnMenu.setOnMouseClicked((a) ->
+                contextMenu.show((Button)a.getSource(), a.getScreenX() + 10, a.getScreenY() + 10));
 
-    public void sayHi(MouseEvent event)
-    {
-        System.out.printf("selam");
-    }
+        /*btnOpenFolder.setOnMouseClicked((a) ->
+                Desktop.getDesktop().browseFileDirectory(profile.getPath().toFile()));*/
 
-    public void onBtnCMClicked(ActionEvent event)
-    {
+        btnDelete.setOnAction((a) ->
+                Profiler.getProfiler().deleteProfile(profile.getProfile()));
 
-        double screenX = btnContextMenu.localToScreen(btnContextMenu.getBoundsInLocal()).getMinX();
-        double screenY = btnContextMenu.localToScreen(btnContextMenu.getBoundsInLocal()).getMinY();
-        contextMenu.show((Button)event.getSource(), screenX + 10, screenY + 10);
 
-    }
-
-    public void onBtnActiveClicked(ActionEvent event) {
-
-        if (btnActive.getTextFill() == Paint.valueOf("red")) {
-            btnActive.setTextFill(Paint.valueOf("White"));
-
-        } else {
-            btnActive.setTextFill(Paint.valueOf("red"));
-        }
-
-        System.out.println("btnActive clicked");
+        btnPlay.setOnMouseClicked((a) -> profile.setSelected(true));
 
     }
-
-    public void MenuItemCompleteB(ActionEvent event) {
-
-        System.out.println("Complete Backup");
-
-    }
-
-    public void MenuItemSend(ActionEvent event) {
-
-        System.out.println("send");
-
-    }
-
-    public void MenuItemOpenFolder(ActionEvent event) {
-
-        System.out.println("Open Folder");
-    }
-
-    public void MenuItemEdit(ActionEvent event) {
-
-        System.out.println("edit");
-    }
-
-    public void MenuItemDelete(ActionEvent event) {
-        System.out.printf("delete profile '" + lblProfileName.getText() + "'");
-    }
-
 
 }

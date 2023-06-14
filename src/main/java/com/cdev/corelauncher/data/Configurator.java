@@ -2,11 +2,15 @@ package com.cdev.corelauncher.data;
 
 import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.data.entities.ChangeEvent;
+import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.ui.utils.EventHandler;
 import com.cdev.corelauncher.utils.GsonUtils;
+import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.Path;
+import com.google.gson.Gson;
 
 import java.io.InputStreamReader;
+import java.util.Locale;
 
 public class Configurator {
     private static Configurator instance;
@@ -15,6 +19,7 @@ public class Configurator {
     private static Config defaultConfig;
     private static Config config;
     private final Path configFilePath;
+    private static final Gson gson = GsonUtils.DEFAULT_GSON.newBuilder().registerTypeAdapter(Profile.class, new Profile.ProfileFactory()).create();
 
 
     public Configurator(Path configPath){
@@ -27,7 +32,7 @@ public class Configurator {
     }
 
     public static Config generateDefaultConfig() {
-        var file = Config.class.getResourceAsStream("/com/cdev/corelauncher/json/config.json");
+        var file = Config.class.getResourceAsStream("/com/cdev/corelauncher/data/config.json");
         if (file == null)
             throw new RuntimeException("Default config file can't found.");
 
@@ -43,7 +48,7 @@ public class Configurator {
 
             var read = configFilePath.read();
 
-            config = GsonUtils.DEFAULT_GSON.fromJson(read, Config.class);
+            config = gson.fromJson(read, Config.class);
         }
         else{
             save(defaultConfig);
@@ -60,8 +65,19 @@ public class Configurator {
     public Configurator setGamePath(Path path){
         var oldPath = config.getGamePath();
         config.setGamePath(path);
-        handler.execute(new ChangeEvent("gamePathChange", oldPath, path, null));
+        save();
 
+        handler.execute(new ChangeEvent("gamePathChange", oldPath, path, null));
+        return this;
+    }
+
+    public Configurator setLanguage(Locale l){
+        var oldLang = config.getLanguage();
+        config.setLanguage(l);
+        Translator.getTranslator().setLanguage(l);
+        save();
+
+        handler.execute(new ChangeEvent("languageChange", oldLang, l, null));
         return this;
     }
 
@@ -70,11 +86,11 @@ public class Configurator {
     }
 
     private void save(Config c){
-        String serialized = GsonUtils.DEFAULT_GSON.toJson(c);
+        String serialized = gson.toJson(c);
         configFilePath.write(serialized);
     }
 
-    public void save(){
-        save(config);
+    public static void save(){
+        instance.save(config);
     }
 }

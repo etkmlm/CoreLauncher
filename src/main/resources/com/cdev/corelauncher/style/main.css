@@ -2,6 +2,10 @@
     -fx-background-color: transparent;
 }
 
+.label{
+    -fx-text-fill: white;
+}
+
 .progress-bar > .track{
     -fx-background-color: #303030;
 }
@@ -31,29 +35,8 @@
     -fx-text-fill: white;
 }
 
-.list-view{
-    -fx-background-color: #303030;
-}
-
-.list-view .list-cell{
-    -fx-background-color: none;
-}
-
-.scroll-bar{
-    -fx-background-color: transparent;
-    -fx-pref-width: 8px;
-}
-
-.scroll-bar .thumb{
-    -fx-background-color: aqua;
-}
-
-.scroll-bar .decrement-button, .scroll-bar .increment-button{
-    -fx-background-color: transparent;
-}
-
 .launch-bar{
-    -fx-background-color: #304040;
+    -fx-background-color: #252540;
     -fx-background-radius: 0 15px 15px 0;
 }
 
@@ -67,7 +50,6 @@
     -fx-font-size: 15pt;
 }
 
-.btnCM{
-    -fx-background-color: #505050;
-    -fx-background-radius: 20px;
+.ench-button{
+    -fx-font-size: 15pt;
 }

@@ -1,11 +1,13 @@
 package com.cdev.corelauncher.data;
 
 import com.cdev.corelauncher.data.entities.ChangeEvent;
+import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.ui.utils.EventHandler;
 import com.cdev.corelauncher.utils.entities.Path;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 
@@ -14,22 +16,26 @@ public class Profiler {
     private Path profilesDir;
     private List<Profile> profiles;
     private EventHandler<ChangeEvent> handler;
-    private Profile selectedProfile; //uwu
+    private Profile selectedProfile;
 
     public Profiler() {
-        profilesDir = Configurator.getConfig().getGamePath().to("profiles");
+        profilesDir = gameDirToProfilesDir(Configurator.getConfig().getGamePath());
 
         handler = new EventHandler<>();
 
         Configurator.getConfigurator().getHandler().addHandler("profiler", (a) -> {
             if (!a.getKey().equals("gamePathChange"))
                 return;
-            profilesDir = (Path)a.getNewValue();
+            profilesDir = gameDirToProfilesDir((Path) a.getNewValue());
 
             reload();
         });
 
         instance = this;
+    }
+
+    private static Path gameDirToProfilesDir(Path gameDir){
+        return gameDir.to("launcher", "profiles");
     }
 
     public EventHandler<ChangeEvent> getHandler(){
@@ -40,8 +46,8 @@ public class Profiler {
         return instance;
     }
 
-    public void moveProfiles(Path oldProfiles){
-        oldProfiles.getFiles().forEach(x -> x.move(profilesDir, false));
+    public void moveProfiles(Path oldGamePath){
+        oldGamePath.to("launcher").to("profiles").getFiles().forEach(x -> x.copy(profilesDir));
     }
 
     public Path getProfilesDir(){
@@ -56,19 +62,23 @@ public class Profiler {
         return profiles.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(Profile.empty());
     }
 
-    public Profiler reload(){
-        profiles = profilesDir.getFiles().stream().map(Profile::get).collect(Collectors.toList());
-        return this;
+    public Profile setProfile(String name, Consumer<Profile> set){
+        var profile = getProfile(name);
+        return setProfile(profile, set);
     }
 
+    private Profile setProfile(Profile profile, Consumer<Profile> set){
+        set.accept(profile);
+        profile.save();
+        handler.execute(new ChangeEvent("profileUpdate", null, profile, null));
+        return profile;
+    }
 
-    /**
-     * Creates new profile.
-     * @param name
-     * Profile name
-     * @return newly created profile,
-     * null if there is an object with the same name
-     */
+    public void reload(){
+        profiles = profilesDir.getFiles().stream().map(Profile::get).collect(Collectors.toList());
+        handler.execute(new ChangeEvent("reload", null, null, null));
+    }
+
     public Profile createProfile(String name) {
         if (profilesDir.getFiles().stream().anyMatch(x -> x.getName().equals(name)))
             return Profile.empty();
@@ -77,6 +87,10 @@ public class Profiler {
         profiles.add(profile);
         handler.execute(new ChangeEvent("profileCreate", null, profile, null));
         return profile;
+    }
+
+    public Profile createAndSetProfile(String name, Consumer<Profile> set){
+        return setProfile(createProfile(name), set);
     }
 
     public void deleteProfile(Profile p){
