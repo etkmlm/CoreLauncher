@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.cdev.corelauncher.ui.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import org.controlsfx.control.*?>
+
+<AnchorPane fx:id="root" prefHeight="620" prefWidth="550.0" styleClass="all" stylesheets="@../style/profileedit.css,@../style/controls/listing.css,@../style/controls/defcontrols.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.ProfileEdit">
+    <HBox alignment="CENTER" minHeight="84" AnchorPane.leftAnchor="30" AnchorPane.topAnchor="10">
+        <TextField fx:id="txtName" minWidth="230" promptText="%profile.edit.name" styleClass="underline-field" />
+    </HBox>
+    <GridPane alignment="CENTER" hgap="20" vgap="20" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="120">
+
+        <columnConstraints>
+            <ColumnConstraints minWidth="160" prefWidth="160" />
+            <ColumnConstraints />
+        </columnConstraints>
+        <Label styleClass="prop-key" text="%profile.edit.type" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+        <HBox alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0">
+
+            <VBox alignment="CENTER" styleClass="rad-option">
+                <ImageView fitHeight="48" fitWidth="48">
+                    <Image url="@../images/vanilla.png" />
+                </ImageView>
+                <RadioButton fx:id="vanilla" />
+            </VBox>
+            <VBox alignment="CENTER" styleClass="rad-option">
+                <ImageView fitHeight="48" fitWidth="48">
+                    <Image url="@../images/forge.jpg" />
+                </ImageView>
+                <RadioButton fx:id="forge" />
+            </VBox>
+            <VBox alignment="CENTER" styleClass="rad-option">
+                <ImageView fitHeight="48" fitWidth="48">
+                    <Image url="@../images/fabric.png" />
+                </ImageView>
+                <RadioButton fx:id="fabric" />
+            </VBox>
+            <VBox alignment="CENTER" styleClass="rad-option">
+                <ImageView fitHeight="48" fitWidth="48">
+                    <Image url="@../images/quilt.png" />
+                </ImageView>
+                <RadioButton fx:id="quilt" />
+            </VBox>
+        </HBox>
+
+        <Label styleClass="prop-key" text="%profile.edit.wrapperVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+        <ComboBox fx:id="cbWrapperVersion" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label styleClass="prop-key" text="%profile.edit.gameVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+        <SearchableComboBox fx:id="cbGameVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label styleClass="prop-key" text="Java" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+        <GridPane GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="90" />
+                <ColumnConstraints percentWidth="10" />
+            </columnConstraints>
+            <ChoiceBox fx:id="cbJavaVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" />
+            <CButton fx:id="btnJavaManager" maxWidth="Infinity" styleClass="java-sel" text="..." GridPane.columnIndex="1" />
+        </GridPane>
+
+        <Label styleClass="prop-key" text="%java.jvm.args" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+        <TextField fx:id="txtArgs" maxWidth="Infinity" prefHeight="30" styleClass="field" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+        <Label styleClass="prop-key" text="%account" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+        <GridPane GridPane.columnIndex="1" GridPane.rowIndex="5">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="90" />
+                <ColumnConstraints percentWidth="10" />
+            </columnConstraints>
+            <ChoiceBox fx:id="cbAccounts" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" />
+            <CButton fx:id="btnAccManager" maxWidth="Infinity" styleClass="java-sel" text="..." GridPane.columnIndex="1" />
+        </GridPane>
+
+        <Label styleClass="prop-key" text="%minMaxRam" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+        <GridPane maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="6">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="47" />
+                <ColumnConstraints percentWidth="6" />
+                <ColumnConstraints percentWidth="47" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints prefHeight="30" />
+                <RowConstraints prefHeight="10" />
+                <RowConstraints prefHeight="30" />
+            </rowConstraints>
+            <Spinner fx:id="txtMinRAM" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Spinner fx:id="txtMaxRAM" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+            <Slider fx:id="sldRAM" majorTickUnit="2048" max="32768" minorTickCount="0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+        </GridPane>
+    </GridPane>
+    <HBox alignment="CENTER" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <CButton styleClass="op-button" text="Mods" />
+        <Rectangle width="10" />
+        <CButton styleClass="op-button" text="Resources" />
+        <Rectangle width="10" />
+        <CButton fx:id="btnSave" styleClass="op-button" text="%save" />
+    </HBox>
+</AnchorPane>
