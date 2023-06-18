@@ -23,6 +23,7 @@ public class Config {
     private boolean showOldReleases;
     private boolean showSnapshots;
     private boolean logMode;
+    private boolean hideAfter;
 
     public Path getGamePath(){
         return gamePath == null ? DEFAULT_GAME_PATH : gamePath;
@@ -87,6 +88,12 @@ public class Config {
     }
     public boolean getLogMode(){
         return logMode;
+    }
+    public boolean hideAfter(){
+        return hideAfter;
+    }
+    public void setHideAfter(boolean ha){
+        hideAfter = ha;
     }
     public Profile getLastSelectedProfile(){
         return lastSelectedProfile;

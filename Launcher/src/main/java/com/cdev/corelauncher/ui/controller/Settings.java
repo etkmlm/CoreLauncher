@@ -57,7 +57,10 @@ public class Settings {
     public CheckBox chkOldReleases;
     @FXML
     public CheckBox chkShowSnaps;
+    @FXML
     public CheckBox chkLogMode;
+    @FXML
+    public CheckBox chkHideAfter;
     @FXML
     public CButton btnSaveRAM;
 
@@ -169,6 +172,10 @@ public class Settings {
             Configurator.getConfig().setLogMode(chkLogMode.isSelected());
             Configurator.save();
         });
+        chkHideAfter.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setHideAfter(chkHideAfter.isSelected());
+            Configurator.save();
+        });
 
         btnSelectGamePath.setOnMouseClicked(x -> {
             DirectoryChooser chooser = new DirectoryChooser();
@@ -221,6 +228,7 @@ public class Settings {
             txtGamePath.setText(c.getGamePath().toString());
             cbLanguage.setValue(c.getLanguage().getDisplayLanguage(c.getLanguage()));
             chkLogMode.setSelected(c.getLogMode());
+            chkHideAfter.setSelected(c.hideAfter());
 
         }
         catch (Exception e){

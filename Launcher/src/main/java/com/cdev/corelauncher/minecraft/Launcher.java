@@ -5,6 +5,7 @@ import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.entities.*;
 import com.cdev.corelauncher.minecraft.utils.CommandConcat;
+import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.EventHandler;
 import com.cdev.corelauncher.utils.JavaMan;
 import com.cdev.corelauncher.utils.Logger;
@@ -131,8 +132,13 @@ public class Launcher {
                     .inheritIO()
                     .command(finalCmds)
                     .start();
-            process.waitFor();
 
+            boolean hide = Configurator.getConfig().hideAfter();
+            if (hide)
+                FXManager.getManager().hideAll();
+            process.waitFor();
+            if (hide)
+                FXManager.getManager().showAll();
             ///
 
             /*String libPath = "-Djava.library.path=" + linfo.nativePath;

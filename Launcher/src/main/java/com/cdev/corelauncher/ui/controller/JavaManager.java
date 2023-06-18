@@ -22,7 +22,7 @@ public class JavaManager {
     private boolean isOpenNewJava;
 
     public static LStage getManager(){
-        return instance == null ? (instance = FXManager.getManager().applyStage("javaman", "Java Manager")) : instance;
+        return instance == null ? (instance = FXManager.getManager().applyStage("javaman")) : instance;
     }
 
     public static void openManager(){
@@ -31,7 +31,7 @@ public class JavaManager {
         else{
             getManager().close();
             instance = null;
-            getManager().showStage();
+            getManager().show();
         }
     }
 

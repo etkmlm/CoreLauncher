@@ -29,7 +29,7 @@ public class CoreLauncher {
         // Needs to be initialized after initialization of configurator
         new Logger();
         new Profiler().reload();
-        new Vanilla().getAllVersions();
+        new Vanilla().asInstance().getAllVersions();
         new Launcher();
         new JavaMan().reload();
         OS_64 = OSUtils.is64BitOS();

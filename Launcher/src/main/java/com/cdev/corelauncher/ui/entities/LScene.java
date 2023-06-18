@@ -4,21 +4,34 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
-public class LScene extends Scene {
-    private final FXMLLoader loader;
-    public LScene(Parent root, int w, int h, FXMLLoader loader) {
+public class LScene<T> extends Scene {
+    private final T controller;
+    private LStage stage;
+    private double xD;
+    private double yD;
+
+
+    public LScene(Parent root, T controller) {
         super(root);
 
-        this.loader = loader;
+        this.controller = controller;
+
+        setOnMousePressed(a -> {
+            xD = stage.getX() - a.getScreenX();
+            yD = stage.getY() - a.getScreenY();
+        });
+        setOnMouseDragged(a -> {
+            stage.setX(a.getScreenX() + xD);
+            stage.setY(a.getScreenY() + yD);
+        });
     }
 
-    public LScene(Parent root, FXMLLoader loader) {
-        super(root);
+    public LScene setStage(LStage stage){
+        this.stage = stage;
 
-        this.loader = loader;
+        return this;
     }
-
-    public <T> T getController(){
-        return loader.getController();
+    public T getController(){
+        return controller;
     }
 }

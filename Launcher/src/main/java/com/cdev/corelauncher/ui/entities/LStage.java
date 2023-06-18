@@ -4,12 +4,16 @@ import com.cdev.corelauncher.CoreLauncherFX;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Translator;
 import com.cdev.corelauncher.utils.Logger;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,7 +38,6 @@ public class LStage extends Stage {
         getIcons().add(new Image(LOGO16));
         getIcons().add(new Image(LOGO32));
         getIcons().add(new Image(LOGO64));
-
     }
 
     public static FXMLLoader getDefaultLoader(URL url){
@@ -45,47 +48,19 @@ public class LStage extends Stage {
         return loader;
     }
 
-    protected static LScene getScene(String fxml, int w, int h){
-        try {
-            var loader = getDefaultLoader(CoreLauncherFX.class.getResource("layout/" + fxml + ".fxml"));
-            return new LScene(loader.load(), w, h, loader);
-        } catch (IOException e) {
-            Logger.getLogger().log(e);
-            return null;
-        }
-    }
-
-    protected static LScene getScene(String fxml){
-        try {
-            var loader = getDefaultLoader(CoreLauncherFX.class.getResource("layout/" + fxml + ".fxml"));
-            return new LScene(loader.load(), loader);
-        } catch (IOException e) {
-            Logger.getLogger().log(e);
-            return null;
-        }
-    }
-
-    public static LStage open(String fxml, int w, int h){
-        return new LStage().setStageScene(getScene(fxml, w, h));
-    }
-
-    public static LStage open(String fxml){
-        return new LStage().setStageScene(getScene(fxml));
+    public LStage setStyle(StageStyle style){
+        initStyle(style);
+        return this;
     }
 
     public LStage setStageScene(LScene s){
-        setScene(s);
+        setScene(s.setStage(this));
         scene = s;
         return this;
     }
 
     public LStage setStageTitle(String title){
         setTitle(title);
-        return this;
-    }
-
-    public LStage showStage(){
-        show();
         return this;
     }
 

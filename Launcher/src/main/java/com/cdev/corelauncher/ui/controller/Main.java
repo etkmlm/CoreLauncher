@@ -6,6 +6,8 @@ import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.data.Translator;
 import com.cdev.corelauncher.data.entities.Account;
 import com.cdev.corelauncher.minecraft.Wrapper;
+import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
+import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.events.ChangeEvent;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.Launcher;
@@ -25,7 +27,9 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.transform.Translate;
 
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class Main{
@@ -73,6 +77,7 @@ public class Main{
     @FXML
     private void initialize(){
         Launcher.getLauncher().getHandler().addHandler("main", this::onGeneralEvent);
+        Vanilla.getVanilla().getHandler().addHandler("main", this::onGeneralEvent);
         Profiler.getProfiler().getHandler().addHandler("mainWindow", this::onProfilerEvent);
 
         lvProfiles.setItems(profiles);
@@ -80,10 +85,10 @@ public class Main{
 
         btnStart.setOnMouseClicked((a) -> launch(selectedProfile));
 
-        btnSettings.setOnMouseClicked((a) -> FXManager.getManager().applyStage("settings", Translator.translate("settings.title")).showStage());
+        btnSettings.setOnMouseClicked((a) -> FXManager.getManager().applyStage("settings").show());
 
         btnAbout.setOnMouseClicked((a) ->
-                CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm", "CoreLauncher")).show());
+                CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm", LauncherConfig.LAUNCHER_NAME)).show());
 
         btnAddProfile.setOnMouseClicked((a) -> ProfileEdit.open(null));
 
@@ -120,8 +125,18 @@ public class Main{
         ((Wrapper<?>)p.getWrapper()).getHandler().addHandler("main", this::onGeneralEvent);
         new Thread(() -> {
             //Launcher.getLauncher().downloadVersion(p.getVersionId());
-            Launcher.getLauncher().prepare(p);
-            Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
+            try{
+                Launcher.getLauncher().prepare(p);
+                Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+                Platform.runLater(() -> {
+                    prg.setProgress(0);
+                    status.setText("");
+                    detailedStatus.setText("");
+                });
+            }
         }).start();
     }
 
@@ -154,8 +169,16 @@ public class Main{
                 status = Translator.translate("launch.state.download.assets");
                 Platform.runLater(() -> detailedStatus.setText(key.substring(6)));
             }
-            else if (key.equals("gameStart"))
-                status = Translator.translate("launch.state.started");
+            else if (key.equals("gameStart")){
+                status = "";
+                Platform.runLater(() -> {
+                    prg.setProgress(0);
+                    detailedStatus.setText("");
+                });
+            }
+                //status = Translator.translate("launch.state.started");
+            else if (key.startsWith("acqVersion"))
+                status = Translator.translateFormat("launch.state.acquire", key.substring(10));
             else if (key.equals("gameEnd")){
                 status = "";
                 Platform.runLater(() -> {
@@ -166,6 +189,12 @@ public class Main{
             else if (key.startsWith("prepare")){
                 status = Translator.translateFormat("launch.state.prepare", key.substring(7));
             }
+            else if (key.startsWith("."))
+                status = dot(key.substring(1));
+            else if (key.startsWith(",")){
+                status = dot(key.split(":\\.")[1]);
+                Platform.runLater(() -> detailedStatus.setText(key.substring(1)));
+            }
             else
                 status = key;
 
@@ -173,14 +202,22 @@ public class Main{
 
         }
     }
+
+    private String dot(String f){
+        String[] spl = f.split(";");
+        return spl.length == 1 ? Translator.translate(spl[0]) : Translator.translateFormat(spl[0], Arrays.stream(spl).skip(1));
+    }
     private void onProfilerEvent(ChangeEvent a){
         var newProfile = (Profile)a.getNewValue();
         var oldProfile = (Profile)a.getOldValue();
 
         switch (a.getKey()) {
-            case "profileCreate" ->
-                    profiles.add(LProfile.get(newProfile)
-                            .setEventListener(this::onProfileSelectEvent));
+            case "profileCreate" ->{
+                var profile = LProfile.get(newProfile)
+                        .setEventListener(this::onProfileSelectEvent);
+                profiles.add(profile);
+                profile.setSelected(true);
+            }
             case "profileDelete" -> {
                 profiles.removeIf(x -> x.getProfile() == oldProfile);
                 if (profiles.stream().noneMatch(LProfile::selected) && profiles.size() > 0) {

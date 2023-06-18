@@ -13,7 +13,8 @@
   "defaultMaxRAM": 4096,
   "showOldReleases": false,
   "showSnapshots": false,
-  "logMode": false
+  "logMode": false,
+  "hideAfter": false
 }
 
 

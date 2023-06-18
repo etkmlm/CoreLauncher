@@ -18,6 +18,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.controlsfx.control.SearchableComboBox;
 
@@ -83,11 +84,11 @@ public class ProfileEdit {
 
     public static ProfileEdit open(Profile p){
         var stage = FXManager.getManager()
-                .applyStage("profileedit", p == null ? "Add Profile" : "Edit Profile");
+                .applyStage("pedit");
 
         var pEdit = ((ProfileEdit) stage.getLScene().getController()).setProfile(p);
 
-        stage.showStage();
+        stage.show();
 
         return pEdit;
     }
@@ -222,6 +223,8 @@ public class ProfileEdit {
             else {
                 Profiler.getProfiler().setProfile(profile.getName(), b -> b.cloneFrom(tempProfile));
             }
+
+            ((Stage)btnSave.getScene().getWindow()).close();
         });
 
         reload();

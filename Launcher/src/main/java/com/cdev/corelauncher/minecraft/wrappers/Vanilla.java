@@ -19,7 +19,12 @@ public class Vanilla extends Wrapper<Version> {
     private static Vanilla instance;
 
     public Vanilla(){
+
+    }
+
+    public Vanilla asInstance(){
         instance = this;
+        return this;
     }
 
     public static Vanilla getVanilla(){
@@ -34,6 +39,7 @@ public class Vanilla extends Wrapper<Version> {
 
     @Override
     public Version getVersion(String id, String wrId){
+        logState("acqVersion" + id);
         return _info.versions.stream().filter(x -> x.id.equals(id)).findFirst().orElse(new Version());
     }
 

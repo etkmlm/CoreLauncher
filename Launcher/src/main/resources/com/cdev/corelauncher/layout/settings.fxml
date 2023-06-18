@@ -107,6 +107,9 @@
 
                 <Label styleClass="prop-key" text="%settings.logMode" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                 <CheckBox fx:id="chkLogMode" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+
+                <Label styleClass="prop-key" text="%settings.hideAfter" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <CheckBox fx:id="chkHideAfter" GridPane.columnIndex="2" GridPane.rowIndex="4" />
             <rowConstraints>
                <RowConstraints />
                <RowConstraints />

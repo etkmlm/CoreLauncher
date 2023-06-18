@@ -14,6 +14,7 @@ import com.cdev.corelauncher.utils.entities.Path;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import javafx.scene.image.Image;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -61,6 +62,8 @@ public class Forge extends Wrapper<ForgeVersion> {
 
     @Override
     public List<ForgeVersion> getVersions(String versionId) {
+        logState("acqVersionForge - " + versionId);
+
         if (cache.containsKey(versionId))
             return cache.get(versionId);
 
@@ -101,6 +104,9 @@ public class Forge extends Wrapper<ForgeVersion> {
             }
 
         }
+        catch (HttpStatusException ignored){
+
+        }
         catch (Exception e){
             Logger.getLogger().log(e);
         }
@@ -114,9 +120,11 @@ public class Forge extends Wrapper<ForgeVersion> {
         if (art == null)
             return;
 
+        logState("acqVersionVanilla " + version.id);
+
         Vanilla.getVanilla().install(version);
 
-        logState("forgeDownload");
+        logState(".forge.state.download");
 
         var versionsPath = Configurator.getConfig().getGamePath().to("versions");
         var verPath = versionsPath.to(version.getJsonName());
@@ -130,7 +138,7 @@ public class Forge extends Wrapper<ForgeVersion> {
 
         var target = Configurator.getConfig().getGamePath().toFile();
 
-        logState("forgeInstall");
+        logState(".forge.state.install");
 
         var profileInfo = Path.begin(java.nio.file.Path.of(target.getPath(), "launcher_profiles.json"));
         profileInfo.write("{\"profiles\":{}}");
@@ -146,7 +154,7 @@ public class Forge extends Wrapper<ForgeVersion> {
                     @Override
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                         if (method.getName().equals("message") && args.length > 0)
-                            logState(args[0].toString());
+                            logState("," + args[0].toString() + ":." + "forge.state.install");
                         return null;
                     }
                 });
@@ -173,13 +181,20 @@ public class Forge extends Wrapper<ForgeVersion> {
 
                 method.invoke(clientInstall, target, always);
                 method.invoke(serverInstall, target, always);
-
             }
         }
         catch (Exception e){
             Logger.getLogger().log(e);
+            logState(".forge.launch.error");
         }
+
+        logState(".forge.launch.finish");
+
         path.delete();
+        getGameDir().getFiles().forEach(x -> {
+            if (x.getExtension() != null && x.getExtension().equals("jar"))
+                x.delete();
+        });
 
         var read = new Gson().fromJson(profileInfo.read(), JsonObject.class);
         var profiles = read.get("profiles").getAsJsonObject();
@@ -191,5 +206,7 @@ public class Forge extends Wrapper<ForgeVersion> {
             versionsPath.to(name, name + ".json").move(verPath.to(version.getJsonName() + ".json"));
             versionsPath.to(name).delete();
         }
+
+        profileInfo.delete();
     }
 }
