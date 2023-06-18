@@ -1,7 +1,6 @@
 package com.cdev.corelauncher.data.entities;
 
 import com.cdev.corelauncher.utils.entities.Path;
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 
 public class Background {

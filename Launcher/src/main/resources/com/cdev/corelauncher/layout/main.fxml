@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.cdev.corelauncher.ui.controls.*?>
+<?import com.cdev.corelauncher.ui.controls.CButton?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-
 <AnchorPane prefHeight="600" prefWidth="720.0" stylesheets="@../style/main.css,@../style/controls/defcontrols.css,@../style/controls/listing.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.Main">
     <background>
         <Background>

@@ -1,9 +1,9 @@
 package com.cdev.corelauncher.data;
 
-import com.cdev.corelauncher.utils.events.ChangeEvent;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.utils.EventHandler;
 import com.cdev.corelauncher.utils.entities.Path;
+import com.cdev.corelauncher.utils.events.ChangeEvent;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -55,6 +55,11 @@ public class Profiler {
 
     public Profile getProfile(String name){
         return profiles.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(Profile.empty());
+    }
+
+    public static void backup(Profile p, Path to){
+        var path = p.getPath();
+        path.zip(to);
     }
 
     public Profile setProfile(String name, Consumer<Profile> set){

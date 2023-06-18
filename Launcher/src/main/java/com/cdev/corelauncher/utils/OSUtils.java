@@ -3,6 +3,8 @@ package com.cdev.corelauncher.utils;
 import com.cdev.corelauncher.CoreLauncher;
 import com.cdev.corelauncher.utils.entities.OS;
 
+import java.awt.*;
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class OSUtils {
@@ -58,6 +60,14 @@ public class OSUtils {
             }
         }
         catch (Exception e){
+            Logger.getLogger().log(e);
+        }
+    }
+
+    public static void openFolder(Path path){
+        try {
+            Desktop.getDesktop().open(path.toFile());
+        } catch (IOException e) {
             Logger.getLogger().log(e);
         }
     }

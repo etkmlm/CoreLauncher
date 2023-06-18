@@ -2,7 +2,6 @@ package com.cdev.corelauncher.data.entities;
 
 import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.minecraft.Wrapper;
-import com.cdev.corelauncher.minecraft.entities.Version;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.entities.Java;
@@ -35,7 +34,7 @@ public class Profile {
     private int minRAM;
     private int maxRAM;
     private Wrapper wrapper;
-    private Path path;
+    //private Path path;
 
     protected Profile(){
         wrapper = new Vanilla();
@@ -68,6 +67,12 @@ public class Profile {
         return this;
     }
 
+    public Path getPath(){
+        if (name == null)
+            return null;
+        return Profiler.profilesDir().to(name);
+    }
+
     public Wrapper getWrapper(){
         return wrapper == null ? new Vanilla() : wrapper;
     }
@@ -84,9 +89,8 @@ public class Profile {
     }
 
     public Profile cloneFrom(Profile p){
-        if (p.path != null){
+        if (p.getPath() != null){
             this.name = p.name;
-            this.path = p.path;
         }
         this.versionId = p.versionId;
         this.wrapperVersion = p.wrapperVersion;
@@ -102,9 +106,6 @@ public class Profile {
     public Profile rename(String name){
         this.name = name;
 
-        if (path != null)
-            path = path.parent().to(name);
-
         return this;
     }
 
@@ -114,21 +115,20 @@ public class Profile {
 
         String json = GsonUtils.DEFAULT_GSON.toJson(this);
 
-        path.to("profile.json").write(json);
+        getPath().to("profile.json").write(json);
 
         return this;
     }
 
-    private Profile setProfilePath(Path path){
-        this.path = path;
-        this.name = path.getName();
+    private Profile setProfileName(String name){
+        this.name = name;
         return this;
     }
 
     public static Profile get(Path profilePath) {
         var file = profilePath.to("profile.json");
         return (file.exists() ? GsonUtils.DEFAULT_GSON.fromJson(file.read(), Profile.class) : new Profile())
-                .setProfilePath(profilePath).save();
+                .setProfileName(profilePath.getName()).save();
     }
 
     public String[] getJvmArgs() {
@@ -156,10 +156,6 @@ public class Profile {
     public Profile setJava(Java java) {
         this.java = java;
         return this;
-    }
-
-    public Path getPath() {
-        return path;
     }
 
     public int getMinRAM() {

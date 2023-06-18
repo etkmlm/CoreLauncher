@@ -4,10 +4,7 @@ import com.cdev.corelauncher.ui.controls.CButton;
 import com.cdev.corelauncher.ui.entities.LStage;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 
 public class Frame {

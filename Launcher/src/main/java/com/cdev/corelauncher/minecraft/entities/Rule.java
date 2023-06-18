@@ -1,7 +1,6 @@
 package com.cdev.corelauncher.minecraft.entities;
 
 import com.cdev.corelauncher.CoreLauncher;
-import com.cdev.corelauncher.utils.OSUtils;
 import com.cdev.corelauncher.utils.entities.OS;
 import com.google.gson.JsonObject;
 

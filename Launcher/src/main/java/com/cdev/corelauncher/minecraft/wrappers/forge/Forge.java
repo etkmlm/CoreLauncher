@@ -2,11 +2,9 @@ package com.cdev.corelauncher.minecraft.wrappers.forge;
 
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.minecraft.Wrapper;
-import com.cdev.corelauncher.minecraft.entities.Version;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.forge.entities.FArtifact;
 import com.cdev.corelauncher.minecraft.wrappers.forge.entities.ForgeVersion;
-import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.NetUtils;
 import com.cdev.corelauncher.utils.entities.LogType;
@@ -19,14 +17,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Predicate;

@@ -1,16 +1,12 @@
 package com.cdev.corelauncher.utils;
 
 import com.cdev.corelauncher.data.Configurator;
-import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.utils.entities.LogType;
 import com.cdev.corelauncher.utils.entities.Path;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 
 public class Logger {
     private static Logger instance;

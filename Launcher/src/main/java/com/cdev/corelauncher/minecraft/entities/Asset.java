@@ -1,9 +1,5 @@
 package com.cdev.corelauncher.minecraft.entities;
 
-import com.google.gson.*;
-
-import java.lang.reflect.Type;
-
 public class Asset {
     public String id;
     public String SHA1;

@@ -15,3 +15,7 @@
 .prop-key{
     -fx-font-size: 12pt;
 }
+
+.context-menu{
+    -fx-opacity: 0;
+}

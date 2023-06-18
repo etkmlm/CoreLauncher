@@ -1,9 +1,8 @@
 package com.cdev.corelauncher.minecraft;
 
-import com.cdev.corelauncher.LauncherConfig;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.entities.Profile;
-import com.cdev.corelauncher.minecraft.entities.*;
+import com.cdev.corelauncher.minecraft.entities.ExecutionInfo;
 import com.cdev.corelauncher.minecraft.utils.CommandConcat;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.EventHandler;

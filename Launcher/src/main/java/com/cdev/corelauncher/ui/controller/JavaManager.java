@@ -2,7 +2,6 @@ package com.cdev.corelauncher.ui.controller;
 
 import com.cdev.corelauncher.ui.controls.CButton;
 import com.cdev.corelauncher.ui.controls.CJava;
-import com.cdev.corelauncher.ui.entities.LScene;
 import com.cdev.corelauncher.ui.entities.LStage;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.JavaMan;
@@ -10,11 +9,9 @@ import com.cdev.corelauncher.utils.entities.Java;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 public class JavaManager {
     private final ObservableList<Java> javas;

@@ -10,7 +10,6 @@ import com.cdev.corelauncher.utils.entities.Path;
 import com.google.gson.Gson;
 import javafx.scene.image.Image;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Vanilla extends Wrapper<Version> {

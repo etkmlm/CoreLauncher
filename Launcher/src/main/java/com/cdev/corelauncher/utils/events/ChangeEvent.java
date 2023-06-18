@@ -1,8 +1,5 @@
 package com.cdev.corelauncher.utils.events;
 
-import javafx.event.Event;
-import javafx.event.EventType;
-
 public class ChangeEvent extends KeyEvent {
     private final Object oldValue;
     private final Object newValue;

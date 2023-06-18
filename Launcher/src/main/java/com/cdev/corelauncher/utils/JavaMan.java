@@ -3,9 +3,9 @@ package com.cdev.corelauncher.utils;
 import com.cdev.corelauncher.CoreLauncher;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Profiler;
-import com.cdev.corelauncher.utils.events.ChangeEvent;
 import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.Path;
+import com.cdev.corelauncher.utils.events.ChangeEvent;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 

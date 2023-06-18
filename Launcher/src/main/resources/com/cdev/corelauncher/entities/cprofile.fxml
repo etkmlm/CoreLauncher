@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.cdev.corelauncher.ui.controls.*?>
+<?import com.cdev.corelauncher.ui.controls.CButton?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-
+<?import javafx.scene.text.Font?>
 <AnchorPane prefHeight="86.0" prefWidth="233.0" styleClass="main" stylesheets="@../style/controls/cprofile.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
     <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="0">
         <ImageView fx:id="imgProfile" fitHeight="42.0" fitWidth="42.0" />
@@ -21,11 +20,11 @@
         <contextMenu>
             <ContextMenu fx:id="contextMenu" style="-fx-background-color: #505050;-fx-background-radius: 3px;">
                 <items>
-                    <MenuItem fx:id="btnBackup" text="Complete Backup" />
-                    <MenuItem fx:id="btnSend" text="Send" />
-                    <MenuItem fx:id="btnOpenFolder" text="Open Folder" />
-                    <MenuItem fx:id="btnEdit" text="Edit" />
-                    <MenuItem fx:id="btnDelete" text="Delete" />
+                    <MenuItem fx:id="btnBackup" style="-fx-text-fill: white" text="%profile.menu.backup" />
+                    <MenuItem fx:id="btnSend" style="-fx-text-fill: white" text="%profile.menu.send" />
+                    <MenuItem fx:id="btnOpenFolder" style="-fx-text-fill: white" text="%profile.menu.open" />
+                    <MenuItem fx:id="btnEdit" style="-fx-text-fill: white" text="%profile.menu.edit" />
+                    <MenuItem fx:id="btnDelete" style="-fx-text-fill: white" text="%profile.menu.delete" />
                 </items>
             </ContextMenu>
         </contextMenu>

@@ -5,8 +5,9 @@ import com.google.gson.*;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
-import org.apache.commons.compress.utils.FileNameUtils;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,7 +16,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class Path{
@@ -175,6 +178,44 @@ public class Path{
             return null;
         String[] all = getName().split("\\.");
         return all[all.length - 1];
+    }
+
+    private ZipArchiveEntry getEntry(Path root, Path p){
+        String rootPath = root.toString();
+        String newPath = p.toString().substring(rootPath.length()).replace('\\', '/');
+        if (newPath.startsWith("/"))
+            newPath = root.getName() + newPath;
+        return new ZipArchiveEntry(p.toFile(), newPath.isEmpty() ? p.getName() : newPath);
+    }
+
+    private void zipEntry(ZipArchiveOutputStream stream, Path root, Path p){
+        try {
+            stream.putArchiveEntry(getEntry(root, p));
+        } catch (IOException ignored) {
+
+        }
+        if (p.isDirectory()){
+            p.getFiles().forEach(x -> zipEntry(stream, root, x));
+        }
+        else{
+            try(var str = new FileInputStream(p.toFile())) {
+                stream.write(str.readAllBytes());
+            } catch (IOException e) {
+
+            }
+        }
+
+    }
+
+    public void zip(Path fileName){
+        try(ZipArchiveOutputStream stream = new ZipArchiveOutputStream(fileName.toFile())){
+            zipEntry(stream, this, this);
+            //stream.putArchiveEntry(new ZipArchiveEntry(root.toFile(), getName()));
+            stream.closeArchiveEntry();
+        }
+        catch (IOException e){
+            Logger.getLogger().log(e);
+        }
     }
 
     private void extract(Path destination, ArchiveInputStream stream, List<String> exclude) throws IOException {

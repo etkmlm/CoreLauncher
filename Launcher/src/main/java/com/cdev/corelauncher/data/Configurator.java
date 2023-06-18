@@ -1,11 +1,11 @@
 package com.cdev.corelauncher.data;
 
 import com.cdev.corelauncher.data.entities.Config;
-import com.cdev.corelauncher.utils.events.ChangeEvent;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.utils.EventHandler;
 import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.entities.Path;
+import com.cdev.corelauncher.utils.events.ChangeEvent;
 import com.google.gson.Gson;
 
 import java.io.InputStreamReader;

@@ -6,11 +6,6 @@ import com.cdev.corelauncher.utils.OSUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.SocketAddress;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Authenticator {

@@ -4,12 +4,14 @@ import com.cdev.corelauncher.CoreLauncherFX;
 import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.ui.controller.ProfileEdit;
 import com.cdev.corelauncher.ui.entities.LProfile;
+import com.cdev.corelauncher.ui.entities.LStage;
+import com.cdev.corelauncher.utils.OSUtils;
+import com.cdev.corelauncher.utils.entities.Path;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-//import java.awt.*;
+import javafx.stage.FileChooser;
 
 import java.io.IOException;
 
@@ -19,8 +21,7 @@ public class CProfile extends ListCell<LProfile> {
     private LProfile profile;
 
     public CProfile(){
-        var n = CoreLauncherFX.class.getResource("/com/cdev/corelauncher/entities/cprofile.fxml");
-        FXMLLoader loader = new FXMLLoader(n);
+        var loader = LStage.getDefaultLoader(CoreLauncherFX.class.getResource("/com/cdev/corelauncher/entities/cprofile.fxml"));
         loader.setController(this);
         try{
             setGraphic(gr = loader.load());
@@ -76,8 +77,32 @@ public class CProfile extends ListCell<LProfile> {
 
         btnEdit.setOnAction(a -> ProfileEdit.open(profile.getProfile()));
 
+        btnSend.setOnAction(a -> {
+            var profileJson = profile.getProfile().getPath().to("profile.json");
+            var chooser = new FileChooser();
+            chooser.setInitialFileName(profile.getProfile().getName() + ".json");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON", "*.json"));
+            var file = chooser.showSaveDialog(lblProfileName.getScene().getWindow());
+            if (file == null)
+                return;
+            profileJson.copy(Path.begin(file.toPath()));
+        });
+
+        btnBackup.setOnAction(a -> {
+            var chooser = new FileChooser();
+            chooser.setInitialFileName(profile.getProfile().getName() + ".zip");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
+            var file = chooser.showSaveDialog(lblProfileName.getScene().getWindow());
+            if (file == null)
+                return;
+            Profiler.backup(profile.getProfile(), Path.begin(file.toPath()));
+        });
+
         /*if (profile.getMods() != null)
             lblProfileDescription.setText(profile.getMods().size() + " mods");*/
+
+
+        btnOpenFolder.setOnAction(a -> OSUtils.openFolder(profile.getProfile().getPath().toFile().toPath()));
 
         setGraphic(gr);
     }

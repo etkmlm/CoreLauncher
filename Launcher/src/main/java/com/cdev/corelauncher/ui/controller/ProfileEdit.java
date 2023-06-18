@@ -3,7 +3,6 @@ package com.cdev.corelauncher.ui.controller;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.data.entities.Profile;
-import com.cdev.corelauncher.minecraft.Launcher;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.forge.Forge;
@@ -22,7 +21,6 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.controlsfx.control.SearchableComboBox;
 
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class ProfileEdit {
@@ -42,7 +40,7 @@ public class ProfileEdit {
     private RadioButton quilt;
 
     @FXML
-    private ComboBox<String> cbWrapperVersion;
+    private ChoiceBox<String> cbWrapperVersion;
     @FXML
     private SearchableComboBox<String> cbGameVersion;
     @FXML
@@ -129,11 +127,15 @@ public class ProfileEdit {
 
     @FXML
     public void initialize(){
-        ControlUtils.setTextFieldContext(txtArgs);
-        ControlUtils.setTextFieldContext(txtName);
-
-        txtMinRAM.setContextMenu(null);
-        txtMaxRAM.setContextMenu(null);
+        /*ControlUtils.setContextNull(txtArgs);
+        ControlUtils.setContextNull(txtName);
+        ControlUtils.setContextNull(cbGameVersion);
+        ControlUtils.setContextNull(cbAccounts);
+        ControlUtils.setContextNull(cbJavaVersion);
+        ControlUtils.setContextNull(cbWrapperVersion);
+        ControlUtils.setContextNull(sldRAM);
+        ControlUtils.setContextNull(txtMaxRAM);
+        ControlUtils.setContextNull(txtMinRAM);*/
 
         cbGameVersion.valueProperty().addListener(x -> {
             String value = cbGameVersion.getValue();
@@ -215,6 +217,9 @@ public class ProfileEdit {
                     .setJvmArgs(txtArgs.getText().split(" "))
                     .setMinRAM(fMinRAM.getValue())
                     .setMaxRAM(fMaxRAM.getValue());
+
+            if (tempProfile.getName() == null || tempProfile.getName().isEmpty() || tempProfile.getName().isBlank())
+                return;
 
             if (profile == null){
                 Profile p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));

@@ -1,43 +1,33 @@
 package com.cdev.corelauncher.ui.entities;
 
 import com.cdev.corelauncher.CoreLauncherFX;
-import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Translator;
-import com.cdev.corelauncher.utils.Logger;
-import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Objects;
 
 public class LStage extends Stage {
 
-    public static final InputStream LOGO16 = CoreLauncherFX.class.getResourceAsStream("/com/cdev/corelauncher/logo16x16.png");
-    public static final InputStream LOGO32 = CoreLauncherFX.class.getResourceAsStream("/com/cdev/corelauncher/logo32x32.png");
-    public static final InputStream LOGO64 = CoreLauncherFX.class.getResourceAsStream("/com/cdev/corelauncher/logo64x64.png");
+    public static final Image LOGO16;
+    public static final Image LOGO32;
+    public static final Image LOGO64;
+
+    static {
+        LOGO16 = new Image(Objects.requireNonNull(CoreLauncherFX.class.getResourceAsStream("/com/cdev/corelauncher/logo16x16.png")));
+        LOGO32 = new Image(Objects.requireNonNull(CoreLauncherFX.class.getResourceAsStream("/com/cdev/corelauncher/logo32x32.png")));
+        LOGO64 = new Image(Objects.requireNonNull(CoreLauncherFX.class.getResourceAsStream("/com/cdev/corelauncher/logo64x64.png")));
+    }
 
     private LScene scene;
 
     public LStage(){
-        getIcons().add(new Image(LOGO16));
-        getIcons().add(new Image(LOGO32));
-        getIcons().add(new Image(LOGO64));
+        getIcons().add(LOGO16);
+        getIcons().add(LOGO32);
+        getIcons().add(LOGO64);
     }
 
     public static FXMLLoader getDefaultLoader(URL url){

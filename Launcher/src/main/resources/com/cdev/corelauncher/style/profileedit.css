@@ -26,6 +26,9 @@
 .java-sel{
     -fx-background-color: transparent!important;
 }
+.context-menu{
+    -fx-opacity: 0;
+}
 
 .game-version{
     -fx-font-size: 12pt;

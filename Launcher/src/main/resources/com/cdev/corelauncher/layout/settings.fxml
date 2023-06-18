@@ -4,7 +4,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
-
 <HBox alignment="CENTER" prefHeight="510" prefWidth="590.0" styleClass="all" stylesheets="@../style/settings.css,@../style/controls/defcontrols.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.Settings">
     <VBox alignment="CENTER">
         <VBox>

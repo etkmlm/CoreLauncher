@@ -2,12 +2,13 @@ package com.cdev.corelauncher.data.entities;
 
 import com.cdev.corelauncher.utils.NetUtils;
 import com.google.gson.*;
-import javafx.scene.image.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.PixelBuffer;
+import javafx.scene.image.WritableImage;
+import javafx.scene.image.WritablePixelFormat;
 
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.nio.IntBuffer;
-import java.nio.file.Path;
 import java.util.Base64;
 
 public class Account{

@@ -17,3 +17,6 @@
 .add-button{
     -fx-font-size: 11pt;
 }
+.context-menu{
+    -fx-opacity: 0;
+}

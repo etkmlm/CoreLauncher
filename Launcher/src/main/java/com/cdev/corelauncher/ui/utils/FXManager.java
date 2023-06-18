@@ -3,29 +3,20 @@ package com.cdev.corelauncher.ui.utils;
 import com.cdev.corelauncher.CoreLauncherFX;
 import com.cdev.corelauncher.data.Translator;
 import com.cdev.corelauncher.ui.controller.Frame;
-import com.cdev.corelauncher.ui.controls.CMsgBox;
 import com.cdev.corelauncher.ui.entities.LScene;
 import com.cdev.corelauncher.ui.entities.LStage;
 import com.cdev.corelauncher.utils.Logger;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 public class FXManager {
 

@@ -1,12 +1,10 @@
 package com.cdev.corelauncher;
 
-import com.cdev.corelauncher.ui.controller.Main;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class CoreLauncherFX extends Application {
 
