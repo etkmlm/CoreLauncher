@@ -48,8 +48,13 @@ public class Vanilla extends Wrapper<Version> {
 
     @Override
     public Version getVersionFromIdentifier(String identifier, String inherits){
-        String[] spl = identifier.replaceAll("[-_]", ".").split("\\.");
-        return spl.length == 2 || spl.length == 3 ? new Version(identifier) : null;
+        boolean f = false;
+        String idLower = identifier.toLowerCase();
+        for (String i : wrappers.keySet()){
+            if (idLower.contains(i) && !i.equals(getIdentifier()))
+                f = true;
+        }
+        return !f ? new Version(identifier) : null;
     }
 
     @Override

@@ -2,10 +2,7 @@
   "gamePath": null,
   "user": "IAMUSER",
   "language": "en_US",
-  "background": {
-    "color": "#202020",
-    "image": ""
-  },
+  "background": null,
   "defaultJVMArgs": "",
   "lastSelectedProfile": null,
   "customJavaVersions": null,
@@ -14,7 +11,7 @@
   "showOldReleases": false,
   "showSnapshots": false,
   "logMode": true,
-  "hideAfter": false
+  "hideAfter": true
 }
 
 

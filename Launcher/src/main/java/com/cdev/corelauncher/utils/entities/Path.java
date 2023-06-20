@@ -64,7 +64,12 @@ public class Path{
      * Concat multiple paths.
      */
     public Path to(String... keys){
-        return new Path(java.nio.file.Path.of(root.toString(), keys));
+        try{
+            return new Path(java.nio.file.Path.of(root.toString(), keys));
+        }
+        catch (NullPointerException e){
+            return null;
+        }
     }
 
     public Path parent(){

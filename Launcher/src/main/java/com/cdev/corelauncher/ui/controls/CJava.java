@@ -88,10 +88,10 @@ public class CJava extends ListCell<Java> {
                     Logger.getLogger().log(e);
                     if (java != null)
                         java.setPath(null);
-                    txtPath.setText("Wrong Path");
+                    txtPath.setText(Translator.translate("error.wrongPath"));
                 }
                 if (java != null && !java.isLoaded())
-                    txtPath.setText("Wrong Path");
+                    txtPath.setText(Translator.translate("error.wrongPath"));
 
             });
             btnAction.setOnMouseClicked((a) -> {

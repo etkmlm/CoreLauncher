@@ -107,9 +107,14 @@ public class Account{
             skin = getClass().getResource("/com/cdev/corelauncher/images/steve.png").toString();
         }
 
-        Image img = new Image(skin);
+        try{
+            Image img = new Image(skin);
 
-        head = resize(img, 8, 8, 8, 8, 32);
+            head = resize(img, 8, 8, 8, 8, 32);
+        }
+        catch (Exception e){
+            head = null;
+        }
     }
 
     private static Image resize(Image original, int x, int y, int w, int h, int scaleFactor){

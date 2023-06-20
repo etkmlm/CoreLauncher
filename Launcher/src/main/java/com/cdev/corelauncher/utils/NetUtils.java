@@ -1,8 +1,11 @@
 package com.cdev.corelauncher.utils;
 
+import com.cdev.corelauncher.utils.entities.LogType;
 import com.cdev.corelauncher.utils.entities.NoConnectionException;
 import com.cdev.corelauncher.utils.entities.Path;
 import org.jsoup.HttpStatusException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.*;
 import java.net.*;
@@ -28,7 +31,10 @@ public class NetUtils {
 
         return read;
     }
-    public static String urlToString(String url){
+    public static String urlToString(String url) {
+        if (url == null)
+            return null;
+
         URL u;
         try {
             u = new URL(url);
@@ -37,15 +43,21 @@ public class NetUtils {
             return null;
         }
 
+        if (offline)
+            throw new NoConnectionException();
+
         try{
             var c = (HttpURLConnection) u.openConnection();
             return inputStreamToString(c.getInputStream());
         }
-        catch (UnknownHostException h){
-            checkAndWarn();
+        catch (FileNotFoundException f){
             return null;
         }
+        catch (UnknownHostException h){
+            throw new NoConnectionException();
+        }
         catch (HttpStatusException e){
+            Logger.getLogger().printLog(LogType.ERROR, "Error on request to " + url + ": " + e.getMessage());
             return null;
         }
         catch (IOException e){
@@ -54,14 +66,17 @@ public class NetUtils {
         }
     }
     public static long getContentLength(String url){
+
+        if (offline)
+            throw new NoConnectionException();
+
         try {
             var uri = new URL(url);
             var conn = (HttpURLConnection)uri.openConnection();
             return conn.getContentLengthLong();
         }
         catch (UnknownHostException h){
-            checkAndWarn();
-            return 0;
+            throw new NoConnectionException();
         }
         catch (IOException e){
             Logger.getLogger().log(e);
@@ -69,6 +84,10 @@ public class NetUtils {
         }
     }
     public static Path download(String url, Path destination, boolean useOriginalName, Consumer<Double> onProgress){
+
+        if (offline)
+            throw new NoConnectionException();
+
         try{
             var uri = new URL(url);
             if (useOriginalName){
@@ -97,7 +116,7 @@ public class NetUtils {
             destination.toFile().setLastModified(conn.getLastModified());
         }
         catch (UnknownHostException h){
-            checkAndWarn();
+            throw new NoConnectionException();
         }
         catch (IOException ex){
             Logger.getLogger().log(ex);
@@ -106,6 +125,10 @@ public class NetUtils {
     }
     public static String post(String url, String content, String contentType){
         String answer = null;
+
+        if (offline)
+            throw new NoConnectionException();
+
         try{
             URL uri = new URL(url);
 
@@ -137,7 +160,7 @@ public class NetUtils {
             }
         }
         catch (UnknownHostException h){
-            checkAndWarn();
+            throw new NoConnectionException();
         }
         catch (IOException e){
             Logger.getLogger().log(e);
@@ -145,7 +168,16 @@ public class NetUtils {
 
         return answer;
     }
-
+    public static Document getDocumentFromUrl(String url) throws IOException {
+        if (offline)
+            throw new NoConnectionException();
+        try{
+            return Jsoup.connect(url).get();
+        }
+        catch (UnknownHostException e){
+            throw new NoConnectionException();
+        }
+    }
     private static String streamToString(InputStream str){
         var answer = new StringBuilder();
         try(var reader = new InputStreamReader(str)){
@@ -191,8 +223,11 @@ public class NetUtils {
     public static boolean isOffline(){
         return offline;
     }
+    public static void setOffline(boolean offline) {
+        NetUtils.offline = offline;
+    }
 
-    public static void check(){
+    public static boolean check(){
         try{
             var url = new URL("https://google.com");
             var c = url.openConnection();
@@ -200,19 +235,13 @@ public class NetUtils {
             c.getInputStream().close();
 
 
-            offline = false;
+            return true;
         }
         catch (UnknownHostException h){
-            offline = true;
+            return false;
         }
         catch (Exception e){
-            offline = false;
+            return true;
         }
-    }
-
-    public static void checkAndWarn(){
-        check();
-        if (offline)
-            throw new NoConnectionException();
     }
 }

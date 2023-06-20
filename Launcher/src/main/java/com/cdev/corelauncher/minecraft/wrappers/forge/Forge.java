@@ -71,7 +71,7 @@ public class Forge extends Wrapper<ForgeVersion> {
         var versions = new ArrayList<ForgeVersion>();
 
         try{
-            Document doc = Jsoup.connect(webPage).get();
+            var doc = NetUtils.getDocumentFromUrl(webPage);
 
             var table = doc.selectXpath("//table[@class='download-list'][1]/tbody/tr");
 
@@ -104,7 +104,7 @@ public class Forge extends Wrapper<ForgeVersion> {
             }
 
         }
-        catch (UnknownHostException e){
+        catch (NoConnectionException e){
             return getOfflineVersions().stream().filter(x -> x.checkId(versionId)).toList();
         }
         catch (HttpStatusException ignored){

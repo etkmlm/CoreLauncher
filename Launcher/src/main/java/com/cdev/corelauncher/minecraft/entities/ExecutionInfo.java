@@ -80,8 +80,10 @@ public class ExecutionInfo{
             //            clientPath = versionDir.to(version.getClientName() + ".jar");
 
             var v0 = new Gson().fromJson(jsonPath.read(), Version.class);
+            if (v0 == null)
+                throw new VersionNotFoundException();
             var v = new Gson().fromJson(wrappedJsonPath.read(), Version.class);
-            assets = v0.assetIndex;
+            assets = v0.getAssetIndex();
             java = v0.javaVersion == null ? Java.fromCodeName("legacy") : v0.javaVersion;
             mainClass = v.mainClass;
 

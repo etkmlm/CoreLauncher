@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
 <?import org.controlsfx.control.SearchableComboBox?>
-<AnchorPane fx:id="root" prefHeight="620" prefWidth="550.0" styleClass="all" stylesheets="@../style/profileedit.css,@../style/controls/listing.css,@../style/controls/defcontrols.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.ProfileEdit">
+<AnchorPane fx:id="root" prefHeight="620" prefWidth="650" styleClass="all" stylesheets="@../style/profileedit.css,@../style/controls/listing.css,@../style/controls/defcontrols.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.ProfileEdit">
     <HBox alignment="CENTER" minHeight="84" AnchorPane.leftAnchor="30" AnchorPane.topAnchor="10">
         <TextField fx:id="txtName" minWidth="230" promptText="%profile.edit.name" styleClass="underline-field" />
     </HBox>
@@ -49,10 +49,26 @@
                 </ImageView>
                 <RadioButton fx:id="optifine" />
             </VBox>
+            <VBox alignment="CENTER" styleClass="rad-option">
+                <ImageView fitHeight="48" fitWidth="48">
+                    <Image url="@../images/optifine.png" />
+                </ImageView>
+                <RadioButton fx:id="custom" />
+            </VBox>
         </HBox>
+
 
         <Label styleClass="prop-key" text="%profile.edit.wrapperVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
         <ChoiceBox fx:id="cbWrapperVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <GridPane fx:id="pWrapper" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="90" />
+                <ColumnConstraints percentWidth="10" />
+            </columnConstraints>
+            <TextField editable="false" fx:id="txtWrapper" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" />
+            <CButton fx:id="btnSelectWrapper" maxWidth="Infinity" styleClass="java-sel" text="..." GridPane.columnIndex="1" />
+        </GridPane>
+
 
         <Label styleClass="prop-key" text="%profile.edit.gameVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
         <SearchableComboBox fx:id="cbGameVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="1" />

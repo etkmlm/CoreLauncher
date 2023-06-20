@@ -2,8 +2,10 @@ package com.cdev.corelauncher.ui.controller;
 
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Profiler;
+import com.cdev.corelauncher.data.Translator;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.Wrapper;
+import com.cdev.corelauncher.minecraft.wrappers.Custom;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.entities.WrapperVersion;
 import com.cdev.corelauncher.minecraft.wrappers.forge.Forge;
@@ -13,14 +15,19 @@ import com.cdev.corelauncher.ui.utils.ControlUtils;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.JavaMan;
 import com.cdev.corelauncher.utils.Logger;
+import com.cdev.corelauncher.utils.OSUtils;
 import com.cdev.corelauncher.utils.StringUtils;
 import com.cdev.corelauncher.utils.entities.Java;
+import com.cdev.corelauncher.utils.entities.Path;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.controlsfx.control.SearchableComboBox;
@@ -44,6 +51,8 @@ public class ProfileEdit {
     private RadioButton quilt;
     @FXML
     private RadioButton optifine;
+    @FXML
+    private RadioButton custom;
 
     @FXML
     private ChoiceBox<String> cbWrapperVersion;
@@ -69,6 +78,12 @@ public class ProfileEdit {
     private Slider sldRAM;
     @FXML
     private AnchorPane root;
+    @FXML
+    private GridPane pWrapper;
+    @FXML
+    private TextField txtWrapper;
+    @FXML
+    private Button btnSelectWrapper;
 
     private final ToggleGroup wrapperGroup;
     private final ObservableList<String> versions;
@@ -196,6 +211,7 @@ public class ProfileEdit {
         fabric.setToggleGroup(wrapperGroup);
         quilt.setToggleGroup(wrapperGroup);
         optifine.setToggleGroup(wrapperGroup);
+        custom.setToggleGroup(wrapperGroup);
         wrapperGroup.selectToggle(vanilla);
 
         wrapperGroup.selectedToggleProperty().addListener(a -> {
@@ -210,6 +226,33 @@ public class ProfileEdit {
             if (tempProfile.getVersionId() == null)
                 return;
             tempProfile.setWrapperVersion(cbWrapperVersion.getValue());
+        });
+        txtWrapper.setCursor(Cursor.HAND);
+        btnSelectWrapper.setOnMouseClicked(a -> {
+            var chooser = new DirectoryChooser();
+            var file = chooser.showDialog(btnSelectWrapper.getScene().getWindow());
+            if (file == null)
+                return;
+            var path = Path.begin(file.toPath());
+            var json = path.to(path.getName() + ".json");
+            if (!path.parent().equals(Configurator.getConfig().getGamePath().to("versions")) || !json.exists()){
+                txtWrapper.setText(Translator.translate("error.wrongPath"));
+                return;
+            }
+
+            try{
+                txtWrapper.setText(path.toString());
+                tempProfile.setWrapperVersion(path.getName());
+            }
+            catch (Exception ignored){
+                txtWrapper.setText(Translator.translate("error.wrongPath"));
+            }
+
+        });
+        txtWrapper.setOnMouseClicked(a -> {
+            var path = ((Custom)tempProfile.getWrapper()).getPath(tempProfile.getVersionId());
+            if (path.exists())
+                OSUtils.openFolder(path.toFile().toPath());
         });
 
         txtMaxRAM.setValueFactory(fMaxRAM);
@@ -271,9 +314,17 @@ public class ProfileEdit {
         wrapperVersions.add("...");
 
         String versionId = tempProfile.getVersionId();
-
-        if (!(tempProfile.getWrapper() instanceof Vanilla))
-            wrapperVersions.addAll(tempProfile.getWrapper().getVersions(versionId).stream().map(x -> ((WrapperVersion)x).getWrapperVersion()).toList());
+        var wr = tempProfile.getWrapper();
+        if (wr instanceof Custom){
+            pWrapper.setVisible(true);
+            cbWrapperVersion.setVisible(false);
+        }
+        else{
+            pWrapper.setVisible(false);
+            cbWrapperVersion.setVisible(true);
+            if (!(wr instanceof Vanilla))
+                wrapperVersions.addAll(tempProfile.getWrapper().getVersions(versionId).stream().map(x -> ((WrapperVersion)x).getWrapperVersion()).toList());
+        }
     }
 
     private void reload(){
@@ -297,13 +348,16 @@ public class ProfileEdit {
             if (tempProfile.getJvmArgs() != null)
                 txtArgs.setText(String.join(" ", tempProfile.getJvmArgs()));
 
-            String id = tempProfile.getWrapper().getIdentifier();
-            var wrapperToggle = wrapperGroup.getToggles().stream().filter(x -> ((RadioButton)x).getId().equals(id)).findFirst().orElse(vanilla);
+            Wrapper wr = tempProfile.getWrapper();
+            var wrapperToggle = wrapperGroup.getToggles().stream().filter(x -> ((RadioButton)x).getId().equals(wr.getIdentifier())).findFirst().orElse(vanilla);
             wrapperGroup.selectToggle(wrapperToggle);
-            if (!id.equals("vanilla")){
-                refreshWrapperVersions();
-                if (tempProfile.getWrapperVersion() != null)
-                    cbWrapperVersion.setValue(tempProfile.getWrapperVersion());
+
+            refreshWrapperVersions();
+            if (wr instanceof Custom c){
+                txtWrapper.setText(c.getPath(tempProfile.getWrapperVersion()).toString());
+            }
+            else if (!(wr instanceof Vanilla) && tempProfile.getWrapperVersion() != null){
+                cbWrapperVersion.setValue(tempProfile.getWrapperVersion());
             }
             fMinRAM.setValue(tempProfile.getMinRAM());
             fMaxRAM.setValue(tempProfile.getMaxRAM());

@@ -62,7 +62,7 @@ public class Main{
     @FXML
     private Label status;
     @FXML
-    private Label detailedStatus;
+    private TextArea detailedStatus;
 
     @FXML
     private AnchorPane root;
@@ -189,7 +189,8 @@ public class Main{
             try{
                 Launcher.getLauncher().prepare(p);
                 Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
-
+                if (Configurator.getConfig().hideAfter())
+                    FXManager.getManager().showAll();
                 wr.setDisableCache(false);
             }
             catch (NoConnectionException e){
@@ -241,6 +242,8 @@ public class Main{
             }
             else if (key.startsWith("sessionStart")){
                 status = "";
+                if (Configurator.getConfig().hideAfter())
+                    FXManager.getManager().hideAll();
                 Platform.runLater(() -> {
                     detailedStatus.setText(null);
                     prg.setProgress(0);

@@ -14,6 +14,8 @@ public class ControlUtils {
 
     public static void scroller(ScrollEvent e){
         var factory = ((Spinner<Double>)e.getSource()).getValueFactory();
+        if (e.getDeltaY() == 0)
+            return;
         factory.increment(e.getDeltaY() > 0 ? 1 : -1);
     }
 }

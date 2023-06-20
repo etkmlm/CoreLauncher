@@ -72,11 +72,7 @@
             </background>
         </HBox>
 
-        <Label fx:id="detailedStatus" AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-            <font>
-                <Font size="14.0" />
-            </font>
-        </Label>
+        <TextArea fx:id="detailedStatus" editable="false" styleClass="detailed-s" AnchorPane.bottomAnchor="0" prefHeight="60" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="65"/>
 
         <CButton fx:id="btnSettings" prefHeight="50" prefWidth="50" styleClass="ench-button" text="✦" AnchorPane.rightAnchor="5" AnchorPane.topAnchor="5" />
         <CButton fx:id="btnAbout" prefHeight="50" prefWidth="50" styleClass="ench-button" text="🛈" AnchorPane.bottomAnchor="5" AnchorPane.rightAnchor="5" />

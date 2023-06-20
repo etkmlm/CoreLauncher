@@ -8,6 +8,10 @@ public class Asset {
     public String url;
     public String path;
 
+    public Asset(String id){
+
+    }
+
     public Asset(String path, String hash, int size){
         this.path = path;
         SHA1 = hash;

@@ -17,7 +17,8 @@ public class Version {
     public String mainClass;
     public String minecraftArguments;
     public Arguments arguments;
-    public Asset assetIndex;
+    private Asset assetIndex;
+    public String inheritsFrom;
     public String assets;
     public DownloadOptions downloads;
 
@@ -26,6 +27,10 @@ public class Version {
     }
     public Version(String id){
         this.id = id;
+    }
+
+    public Asset getAssetIndex(){
+        return assetIndex == null ? new Asset(inheritsFrom == null ? id : inheritsFrom) : assetIndex;
     }
 
     public boolean checkId(String id){

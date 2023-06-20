@@ -7,6 +7,7 @@ import com.cdev.corelauncher.minecraft.entities.Asset;
 import com.cdev.corelauncher.minecraft.entities.AssetIndex;
 import com.cdev.corelauncher.minecraft.entities.Library;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.minecraft.wrappers.Custom;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.fabric.Fabric;
 import com.cdev.corelauncher.minecraft.wrappers.forge.Forge;
@@ -33,12 +34,13 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class Wrapper<H extends Version> {
-    private static final Map<String, Type> wrappers = new HashMap<>(){{
+    protected static final Map<String, Type> wrappers = new HashMap<>(){{
        put("forge", Forge.class);
        put("vanilla", Vanilla.class);
        put("optifine", OptiFine.class);
        put("fabric", Fabric.class);
        put("quilt", Quilt.class);
+       put("custom", Custom.class);
     }};
     private static final String ASSET_URL = "https://resources.download.minecraft.net/";
 
@@ -116,9 +118,10 @@ public abstract class Wrapper<H extends Version> {
 
         setupLauncherLibraries();
 
+        if (v.libraries == null)
+            return;
+
         try{
-
-
             for(var lib : v.libraries)
             {
                 try{
@@ -159,16 +162,22 @@ public abstract class Wrapper<H extends Version> {
     {
         Logger.getLogger().printLog(LogType.INFO, "Retrieving assets...");
 
+        var vIndex = v.getAssetIndex();
+
+        Path assetDir = getGameDir().to("assets", "objects");
+        Path fileDir = getGameDir().to("assets", "indexes");
+        Path assetFile = fileDir.to(vIndex.id + ".json");
+        Path legacyDir = getGameDir().to("assets", "virtual", "legacy");
+        Path veryLegacyDir = getGameDir().to("assets", "virtual", "verylegacy");
+
         try{
-            Path assetDir = getGameDir().to("assets", "objects");
-            Path fileDir = getGameDir().to("assets", "indexes");
-            Path assetFile = fileDir.to(v.assetIndex.id + ".json");
-            Path legacyDir = getGameDir().to("assets", "virtual", "legacy");
-            Path veryLegacyDir = getGameDir().to("assets", "virtual", "verylegacy");
 
             String asstText;
-            if (!assetFile.exists())
-                assetFile.write(asstText = NetUtils.urlToString(v.assetIndex.url));
+            if (!assetFile.exists()){
+                if (vIndex.url == null)
+                    return;
+                assetFile.write(asstText = NetUtils.urlToString(vIndex.url));
+            }
             else
                 asstText = assetFile.read();
 
@@ -193,11 +202,11 @@ public abstract class Wrapper<H extends Version> {
                     if (!path.exists())
                         NetUtils.download(url, path.forceSetDir(false), false, null);
 
-                    if (v.assetIndex.isLegacy()){
+                    if (vIndex.isLegacy()){
                         var f = legacyDir.to(asset.path);
                         path.copy(f);
                     }
-                    else if (v.assetIndex.isVeryLegacy()){
+                    else if (vIndex.isVeryLegacy()){
                         var f = veryLegacyDir.to(asset.path);
                         path.copy(f);
                     }
@@ -260,6 +269,8 @@ public abstract class Wrapper<H extends Version> {
             try{
                 var json = i.to(i.getName() + ".json");
                 var read = gson.fromJson(json.read(), JsonObject.class);
+                if (read == null)
+                    continue;
                 String id = read.get("id").getAsString();
                 String inherits = read.has("inheritsFrom") ? read.get("inheritsFrom").getAsString() : null;
                 var ver = getVersionFromIdentifier(id, inherits);

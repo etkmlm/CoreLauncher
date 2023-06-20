@@ -65,10 +65,12 @@ public class OSUtils {
     }
 
     public static void openFolder(Path path){
-        try {
-            Desktop.getDesktop().open(path.toFile());
-        } catch (IOException e) {
-            Logger.getLogger().log(e);
-        }
+        new Thread(() -> {
+            try {
+                Desktop.getDesktop().open(path.toFile());
+            } catch (IOException e) {
+                Logger.getLogger().log(e);
+            }
+        }).start();
     }
 }

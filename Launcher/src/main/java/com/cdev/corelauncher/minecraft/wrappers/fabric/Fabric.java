@@ -84,6 +84,9 @@ public class Fabric extends Wrapper<FabricVersion> {
         try{
             String url = getBaseUrl() + "versions/loader/" + id;
             var json = gson.fromJson(NetUtils.urlToString(url), JsonArray.class);
+            if (json == null)
+                return List.of();
+
             var all = new ArrayList<FabricVersion>();
             for(var i : json){
                 FabricVersion v = new FabricVersion()

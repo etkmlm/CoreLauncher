@@ -1,8 +1,10 @@
 package com.cdev.corelauncher.minecraft;
 
+import com.cdev.corelauncher.CoreLauncher;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.entities.ExecutionInfo;
+import com.cdev.corelauncher.minecraft.entities.VersionNotFoundException;
 import com.cdev.corelauncher.minecraft.utils.CommandConcat;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.EventHandler;
@@ -16,6 +18,7 @@ import com.cdev.corelauncher.utils.events.ProgressEvent;
 import javafx.event.Event;
 
 import java.io.File;
+import java.io.IOException;
 
 public class Launcher {
     public static Launcher instance;
@@ -65,9 +68,8 @@ public class Launcher {
         if (info.args == null)
             info.args = new String[0];
 
-        var linfo = info.new LaunchInfo();
-
         try {
+            var linfo = info.new LaunchInfo();
 
             if (info.account == null)
                 info.account = Configurator.getConfig().getUser();
@@ -85,6 +87,7 @@ public class Launcher {
                         if (info.java.majorVersion != linfo.java.majorVersion){
                             // Last solution, download new Java and relaunch (if there is internet here of course...)
                             handleState("java" + linfo.java.majorVersion);
+                            Logger.getLogger().log(LogType.INFO, "Downloading Java " + linfo.java.majorVersion);
                             try{
                                 JavaMan.getManager().download(linfo.java, (b) -> handler.execute(new ProgressEvent("javaDownload", b)));
                             }
@@ -98,6 +101,13 @@ public class Launcher {
                     }
                 }
 
+            }
+
+            if (!info.java.getExecutable().exists()){
+                JavaMan.getManager().reload();
+                info.java = null;
+                launch(info);
+                return;
             }
 
             String libPath = "-Djava.library.path=" + linfo.nativePath;
@@ -131,17 +141,12 @@ public class Launcher {
                     .add(gameCmds)
                     .generate();
 
-            boolean hide = Configurator.getConfig().hideAfter();
-            if (hide)
-                FXManager.getManager().hideAll();
-
             handleState("sessionStart");
-
             // Start new session
             new Session(info.dir, finalCmds).start();
-
-            if (hide)
-                FXManager.getManager().showAll();
+        }
+        catch (VersionNotFoundException e){
+            handleState(".error.noVersion");
         }
         catch (Exception e){
             Logger.getLogger().log(e);

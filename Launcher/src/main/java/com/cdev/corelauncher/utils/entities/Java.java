@@ -14,8 +14,12 @@ public class Java {
         @Override
         public Java deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             var obj = jsonElement.getAsJsonObject();
-            var f = obj.get("name").getAsString();
-            return new Java(f.isEmpty() ? "null" : f, Path.begin(java.nio.file.Path.of(obj.get("path").getAsString())));
+            if (!obj.has("path"))
+                return null;
+            String name = null;
+            if (obj.has("name"))
+                name = obj.get("name").getAsString();
+            return new Java(name == null ? "null" : name, Path.begin(java.nio.file.Path.of(obj.get("path").getAsString())));
         }
 
         @Override

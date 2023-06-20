@@ -2,6 +2,7 @@ package com.cdev.corelauncher.utils;
 
 import com.cdev.corelauncher.data.entities.Account;
 import com.cdev.corelauncher.minecraft.Wrapper;
+import com.cdev.corelauncher.minecraft.wrappers.Custom;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.fabric.Fabric;
 import com.cdev.corelauncher.minecraft.wrappers.forge.Forge;
@@ -23,5 +24,6 @@ public class GsonUtils {
             .registerTypeAdapter(OptiFine.class, new Wrapper.WrapperFactory())
             .registerTypeAdapter(Fabric.class, new Wrapper.WrapperFactory())
             .registerTypeAdapter(Quilt.class, new Wrapper.WrapperFactory())
+            .registerTypeAdapter(Custom.class, new Wrapper.WrapperFactory())
             .create();
 }
