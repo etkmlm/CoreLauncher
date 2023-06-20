@@ -21,6 +21,15 @@ public class EventHandler<T extends Event> {
     }
 
     public void execute(T e){
-        handlers.values().forEach(x -> x.handle(e));
+        handlers.keySet().forEach(x -> {
+            var value = handlers.get(x);
+            try{
+                value.handle(e);
+            }
+            catch (Exception f){
+                Logger.getLogger().logHyph("ERROR HANDLING " + x);
+                Logger.getLogger().log(f);
+            }
+        });
     }
 }

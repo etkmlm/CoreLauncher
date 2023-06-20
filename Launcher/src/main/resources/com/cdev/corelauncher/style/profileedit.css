@@ -26,7 +26,7 @@
 .java-sel{
     -fx-background-color: transparent!important;
 }
-.context-menu{
+.text-field .context-menu, #cbGameVersion .context-menu{
     -fx-opacity: 0;
 }
 

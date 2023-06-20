@@ -57,10 +57,9 @@ public class Translator {
         return translate;
     }
 
-    public static Translator generateTranslator(){
+    public static void generateTranslator(){
         Translator t = new Translator().reload();
         t.setLanguage(Configurator.getConfig().getLanguage());
-        return t;
     }
 
     public Translator reload(){

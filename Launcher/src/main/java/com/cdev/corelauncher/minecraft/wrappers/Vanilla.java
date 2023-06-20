@@ -1,14 +1,18 @@
 package com.cdev.corelauncher.minecraft.wrappers;
 
+import com.cdev.corelauncher.data.Configurator;
+import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.entities.MainInfo;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.NetUtils;
 import com.cdev.corelauncher.utils.entities.LogType;
+import com.cdev.corelauncher.utils.entities.NoConnectionException;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.google.gson.Gson;
-import javafx.scene.image.Image;
+import com.google.gson.JsonObject;
 
 import java.util.List;
 
@@ -23,34 +27,44 @@ public class Vanilla extends Wrapper<Version> {
 
     public Vanilla asInstance(){
         instance = this;
+        setupLauncherLibraries();
         return this;
     }
 
     public static Vanilla getVanilla(){
         return instance;
     }
-
-    @Override
-    public Image getIcon(){
-        var str = Vanilla.class.getResourceAsStream("/com/cdev/corelauncher/images/vanilla.png");
-        return str == null ? null : new Image(str);
-    }
-
     @Override
     public Version getVersion(String id, String wrId){
         logState("acqVersion" + id);
-        return _info.versions.stream().filter(x -> x.id.equals(id)).findFirst().orElse(new Version());
+        return getAllVersions().stream().filter(x -> x.checkId(id)).findFirst().orElse(new Version());
     }
 
 
     private String getVersionString(String id){
-        var v = _info.versions.stream().filter(x -> x.id.equals(id)).findFirst();
+        var v = getAllVersions().stream().filter(x -> x.checkId(id)).findFirst();
         return v.map(version -> NetUtils.urlToString(version.url)).orElse(null);
     }
 
     @Override
+    public Version getVersionFromIdentifier(String identifier, String inherits){
+        String[] spl = identifier.replaceAll("[-_]", ".").split("\\.");
+        return spl.length == 2 || spl.length == 3 ? new Version(identifier) : null;
+    }
+
+    @Override
     public List<Version> getAllVersions() {
-        _info = new Gson().fromJson(NetUtils.urlToString(INFO_URL), MainInfo.class);
+        if (_info == null || disableCache){
+            try{
+                _info = new Gson().fromJson(NetUtils.urlToString(INFO_URL), MainInfo.class);
+            }
+            catch (NoConnectionException e){
+                return getOfflineVersions();
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
+        }
         return _info.versions;
     }
 
@@ -61,36 +75,45 @@ public class Vanilla extends Wrapper<Version> {
 
     @Override
     public void install(Version v) {
-        Logger.getLogger().log(LogType.INFO, "-------RETRIEVING VERSION BEGIN: " + v.id + "-------");
         if (v.id == null)
             return;
+
         Path verDir = getGameDir().to("versions", v.id);
         Path jsonPath = verDir.to(v.id + ".json");
         Path clientPath = verDir.to(v.id + ".jar");
 
+        setupLauncherLibraries();
+
         Version info;
 
-        if (!jsonPath.exists())
-        {
-            String vJson = getVersionString(v.id);
-            info = new Gson().fromJson(vJson, Version.class);
-            jsonPath.write(vJson);
-        }
-        else
-            info = new Gson().fromJson(jsonPath.read(), Version.class);
+        try{
+            if (!jsonPath.exists() || disableCache)
+            {
+                String vJson = getVersionString(v.id);
+                info = new Gson().fromJson(vJson, Version.class);
+                jsonPath.write(vJson);
+            }
+            else
+                info = new Gson().fromJson(jsonPath.read(), Version.class);
 
-        if (!clientPath.exists()/* || NetUtils.getContentLength(info.downloads.client.url) != clientPath.getSize()*/){
-            logState("clientDownload");
-            Logger.getLogger().log(LogType.INFO, "Downloading client...");
-            NetUtils.download(info.downloads.client.url, clientPath, false, this::logProgress);
-        }
+            if (!clientPath.exists() || disableCache/* || NetUtils.getContentLength(info.downloads.client.url) != clientPath.getSize()*/){
+                logState("clientDownload");
+                Logger.getLogger().printLog(LogType.INFO, "Downloading client " + v.id + "...");
+                NetUtils.download(info.downloads.client.url, clientPath, false, this::logProgress);
+            }
 
-        Logger.getLogger().printLog(LogType.INFO, "Version up to date!");
+            Logger.getLogger().printLog(LogType.INFO, "Vanilla Version " + v.id + " up to date!");
+        }
+        catch (NoConnectionException e){
+            throw e;
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+            return;
+        }
 
         downloadLibraries(info);
         downloadAssets(info);
-
-        Logger.getLogger().log(LogType.INFO, "-------RETRIEVING VERSION END: " + v.id + "-------\n");
     }
 
     @Override

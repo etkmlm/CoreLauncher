@@ -61,6 +61,9 @@ public class ArgumentConcat {
             }
             else if (a.startsWith("-") && !a.startsWith("-D") && !a.startsWith("-X"))
                 args.add(new Arg(a).setValue(argz.get(++i)));
+            else if (a.isEmpty() || a.isBlank()){
+
+            }
             else
                 args.add(new Arg(a));
         }

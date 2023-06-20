@@ -58,7 +58,7 @@ public class FXManager {
             return stage;
         }
         catch (Exception e){
-            e.printStackTrace();
+            Logger.getLogger().log(e);
             return null;
         }
     }

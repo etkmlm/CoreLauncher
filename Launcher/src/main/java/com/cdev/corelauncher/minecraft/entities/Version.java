@@ -21,6 +21,17 @@ public class Version {
     public String assets;
     public DownloadOptions downloads;
 
+    public Version(){
+
+    }
+    public Version(String id){
+        this.id = id;
+    }
+
+    public boolean checkId(String id){
+        return this.id != null && (this.id.equals("*") || this.id.equals(id));
+    }
+
     public String getJsonName(){
         return id;
     }

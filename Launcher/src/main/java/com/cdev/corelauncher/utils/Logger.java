@@ -10,6 +10,7 @@ import java.util.Calendar;
 
 public class Logger {
     private static Logger instance;
+    private static final String logLines = generateHyph(10);
 
     private Path logDir;
 
@@ -35,14 +36,24 @@ public class Logger {
         return instance;
     }
 
-    public void setLogDir(Path logDir){
-        this.logDir = logDir;
-    }
-
     private Path todayLogFile(){
         var today = Calendar.getInstance();
         String name = String.format("%02d", today.get(Calendar.DAY_OF_MONTH)) + "." + String.format("%02d", today.get(Calendar.MONTH)) + "." + today.get(Calendar.YEAR) + ".log";
         return logDir.to(name);
+    }
+
+    private static String generateHyph(int count){
+        return "-".repeat(count);
+    }
+
+    private static String beginBlock(String title, String inner){
+        String b = beginTitle(title);
+
+        return b + "\n" + inner + "\n" + generateHyph(b.length() + title.length());
+    }
+
+    private static String beginTitle(String title){
+        return logLines + title + logLines;
     }
 
     private String generate(LogType type, String content){
@@ -53,11 +64,29 @@ public class Logger {
         System.out.println(generate(type, content));
     }
 
-    public void log(LogType type, String content){
-        String message = generate(type, content);
-        System.out.println(message);
+    public void logHyphBlock(String title, String content){
+        log(beginBlock(title, content));
+    }
+
+    public void logHyph(String t){
+        log(beginTitle(t));
+    }
+
+    public void logHyphEnd(int len){
+        log(generateHyph(len));
+    }
+
+    private void log(String content){
+        System.out.println(content);
         if (Configurator.getConfig().getLogMode())
-            todayLogFile().append("\n" + message);
+            todayLogFile().append("\n" + content);
+    }
+
+    public void log(LogType type, String content){
+        if (type == LogType.ERROR)
+            logHyphBlock("OOPS, AN ERROR!", content);
+        else
+            log(generate(type, content));
     }
 
     public void log(Exception e){

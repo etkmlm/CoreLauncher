@@ -14,7 +14,7 @@ public class Config {
     private Account user;
     private Path gamePath;
     private Locale language;
-    private Background background;
+    private Path backgroundImage;
     private Profile lastSelectedProfile;
     private List<Java> customJavaVersions;
     private Java defaultJava;
@@ -58,6 +58,14 @@ public class Config {
     }
     public void setDefaultMaxRAM(int maxRAM){
         defaultMaxRAM = maxRAM;
+    }
+
+    public Path getBackgroundImage(){
+        return backgroundImage != null ? (backgroundImage.exists() ? backgroundImage : null) : null;
+    }
+
+    public void setBackgroundImage(Path img){
+        this.backgroundImage = img;
     }
 
     public int getDefaultMaxRAM(){

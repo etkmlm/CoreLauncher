@@ -92,7 +92,7 @@ public class ExecutionInfo{
 
             libraries = Stream.concat(v.libraries.stream(), v0.libraries.stream())
                     .filter(x -> x.checkAvailability(CoreLauncher.SYSTEM_OS))
-                    .map(Library::getMainAsset)
+                    .map(Library::getAsset)
                     .filter(Objects::nonNull)
                     .map(x -> libDir.to(x.path).toString()).distinct().toList();
 
@@ -106,11 +106,15 @@ public class ExecutionInfo{
                 return new ArgumentConcat(new ArrayList<>());
 
             if (isGame){
+                if (v.arguments.game == null)
+                    return new ArgumentConcat(new ArrayList<>());
                 //x.isJsonPrimitive() ? x.getAsString() : (x.getAsJsonObject().get("rules").getAsJsonArray())
                 return new ArgumentConcat(v.arguments.game.stream().filter(JsonElement::isJsonPrimitive).map(JsonElement::getAsString).collect(Collectors.toList()));
             }
             else{
                 var gson = new Gson();
+                if (v.arguments.jvm == null)
+                    return new ArgumentConcat(new ArrayList<>());
                 return new ArgumentConcat(v.arguments.jvm.stream().filter(x -> {
                     if (x.isJsonPrimitive())
                         return true;

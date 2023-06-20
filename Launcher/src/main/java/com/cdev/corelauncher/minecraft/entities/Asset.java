@@ -14,6 +14,12 @@ public class Asset {
         this.size = size;
     }
 
+    public Asset(String path, String url){
+        this.url = url;
+        this.path = path;
+        size = -1;
+    }
+
     public boolean isLegacy(){
         return id.equals("legacy");
     }

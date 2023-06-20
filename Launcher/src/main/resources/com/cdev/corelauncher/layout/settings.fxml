@@ -16,20 +16,11 @@
                     <ColumnConstraints />
                 </columnConstraints>
 
-                <Label styleClass="prop-key" text="%settings.theme" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                <HBox alignment="CENTER" GridPane.columnIndex="2" GridPane.rowIndex="0">
-                    <RadioButton fx:id="rbPurple" text="%settings.theme.purple" />
-                    <Rectangle width="20" />
-                    <RadioButton fx:id="rbDark" text="%settings.theme.dark" />
-                    <Rectangle width="20" />
-                    <RadioButton fx:id="rbBlue" text="%settings.theme.blue" />
-                </HBox>
-
                 <Label styleClass="prop-key" text="%settings.customBackground" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <HBox GridPane.columnIndex="2" GridPane.rowIndex="1">
                     <TextField fx:id="txtCustomBackground" editable="false" />
                     <Rectangle width="5" />
-                    <CButton fx:id="btnSelectBackground" text="..." />
+                    <CButton styleClass="sel-button" fx:id="btnSelectBackground" text="..." />
                 </HBox>
 
                 <Label styleClass="prop-key" text="%settings.language" GridPane.columnIndex="1" GridPane.rowIndex="2" />
@@ -39,21 +30,21 @@
                 <HBox GridPane.columnIndex="2" GridPane.rowIndex="3">
                     <TextField fx:id="txtGamePath" editable="false" />
                     <Rectangle width="5" />
-                    <CButton fx:id="btnSelectGamePath" text="..." />
+                    <CButton styleClass="sel-button" fx:id="btnSelectGamePath" text="..." />
                 </HBox>
 
                 <Label styleClass="prop-key" text="%account" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                 <HBox GridPane.columnIndex="2" GridPane.rowIndex="4">
                     <ChoiceBox fx:id="cbAccount" minWidth="160" />
                     <Rectangle width="5" />
-                    <CButton fx:id="btnAccounts" text="..." />
+                    <CButton styleClass="sel-button" fx:id="btnAccounts" text="..." />
                 </HBox>
 
                 <Label styleClass="prop-key" text="Java" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                 <HBox GridPane.columnIndex="2" GridPane.rowIndex="5">
                     <ChoiceBox fx:id="cbJava" minWidth="160" />
                     <Rectangle width="5" />
-                    <CButton fx:id="btnJavaMan" text="..." />
+                    <CButton styleClass="sel-button" fx:id="btnJavaMan" text="..." />
                 </HBox>
             <rowConstraints>
                <RowConstraints />

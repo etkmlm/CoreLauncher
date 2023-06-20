@@ -4,6 +4,7 @@ import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.utils.GsonUtils;
+import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.google.gson.*;
@@ -113,9 +114,14 @@ public class Profile {
         if (isEmpty)
             return null;
 
-        String json = GsonUtils.DEFAULT_GSON.toJson(this);
+        try {
+            String json = GsonUtils.DEFAULT_GSON.toJson(this);
 
-        getPath().to("profile.json").write(json);
+            getPath().to("profile.json").write(json);
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }
 
         return this;
     }
@@ -126,9 +132,15 @@ public class Profile {
     }
 
     public static Profile get(Path profilePath) {
-        var file = profilePath.to("profile.json");
-        return (file.exists() ? GsonUtils.DEFAULT_GSON.fromJson(file.read(), Profile.class) : new Profile())
-                .setProfileName(profilePath.getName()).save();
+        try{
+            var file = profilePath.to("profile.json");
+            return (file.exists() ? GsonUtils.DEFAULT_GSON.fromJson(file.read(), Profile.class) : new Profile())
+                    .setProfileName(profilePath.getName()).save();
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+            return null;
+        }
     }
 
     public String[] getJvmArgs() {

@@ -27,7 +27,7 @@
             </VBox>
             <VBox alignment="CENTER" styleClass="rad-option">
                 <ImageView fitHeight="48" fitWidth="48">
-                    <Image url="@../images/forge.jpg" />
+                    <Image url="@../images/forge.png" />
                 </ImageView>
                 <RadioButton fx:id="forge" />
             </VBox>
@@ -42,6 +42,12 @@
                     <Image url="@../images/quilt.png" />
                 </ImageView>
                 <RadioButton fx:id="quilt" />
+            </VBox>
+            <VBox alignment="CENTER" styleClass="rad-option">
+                <ImageView fitHeight="48" fitWidth="48">
+                    <Image url="@../images/optifine.png" />
+                </ImageView>
+                <RadioButton fx:id="optifine" />
             </VBox>
         </HBox>
 

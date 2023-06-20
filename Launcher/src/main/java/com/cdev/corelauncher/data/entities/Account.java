@@ -1,6 +1,8 @@
 package com.cdev.corelauncher.data.entities;
 
+import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.NetUtils;
+import com.cdev.corelauncher.utils.entities.NoConnectionException;
 import com.google.gson.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelBuffer;
@@ -52,32 +54,41 @@ public class Account{
         if (isReloaded)
             return this;
 
-        String accInfoJson = NetUtils.post(UUID_URL, "[\"" + username + "\"]", "application/json");
-        var accInfo = new Gson().fromJson(accInfoJson, JsonArray.class);
-        if (isMojangUser = accInfo.size() > 0){
+        try{
+            String accInfoJson = NetUtils.post(UUID_URL, "[\"" + username + "\"]", "application/json");
+            var accInfo = new Gson().fromJson(accInfoJson, JsonArray.class);
+            if (isMojangUser = accInfo.size() > 0){
 
-            uuid = accInfo.get(0).getAsJsonObject().get("id").getAsString();
+                uuid = accInfo.get(0).getAsJsonObject().get("id").getAsString();
 
-            String js = NetUtils.urlToString(PROFILE_URL + uuid);
+                String js = NetUtils.urlToString(PROFILE_URL + uuid);
 
-            var properties = new Gson().fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
+                var properties = new Gson().fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
 
-            var b64textures = properties.asList().stream().map(JsonElement::getAsJsonObject).filter(x -> x.get("name").getAsString().equals("textures")).findFirst().orElse(null);
-            String base64profile = b64textures == null ? null : b64textures.get("value").getAsString();
+                var b64textures = properties.asList().stream().map(JsonElement::getAsJsonObject).filter(x -> x.get("name").getAsString().equals("textures")).findFirst().orElse(null);
+                String base64profile = b64textures == null ? null : b64textures.get("value").getAsString();
 
-            var textures = new Gson().fromJson(new String(Base64.getDecoder().decode(base64profile)), JsonObject.class).get("textures").getAsJsonObject();
+                var textures = new Gson().fromJson(new String(Base64.getDecoder().decode(base64profile)), JsonObject.class).get("textures").getAsJsonObject();
 
-            var skin = textures.get("SKIN");
-            if (skin != null)
-                this.skin = skin.getAsJsonObject().get("url").getAsString();
-            else
-                this.skin = null;
+                var skin = textures.get("SKIN");
+                if (skin != null)
+                    this.skin = skin.getAsJsonObject().get("url").getAsString();
+                else
+                    this.skin = null;
 
-            var cape = textures.get("CAPE");
-            if (cape != null)
-                this.cape = cape.getAsJsonObject().get("url").getAsString();
-            else
-                this.cape = null;
+                var cape = textures.get("CAPE");
+                if (cape != null)
+                    this.cape = cape.getAsJsonObject().get("url").getAsString();
+                else
+                    this.cape = null;
+            }
+
+        }
+        catch (NoConnectionException ignored){
+
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
         }
 
         reloadHead();

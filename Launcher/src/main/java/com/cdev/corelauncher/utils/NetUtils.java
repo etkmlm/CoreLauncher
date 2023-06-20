@@ -1,12 +1,11 @@
 package com.cdev.corelauncher.utils;
 
+import com.cdev.corelauncher.utils.entities.NoConnectionException;
 import com.cdev.corelauncher.utils.entities.Path;
+import org.jsoup.HttpStatusException;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ServerSocket;
-import java.net.URL;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 
@@ -34,6 +33,7 @@ public class NetUtils {
         try {
             u = new URL(url);
         } catch (MalformedURLException e) {
+            Logger.getLogger().log(e);
             return null;
         }
 
@@ -41,7 +41,15 @@ public class NetUtils {
             var c = (HttpURLConnection) u.openConnection();
             return inputStreamToString(c.getInputStream());
         }
+        catch (UnknownHostException h){
+            checkAndWarn();
+            return null;
+        }
+        catch (HttpStatusException e){
+            return null;
+        }
         catch (IOException e){
+            Logger.getLogger().log(e);
             return null;
         }
     }
@@ -50,6 +58,10 @@ public class NetUtils {
             var uri = new URL(url);
             var conn = (HttpURLConnection)uri.openConnection();
             return conn.getContentLengthLong();
+        }
+        catch (UnknownHostException h){
+            checkAndWarn();
+            return 0;
         }
         catch (IOException e){
             Logger.getLogger().log(e);
@@ -83,6 +95,9 @@ public class NetUtils {
                 }
             }
             destination.toFile().setLastModified(conn.getLastModified());
+        }
+        catch (UnknownHostException h){
+            checkAndWarn();
         }
         catch (IOException ex){
             Logger.getLogger().log(ex);
@@ -121,6 +136,9 @@ public class NetUtils {
                 }
             }
         }
+        catch (UnknownHostException h){
+            checkAndWarn();
+        }
         catch (IOException e){
             Logger.getLogger().log(e);
         }
@@ -142,11 +160,6 @@ public class NetUtils {
         }
 
         return answer.toString();
-    }
-
-    public static InputStream urlToInputStream(String url) throws IOException {
-        URL uri = new URL(url);
-        return uri.openStream();
     }
     public static String listenServer(int port){
         try{
@@ -171,5 +184,35 @@ public class NetUtils {
             Logger.getLogger().log(e);
             return null;
         }
+    }
+
+    private static boolean offline;
+
+    public static boolean isOffline(){
+        return offline;
+    }
+
+    public static void check(){
+        try{
+            var url = new URL("https://google.com");
+            var c = url.openConnection();
+            c.getInputStream().read();
+            c.getInputStream().close();
+
+
+            offline = false;
+        }
+        catch (UnknownHostException h){
+            offline = true;
+        }
+        catch (Exception e){
+            offline = false;
+        }
+    }
+
+    public static void checkAndWarn(){
+        check();
+        if (offline)
+            throw new NoConnectionException();
     }
 }

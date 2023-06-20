@@ -5,9 +5,12 @@ import com.cdev.corelauncher.data.Translator;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.JavaMan;
 import com.cdev.corelauncher.utils.Logger;
+import com.cdev.corelauncher.utils.OSUtils;
 import com.cdev.corelauncher.utils.entities.Java;
+import com.cdev.corelauncher.utils.entities.OS;
 import com.cdev.corelauncher.utils.entities.Path;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -57,12 +60,10 @@ public class CJava extends ListCell<Java> {
             txtName.setEditable(false);
             txtPath.setText(java.getPath().toString());
             btnSelect.setText(">");
-            btnSelect.setOnMouseClicked((a) -> {
-
-            });
+            btnSelect.setOnMouseClicked((a) -> OSUtils.openFolder(java.getPath().toFile().toPath()));
             btnAction.setOnMouseClicked((a) -> JavaMan.getManager().deleteJava(java));
 
-            lblVersion.setText(java.majorVersion + "");
+            lblVersion.setText(String.valueOf(java.majorVersion));
 
             btnAction.setText("-");
         }

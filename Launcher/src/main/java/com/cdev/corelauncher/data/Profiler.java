@@ -2,8 +2,11 @@ package com.cdev.corelauncher.data;
 
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.utils.EventHandler;
+import com.cdev.corelauncher.utils.GsonUtils;
+import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.cdev.corelauncher.utils.events.ChangeEvent;
+import javafx.geometry.Side;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -14,8 +17,7 @@ public class Profiler {
     private static Profiler instance;
     private Path profilesDir;
     private List<Profile> profiles;
-    private EventHandler<ChangeEvent> handler;
-    private Profile selectedProfile;
+    private final EventHandler<ChangeEvent> handler;
 
     public Profiler() {
         profilesDir = profilesDir();
@@ -46,7 +48,12 @@ public class Profiler {
     }
 
     public void moveProfiles(Path oldGamePath){
-        oldGamePath.to("launcher").to("profiles").getFiles().forEach(x -> x.copy(profilesDir.to(x.getName())));
+        try{
+            oldGamePath.to("launcher").to("profiles").getFiles().forEach(x -> x.copy(profilesDir.to(x.getName())));
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }
     }
 
     public List<Profile> getAllProfiles(){
@@ -62,31 +69,84 @@ public class Profiler {
         path.zip(to);
     }
 
+    public void importProfile(Path path){
+        var ext = path.getExtension();
+        var tempProfiles = Configurator.getConfig().getTemporaryFolder();
+        Profile p;
+        if (ext.equals("zip")){
+            path.extract(tempProfiles, null);
+            String name = path.getZipFirstFolder().replace("/", "");
+            var px = tempProfiles.to(name, "profile.json");
+            p = GsonUtils.DEFAULT_GSON.fromJson(px.read(), Profile.class);
+        }
+        else if (ext.equals("json")){
+            p = GsonUtils.DEFAULT_GSON.fromJson(path.read(), Profile.class);
+            path.copy(tempProfiles.to(p.getName(), "profile.json"));
+        }
+        else
+            return;
+
+        if (profiles.stream().anyMatch(x -> x.getName().equals(p.getName()))){
+            String first = p.getName();
+            int identifier = 1;
+            do{
+                p.rename(first + identifier++);
+            }while (profiles.stream().anyMatch(x -> x.getName().equals(p.getName())));
+            tempProfiles.to(first).move(profilesDir.to(p.save().getName()));
+        }
+        else
+            tempProfiles.to(p.getName()).move(profilesDir().to(p.getName()));
+
+        profiles.add(p);
+        handler.execute(new ChangeEvent("profileCreate", null, p));
+    }
+
     public Profile setProfile(String name, Consumer<Profile> set){
         var profile = getProfile(name);
         return setProfile(profile, set);
     }
 
     private Profile setProfile(Profile profile, Consumer<Profile> set){
-        set.accept(profile);
-        profile.save();
-        handler.execute(new ChangeEvent("profileUpdate", null, profile));
+        try{
+            String n = profile.getName();
+            set.accept(profile);
+            profile.save();
+            if (!profile.getName().equals(n)){
+                profilesDir.to(n).move(profile.getPath());
+            }
+
+            handler.execute(new ChangeEvent("profileUpdate", null, profile));
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }
         return profile;
     }
 
     public void reload(){
-        profiles = profilesDir.getFiles().stream().map(Profile::get).collect(Collectors.toList());
-        handler.execute(new ChangeEvent("reload", null, null));
+        try{
+            profiles = profilesDir.getFiles().stream().map(Profile::get).collect(Collectors.toList());
+            handler.execute(new ChangeEvent("reload", null, null));
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }
     }
 
     public Profile createProfile(String name) {
-        if (profilesDir.getFiles().stream().anyMatch(x -> x.getName().equals(name)))
-            return Profile.empty();
+        try{
+            if (profilesDir.getFiles().stream().anyMatch(x -> x.getName().equals(name)))
+                return Profile.empty();
 
-        var profile = Profile.get(profilesDir.to(name));
-        profiles.add(profile);
-        handler.execute(new ChangeEvent("profileCreate", null, profile));
-        return profile;
+            var profile = Profile.get(profilesDir.to(name));
+            profiles.add(profile);
+            handler.execute(new ChangeEvent("profileCreate", null, profile));
+            return profile;
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+            return Profile.empty();
+        }
     }
 
     public Profile createAndSetProfile(String name, Consumer<Profile> set){

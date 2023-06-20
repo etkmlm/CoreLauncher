@@ -5,6 +5,7 @@ import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.ui.controller.ProfileEdit;
 import com.cdev.corelauncher.ui.entities.LProfile;
 import com.cdev.corelauncher.ui.entities.LStage;
+import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.OSUtils;
 import com.cdev.corelauncher.utils.entities.Path;
 import javafx.fxml.FXML;
@@ -17,7 +18,7 @@ import java.io.IOException;
 
 public class CProfile extends ListCell<LProfile> {
 
-    private final Node gr;
+    private Node gr;
     private LProfile profile;
 
     public CProfile(){
@@ -27,7 +28,7 @@ public class CProfile extends ListCell<LProfile> {
             setGraphic(gr = loader.load());
         }
         catch (IOException e){
-            throw new RuntimeException(e);
+            Logger.getLogger().log(e);
         }
     }
 
@@ -85,7 +86,12 @@ public class CProfile extends ListCell<LProfile> {
             var file = chooser.showSaveDialog(lblProfileName.getScene().getWindow());
             if (file == null)
                 return;
-            profileJson.copy(Path.begin(file.toPath()));
+            try{
+                profileJson.copy(Path.begin(file.toPath()));
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
         });
 
         btnBackup.setOnAction(a -> {
@@ -95,7 +101,12 @@ public class CProfile extends ListCell<LProfile> {
             var file = chooser.showSaveDialog(lblProfileName.getScene().getWindow());
             if (file == null)
                 return;
-            Profiler.backup(profile.getProfile(), Path.begin(file.toPath()));
+            try{
+                Profiler.backup(profile.getProfile(), Path.begin(file.toPath()));
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
         });
 
         /*if (profile.getMods() != null)

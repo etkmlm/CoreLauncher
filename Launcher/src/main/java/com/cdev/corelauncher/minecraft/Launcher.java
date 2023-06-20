@@ -9,6 +9,7 @@ import com.cdev.corelauncher.utils.EventHandler;
 import com.cdev.corelauncher.utils.JavaMan;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.entities.LogType;
+import com.cdev.corelauncher.utils.entities.NoConnectionException;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.cdev.corelauncher.utils.events.KeyEvent;
 import com.cdev.corelauncher.utils.events.ProgressEvent;
@@ -20,7 +21,6 @@ public class Launcher {
     public static Launcher instance;
     private Path gameDir;
     private final EventHandler<Event> handler;
-    private boolean isGameRunning;
 
 
     public Launcher(){
@@ -49,10 +49,6 @@ public class Launcher {
         handler.execute(new KeyEvent(key));
     }
 
-    public boolean isGameRunning(){
-        return isGameRunning;
-    }
-
     public void prepare(Profile profile){
         handleState("prepare" + profile.getName());
         profile.getWrapper().install(profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion()));
@@ -62,8 +58,10 @@ public class Launcher {
     {
         if (info.version == null || info.version.id == null)
             return;
+
         if (info.dir == null)
             info.dir = gameDir;
+
         if (info.args == null)
             info.args = new String[0];
 
@@ -74,18 +72,27 @@ public class Launcher {
             if (info.account == null)
                 info.account = Configurator.getConfig().getUser();
 
+            // Checkup for Java
             if (info.java == null){
+                // If profile Java is null, try to get default Java from config
                 info.java = Configurator.getConfig().getDefaultJava();
-
                 if (info.java == null || info.java.majorVersion != linfo.java.majorVersion){
+                    // If this Java is unusable, try to get any Java that fits to version from all
                     info.java = JavaMan.getManager().tryGet(linfo.java);
                     if (info.java == null){
+                        // If no result, use launcher's Java
                         info.java = JavaMan.getDefault();
                         if (info.java.majorVersion != linfo.java.majorVersion){
+                            // Last solution, download new Java and relaunch (if there is internet here of course...)
                             handleState("java" + linfo.java.majorVersion);
-                            JavaMan.getManager().download(linfo.java, (b) -> handler.execute(new ProgressEvent("javaDownload", b)));
+                            try{
+                                JavaMan.getManager().download(linfo.java, (b) -> handler.execute(new ProgressEvent("javaDownload", b)));
+                            }
+                            catch (NoConnectionException e){
+                                handleState(".error.launch.java");
+                                return;
+                            }
                             launch(info);
-                            //handler.execute(new KeyEvent("needJava" + linfo.java.majorVersion).setSource(info));
                             return;
                         }
                     }
@@ -93,22 +100,20 @@ public class Launcher {
 
             }
 
-            handleState("gameStart");
-            Logger.getLogger().log(LogType.INFO, "-------LAUNCH START: " + info.version.id + "-------");
-
-            ///
-
             String libPath = "-Djava.library.path=" + linfo.nativePath;
             String c = String.valueOf(File.pathSeparatorChar);
             String cp = linfo.clientPath + c + String.join(c, linfo.libraries);
 
+            // Static commands
             String[] rootCmds = {
                     info.java.getExecutable().toString(),
                     libPath,
-                    "-javaagent:" + linfo.agentPath,
+                    "-javaagent:" + linfo.agentPath, // Don't worry (yup), this contains launcher's patches to mc like 1.16.4 multiplayer bug
                     "-Dorg.lwjgl.util.Debug=true",
                     "-Dfml.ignoreInvalidMinecraftCertificates=true"
             };
+
+            // If version lower than 1.7.2 (very legacy) then copy all textures to resources folder in profile folder
             if (linfo.assets.isVeryLegacy()){
                 var resources = info.dir.to("resources");
                 gameDir.to("assets", "virtual", "verylegacy").copy(resources);
@@ -116,8 +121,7 @@ public class Launcher {
 
             String[] gameCmds = linfo.getGameArguments();
 
-            isGameRunning = true;
-
+            // Final commands
             var finalCmds = new CommandConcat()
                     .add(rootCmds)
                     .add(linfo.getJvmArguments())
@@ -126,79 +130,18 @@ public class Launcher {
                     .add(linfo.mainClass)
                     .add(gameCmds)
                     .generate();
-            var process = new ProcessBuilder()
-                    .directory(info.dir.toFile())
-                    .inheritIO()
-                    .command(finalCmds)
-                    .start();
 
             boolean hide = Configurator.getConfig().hideAfter();
             if (hide)
                 FXManager.getManager().hideAll();
-            process.waitFor();
+
+            handleState("sessionStart");
+
+            // Start new session
+            new Session(info.dir, finalCmds).start();
+
             if (hide)
                 FXManager.getManager().showAll();
-            ///
-
-            /*String libPath = "-Djava.library.path=" + linfo.nativePath;
-            String c = String.valueOf(File.pathSeparatorChar);
-            String cp = linfo.clientPath + c + String.join(c, linfo.libraries);
-
-            String[] rootCmds = {
-                    info.java.getExecutable().toString(),
-                    "-cp", cp,
-                    libPath,
-                    "-Dorg.lwjgl.util.Debug=true"
-            };
-
-            String[] gameCmds;
-
-            if (linfo.assets.isVeryLegacy()){
-                gameCmds = new String[] {
-                        linfo.mainClass,
-                        info.account.getUsername(),
-                        "verylegacy",
-                        //"--assetsDir", gameDir.to("assets", "virtual", "verylegacy").toString(),
-                        "--gameDir", info.dir.toString(),
-                };
-                var resources = info.dir.to("resources");
-                gameDir.to("assets", "virtual", "verylegacy").copy(resources);
-            }
-            else if (linfo.assets.isLegacy())
-                gameCmds = new String[] {
-                        linfo.mainClass,
-                        "--assetIndex", linfo.assets.id,
-                        "--assetsDir", gameDir.to("assets", "virtual", "legacy").toString(),
-                        "--version", info.version.id,
-                        "--gameDir", info.dir.toString(),
-                        "--username", info.account.getUsername()
-                };
-            else
-                gameCmds = new String[] {
-                        linfo.mainClass,
-                        "--assetIndex", linfo.assets.id,
-                        "--assetsDir", gameDir.to("assets").toString(),
-                        "--version", info.version.id,
-                        "--gameDir", info.dir.toString(),
-                        "--accessToken", "T",
-                        "--username", info.account.getUsername()
-                };
-
-
-
-            isGameRunning = true;
-
-            var process = new ProcessBuilder()
-                    .directory(info.dir.toFile())
-                    .inheritIO()
-                    .command(new CommandConcat().add(rootCmds).add(info.args).add(gameCmds).generate())
-                    .start();
-            process.waitFor();*/
-
-            isGameRunning = false;
-
-            Logger.getLogger().log(LogType.INFO, "-------LAUNCH END-------");
-            handleState("gameEnd");
         }
         catch (Exception e){
             Logger.getLogger().log(e);

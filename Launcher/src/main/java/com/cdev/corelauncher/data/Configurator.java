@@ -4,6 +4,7 @@ import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.utils.EventHandler;
 import com.cdev.corelauncher.utils.GsonUtils;
+import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.cdev.corelauncher.utils.events.ChangeEvent;
 import com.google.gson.Gson;
@@ -31,12 +32,15 @@ public class Configurator {
     }
 
     public static Config generateDefaultConfig() {
-        
-        var file = Config.class.getResourceAsStream("/com/cdev/corelauncher/data/config.json");
-        if (file == null)
-            throw new RuntimeException("Default config file can't found.");
+        try{
+            var file = Config.class.getResourceAsStream("/com/cdev/corelauncher/data/config.json");
 
-        return GsonUtils.DEFAULT_GSON.fromJson(new InputStreamReader(file), Config.class);
+            return GsonUtils.DEFAULT_GSON.fromJson(new InputStreamReader(file), Config.class);
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+            return null;
+        }
     }
 
     public EventHandler<ChangeEvent> getHandler(){
@@ -62,23 +66,28 @@ public class Configurator {
         return config;
     }
 
-    public Configurator setGamePath(Path path){
+    public void setGamePath(Path path){
         var oldPath = config.getGamePath();
         config.setGamePath(path);
         save();
 
         handler.execute(new ChangeEvent("gamePathChange", oldPath, path));
-        return this;
     }
 
-    public Configurator setLanguage(Locale l){
+    public void setCustomBackground(Path path){
+        config.setBackgroundImage(path);
+        save();
+
+        handler.execute(new ChangeEvent("bgChange", null, path));
+    }
+
+    public void setLanguage(Locale l){
         var oldLang = config.getLanguage();
         config.setLanguage(l);
         Translator.getTranslator().setLanguage(l);
         save();
 
         handler.execute(new ChangeEvent("languageChange", oldLang, l));
-        return this;
     }
 
     public static Configurator getConfigurator(){
@@ -86,8 +95,13 @@ public class Configurator {
     }
 
     private void save(Config c){
-        String serialized = gson.toJson(c);
-        configFilePath.write(serialized);
+        try{
+            String serialized = gson.toJson(c);
+            configFilePath.write(serialized);
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }
     }
 
     public static void save(){

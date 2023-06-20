@@ -16,6 +16,10 @@
     -fx-font-size: 12pt;
 }
 
-.context-menu{
+.text-field .context-menu{
     -fx-opacity: 0;
+}
+
+.sel-button{
+    -fx-background-color: #252525;
 }

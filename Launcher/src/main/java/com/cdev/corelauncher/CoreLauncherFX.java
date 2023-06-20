@@ -6,6 +6,8 @@ import javafx.application.Platform;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.util.Objects;
+
 public class CoreLauncherFX extends Application {
 
     @Override
@@ -14,7 +16,7 @@ public class CoreLauncherFX extends Application {
         new FXManager();
         Platform.setImplicitExit(false);
 
-        Font.loadFont(CoreLauncherFX.class.getResource("/com/cdev/corelauncher/font/Minecraft.ttf").toExternalForm(), 16);
+        Font.loadFont(Objects.requireNonNull(CoreLauncherFX.class.getResource("/com/cdev/corelauncher/font/Minecraft.ttf")).toExternalForm(), 16);
 
         FXManager.getManager().applyStage("main").show();
     }

@@ -72,7 +72,7 @@ public class Path{
     }
 
     /**
-     * Concat path;
+     * Concat path.
      */
     public Path to(String key){
         return new Path(root.resolve(key));
@@ -215,6 +215,16 @@ public class Path{
         }
         catch (IOException e){
             Logger.getLogger().log(e);
+        }
+    }
+
+    public String getZipFirstFolder(){
+        try(ZipArchiveInputStream stream = new ZipArchiveInputStream(new FileInputStream(toFile()))){
+            return stream.getNextZipEntry().getName();
+        }
+        catch (IOException e){
+            Logger.getLogger().log(e);
+            return null;
         }
     }
 

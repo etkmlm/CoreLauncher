@@ -8,11 +8,15 @@ import com.cdev.corelauncher.minecraft.entities.AssetIndex;
 import com.cdev.corelauncher.minecraft.entities.Library;
 import com.cdev.corelauncher.minecraft.entities.Version;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
+import com.cdev.corelauncher.minecraft.wrappers.fabric.Fabric;
 import com.cdev.corelauncher.minecraft.wrappers.forge.Forge;
+import com.cdev.corelauncher.minecraft.wrappers.optifine.OptiFine;
+import com.cdev.corelauncher.minecraft.wrappers.quilt.Quilt;
 import com.cdev.corelauncher.utils.EventHandler;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.NetUtils;
 import com.cdev.corelauncher.utils.entities.LogType;
+import com.cdev.corelauncher.utils.entities.NoConnectionException;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.cdev.corelauncher.utils.events.KeyEvent;
 import com.cdev.corelauncher.utils.events.ProgressEvent;
@@ -26,15 +30,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public abstract class Wrapper<H extends Version> {
     private static final Map<String, Type> wrappers = new HashMap<>(){{
        put("forge", Forge.class);
        put("vanilla", Vanilla.class);
+       put("optifine", OptiFine.class);
+       put("fabric", Fabric.class);
+       put("quilt", Quilt.class);
     }};
     private static final String ASSET_URL = "https://resources.download.minecraft.net/";
 
     protected EventHandler<Event> handler;
+    protected boolean disableCache;
 
     public Wrapper(){
         handler = new EventHandler<>();
@@ -70,22 +79,21 @@ public abstract class Wrapper<H extends Version> {
         }
     }
 
-    protected void downloadLibraries(Version v)
-    {
-        Logger.getLogger().printLog(LogType.INFO, "Retrieving libraries...");
+    protected Path generateProfileInfo(Path target){
+        var profileInfo = target.to("launcher_profiles.json");
+        profileInfo.write("{\"profiles\":{}}");
 
+        return profileInfo;
+    }
+
+    public Wrapper<?> setDisableCache(boolean mode){
+        this.disableCache = mode;
+
+        return this;
+    }
+
+    protected void setupLauncherLibraries(){
         Path libDir = getGameDir().to("libraries");
-        Path nativeDir = getGameDir().to("versions", v.id, "natives");
-
-        /*Path fixerDir = libDir.to("com", "cdev", "clfixer", "1.0", "clfixer-1.0.jar");
-        if (!fixerDir.exists()){
-            try(var fixer = Wrapper.class.getResourceAsStream("/com/cdev/corelauncher/libraries/clfixer-1.0.jar")){
-                fixer.transferTo(new FileOutputStream(fixerDir.prepare().toFile()));
-            }
-            catch (Exception e){
-                Logger.getLogger().log(e);
-            }
-        }*/
         for (Library l : LauncherConfig.LAUNCHER_LIBRARIES){
             Path p = libDir.to(l.calculatePath());
             if (!p.exists()){
@@ -97,78 +105,118 @@ public abstract class Wrapper<H extends Version> {
                 }
             }
         }
+    }
 
-        for(var lib : v.libraries)
-        {
-            Logger.getLogger().log(LogType.INFO, "LIB: " + lib.name);
-            logState("lib" + lib.name);
-            if (!lib.checkAvailability(CoreLauncher.SYSTEM_OS))
+    protected void downloadLibraries(Version v)
+    {
+        Logger.getLogger().printLog(LogType.INFO, "Retrieving libraries...");
+
+        Path libDir = getGameDir().to("libraries");
+        Path nativeDir = getGameDir().to("versions", v.getJsonName(), "natives");
+
+        setupLauncherLibraries();
+
+        try{
+
+
+            for(var lib : v.libraries)
             {
-                Logger.getLogger().log(LogType.INFO, "PASS\n");
-                continue;
+                try{
+                    Logger.getLogger().printLog(LogType.INFO, "LIB: " + lib.name);
+                    logState("lib" + lib.name);
+                    if (!lib.checkAvailability(CoreLauncher.SYSTEM_OS))
+                    {
+                        Logger.getLogger().printLog(LogType.INFO, "PASS\n");
+                        continue;
+                    }
+
+                    var mainAsset = lib.getMainAsset();
+                    var nativeAsset = lib.getNativeAsset();
+
+                    if (mainAsset != null)
+                        downloadLibraryAsset(mainAsset, libDir, nativeDir, null);
+
+                    if (nativeAsset != null)
+                        downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude);
+
+                    Logger.getLogger().printLog(LogType.INFO, "OK\n");
+                }
+                catch (NoConnectionException e){
+                    throw e;
+                }
+                catch (Exception e){
+                    Logger.getLogger().log(LogType.INFO, "ERRLIB: " + lib.name);
+                    Logger.getLogger().log(e);
+                }
             }
-
-            var artifactAsset = lib.downloads.artifact;
-            var nativeAsset = lib.downloads.classifiers != null ? lib.downloads.classifiers.getNatives(CoreLauncher.SYSTEM_OS) : null;
-
-            if (artifactAsset != null)
-                downloadLibraryAsset(artifactAsset, libDir, nativeDir, null);
-
-            if (nativeAsset != null)
-                downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude);
-
-            Logger.getLogger().log(LogType.INFO, "OK\n");
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
         }
     }
 
     protected void downloadAssets(Version v)
     {
-        Logger.getLogger().log(LogType.INFO, "Retrieving assets...");
+        Logger.getLogger().printLog(LogType.INFO, "Retrieving assets...");
 
-        Path assetDir = getGameDir().to("assets", "objects");
-        Path fileDir = getGameDir().to("assets", "indexes");
-        Path assetFile = fileDir.to(v.assetIndex.id + ".json");
-        Path legacyDir = getGameDir().to("assets", "virtual", "legacy");
-        Path veryLegacyDir = getGameDir().to("assets", "virtual", "verylegacy");
+        try{
+            Path assetDir = getGameDir().to("assets", "objects");
+            Path fileDir = getGameDir().to("assets", "indexes");
+            Path assetFile = fileDir.to(v.assetIndex.id + ".json");
+            Path legacyDir = getGameDir().to("assets", "virtual", "legacy");
+            Path veryLegacyDir = getGameDir().to("assets", "virtual", "verylegacy");
 
-        String asstText;
-        if (!assetFile.exists())
-            assetFile.write(asstText = NetUtils.urlToString(v.assetIndex.url));
-        else
-            asstText = assetFile.read();
+            String asstText;
+            if (!assetFile.exists())
+                assetFile.write(asstText = NetUtils.urlToString(v.assetIndex.url));
+            else
+                asstText = assetFile.read();
 
-        var n = new Gson().fromJson(asstText, JsonObject.class);
+            var n = new Gson().fromJson(asstText, JsonObject.class);
 
-        var index = new AssetIndex();
-        index.objects = new ArrayList<>();
+            var index = new AssetIndex();
+            index.objects = new ArrayList<>();
 
-        for (var x : n.getAsJsonObject("objects").entrySet())
-            index.objects.add(new Asset(x.getKey(), x.getValue().getAsJsonObject().get("hash").getAsString(), x.getValue().getAsJsonObject().get("size").getAsInt()));
+            for (var x : n.getAsJsonObject("objects").entrySet())
+                index.objects.add(new Asset(x.getKey(), x.getValue().getAsJsonObject().get("hash").getAsString(), x.getValue().getAsJsonObject().get("size").getAsInt()));
 
-        int count = index.objects.size();
-        int i = 1;
-        for (var asset : index.objects)
-        {
-            String hash = asset.SHA1;
-            String nhash = hash.substring(0, 2);
-            String url = ASSET_URL + nhash + "/" + hash;
+            int count = index.objects.size();
+            int i = 1;
+            for (var asset : index.objects)
+            {
+                try{
+                    String hash = asset.SHA1;
+                    String nhash = hash.substring(0, 2);
+                    String url = ASSET_URL + nhash + "/" + hash;
 
-            Path path = assetDir.to(nhash, hash);
-            if (!path.exists())
-                NetUtils.download(url, path.forceSetDir(false), false, null);
+                    Path path = assetDir.to(nhash, hash);
+                    if (!path.exists())
+                        NetUtils.download(url, path.forceSetDir(false), false, null);
 
-            if (v.assetIndex.isLegacy()){
-                var f = legacyDir.to(asset.path);
-                path.copy(f);
+                    if (v.assetIndex.isLegacy()){
+                        var f = legacyDir.to(asset.path);
+                        path.copy(f);
+                    }
+                    else if (v.assetIndex.isVeryLegacy()){
+                        var f = veryLegacyDir.to(asset.path);
+                        path.copy(f);
+                    }
+
+                    Logger.getLogger().printLog(LogType.INFO, i++ + " / " + count);
+                    logState("asset" + i + "/" + count);
+                    logProgress(i * 1.0 / count);
+                }
+                catch (NoConnectionException e){
+                    throw e;
+                }
+                catch (Exception e){
+                    Logger.getLogger().log(LogType.INFO, "ERRASST: " + asset.id);
+                    Logger.getLogger().log(e);
+                }
             }
-            else if (v.assetIndex.isVeryLegacy()){
-                var f = veryLegacyDir.to(asset.path);
-                path.copy(f);
-            }
-
-            Logger.getLogger().printLog(LogType.INFO, i++ + " / " + count);
-            logState("asset" + i + "/" + count);
-            logProgress(i * 1.0 / count);
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
         }
     }
 
@@ -202,8 +250,36 @@ public abstract class Wrapper<H extends Version> {
         }
     }
 
-    public abstract Image getIcon();
+    protected List<H> getOfflineVersions(){
+        var versions = Configurator.getConfig().getGamePath().to("versions");
+        var gson = new Gson();
+        var all = new ArrayList<H>();
+        for(var i : versions.getFiles()){
+            if (!i.isDirectory())
+                continue;
+            try{
+                var json = i.to(i.getName() + ".json");
+                var read = gson.fromJson(json.read(), JsonObject.class);
+                String id = read.get("id").getAsString();
+                String inherits = read.has("inheritsFrom") ? read.get("inheritsFrom").getAsString() : null;
+                var ver = getVersionFromIdentifier(id, inherits);
+                if (ver != null)
+                    all.add(ver);
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
+        }
+
+        return all;
+    }
+
+    public final Image getIcon(){
+        var str = Wrapper.class.getResourceAsStream("/com/cdev/corelauncher/images/" + getIdentifier() + ".png");
+        return str == null ? null : new Image(str);
+    }
     public abstract String getIdentifier();
+    public abstract H getVersionFromIdentifier(String identifier, String inherits);
     public abstract H getVersion(String id, String wrId);
     public abstract List<H> getAllVersions();
     public abstract List<H> getVersions(String id);

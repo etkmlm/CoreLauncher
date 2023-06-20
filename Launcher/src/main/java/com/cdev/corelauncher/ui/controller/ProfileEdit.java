@@ -5,11 +5,15 @@ import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
+import com.cdev.corelauncher.minecraft.wrappers.entities.WrapperVersion;
 import com.cdev.corelauncher.minecraft.wrappers.forge.Forge;
+import com.cdev.corelauncher.minecraft.wrappers.optifine.OptiFine;
+import com.cdev.corelauncher.ui.entities.LStage;
 import com.cdev.corelauncher.ui.utils.ControlUtils;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.JavaMan;
 import com.cdev.corelauncher.utils.Logger;
+import com.cdev.corelauncher.utils.StringUtils;
 import com.cdev.corelauncher.utils.entities.Java;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -38,6 +42,8 @@ public class ProfileEdit {
     private RadioButton fabric;
     @FXML
     private RadioButton quilt;
+    @FXML
+    private RadioButton optifine;
 
     @FXML
     private ChoiceBox<String> cbWrapperVersion;
@@ -100,9 +106,9 @@ public class ProfileEdit {
 
         var showOld = Configurator.getConfig().isShowOldReleases();
         var showSnap = Configurator.getConfig().isShowSnapshots();
-        versions = FXCollections.observableList(Vanilla.getVanilla().getAllVersions().stream().filter(x -> (x.type.equals("snapshot") && showSnap) || ((x.type.equals("old_beta") || x.type.equals("old_alpha")) && showOld) || x.type.equals("release")).map(x -> x.id).toList());
         javaVersions = FXCollections.observableList(JavaMan.getManager().getAllJavaVersions().stream().map(Java::toIdentifier).collect(Collectors.toList()));
         javaVersions.add(0, "...");
+        versions = FXCollections.observableList(Vanilla.getVanilla().getAllVersions().stream().filter(x -> x.type == null || (x.type.equals("snapshot") && showSnap) || ((x.type.equals("old_beta") || x.type.equals("old_alpha")) && showOld) || x.type.equals("release")).map(x -> x.id).toList());
         wrapperVersions = FXCollections.observableArrayList();
         wrapperVersions.add("...");
 
@@ -162,7 +168,7 @@ public class ProfileEdit {
 
         });
 
-        sldRAM.setLabelFormatter(new StringConverter<Double>() {
+        sldRAM.setLabelFormatter(new StringConverter<>() {
             @Override
             public String toString(Double aDouble) {
                 return (aDouble / 1024) + "GB";
@@ -189,6 +195,7 @@ public class ProfileEdit {
         forge.setToggleGroup(wrapperGroup);
         fabric.setToggleGroup(wrapperGroup);
         quilt.setToggleGroup(wrapperGroup);
+        optifine.setToggleGroup(wrapperGroup);
         wrapperGroup.selectToggle(vanilla);
 
         wrapperGroup.selectedToggleProperty().addListener(a -> {
@@ -208,12 +215,23 @@ public class ProfileEdit {
         txtMaxRAM.setValueFactory(fMaxRAM);
         txtMinRAM.setValueFactory(fMinRAM);
 
+        txtMaxRAM.valueProperty().addListener(a -> {
+            if (fMaxRAM.getValue() > 32 * 1024)
+                return;
+            sldRAM.setValue(fMaxRAM.getValue());
+        });
+
         txtMaxRAM.setOnScroll(ControlUtils::scroller);
         txtMinRAM.setOnScroll(ControlUtils::scroller);
 
         btnSave.setOnMouseClicked(a -> {
+            String name = StringUtils.pure(txtName.getText());
+
+            if (name.endsWith("."))
+                name = StringUtils.trimEnd(name, '.');
+
             tempProfile
-                    .rename(txtName.getText())
+                    .rename(name)
                     .setJvmArgs(txtArgs.getText().split(" "))
                     .setMinRAM(fMinRAM.getValue())
                     .setMaxRAM(fMaxRAM.getValue());
@@ -221,15 +239,20 @@ public class ProfileEdit {
             if (tempProfile.getName() == null || tempProfile.getName().isEmpty() || tempProfile.getName().isBlank())
                 return;
 
-            if (profile == null){
-                Profile p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
-                setProfile(p);
+            try{
+                if (profile == null){
+                    Profile p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
+                    setProfile(p);
+                }
+                else {
+                    Profiler.getProfiler().setProfile(profile.getName(), b -> b.cloneFrom(tempProfile));
+                }
             }
-            else {
-                Profiler.getProfiler().setProfile(profile.getName(), b -> b.cloneFrom(tempProfile));
+            catch (Exception e){
+                Logger.getLogger().log(e);
             }
 
-            ((Stage)btnSave.getScene().getWindow()).close();
+            FXManager.getManager().closeStage((LStage)btnSave.getScene().getWindow());
         });
 
         reload();
@@ -248,8 +271,9 @@ public class ProfileEdit {
         wrapperVersions.add("...");
 
         String versionId = tempProfile.getVersionId();
-        if (tempProfile.getWrapper() instanceof Forge forge)
-            wrapperVersions.addAll(forge.getVersions(versionId).stream().map(x -> x.wrapperVersion).toList());
+
+        if (!(tempProfile.getWrapper() instanceof Vanilla))
+            wrapperVersions.addAll(tempProfile.getWrapper().getVersions(versionId).stream().map(x -> ((WrapperVersion)x).getWrapperVersion()).toList());
     }
 
     private void reload(){

@@ -8,6 +8,7 @@ import java.util.List;
 public class Library {
     public DownloadOptions downloads;
     public String name;
+    public String url;
     public transient String fileName;
     public List<Rule> rules;
 
@@ -17,9 +18,19 @@ public class Library {
         return Rule.checkRules(rules, os);
     }
 
+    public Asset getAsset(){
+        var main = getMainAsset();
+        return main == null ? getNativeAsset() : main;
+    }
+    public Asset getNativeAsset(){
+        return downloads != null ? (downloads.classifiers != null ? downloads.classifiers.getNatives(CoreLauncher.SYSTEM_OS) : null) : null;
+    }
     public Asset getMainAsset(){
-        return downloads == null ? new Asset(calculatePath(), null, -1) :
-                (downloads.artifact != null ? downloads.artifact : downloads.classifiers.getNatives(CoreLauncher.SYSTEM_OS));
+        if (downloads == null){
+            String path = calculatePath();
+            return new Asset(path, url + path);
+        }
+        return downloads.artifact != null ? downloads.artifact : null;
     }
 
     public String calculatePath(){

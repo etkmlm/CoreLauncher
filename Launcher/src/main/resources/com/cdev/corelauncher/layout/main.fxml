@@ -5,7 +5,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<AnchorPane prefHeight="600" prefWidth="720.0" stylesheets="@../style/main.css,@../style/controls/defcontrols.css,@../style/controls/listing.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.Main">
+<AnchorPane prefHeight="600" prefWidth="720.0" fx:id="root" stylesheets="@../style/main.css,@../style/controls/defcontrols.css,@../style/controls/listing.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cdev.corelauncher.ui.controller.Main">
     <background>
         <Background>
             <fills>
@@ -14,7 +14,7 @@
         </Background>
     </background>
 
-    <AnchorPane prefWidth="300" styleClass="launch-bar" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0">
+    <AnchorPane fx:id="leftRoot" prefWidth="300" styleClass="launch-bar" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0">
         <HBox alignment="CENTER" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="30">
             <ImageView fx:id="imgHeadView" fitHeight="128" fitWidth="128" pickOnBounds="true" preserveRatio="true"/>
         </HBox>
@@ -53,10 +53,11 @@
     <AnchorPane AnchorPane.bottomAnchor="150" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="15">
         <ListView fx:id="lvProfiles" minHeight="430" minWidth="380" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" />
         <CButton fx:id="btnAddProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="+" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" />
+        <CButton fx:id="btnImportProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="⇲" style="-fx-font-size: 13pt;" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="65"/>
     </AnchorPane>
 
     <AnchorPane prefHeight="130" AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15">
-        <Label fx:id="status" text="" textFill="WHITE" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="5">
+        <Label fx:id="status" textFill="WHITE" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="5">
             <font>
                 <Font size="24.0" />
             </font>
@@ -71,7 +72,7 @@
             </background>
         </HBox>
 
-        <Label fx:id="detailedStatus" text="" AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="0">
+        <Label fx:id="detailedStatus" AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
             <font>
                 <Font size="14.0" />
             </font>

@@ -2,10 +2,11 @@ package com.cdev.corelauncher.minecraft.wrappers.forge.entities;
 
 import com.cdev.corelauncher.minecraft.entities.Arguments;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.minecraft.wrappers.entities.WrapperVersion;
 
 import java.util.List;
 
-public class ForgeVersion extends Version {
+public class ForgeVersion extends WrapperVersion {
     public enum ForgeVersionType{
         LATEST, RECOMMENDED, NORMAL
     }
@@ -13,9 +14,13 @@ public class ForgeVersion extends Version {
     public ForgeVersion(String id){
         this.id = id;
     }
+
+    public ForgeVersion(String id, String wrId){
+        this.id = id;
+        this.wrapperVersion = wrId;
+    }
     public ForgeVersionType forgeVersionType;
     public List<FArtifact> fArtifacts;
-    public String wrapperVersion;
     @Override
     public String getJsonName(){
         return id + "-forge-" + wrapperVersion;
