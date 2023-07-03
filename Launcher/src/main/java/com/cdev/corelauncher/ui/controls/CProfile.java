@@ -2,9 +2,13 @@ package com.cdev.corelauncher.ui.controls;
 
 import com.cdev.corelauncher.CoreLauncherFX;
 import com.cdev.corelauncher.data.Profiler;
+import com.cdev.corelauncher.data.Translator;
+import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
+import com.cdev.corelauncher.ui.controller.Mods;
 import com.cdev.corelauncher.ui.controller.ProfileEdit;
 import com.cdev.corelauncher.ui.entities.LProfile;
 import com.cdev.corelauncher.ui.entities.LStage;
+import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.OSUtils;
 import com.cdev.corelauncher.utils.entities.Path;
@@ -47,6 +51,10 @@ public class CProfile extends ListCell<LProfile> {
     @FXML
     private Button btnPlay;
     @FXML
+    private MenuItem btnMods;
+    @FXML
+    private MenuItem btnWorlds;
+    @FXML
     private MenuItem btnEdit;
     @FXML
     private MenuItem btnBackup;
@@ -68,20 +76,22 @@ public class CProfile extends ListCell<LProfile> {
 
         this.profile = profile;
 
-        imgProfile.setImage(profile.getProfile().getWrapper().getIcon());
-        lblProfileName.setText(profile.getProfile().getName());
-        lblProfileVersion.setText(profile.getProfile().getVersionId());
+        var p = profile.getProfile();
+
+        imgProfile.setImage(p.getWrapper().getIcon());
+        lblProfileName.setText(p.getName());
+        lblProfileVersion.setText(p.getVersionId());
 
         btnPlay.getStyleClass().set(1, profile.selected() ? "profile-sel" : "profile-unsel");
         //btnPlay.setStyle(profile.selected() ? "-fx-background-color: aqua!important;" : "-fx-background-color: #303030!important;");
         btnPlay.setText(profile.selected() ? "▶" : ">");
 
-        btnEdit.setOnAction(a -> ProfileEdit.open(profile.getProfile()));
+        btnEdit.setOnAction(a -> ProfileEdit.open(p));
 
         btnSend.setOnAction(a -> {
-            var profileJson = profile.getProfile().getPath().to("profile.json");
+            var profileJson = p.getPath().to("profile.json");
             var chooser = new FileChooser();
-            chooser.setInitialFileName(profile.getProfile().getName() + ".json");
+            chooser.setInitialFileName(p.getName() + ".json");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON", "*.json"));
             var file = chooser.showSaveDialog(lblProfileName.getScene().getWindow());
             if (file == null)
@@ -96,24 +106,46 @@ public class CProfile extends ListCell<LProfile> {
 
         btnBackup.setOnAction(a -> {
             var chooser = new FileChooser();
-            chooser.setInitialFileName(profile.getProfile().getName() + ".zip");
+            chooser.setInitialFileName(p.getName() + ".zip");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
             var file = chooser.showSaveDialog(lblProfileName.getScene().getWindow());
             if (file == null)
                 return;
             try{
-                Profiler.backup(profile.getProfile(), Path.begin(file.toPath()));
+                Profiler.backup(p, Path.begin(file.toPath()));
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
             }
         });
 
-        /*if (profile.getMods() != null)
-            lblProfileDescription.setText(profile.getMods().size() + " mods");*/
+        var res = p.getResources();
+        var ow = p.getOnlineWorlds();
+        var lw = p.getLocalWorlds();
+        String resInfo = res.size() + Translator.translate("profile.resources") + " / " + (ow.size() + lw.size()) + Translator.translate("profile.worlds");
+
+        if (!(p.getWrapper() instanceof Vanilla)){
+            var mods = p.getMods();
+            var packs = p.getModpacks();
+
+            lblProfileDescription.setText(Translator.translateFormat("profile.modState", p.getWrapperVersion(), mods.size(), packs.size(), resInfo));
+        }
+        else
+            lblProfileDescription.setText(resInfo);
+
+        btnDelete.setOnAction((a) ->
+                Profiler.getProfiler().deleteProfile(p));
 
 
-        btnOpenFolder.setOnAction(a -> OSUtils.openFolder(profile.getProfile().getPath().toFile().toPath()));
+        btnPlay.setOnMouseClicked((a) -> profile.setSelected(true));
+
+
+        btnMods.setOnAction(a -> Mods.open(p).show());
+        btnWorlds.setOnAction(a -> {
+
+        });
+
+        btnOpenFolder.setOnAction(a -> OSUtils.openFolder(p.getPath().toFile().toPath()));
 
         setGraphic(gr);
     }
@@ -122,15 +154,6 @@ public class CProfile extends ListCell<LProfile> {
     private void initialize(){
         btnMenu.setOnMouseClicked((a) ->
                 contextMenu.show((Button)a.getSource(), a.getScreenX() + 10, a.getScreenY() + 10));
-
-        /*btnOpenFolder.setOnMouseClicked((a) ->
-                Desktop.getDesktop().browseFileDirectory(profile.getPath().toFile()));*/
-
-        btnDelete.setOnAction((a) ->
-                Profiler.getProfiler().deleteProfile(profile.getProfile()));
-
-
-        btnPlay.setOnMouseClicked((a) -> profile.setSelected(true));
 
     }
 

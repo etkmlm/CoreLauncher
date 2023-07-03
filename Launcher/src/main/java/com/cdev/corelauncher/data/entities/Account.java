@@ -1,7 +1,11 @@
 package com.cdev.corelauncher.data.entities;
 
+import com.cdev.corelauncher.minecraft.utils.Authenticator;
+import com.cdev.corelauncher.minecraft.utils.Tokener;
+import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.NetUtils;
+import com.cdev.corelauncher.utils.Requester;
 import com.cdev.corelauncher.utils.entities.NoConnectionException;
 import com.google.gson.*;
 import javafx.scene.image.Image;
@@ -20,30 +24,50 @@ public class Account{
     public static final class AccountFactory implements JsonSerializer<Account>, JsonDeserializer<Account> {
         @Override
         public Account deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            return Account.fromUsername(jsonElement.getAsString());
+            var obj = jsonElement.getAsJsonObject();
+            boolean isOnline = false;
+            if (obj.has("isOnline"))
+                isOnline = obj.get("isOnline").getAsBoolean();
+            return Account.fromUsername(obj.get("name").getAsString()).setOnline(isOnline);
         }
 
         @Override
         public JsonElement serialize(Account account, Type type, JsonSerializationContext jsonSerializationContext) {
-            return new JsonPrimitive(account.username);
+            var obj = new JsonObject();
+            obj.add("name", new JsonPrimitive(account.username));
+            obj.add("isOnline", new JsonPrimitive(account.isOnline));
+            return obj;
         }
     }
     private final String username;
-    private String token;
+    private Tokener tokener;
     private String uuid;
     private String skin;
     private String cape;
     private Image head;
     private boolean isReloaded;
-    private boolean isMojangUser;
+    private boolean isOnline;
 
     private Account(String username){
         this.username = username;
     }
 
+    public Account authenticate(){
+        if (!isOnline)
+            return this;
+        if (tokener == null)
+            tokener = Authenticator.getAuthenticator().authenticate();
+        return this;
+    }
+
+    public Tokener getTokener(){
+        return tokener;
+    }
+
     public static Account fromUsername(String username){
         return new Account(username);
     }
+
 
     public String getUsername(){
         return username;
@@ -55,20 +79,20 @@ public class Account{
             return this;
 
         try{
-            String accInfoJson = NetUtils.post(UUID_URL, "[\"" + username + "\"]", "application/json");
-            var accInfo = new Gson().fromJson(accInfoJson, JsonArray.class);
-            if (isMojangUser = accInfo.size() > 0){
+            String accInfoJson = NetUtils.post(UUID_URL, "[\"" + username + "\"]", Requester.Parameter.contentType("application/json"));
+            var accInfo = GsonUtils.empty().fromJson(accInfoJson, JsonArray.class);
+            if (accInfo.size() > 0){
 
                 uuid = accInfo.get(0).getAsJsonObject().get("id").getAsString();
 
                 String js = NetUtils.urlToString(PROFILE_URL + uuid);
 
-                var properties = new Gson().fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
+                var properties = GsonUtils.empty().fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
 
                 var b64textures = properties.asList().stream().map(JsonElement::getAsJsonObject).filter(x -> x.get("name").getAsString().equals("textures")).findFirst().orElse(null);
                 String base64profile = b64textures == null ? null : b64textures.get("value").getAsString();
 
-                var textures = new Gson().fromJson(new String(Base64.getDecoder().decode(base64profile)), JsonObject.class).get("textures").getAsJsonObject();
+                var textures = GsonUtils.empty().fromJson(new String(Base64.getDecoder().decode(base64profile)), JsonObject.class).get("textures").getAsJsonObject();
 
                 var skin = textures.get("SKIN");
                 if (skin != null)
@@ -98,8 +122,14 @@ public class Account{
         return this;
     }
 
-    public boolean mojangUser(){
-        return isMojangUser;
+    public Account setOnline(boolean isOnline){
+        this.isOnline = isOnline;
+
+        return this;
+    }
+
+    public boolean isOnline(){
+        return isOnline;
     }
 
     private void reloadHead(){

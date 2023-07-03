@@ -35,9 +35,9 @@
 
                 <Label styleClass="prop-key" text="%account" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                 <HBox GridPane.columnIndex="2" GridPane.rowIndex="4">
-                    <ChoiceBox fx:id="cbAccount" minWidth="160" />
+                    <TextField fx:id="txtAccount" minWidth="160" />
                     <Rectangle width="5" />
-                    <CButton styleClass="sel-button" fx:id="btnAccounts" text="..." />
+                    <CheckBox alignment="CENTER" maxHeight="Infinity" fx:id="chkOnline" text="%online" />
                 </HBox>
 
                 <Label styleClass="prop-key" text="Java" GridPane.columnIndex="1" GridPane.rowIndex="5" />

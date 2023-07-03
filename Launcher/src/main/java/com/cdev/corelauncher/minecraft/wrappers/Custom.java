@@ -3,6 +3,7 @@ package com.cdev.corelauncher.minecraft.wrappers;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.entities.Path;
@@ -54,5 +55,11 @@ public class Custom extends Wrapper<Version> {
 
         downloadLibraries(v);
         downloadAssets(v);
+    }
+
+
+    @Override
+    public CurseWrapper.Type getType() {
+        return CurseWrapper.Type.ANY;
     }
 }

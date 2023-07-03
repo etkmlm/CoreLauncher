@@ -1,5 +1,6 @@
 package com.cdev.corelauncher.utils;
 
+import javafx.application.Platform;
 import javafx.event.Event;
 
 import java.util.HashMap;
@@ -24,7 +25,7 @@ public class EventHandler<T extends Event> {
         handlers.keySet().forEach(x -> {
             var value = handlers.get(x);
             try{
-                value.handle(e);
+                Platform.runLater(() -> value.handle(e));
             }
             catch (Exception f){
                 Logger.getLogger().logHyph("ERROR HANDLING " + x);

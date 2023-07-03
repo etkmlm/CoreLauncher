@@ -5,6 +5,7 @@ import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.entities.MainInfo;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.NetUtils;
@@ -61,7 +62,7 @@ public class Vanilla extends Wrapper<Version> {
     public List<Version> getAllVersions() {
         if (_info == null || disableCache){
             try{
-                _info = new Gson().fromJson(NetUtils.urlToString(INFO_URL), MainInfo.class);
+                _info = GsonUtils.empty().fromJson(NetUtils.urlToString(INFO_URL), MainInfo.class);
             }
             catch (NoConnectionException e){
                 return getOfflineVersions();
@@ -95,16 +96,16 @@ public class Vanilla extends Wrapper<Version> {
             if (!jsonPath.exists() || disableCache)
             {
                 String vJson = getVersionString(v.id);
-                info = new Gson().fromJson(vJson, Version.class);
+                info = GsonUtils.empty().fromJson(vJson, Version.class);
                 jsonPath.write(vJson);
             }
             else
-                info = new Gson().fromJson(jsonPath.read(), Version.class);
+                info = GsonUtils.empty().fromJson(jsonPath.read(), Version.class);
 
             if (!clientPath.exists() || disableCache/* || NetUtils.getContentLength(info.downloads.client.url) != clientPath.getSize()*/){
                 logState("clientDownload");
                 Logger.getLogger().printLog(LogType.INFO, "Downloading client " + v.id + "...");
-                NetUtils.download(info.downloads.client.url, clientPath, false, this::logProgress);
+                NetUtils.download(info.downloads.client.url, clientPath, false, handler::execute);
             }
 
             Logger.getLogger().printLog(LogType.INFO, "Vanilla Version " + v.id + " up to date!");
@@ -124,5 +125,11 @@ public class Vanilla extends Wrapper<Version> {
     @Override
     public String getIdentifier() {
         return "vanilla";
+    }
+
+
+    @Override
+    public CurseWrapper.Type getType() {
+        return CurseWrapper.Type.ANY;
     }
 }

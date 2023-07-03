@@ -5,7 +5,10 @@ import com.cdev.corelauncher.ui.entities.LStage;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Stage;
 
 public class Frame {
     @FXML
@@ -15,7 +18,9 @@ public class Frame {
     @FXML
     private CButton btnMaximize;
     @FXML
-    private Pane content;
+    private StackPane content;
+    @FXML
+    private AnchorPane root;
     @FXML
     private Label lblTitle;
 
@@ -27,6 +32,7 @@ public class Frame {
         btnClose.setOnMouseClicked(a -> FXManager.getManager().closeStage(getStage()));
         btnMinimize.setOnMouseClicked(a -> getStage().setIconified(true));
         btnMaximize.setOnMouseClicked(a -> getStage().setMaximized(!getStage().isMaximized()));
+        //content.setClip(root);
     }
 
     private LStage getStage(){

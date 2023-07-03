@@ -2,10 +2,12 @@ package com.cdev.corelauncher.minecraft.wrappers.forge;
 
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.minecraft.Wrapper;
+import com.cdev.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.fabric.entities.FabricVersion;
 import com.cdev.corelauncher.minecraft.wrappers.forge.entities.FArtifact;
 import com.cdev.corelauncher.minecraft.wrappers.forge.entities.ForgeVersion;
+import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.NetUtils;
 import com.cdev.corelauncher.utils.entities.LogType;
@@ -76,8 +78,9 @@ public class Forge extends Wrapper<ForgeVersion> {
             var table = doc.selectXpath("//table[@class='download-list'][1]/tbody/tr");
 
             for(var element : table){
+                var s = element.getElementsByClass("download-version").get(0).text().split(" ")[0];
                 ForgeVersion forge = new ForgeVersion(versionId)
-                        .setWrapperVersion(element.getElementsByClass("download-version").get(0).text().split(" ")[0]);
+                        .setWrapperVersion(s);
 
                 boolean latest = element.getElementsByClass("promo-latest").size() != 0;
                 boolean recommended = element.getElementsByClass("promo-recommended").size() != 0;
@@ -86,7 +89,8 @@ public class Forge extends Wrapper<ForgeVersion> {
                 String date = element.getElementsByClass("download-time").get(0).attr("title");
                 forge.releaseTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(date);
 
-                var files = element.selectXpath(".//ul[@class='download-links']/li");
+                //var files = element.selectXpath(".//ul[@class='download-links']/li");
+                var files = element.getElementsByClass("download-links").stream().flatMap(x -> x.getElementsByTag("li").stream()).toList();
                 forge.fArtifacts = files.stream().map(file -> {
                     try{
                         var a = file.getElementsByTag("a").get(0);
@@ -194,7 +198,7 @@ public class Forge extends Wrapper<ForgeVersion> {
                     x.delete();
             });
 
-            var read = new Gson().fromJson(profileInfo.read(), JsonObject.class);
+            var read = GsonUtils.empty().fromJson(profileInfo.read(), JsonObject.class);
             var profiles = read.get("profiles").getAsJsonObject();
             var forge = profiles.get("forge");
             if (forge == null)
@@ -213,5 +217,11 @@ public class Forge extends Wrapper<ForgeVersion> {
         }
 
         //profileInfo.delete();
+    }
+
+
+    @Override
+    public CurseWrapper.Type getType() {
+        return CurseWrapper.Type.FORGE;
     }
 }

@@ -2,6 +2,7 @@ package com.cdev.corelauncher.minecraft.wrappers.quilt;
 
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.fabric.Fabric;
 import com.cdev.corelauncher.minecraft.wrappers.fabric.entities.FabricVersion;
@@ -80,5 +81,11 @@ public class Quilt extends Fabric {
             Logger.getLogger().log(e);
         }
 
+    }
+
+
+    @Override
+    public CurseWrapper.Type getType() {
+        return CurseWrapper.Type.QUILT;
     }
 }

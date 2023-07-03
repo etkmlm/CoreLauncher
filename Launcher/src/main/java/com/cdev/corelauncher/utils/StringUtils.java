@@ -29,6 +29,8 @@ public class StringUtils {
     }
 
     public static String pure(String source){
+        if (source == null)
+            return null;
         for(char i : INVALID_CHARS)
             source = source.replace(String.valueOf(i), "");
         return source;

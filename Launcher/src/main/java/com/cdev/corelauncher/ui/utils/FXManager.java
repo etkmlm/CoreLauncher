@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
@@ -48,10 +49,11 @@ public class FXManager {
             content.getChildren().add(c);
 
             var newScene = new LScene<>(frame, controller);
+            newScene.setFill(Color.TRANSPARENT);
             var stage = new LStage()
                     .setStageScene(newScene)
                     .setStageTitle(title)
-                    .setStyle(StageStyle.UNDECORATED);
+                    .setStyle(StageStyle.TRANSPARENT);
 
             openStages.add(stage);
             stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, (a) -> closeStage(stage));

@@ -7,6 +7,7 @@ import com.cdev.corelauncher.minecraft.entities.Asset;
 import com.cdev.corelauncher.minecraft.entities.AssetIndex;
 import com.cdev.corelauncher.minecraft.entities.Library;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.cdev.corelauncher.minecraft.wrappers.Custom;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.fabric.Fabric;
@@ -14,6 +15,7 @@ import com.cdev.corelauncher.minecraft.wrappers.forge.Forge;
 import com.cdev.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.cdev.corelauncher.minecraft.wrappers.quilt.Quilt;
 import com.cdev.corelauncher.utils.EventHandler;
+import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.NetUtils;
 import com.cdev.corelauncher.utils.entities.LogType;
@@ -59,8 +61,8 @@ public abstract class Wrapper<H extends Version> {
         handler.execute(new KeyEvent(key));
     }
 
-    protected void logProgress(double progress){
-        handler.execute(new ProgressEvent("wrapperProgress", progress));
+    protected void logProgress(double remain, double total){
+        handler.execute(new ProgressEvent("wrapperProgress", remain, total));
     }
 
     protected Path getGameDir(){
@@ -72,7 +74,7 @@ public abstract class Wrapper<H extends Version> {
         Path libPath = libDir.to(asset.path.split("/"));
         if (!libPath.exists())
         {
-            NetUtils.download(asset.url, libPath, false, null);
+            NetUtils.download(asset.url, libPath, false, handler::execute);
         }
 
         if (exclude != null)
@@ -181,7 +183,7 @@ public abstract class Wrapper<H extends Version> {
             else
                 asstText = assetFile.read();
 
-            var n = new Gson().fromJson(asstText, JsonObject.class);
+            var n = GsonUtils.empty().fromJson(asstText, JsonObject.class);
 
             var index = new AssetIndex();
             index.objects = new ArrayList<>();
@@ -200,7 +202,7 @@ public abstract class Wrapper<H extends Version> {
 
                     Path path = assetDir.to(nhash, hash);
                     if (!path.exists())
-                        NetUtils.download(url, path.forceSetDir(false), false, null);
+                        NetUtils.download(url, path.forceSetDir(false), false, handler::execute);
 
                     if (vIndex.isLegacy()){
                         var f = legacyDir.to(asset.path);
@@ -212,8 +214,8 @@ public abstract class Wrapper<H extends Version> {
                     }
 
                     Logger.getLogger().printLog(LogType.INFO, i++ + " / " + count);
-                    logState("asset" + i + "/" + count);
-                    logProgress(i * 1.0 / count);
+                    //logState("asset" + i + "/" + count);
+                    //logProgress(i, count);
                 }
                 catch (NoConnectionException e){
                     throw e;
@@ -295,4 +297,5 @@ public abstract class Wrapper<H extends Version> {
     public abstract List<H> getAllVersions();
     public abstract List<H> getVersions(String id);
     public abstract void install(H v);
+    public abstract CurseWrapper.Type getType();
 }

@@ -17,10 +17,6 @@
     -fx-text-fill: white;
 }
 
-.menu-item{
-    -fx-text-fill: white!important;
-}
-
 .button{
     -fx-background-color: #505050;
     -fx-background-radius: 50%;

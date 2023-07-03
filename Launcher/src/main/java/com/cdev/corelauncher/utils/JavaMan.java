@@ -7,6 +7,7 @@ import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.NoConnectionException;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.cdev.corelauncher.utils.events.ChangeEvent;
+import com.cdev.corelauncher.utils.events.ProgressEvent;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
@@ -88,7 +89,7 @@ public class JavaMan {
         try{
             var os = CoreLauncher.SYSTEM_OS;
             String url = ADOPTIUM + j.majorVersion + "/hotspot?os=" + os.getName() + "&image_type=jdk&architecture=" + (is64Bit ? "x64" : "x86");
-            var object = new Gson().fromJson(NetUtils.urlToString(url), JsonArray.class).get(0);
+            var object = GsonUtils.empty().fromJson(NetUtils.urlToString(url), JsonArray.class).get(0);
             if (object == null)
                 return null;
             var obj = object.getAsJsonObject();
@@ -104,7 +105,7 @@ public class JavaMan {
         return javaVersions.stream().filter(x -> x.getName().equals(j.getName()) || x.majorVersion == j.majorVersion).findFirst().orElse(null);
     }
 
-    public void download(Java java, Consumer<Double> onProgress){
+    public void download(Java java, Consumer<ProgressEvent> onProgress){
         if (java.majorVersion == 0)
             return;
 

@@ -3,6 +3,7 @@ package com.cdev.corelauncher.ui.controller;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.data.Translator;
+import com.cdev.corelauncher.data.entities.Account;
 import com.cdev.corelauncher.data.entities.Config;
 import com.cdev.corelauncher.ui.controls.CButton;
 import com.cdev.corelauncher.ui.controls.CMsgBox;
@@ -18,6 +19,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -37,9 +39,9 @@ public class Settings {
     @FXML
     public CButton btnSelectGamePath;
     @FXML
-    public ChoiceBox<String> cbAccount;
+    public TextField txtAccount;
     @FXML
-    public CButton btnAccounts;
+    public CheckBox chkOnline;
     @FXML
     public ChoiceBox<String> cbJava;
     @FXML
@@ -65,7 +67,6 @@ public class Settings {
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMaxRAM;
     private final ObservableList<String> languages;
     private final ObservableList<String> javas;
-    private final ObservableList<String> accounts;
 
     public Settings(){
         fMinRAM = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
@@ -76,7 +77,6 @@ public class Settings {
         languages = FXCollections.observableList(Translator.getTranslator().getAllLanguages().stream().map(x -> x.getDisplayLanguage(x)).toList());
         javas = FXCollections.observableList(JavaMan.getManager().getAllJavaVersions().stream().map(Java::toIdentifier).collect(Collectors.toList()));
         javas.add(0, "...");
-        accounts = FXCollections.observableArrayList();
 
         Configurator.getConfigurator().getHandler().addHandler("settings", x -> {
             if (x.getKey().equals("gamePathChange")){
@@ -242,10 +242,21 @@ public class Settings {
             sldRAM.setValue(fMaxRAM.getValue());
         });
 
+        txtAccount.setOnKeyPressed(a -> {
+            if (a.getCode() != KeyCode.ENTER)
+                return;
+            Configurator.getConfig().setUser(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isEmpty() || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
+            Configurator.save();
+        });
+
+        chkOnline.selectedProperty().addListener(a -> {
+            Configurator.getConfig().getUser().setOnline(chkOnline.isSelected());
+            Configurator.save();
+        });
+
         txtMaxRAM.setOnScroll(ControlUtils::scroller);
         txtMinRAM.setOnScroll(ControlUtils::scroller);
 
-        cbAccount.setItems(accounts);
         cbJava.setItems(javas);
         cbLanguage.setItems(languages);
 
@@ -261,8 +272,14 @@ public class Settings {
             else
                 cbJava.setValue("...");
 
-            if (c.getUser() != null)
-                cbAccount.setValue(c.getUser().getUsername());
+            if (c.getUser() != null){
+                txtAccount.setText(c.getUser().getUsername());
+                chkOnline.setSelected(c.getUser().isOnline());
+            }
+            else{
+                txtAccount.setText(null);
+                chkOnline.setSelected(false);
+            }
 
             fMinRAM.setValue(c.getDefaultMinRAM());
             fMaxRAM.setValue(c.getDefaultMaxRAM());

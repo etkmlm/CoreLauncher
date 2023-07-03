@@ -51,7 +51,7 @@
             </VBox>
             <VBox alignment="CENTER" styleClass="rad-option">
                 <ImageView fitHeight="48" fitWidth="48">
-                    <Image url="@../images/optifine.png" />
+                    <Image url="@../images/custom.png" />
                 </ImageView>
                 <RadioButton fx:id="custom" />
             </VBox>
@@ -89,11 +89,12 @@
         <Label styleClass="prop-key" text="%account" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
         <GridPane GridPane.columnIndex="1" GridPane.rowIndex="5">
             <columnConstraints>
-                <ColumnConstraints percentWidth="90" />
+                <ColumnConstraints percentWidth="70" />
                 <ColumnConstraints percentWidth="10" />
+                <ColumnConstraints percentWidth="20" />
             </columnConstraints>
-            <ChoiceBox fx:id="cbAccounts" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" />
-            <CButton fx:id="btnAccManager" maxWidth="Infinity" styleClass="java-sel" text="..." GridPane.columnIndex="1" />
+            <TextField fx:id="txtAccount" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" />
+            <CheckBox fx:id="chkAccOnline" maxWidth="Infinity" text="%online" GridPane.columnIndex="2"/>
         </GridPane>
 
         <Label styleClass="prop-key" text="%minMaxRam" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
@@ -114,10 +115,6 @@
         </GridPane>
     </GridPane>
     <HBox alignment="CENTER" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <CButton styleClass="op-button" text="Mods" />
-        <Rectangle width="10" />
-        <CButton styleClass="op-button" text="Resources" />
-        <Rectangle width="10" />
-        <CButton fx:id="btnSave" styleClass="op-button" text="%save" />
+        <CButton fx:id="btnSave" minWidth="200" styleClass="op-button" text="%save" />
     </HBox>
 </AnchorPane>

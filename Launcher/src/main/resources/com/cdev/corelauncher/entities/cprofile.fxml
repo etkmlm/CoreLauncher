@@ -11,7 +11,7 @@
     </VBox>
     <Label fx:id="lblProfileName" layoutX="62.0" layoutY="2.0" styleClass="title" text="Title of Profile" AnchorPane.leftAnchor="62.0" AnchorPane.topAnchor="2.0" />
     <Label fx:id="lblProfileVersion" layoutX="62.0" layoutY="30.0" styleClass="version" text="Version of Profile" AnchorPane.leftAnchor="62.0" AnchorPane.topAnchor="25.0" />
-    <Label fx:id="lblProfileDescription" layoutX="62.0" layoutY="53.0" prefHeight="17.0" prefWidth="99.0" text="Description" textFill="#f84545" />
+    <Label fx:id="lblProfileDescription" layoutX="62.0" layoutY="53.0" style="-fx-font-size: 8pt" text="Description" textFill="#f84545" />
     <CButton fx:id="btnMenu" prefHeight="30" prefWidth="30.0" text="..." AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="10.0">
         <font>
             <Font size="15.0" />
@@ -20,6 +20,8 @@
         <contextMenu>
             <ContextMenu fx:id="contextMenu" style="-fx-background-color: #505050;-fx-background-radius: 3px;">
                 <items>
+                    <MenuItem fx:id="btnMods" style="-fx-text-fill: white" text="%profile.menu.mods" />
+                    <MenuItem fx:id="btnWorlds" style="-fx-text-fill: white" text="%profile.menu.worlds" />
                     <MenuItem fx:id="btnBackup" style="-fx-text-fill: white" text="%profile.menu.backup" />
                     <MenuItem fx:id="btnSend" style="-fx-text-fill: white" text="%profile.menu.send" />
                     <MenuItem fx:id="btnOpenFolder" style="-fx-text-fill: white" text="%profile.menu.open" />
@@ -32,6 +34,5 @@
     </CButton>
 
     <CButton fx:id="btnPlay" prefHeight="30" prefWidth="30.0" styleClass="profile-unsel" text="&gt;" textFill="WHITE" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="8.0" />
-
 
 </AnchorPane>

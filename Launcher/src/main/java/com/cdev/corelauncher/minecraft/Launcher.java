@@ -5,7 +5,11 @@ import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.entities.ExecutionInfo;
 import com.cdev.corelauncher.minecraft.entities.VersionNotFoundException;
+import com.cdev.corelauncher.minecraft.modding.curseforge.CurseForge;
+import com.cdev.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.cdev.corelauncher.minecraft.utils.CommandConcat;
+import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
+import com.cdev.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.cdev.corelauncher.ui.utils.FXManager;
 import com.cdev.corelauncher.utils.EventHandler;
 import com.cdev.corelauncher.utils.JavaMan;
@@ -54,7 +58,16 @@ public class Launcher {
 
     public void prepare(Profile profile){
         handleState("prepare" + profile.getName());
+
         profile.getWrapper().install(profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion()));
+
+        if (profile.getWrapper().getType() != CurseWrapper.Type.ANY){
+            CurseForge.getForge().installModpacks(profile, profile.getModpacks());
+            CurseForge.getForge().installMods(profile, profile.getMods());
+        }
+
+        CurseForge.getForge().installWorlds(profile, profile.getOnlineWorlds());
+        CurseForge.getForge().installResourcepacks(profile, profile.getResources());
     }
 
     public void launch(ExecutionInfo info)
@@ -89,7 +102,7 @@ public class Launcher {
                             handleState("java" + linfo.java.majorVersion);
                             Logger.getLogger().log(LogType.INFO, "Downloading Java " + linfo.java.majorVersion);
                             try{
-                                JavaMan.getManager().download(linfo.java, (b) -> handler.execute(new ProgressEvent("javaDownload", b)));
+                                JavaMan.getManager().download(linfo.java, handler::execute);
                             }
                             catch (NoConnectionException e){
                                 handleState(".error.launch.java");

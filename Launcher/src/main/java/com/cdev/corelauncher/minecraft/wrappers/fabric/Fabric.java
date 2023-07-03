@@ -3,6 +3,7 @@ package com.cdev.corelauncher.minecraft.wrappers.fabric;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.entities.Version;
+import com.cdev.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.minecraft.wrappers.fabric.entities.FabricVersion;
 import com.cdev.corelauncher.minecraft.wrappers.forge.entities.ForgeVersion;
@@ -150,5 +151,10 @@ public class Fabric extends Wrapper<FabricVersion> {
             Logger.getLogger().log(e);
         }
 
+    }
+
+    @Override
+    public CurseWrapper.Type getType() {
+        return CurseWrapper.Type.FABRIC;
     }
 }

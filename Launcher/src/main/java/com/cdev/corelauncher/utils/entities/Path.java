@@ -80,7 +80,7 @@ public class Path{
      * Concat path.
      */
     public Path to(String key){
-        return new Path(root.resolve(key));
+        return new Path(root.resolve(key).normalize());
     }
 
     public File toFile(){
@@ -125,6 +125,16 @@ public class Path{
         return Arrays.stream(files).map(x -> new Path(x.toPath())).toList();
     }
 
+    public byte[] openAsGzip(){
+        try(var gzip = new GZIPInputStream(new FileInputStream(root.toFile()))){
+            return gzip.readAllBytes();
+        }
+        catch (IOException e){
+            Logger.getLogger().log(e);
+            return new byte[0];
+        }
+    }
+
     public long getSize(){
         try{
             return Files.size(root);
@@ -165,8 +175,7 @@ public class Path{
     }
 
     public void delete(){
-        boolean f = root.toFile().delete();
-        if (f || !isDirectory())
+        if (root.toFile().delete() || !isDirectory())
             return;
 
         getFiles().forEach(Path::delete);
@@ -176,6 +185,14 @@ public class Path{
 
     public String getName(){
         return root.toFile().getName();
+    }
+
+    public String getNameWithoutExtension(){
+        if (isDirectory())
+            return getName();
+
+        var spl = getName().split("\\.");
+        return getName().substring(0, getName().length() - spl[spl.length - 1].length() - 1);
     }
 
     public String getExtension(){
@@ -334,16 +351,14 @@ public class Path{
         }
     }
 
-    public void copyInner(Path destination){
-        try{
-            if (!isDirectory())
-                return;
-
-        }catch (Exception e){
+    public byte[] readBytes(){
+        try {
+            return Files.readAllBytes(root);
+        } catch (Exception e) {
             Logger.getLogger().log(e);
+            return new byte[0];
         }
     }
-
     @Override
     public boolean equals(Object obj){
         return obj != null && obj.toString().equals(toString());

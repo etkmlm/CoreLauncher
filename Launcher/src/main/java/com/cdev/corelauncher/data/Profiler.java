@@ -109,7 +109,8 @@ public class Profiler {
     private Profile setProfile(Profile profile, Consumer<Profile> set){
         try{
             String n = profile.getName();
-            set.accept(profile);
+            if (set != null)
+                set.accept(profile);
             profile.save();
             if (!profile.getName().equals(n)){
                 profilesDir.to(n).move(profile.getPath());
@@ -150,7 +151,10 @@ public class Profiler {
     }
 
     public Profile createAndSetProfile(String name, Consumer<Profile> set){
-        return setProfile(createProfile(name), set);
+        var profile = createProfile(name);
+        if (profile.isEmpty())
+            return getProfile(name);
+        return setProfile(profile, set);
     }
 
     public void deleteProfile(Profile p){

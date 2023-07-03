@@ -7,6 +7,7 @@ import com.cdev.corelauncher.data.entities.Account;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.utils.ArgumentConcat;
 import com.cdev.corelauncher.minecraft.utils.CommandConcat;
+import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.google.gson.Gson;
@@ -79,10 +80,10 @@ public class ExecutionInfo{
             //            wrappedJsonPath = gameDir.to("versions", version.getJsonName(), version.getJsonName() + ".json");
             //            clientPath = versionDir.to(version.getClientName() + ".jar");
 
-            var v0 = new Gson().fromJson(jsonPath.read(), Version.class);
+            var v0 = GsonUtils.empty().fromJson(jsonPath.read(), Version.class);
             if (v0 == null)
                 throw new VersionNotFoundException();
-            var v = new Gson().fromJson(wrappedJsonPath.read(), Version.class);
+            var v = GsonUtils.empty().fromJson(wrappedJsonPath.read(), Version.class);
             assets = v0.getAssetIndex();
             java = v0.javaVersion == null ? Java.fromCodeName("legacy") : v0.javaVersion;
             mainClass = v.mainClass;
@@ -171,12 +172,13 @@ public class ExecutionInfo{
                     .register("${game_assets}", assetsRoot.toString())
                     .register("${assets_index_name}", assets.id)
                     .register("${auth_uuid}", account.reload().getUuid())
-                    .register("${auth_access_token}", "null")
+                    .register("${auth_access_token}", account.isOnline() ? account.authenticate().getTokener().getAccessToken() : "null")
                     .register("${user_properties}", "{}")
                     .register("${user_type}", "msa")
                     .register("${version_type}", version.type == null ? "release" : version.type)
                     .register("${clientid}", version.id)
                     .register("${auth_xuid}", "X")
+                    .register("${auth_session}", "X")
                     .build();
         }
 

@@ -23,18 +23,13 @@
                 <Font name="Minecraft" size="26.0" />
             </font>
         </Label>
-        <Label fx:id="gameVersion" alignment="CENTER" text="" AnchorPane.bottomAnchor="160" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <Label fx:id="gameVersion" alignment="CENTER" style="-fx-font-family: 'Minecraft'; -fx-font-size: 26pt;" AnchorPane.bottomAnchor="160" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
             <font>
                 <Font name="Minecraft" size="26.0" />
             </font>
-            <contextMenu>
-                <ContextMenu fx:id="versions" style="-fx-background-color: #303030">
-
-                </ContextMenu>
-            </contextMenu>
         </Label>
 
-        <Label fx:id="gameDescription" alignment="CENTER" text="" AnchorPane.bottomAnchor="120" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <Label fx:id="gameDescription" alignment="CENTER" AnchorPane.bottomAnchor="120" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
             <font>
                 <Font name="Calibri" size="20.0" />
             </font>
@@ -51,7 +46,7 @@
         </HBox>
     </AnchorPane>
     <AnchorPane AnchorPane.bottomAnchor="150" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="15">
-        <ListView fx:id="lvProfiles" minHeight="430" minWidth="380" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" />
+        <ListView fx:id="lvProfiles" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" />
         <CButton fx:id="btnAddProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="+" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" />
         <CButton fx:id="btnImportProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="⇲" style="-fx-font-size: 13pt;" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="65"/>
     </AnchorPane>
@@ -62,7 +57,7 @@
                 <Font size="24.0" />
             </font>
         </Label>
-        <HBox fx:id="separator" prefHeight="1" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="70" AnchorPane.topAnchor="60">
+        <HBox prefHeight="1" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="70" AnchorPane.topAnchor="60">
             <background>
                 <Background>
                     <fills>
@@ -72,7 +67,7 @@
             </background>
         </HBox>
 
-        <TextArea fx:id="detailedStatus" editable="false" styleClass="detailed-s" AnchorPane.bottomAnchor="0" prefHeight="60" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="65"/>
+        <TextArea fx:id="detailedStatus" editable="false"  AnchorPane.bottomAnchor="0" prefHeight="60" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="65"/>
 
         <CButton fx:id="btnSettings" prefHeight="50" prefWidth="50" styleClass="ench-button" text="✦" AnchorPane.rightAnchor="5" AnchorPane.topAnchor="5" />
         <CButton fx:id="btnAbout" prefHeight="50" prefWidth="50" styleClass="ench-button" text="🛈" AnchorPane.bottomAnchor="5" AnchorPane.rightAnchor="5" />

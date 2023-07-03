@@ -3,6 +3,7 @@ package com.cdev.corelauncher.ui.controller;
 import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.data.Translator;
+import com.cdev.corelauncher.data.entities.Account;
 import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.wrappers.Custom;
@@ -35,9 +36,6 @@ import org.controlsfx.control.SearchableComboBox;
 import java.util.stream.Collectors;
 
 public class ProfileEdit {
-
-    @FXML
-    private ImageView img;
     @FXML
     private TextField txtName;
 
@@ -61,13 +59,13 @@ public class ProfileEdit {
     @FXML
     private ChoiceBox<String> cbJavaVersion;
     @FXML
-    private ChoiceBox<String> cbAccounts;
+    private TextField txtAccount;
     @FXML
     private Button btnJavaManager;
     @FXML
     private Button btnSave;
     @FXML
-    private Button btnAccManager;
+    private CheckBox chkAccOnline;
     @FXML
     private TextField txtArgs;
     @FXML
@@ -89,7 +87,6 @@ public class ProfileEdit {
     private final ObservableList<String> versions;
     private final ObservableList<String> javaVersions;
     private final ObservableList<String> wrapperVersions;
-    private final ObservableList<String> accounts;
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMinRAM;
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMaxRAM;
     private Profile profile;
@@ -127,9 +124,6 @@ public class ProfileEdit {
         wrapperVersions = FXCollections.observableArrayList();
         wrapperVersions.add("...");
 
-        accounts = FXCollections.observableArrayList();
-        accounts.add(0, "...");
-
         JavaMan.getManager().getHandler().addHandler("pedit", (a) -> {
             switch (a.getKey()){
                 case "addJava" -> {
@@ -148,16 +142,6 @@ public class ProfileEdit {
 
     @FXML
     public void initialize(){
-        /*ControlUtils.setContextNull(txtArgs);
-        ControlUtils.setContextNull(txtName);
-        ControlUtils.setContextNull(cbGameVersion);
-        ControlUtils.setContextNull(cbAccounts);
-        ControlUtils.setContextNull(cbJavaVersion);
-        ControlUtils.setContextNull(cbWrapperVersion);
-        ControlUtils.setContextNull(sldRAM);
-        ControlUtils.setContextNull(txtMaxRAM);
-        ControlUtils.setContextNull(txtMinRAM);*/
-
         cbGameVersion.valueProperty().addListener(x -> {
             String value = cbGameVersion.getValue();
 
@@ -176,12 +160,6 @@ public class ProfileEdit {
             tempProfile.setJava(java);
         });
         cbJavaVersion.setItems(javaVersions);
-
-        cbAccounts.setItems(accounts);
-
-        btnAccManager.setOnMouseClicked((a) -> {
-
-        });
 
         sldRAM.setLabelFormatter(new StringConverter<>() {
             @Override
@@ -225,7 +203,13 @@ public class ProfileEdit {
         cbWrapperVersion.valueProperty().addListener(a -> {
             if (tempProfile.getVersionId() == null)
                 return;
-            tempProfile.setWrapperVersion(cbWrapperVersion.getValue());
+
+            String value = cbWrapperVersion.getValue();
+
+            if (value == null || value.isEmpty())
+                return;
+
+            tempProfile.setWrapperVersion(value);
         });
         txtWrapper.setCursor(Cursor.HAND);
         btnSelectWrapper.setOnMouseClicked(a -> {
@@ -270,6 +254,9 @@ public class ProfileEdit {
         btnSave.setOnMouseClicked(a -> {
             String name = StringUtils.pure(txtName.getText());
 
+            if (name == null || name.isEmpty() || name.isBlank())
+                return;
+
             if (name.endsWith("."))
                 name = StringUtils.trimEnd(name, '.');
 
@@ -277,14 +264,15 @@ public class ProfileEdit {
                     .rename(name)
                     .setJvmArgs(txtArgs.getText().split(" "))
                     .setMinRAM(fMinRAM.getValue())
-                    .setMaxRAM(fMaxRAM.getValue());
+                    .setMaxRAM(fMaxRAM.getValue())
+                    .setCustomUser(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isEmpty() || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkAccOnline.isSelected()));
 
-            if (tempProfile.getName() == null || tempProfile.getName().isEmpty() || tempProfile.getName().isBlank())
+            if ((tempProfile.getWrapper() != null && !(tempProfile.getWrapper() instanceof Vanilla) && (tempProfile.getWrapperVersion() == null || tempProfile.getWrapperVersion().isEmpty() || tempProfile.getWrapperVersion().isBlank() || tempProfile.getWrapperVersion().equals("..."))))
                 return;
 
             try{
                 if (profile == null){
-                    Profile p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
+                    var p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
                     setProfile(p);
                 }
                 else {
@@ -341,10 +329,14 @@ public class ProfileEdit {
                 cbJavaVersion.setValue(j.toIdentifier());
             else
                 cbJavaVersion.setValue("...");
-            if (tempProfile.getUser() != null)
-                cbAccounts.setValue(tempProfile.getUser().getUsername());
-            else
-                cbAccounts.setValue("...");
+            if (tempProfile.getUser() != null){
+                txtAccount.setText(tempProfile.getUser().getUsername());
+                chkAccOnline.setSelected(tempProfile.getUser().isOnline());
+            }
+            else{
+                txtAccount.setText(null);
+                chkAccOnline.setSelected(false);
+            }
             if (tempProfile.getJvmArgs() != null)
                 txtArgs.setText(String.join(" ", tempProfile.getJvmArgs()));
 

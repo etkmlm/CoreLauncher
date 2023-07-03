@@ -18,6 +18,7 @@ public class CoreLauncherFX extends Application {
 
         Font.loadFont(Objects.requireNonNull(CoreLauncherFX.class.getResource("/com/cdev/corelauncher/font/Minecraft.ttf")).toExternalForm(), 16);
 
+        CoreLauncher.GUI_INIT = true;
         FXManager.getManager().applyStage("main").show();
     }
 

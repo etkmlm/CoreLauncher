@@ -81,7 +81,7 @@ public class Session {
             try {
                 if (stopRequested || (read = inReader.readLine()) == null) break;
 
-                String msg = "IN: " + read;
+                String msg = "[S" + sessionId + "IN] " + read;
                 System.out.println(msg);
                 logFile.append("\n" + msg);
 
@@ -98,7 +98,7 @@ public class Session {
             try {
                 if (stopRequested || (read = errorReader.readLine()) == null) break;
 
-                String msg = "ERROR: " + read;
+                String msg = "[S" + sessionId + "ERROR] " + read;
                 System.out.println(msg);
                 logFile.append("\n" + msg);
 

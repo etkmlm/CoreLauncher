@@ -1,0 +1,19 @@
+.all{
+    -fx-background-color: #404040;
+    -fx-background-radius: 10px;
+}
+
+#lblName{
+    -fx-font-size: 13pt;
+    -fx-background-color: #424545;
+    -fx-padding: 2 0 2 8;
+    -fx-background-radius: 2px;
+}
+
+#btnRemove{
+    -fx-font-size: 10pt;
+}
+
+#txtDescription{
+    -fx-font-size: 9pt;
+}

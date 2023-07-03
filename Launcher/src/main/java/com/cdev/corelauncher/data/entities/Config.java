@@ -1,5 +1,6 @@
 package com.cdev.corelauncher.data.entities;
 
+import com.cdev.corelauncher.data.Configurator;
 import com.cdev.corelauncher.utils.OSUtils;
 import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.Path;
@@ -112,7 +113,16 @@ public class Config {
         return customJavaVersions;
     }
 
+    public void setUser(Account a){
+        this.user = a;
+    }
+
     public Account getUser(){
+
+        if (user == null){
+            setUser(Configurator.generateDefaultConfig().getUser());
+        }
+
         return user;
     }
 

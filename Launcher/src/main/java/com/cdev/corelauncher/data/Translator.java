@@ -27,14 +27,14 @@ public class Translator {
     }
 
     public static String translateFormat(String key, Object... args){
-        return getTranslator().getTranslateFormat(key, args);
+        return getTranslator().getTranslateFormat(key, Arrays.stream(args).toList());
     }
 
     public String getTranslate(String key){
         return bundle.containsKey(key) ? bundle.getString(key) : null;
     }
 
-    public String getTranslateFormat(String key, Object... args){
+    public String getTranslateFormat(String key, List<Object> args){
         var translate = getTranslate(key);
         if (translate == null)
             return null;
@@ -47,7 +47,7 @@ public class Translator {
                 if (index == -1)
                     break;
                 else
-                    translate = translate.replaceFirst("%", args[i++].toString());
+                    translate = translate.replaceFirst("%", args.get(i++).toString());
             }
         }
         catch (Exception ignored){

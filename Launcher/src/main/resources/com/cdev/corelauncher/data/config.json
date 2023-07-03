@@ -1,6 +1,9 @@
 {
   "gamePath": null,
-  "user": "IAMUSER",
+  "user": {
+    "name": "IAMUSER",
+    "isOnline": false
+  },
   "language": "en_US",
   "background": null,
   "defaultJVMArgs": "",

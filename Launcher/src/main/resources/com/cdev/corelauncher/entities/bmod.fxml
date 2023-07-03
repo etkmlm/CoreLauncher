@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.image.ImageView?>
+<?import com.cdev.corelauncher.ui.controls.CButton?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="100.0" prefWidth="200.0" styleClass="all" stylesheets="@../style/controls/bmod.css,@../style/controls/defcontrols.css,@../style/controls/listing.css">
+    <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="0">
+        <ImageView fx:id="img" fitWidth="60" fitHeight="60"/>
+    </VBox>
+    <VBox AnchorPane.rightAnchor="5" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" alignment="CENTER">
+        <CButton styleClass="option" text="⭳" fx:id="btnInstall" prefHeight="32" prefWidth="32"/>
+        <Rectangle height="10"/>
+        <CButton styleClass="option" text="..." fx:id="btnMore" prefHeight="32" prefWidth="32"/>
+    </VBox>
+
+    <Label fx:id="lblName" text="Name" AnchorPane.leftAnchor="85" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="50"/>
+    <Label fx:id="lblAuthor" text="Authors" AnchorPane.leftAnchor="85" AnchorPane.topAnchor="35" AnchorPane.rightAnchor="50"/>
+
+    <TextField editable="false" fx:id="txtDesc" text="Description" AnchorPane.leftAnchor="80" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="50"/>
+</AnchorPane>

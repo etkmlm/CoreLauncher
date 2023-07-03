@@ -53,14 +53,3 @@
 .ench-button{
     -fx-font-size: 15pt;
 }
-
-.detailed-s{
-    -fx-font-size: 10pt;
-    -fx-wrap-text: true;
-    -fx-background-color: transparent;
-    -fx-text-fill: white;
-}
-    .detailed-s *{
-        -fx-background-color: transparent!important;
-        -fx-cursor: normal;
-    }

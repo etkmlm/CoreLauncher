@@ -2,14 +2,19 @@ package com.cdev.corelauncher.data.entities;
 
 import com.cdev.corelauncher.data.Profiler;
 import com.cdev.corelauncher.minecraft.Wrapper;
+import com.cdev.corelauncher.minecraft.modding.curseforge.entities.File;
+import com.cdev.corelauncher.minecraft.modding.entities.*;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.utils.GsonUtils;
 import com.cdev.corelauncher.utils.Logger;
 import com.cdev.corelauncher.utils.entities.Java;
 import com.cdev.corelauncher.utils.entities.Path;
 import com.google.gson.*;
+import org.apache.commons.compress.compressors.gzip.GzipUtils;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Profile {
     public static final class ProfileFactory implements JsonSerializer<Profile>, JsonDeserializer<Profile> {
@@ -32,6 +37,10 @@ public class Profile {
     private Account customUser;
     private String[] jvmArgs;
     private Java java;
+    private List<Mod> mods;
+    private List<Resourcepack> resources;
+    private List<Modpack> modpacks;
+    private List<World> worlds;
     private int minRAM;
     private int maxRAM;
     private Wrapper wrapper;
@@ -39,6 +48,7 @@ public class Profile {
 
     protected Profile(){
         wrapper = new Vanilla();
+
     }
 
     public String getName() {
@@ -63,6 +73,47 @@ public class Profile {
         return this;
     }
 
+    public List<Resourcepack> getResources(){
+        if (resources == null)
+            resources = new ArrayList<>();
+        return resources;
+    }
+    public List<Mod> getMods(){
+        if (mods == null)
+            mods = new ArrayList<>();
+
+        return mods;
+    }
+
+    public List<Modpack> getModpacks(){
+        if (modpacks == null)
+            modpacks = new ArrayList<>();
+
+        return modpacks;
+    }
+
+    public CResource getResource(int id){
+        var r1 = getMods().stream().filter(x -> x.id == id).findFirst();
+
+        if (r1.isPresent())
+            return r1.get();
+
+        var r2 = getModpacks().stream().filter(x -> x.id == id).findFirst();
+
+        if (r2.isPresent())
+            return r2.get();
+
+        var r3 = getResources().stream().filter(x -> x.id == id).findFirst();
+
+        if (r3.isPresent())
+            return r3.get();
+
+        var r4 = getOnlineWorlds().stream().filter(x -> x.id == id).findFirst();
+
+        return r4.orElse(null);
+
+    }
+
     public Profile setWrapper(Wrapper<?> w){
         wrapper = w;
         return this;
@@ -83,10 +134,25 @@ public class Profile {
         return this;
     }
 
+    public List<World> getOnlineWorlds(){
+        if (worlds == null)
+            worlds = new ArrayList<>();
+        return worlds;
+    }
+
+    public List<World> getLocalWorlds(){
+        var path = getPath().to("saves");
+        return path.getFiles().stream().map(x -> World.fromGzip(null, x.to("level.dat"))).toList();
+    }
+
     public static Profile empty(){
         var p = new Profile();
         p.isEmpty = true;
         return p;
+    }
+
+    public boolean isEmpty(){
+        return isEmpty;
     }
 
     public Profile cloneFrom(Profile p){

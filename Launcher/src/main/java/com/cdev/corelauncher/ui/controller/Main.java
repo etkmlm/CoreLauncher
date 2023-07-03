@@ -9,6 +9,7 @@ import com.cdev.corelauncher.data.entities.Profile;
 import com.cdev.corelauncher.minecraft.Launcher;
 import com.cdev.corelauncher.minecraft.Wrapper;
 import com.cdev.corelauncher.minecraft.entities.ExecutionInfo;
+import com.cdev.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.cdev.corelauncher.minecraft.wrappers.Vanilla;
 import com.cdev.corelauncher.ui.controls.CMsgBox;
 import com.cdev.corelauncher.ui.controls.CProfile;
@@ -79,6 +80,7 @@ public class Main{
 
         Launcher.getLauncher().getHandler().addHandler("main", this::onGeneralEvent);
         Vanilla.getVanilla().getHandler().addHandler("main", this::onGeneralEvent);
+        CurseForge.getForge().getHandler().addHandler("main", this::onGeneralEvent);
         Profiler.getProfiler().getHandler().addHandler("mainWindow", this::onProfilerEvent);
 
         Configurator.getConfigurator().getHandler().addHandler("main", a -> {
@@ -219,8 +221,9 @@ public class Main{
     private void onGeneralEvent(Event e){
         if (e instanceof ProgressEvent p){
             Platform.runLater(() -> {
-                detailedStatus.setText("%" + (p.progress * 100));
-                prg.setProgress(p.progress);
+                String id = p.key.equals("download") ? "mb" : p.key;
+                detailedStatus.setText("%" + p.getProgressPercent() + "\n" + p.getRemain() + id + " / " + p.getTotal() + id);
+                prg.setProgress(p.getProgress());
             });
         }
         else if (e instanceof KeyEvent k){
@@ -257,8 +260,9 @@ public class Main{
             else if (key.startsWith("."))
                 status = dot(key.substring(1));
             else if (key.startsWith(",")){
-                status = dot(key.split(":\\.")[1]);
-                Platform.runLater(() -> detailedStatus.setText(key.substring(1)));
+                var s = key.split(":\\.");
+                status = dot(s[1]);
+                Platform.runLater(() -> detailedStatus.setText(s[0].substring(1)));
             }
             else
                 status = key;
@@ -270,7 +274,7 @@ public class Main{
 
     private String dot(String f){
         String[] spl = f.split(";");
-        return spl.length == 1 ? Translator.translate(spl[0]) : Translator.translateFormat(spl[0], Arrays.stream(spl).skip(1));
+        return spl.length == 1 ? Translator.translate(spl[0]) : Translator.getTranslator().getTranslateFormat(spl[0], Arrays.stream(spl).skip(1).map(x -> (Object) x).toList());
     }
     private void onProfilerEvent(ChangeEvent a){
         var newProfile = (Profile)a.getNewValue();
