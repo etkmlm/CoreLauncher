@@ -160,11 +160,23 @@ public class Mods {
             String text = txtSearch.getText();
             if (text.isEmpty() || text.isBlank()){
                 lvMods.setItems(mods);
+                lvModpacks.setItems(modpacks);
+                lvResources.setItems(resources);
+                lvWorlds.setItems(worlds);
                 return;
             }
 
-            var filtered = mods.filtered(a -> a.get().name.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault())));
-            lvMods.setItems(filtered);
+            var fMods = mods.filtered(a -> a.get().name.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault())));
+            lvMods.setItems(fMods);
+
+            var fModpacks = modpacks.filtered(a -> a.get().name.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault())));
+            lvModpacks.setItems(fModpacks);
+
+            var fRes = resources.filtered(a -> a.get().name.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault())));
+            lvResources.setItems(fRes);
+
+            var fWorlds = worlds.filtered(a -> a.get().name.toLowerCase(Locale.getDefault()).contains(text.toLowerCase(Locale.getDefault())));
+            lvWorlds.setItems(fWorlds);
         });
 
         btnBrowse.setOnAction(x -> {

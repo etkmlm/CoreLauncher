@@ -1,13 +1,15 @@
 package com.laeben.corelauncher.utils;
 
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.util.EventHandler;
+import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.utils.entities.Java;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
-import com.laeben.corelauncher.utils.entities.Path;
-import com.laeben.corelauncher.utils.events.ChangeEvent;
-import com.laeben.corelauncher.utils.events.ProgressEvent;
+import com.laeben.core.entity.Path;
+import com.laeben.core.util.events.ChangeEvent;
+import com.laeben.core.util.events.ProgressEvent;
 import com.google.gson.JsonArray;
 
 import java.util.List;

@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.minecraft.modding.modrinth;
 
+import com.laeben.core.entity.RequestParameter;
+import com.laeben.core.util.RequesterFactory;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.ClassType;
 import com.laeben.corelauncher.minecraft.modding.entities.Mod;
 import com.laeben.corelauncher.utils.*;
@@ -56,8 +58,8 @@ public class Modrinth {
     public List<Mod> searchSodium(String loader, String vId){
         String str = factory.create()
                 .to("/v2/project/" + SODIUM_ID + "/version")
-                .withParam(new Requester.Parameter("game_versions", "%5b%22" + vId + "%22%5d"))
-                .withParam(new Requester.Parameter("loaders", "%5b%22" + loader + "%22%5d"))
+                .withParam(new RequestParameter("game_versions", "%5b%22" + vId + "%22%5d"))
+                .withParam(new RequestParameter("loaders", "%5b%22" + loader + "%22%5d"))
                 .getString();
 
         if (str == null)

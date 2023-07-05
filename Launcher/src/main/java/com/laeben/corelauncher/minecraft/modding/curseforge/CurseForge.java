@@ -1,15 +1,22 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge;
 
+import com.laeben.core.entity.RequestParameter;
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.util.EventHandler;
+import com.laeben.corelauncher.utils.NetUtils;
+import com.laeben.core.util.RequesterFactory;
+import com.laeben.core.util.events.BaseEvent;
+import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.entities.Profile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.*;
 import com.laeben.corelauncher.minecraft.modding.entities.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
-import com.laeben.corelauncher.utils.*;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
-import com.laeben.corelauncher.utils.entities.Path;
-import com.laeben.corelauncher.utils.events.KeyEvent;
+import com.laeben.core.entity.Path;
 import com.google.gson.*;
+import com.laeben.corelauncher.utils.GsonUtils;
+import com.laeben.corelauncher.utils.Logger;
+import com.laeben.corelauncher.utils.StringUtils;
 import javafx.event.Event;
 
 import java.util.ArrayList;
@@ -26,7 +33,7 @@ public class CurseForge {
 
     private List<Category> categories;
     private final RequesterFactory factory;
-    private final EventHandler<Event> handler;
+    private final EventHandler<BaseEvent> handler;
 
 
     public CurseForge(){
@@ -42,12 +49,12 @@ public class CurseForge {
         return instance;
     }
 
-    public EventHandler<Event> getHandler(){
+    public EventHandler<BaseEvent> getHandler(){
         return handler;
     }
 
     public SearchResponse search(Search s){
-        String a = get("/v1/mods/search", Requester.Parameter.classToParams(s, Search.class));
+        String a = get("/v1/mods/search", RequestParameter.classToParams(s, Search.class));
         return gson.fromJson(a, SearchResponse.class);
     }
 
@@ -123,10 +130,10 @@ public class CurseForge {
 
     public Resource getFullResource(String vId, CurseWrapper.Type type, Resource r){
 
-        var params = new ArrayList<Requester.Parameter>();
-        params.add(new Requester.Parameter("gameVersion", vId));
+        var params = new ArrayList<RequestParameter>();
+        params.add(new RequestParameter("gameVersion", vId));
         if (type != CurseWrapper.Type.ANY)
-            params.add(new Requester.Parameter("modLoaderType", type.ordinal()));
+            params.add(new RequestParameter("modLoaderType", type.ordinal()));
 
         String g = get("/v1/mods/" + r.id + "/files", params);
         var rs = gson.fromJson(g, JsonObject.class);
@@ -365,11 +372,11 @@ public class CurseForge {
 
         return path;
     }
-    private String get(String api, List<Requester.Parameter> params){
+    private String get(String api, List<RequestParameter> params){
         try{
             var r = factory.create().to(api)
-                    .withHeader(new Requester.Parameter("x-api-key", API_KEY))
-                    .withParam(new Requester.Parameter("gameId", GAME_ID));
+                    .withHeader(new RequestParameter("x-api-key", API_KEY))
+                    .withParam(new RequestParameter("gameId", GAME_ID));
             if (params != null)
                 r.withParams(params);
             return r.getString();
@@ -386,8 +393,8 @@ public class CurseForge {
     private String post(String api, String body){
         try{
             var r = factory.create().to(api)
-                    .withHeader(new Requester.Parameter("x-api-key", API_KEY))
-                    .withHeader(Requester.Parameter.contentType("application/json"));
+                    .withHeader(new RequestParameter("x-api-key", API_KEY))
+                    .withHeader(RequestParameter.contentType("application/json"));
             return r.post(body);
             //return NetUtils.urlToString(BASE_URL + api, "x-api-key=" + API_KEY);
         }

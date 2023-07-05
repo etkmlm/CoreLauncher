@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.ui.entities;
 
 import com.laeben.corelauncher.data.entities.Profile;
-import com.laeben.corelauncher.utils.events.ChangeEvent;
+import com.laeben.core.util.events.ChangeEvent;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

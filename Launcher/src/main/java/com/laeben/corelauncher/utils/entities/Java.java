@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.utils.entities;
 
+import com.laeben.core.entity.Path;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.OSUtils;
 import com.google.gson.*;

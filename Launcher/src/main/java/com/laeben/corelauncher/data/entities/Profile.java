@@ -7,7 +7,7 @@ import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.entities.Java;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
@@ -42,7 +42,6 @@ public class Profile {
     private int minRAM;
     private int maxRAM;
     private Wrapper wrapper;
-    //private Path path;
 
     protected Profile(){
         wrapper = new Vanilla();

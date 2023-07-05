@@ -1,11 +1,11 @@
 package com.laeben.corelauncher.data;
 
 import com.laeben.corelauncher.data.entities.Profile;
-import com.laeben.corelauncher.utils.EventHandler;
+import com.laeben.core.util.EventHandler;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
-import com.laeben.corelauncher.utils.entities.Path;
-import com.laeben.corelauncher.utils.events.ChangeEvent;
+import com.laeben.core.entity.Path;
+import com.laeben.core.util.events.ChangeEvent;
 
 import java.util.List;
 import java.util.function.Consumer;

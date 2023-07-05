@@ -1,13 +1,14 @@
 package com.laeben.corelauncher.minecraft.utils;
 
+import com.laeben.core.entity.RequestParameter;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.corelauncher.utils.OSUtils;
-import com.laeben.corelauncher.utils.Requester;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class Authenticator {
@@ -82,7 +83,7 @@ public class Authenticator {
                 "&code=" + code +
                 "&grant_type=authorization_code&redirect_uri=" + LOCALHOST;
 
-        var fx = gson.fromJson(NetUtils.post(TOKEN_URL, token_con, Requester.Parameter.contentType("application/x-www-form-urlencoded")), JsonObject.class);
+        var fx = gson.fromJson(NetUtils.post(TOKEN_URL, token_con, List.of(RequestParameter.contentType("application/x-www-form-urlencoded"))), JsonObject.class);
 
         String accessToken = fx.get("access_token").getAsString();
         String refreshAccessToken = fx.get("refresh_token").getAsString();
@@ -104,7 +105,7 @@ public class Authenticator {
                    "TokenType": "JWT"
                 }
                 """.replace("$", token);
-        var prc = gson.fromJson(NetUtils.post(AUTH_URL, json, Requester.Parameter.contentType("application/json")), JsonObject.class);
+        var prc = gson.fromJson(NetUtils.post(AUTH_URL, json, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
 
         String xblToken = prc.get("Token").getAsString();
         var arr = prc.get("DisplayClaims").getAsJsonObject().get("xui").getAsJsonArray().asList().stream().filter(x -> x.getAsJsonObject().has("uhs")).findFirst();
@@ -126,10 +127,10 @@ public class Authenticator {
                 }
                 """.replace("$", xblToken);
 
-        String authToken = gson.fromJson(NetUtils.post(XSTS_URL, xjson, Requester.Parameter.contentType("application/json")), JsonObject.class).get("Token").getAsString();
+        String authToken = gson.fromJson(NetUtils.post(XSTS_URL, xjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class).get("Token").getAsString();
 
         String fjson = "{ \"identityToken\": \"XBL3.0 x=" + hash + ";" + authToken + "\" }";
-        var user = gson.fromJson(NetUtils.post(MC_AUTH_URL, fjson, Requester.Parameter.contentType("application/json")), JsonObject.class);
+        var user = gson.fromJson(NetUtils.post(MC_AUTH_URL, fjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
 
         String name = user.get("username").getAsString();
         String mcAccessToken = user.get("access_token").getAsString();

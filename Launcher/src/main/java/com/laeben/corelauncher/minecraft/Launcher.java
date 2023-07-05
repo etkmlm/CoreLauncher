@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.minecraft;
 
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.util.events.BaseEvent;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.entities.Profile;
 import com.laeben.corelauncher.minecraft.entities.ExecutionInfo;
@@ -7,13 +9,12 @@ import com.laeben.corelauncher.minecraft.entities.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.laeben.corelauncher.minecraft.utils.CommandConcat;
-import com.laeben.corelauncher.utils.EventHandler;
+import com.laeben.core.util.EventHandler;
 import com.laeben.corelauncher.utils.JavaMan;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.entities.LogType;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
-import com.laeben.corelauncher.utils.entities.Path;
-import com.laeben.corelauncher.utils.events.KeyEvent;
+import com.laeben.core.entity.Path;
+import com.laeben.core.util.events.KeyEvent;
 import javafx.event.Event;
 
 import java.io.File;
@@ -21,7 +22,7 @@ import java.io.File;
 public class Launcher {
     public static Launcher instance;
     private Path gameDir;
-    private final EventHandler<Event> handler;
+    private final EventHandler<BaseEvent> handler;
 
 
     public Launcher(){
@@ -42,7 +43,7 @@ public class Launcher {
         return instance;
     }
 
-    public EventHandler<Event> getHandler(){
+    public EventHandler<BaseEvent> getHandler(){
         return handler;
     }
 

@@ -7,7 +7,7 @@ import com.laeben.corelauncher.utils.JavaMan;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.OSUtils;
 import com.laeben.corelauncher.utils.entities.Java;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;

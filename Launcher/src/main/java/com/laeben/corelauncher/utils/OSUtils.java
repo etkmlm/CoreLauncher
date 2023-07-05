@@ -11,9 +11,9 @@ public class OSUtils {
     public static Path getAppFolder(){
         var os = CoreLauncher.SYSTEM_OS;
         return switch (os){
-            case WINDOWS -> Path.of(System.getenv("APPDATA"), "corelauncher");
-            case OSX -> Path.of(System.getProperty("user.home"), "Library", "Application Support", "corelauncher");
-            default -> Path.of(System.getProperty("user.home"), "corelauncher");
+            case WINDOWS -> Path.of(System.getenv("APPDATA"), ".corelauncher");
+            case OSX -> Path.of(System.getProperty("user.home"), "Library", "Application Support", ".corelauncher");
+            default -> Path.of(System.getProperty("user.home"), ".corelauncher");
         };
     }
 

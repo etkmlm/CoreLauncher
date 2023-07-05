@@ -10,10 +10,11 @@ import com.laeben.corelauncher.minecraft.wrappers.forge.Forge;
 import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.laeben.corelauncher.minecraft.wrappers.quilt.Quilt;
 import com.laeben.corelauncher.utils.entities.Java;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.laeben.corelauncher.utils.entities.PathFactory;
 
 import java.lang.reflect.Type;
 
@@ -21,7 +22,7 @@ public class GsonUtils {
     private static final Gson EMPTY = new Gson();
 
     public static final Gson DEFAULT_GSON = new GsonBuilder()
-            .registerTypeAdapter(Path.class, new Path.PathFactory())
+            .registerTypeAdapter(Path.class, new PathFactory())
             .registerTypeAdapter(Account.class, new Account.AccountFactory())
             .registerTypeAdapter(Java.class, new Java.JavaFactory())
             .registerTypeAdapter(Wrapper.class, new Wrapper.WrapperFactory())

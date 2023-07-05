@@ -2,7 +2,7 @@ package com.laeben.corelauncher.minecraft;
 
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.utils.Logger;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 
 import java.io.BufferedReader;
 import java.io.IOException;

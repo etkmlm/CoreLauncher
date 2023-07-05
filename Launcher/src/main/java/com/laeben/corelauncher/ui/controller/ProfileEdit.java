@@ -17,7 +17,7 @@ import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.OSUtils;
 import com.laeben.corelauncher.utils.StringUtils;
 import com.laeben.corelauncher.utils.entities.Java;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

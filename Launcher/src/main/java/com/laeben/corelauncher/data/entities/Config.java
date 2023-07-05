@@ -3,7 +3,7 @@ package com.laeben.corelauncher.data.entities;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.utils.OSUtils;
 import com.laeben.corelauncher.utils.entities.Java;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class Config {
     private boolean autoUpdate;
 
     public Path getGamePath(){
-        return gamePath == null ? DEFAULT_GAME_PATH : gamePath;
+        return (gamePath == null ? DEFAULT_GAME_PATH : gamePath).forceSetDir(true);
     }
     public Path getLauncherPath(){
         return getGamePath().to("launcher");

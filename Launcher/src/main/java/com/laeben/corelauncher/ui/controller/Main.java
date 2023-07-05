@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.ui.controller;
 
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.util.events.BaseEvent;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
@@ -16,15 +18,13 @@ import com.laeben.corelauncher.ui.controls.CProfile;
 import com.laeben.corelauncher.ui.entities.LProfile;
 import com.laeben.corelauncher.ui.utils.FXManager;
 import com.laeben.corelauncher.utils.Logger;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
-import com.laeben.corelauncher.utils.entities.Path;
-import com.laeben.corelauncher.utils.events.ChangeEvent;
-import com.laeben.corelauncher.utils.events.KeyEvent;
-import com.laeben.corelauncher.utils.events.ProgressEvent;
+import com.laeben.core.entity.Path;
+import com.laeben.core.util.events.ChangeEvent;
+import com.laeben.core.util.events.KeyEvent;
+import com.laeben.core.util.events.ProgressEvent;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -69,6 +69,8 @@ public class Main{
     private AnchorPane root;
     @FXML
     private AnchorPane leftRoot;
+    @FXML
+    private TextField txtSearch;
 
     private Profile selectedProfile;
     private ObservableList<LProfile> profiles;
@@ -124,6 +126,14 @@ public class Main{
 
         btnAbout.setOnMouseClicked((a) ->
                 CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm", LauncherConfig.APPLICATION.getName())).show());
+
+        txtSearch.textProperty().addListener(a -> {
+            var text = txtSearch.getText();
+            if (text == null || text.isBlank() || text.isEmpty())
+                lvProfiles.setItems(profiles);
+            else
+                lvProfiles.setItems(profiles.filtered(x -> x.getProfile().getName().toLowerCase().contains(text.toLowerCase())));
+        });
 
         btnAddProfile.setOnMouseClicked((a) -> ProfileEdit.open(null));
         btnImportProfile.setOnMouseClicked(a -> {
@@ -222,11 +232,11 @@ public class Main{
         lblPlayerName.setText(acc.getUsername());
     }
 
-    private void onGeneralEvent(Event e){
+    private void onGeneralEvent(BaseEvent e){
         if (e instanceof ProgressEvent p){
             Platform.runLater(() -> {
                 String id = p.key.equals("download") ? "mb" : p.key;
-                detailedStatus.setText("%" + p.getProgressPercent() + "\n" + p.getRemain() + id + " / " + p.getTotal() + id);
+                detailedStatus.setText(p.getRemain() + id + " / " + p.getTotal() + id);
                 prg.setProgress(p.getProgress());
             });
         }

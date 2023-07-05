@@ -24,7 +24,7 @@
 }
 
 .progress-indicator .percentage{
-    -fx-fill: none;
+    -fx-fill: white;
 }
 
 .progress-indicator .tick{

@@ -2,7 +2,7 @@ package com.laeben.corelauncher.minecraft.modding.entities;
 
 import com.laeben.corelauncher.data.nbt.NBTFile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.Resource;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 
 public class World extends CResource{
     public enum Difficulty{
@@ -61,5 +61,19 @@ public class World extends CResource{
 
         }
         return world;
+    }
+
+    public String getIdentifier(){
+        return levelName == null ? (name == null ? "" : name) : levelName;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        return o instanceof World w && getIdentifier().equals(w.getIdentifier());
+    }
+
+    @Override
+    public int hashCode(){
+        return -1;
     }
 }

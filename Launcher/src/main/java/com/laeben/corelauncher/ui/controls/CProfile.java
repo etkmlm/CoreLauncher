@@ -11,7 +11,7 @@ import com.laeben.corelauncher.ui.entities.LProfile;
 import com.laeben.corelauncher.ui.entities.LStage;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.OSUtils;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -19,6 +19,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 
 import java.io.IOException;
+import java.util.stream.Stream;
 
 public class CProfile extends ListCell<LProfile> {
 
@@ -122,7 +123,7 @@ public class CProfile extends ListCell<LProfile> {
         var res = p.getResources();
         var ow = p.getOnlineWorlds();
         var lw = p.getLocalWorlds();
-        String resInfo = res.size() + Translator.translate("profile.resources") + " / " + (ow.size() + lw.size()) + Translator.translate("profile.worlds");
+        String resInfo = res.size() + Translator.translate("profile.resources") + " / " + (Stream.concat(ow.stream(), lw.stream()).distinct().count()) + Translator.translate("profile.worlds");
 
         if (!(p.getWrapper() instanceof Vanilla)){
             var mods = p.getMods();

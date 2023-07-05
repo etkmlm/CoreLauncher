@@ -9,7 +9,7 @@ import com.laeben.corelauncher.minecraft.utils.ArgumentConcat;
 import com.laeben.corelauncher.minecraft.utils.CommandConcat;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.entities.Java;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 

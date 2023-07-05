@@ -18,7 +18,7 @@
 }
 
 .scroll-bar .thumb{
-    -fx-background-color: aqua;
+    -fx-background-color: #308080;
 }
 
 .scroll-bar .decrement-button, .scroll-bar .increment-button{

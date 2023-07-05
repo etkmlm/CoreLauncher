@@ -6,7 +6,7 @@ import com.laeben.corelauncher.minecraft.entities.Version;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 
 import java.util.List;
 

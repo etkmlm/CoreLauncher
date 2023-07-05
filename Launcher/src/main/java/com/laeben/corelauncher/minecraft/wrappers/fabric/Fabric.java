@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.wrappers.fabric;
 
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
@@ -8,7 +9,6 @@ import com.laeben.corelauncher.minecraft.wrappers.fabric.entities.FabricVersion;
 import com.laeben.corelauncher.utils.JavaMan;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 

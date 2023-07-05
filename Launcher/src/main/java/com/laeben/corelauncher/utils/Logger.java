@@ -2,7 +2,7 @@ package com.laeben.corelauncher.utils;
 
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.utils.entities.LogType;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -1,5 +1,8 @@
 package com.laeben.corelauncher;
 
+import com.laeben.core.LaebenApp;
+import com.laeben.core.util.events.KeyEvent;
+import com.laeben.core.util.events.ObjectEvent;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
@@ -16,7 +19,7 @@ import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.corelauncher.utils.OSUtils;
 import com.laeben.corelauncher.utils.entities.LogType;
 import com.laeben.corelauncher.utils.entities.OS;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 
 import java.util.Arrays;
 
@@ -112,6 +115,17 @@ public class CoreLauncher {
         new Modrinth();
         new Authenticator();
         OS_64 = OSUtils.is64BitOS();
+
+        LaebenApp.getHandler().addHandler("clauncher", a -> {
+            if (a instanceof ObjectEvent oe){
+                if (oe.getKey().equals("exception"))
+                    Logger.getLogger().log((Exception) oe.getValue());
+                else if (oe.getKey().equals("netException")){
+                    String[] spl = oe.getValue().toString().split("\\$\\$\\$");
+                    Logger.getLogger().printLog(LogType.ERROR, "Error on request to " + spl[0] + ": " + spl[1]);
+                }
+            }
+        });
         //
 
         int index = listArgs.indexOf("--profile");

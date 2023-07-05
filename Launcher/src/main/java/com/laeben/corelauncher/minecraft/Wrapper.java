@@ -1,5 +1,8 @@
 package com.laeben.corelauncher.minecraft;
 
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.util.events.BaseEvent;
+import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.data.Configurator;
@@ -14,17 +17,13 @@ import com.laeben.corelauncher.minecraft.wrappers.fabric.Fabric;
 import com.laeben.corelauncher.minecraft.wrappers.forge.Forge;
 import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.laeben.corelauncher.minecraft.wrappers.quilt.Quilt;
-import com.laeben.corelauncher.utils.EventHandler;
+import com.laeben.core.util.EventHandler;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.corelauncher.utils.entities.LogType;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
-import com.laeben.corelauncher.utils.entities.Path;
-import com.laeben.corelauncher.utils.events.KeyEvent;
-import com.laeben.corelauncher.utils.events.ProgressEvent;
+import com.laeben.core.entity.Path;
 import com.google.gson.*;
-import javafx.event.Event;
 import javafx.scene.image.Image;
 
 import java.io.FileOutputStream;
@@ -45,14 +44,14 @@ public abstract class Wrapper<H extends Version> {
     }};
     private static final String ASSET_URL = "https://resources.download.minecraft.net/";
 
-    protected EventHandler<Event> handler;
+    protected EventHandler<BaseEvent> handler;
     protected boolean disableCache;
 
     public Wrapper(){
         handler = new EventHandler<>();
     }
 
-    public EventHandler<Event> getHandler(){
+    public EventHandler<BaseEvent> getHandler(){
         return handler;
     }
 
@@ -60,8 +59,13 @@ public abstract class Wrapper<H extends Version> {
         handler.execute(new KeyEvent(key));
     }
 
-    protected void logProgress(double remain, double total){
-        handler.execute(new ProgressEvent("wrapperProgress", remain, total));
+    protected boolean checkLen(String url, Path file){
+        try{
+            return NetUtils.getContentLength(url) == file.getSize();
+        }
+        catch (NoConnectionException e){
+            return true;
+        }
     }
 
     protected Path getGameDir(){
@@ -71,7 +75,7 @@ public abstract class Wrapper<H extends Version> {
     private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude)
     {
         Path libPath = libDir.to(asset.path.split("/"));
-        if (!libPath.exists() || NetUtils.getContentLength(asset.url) != libPath.getSize() || disableCache)
+        if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || disableCache)
         {
             NetUtils.download(asset.url, libPath, false, handler::execute);
         }

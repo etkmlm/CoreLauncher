@@ -1,12 +1,12 @@
 package com.laeben.corelauncher.data.entities;
 
+import com.laeben.core.entity.RequestParameter;
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.minecraft.utils.Authenticator;
 import com.laeben.corelauncher.minecraft.utils.Tokener;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
-import com.laeben.corelauncher.utils.Requester;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
 import com.google.gson.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelBuffer;
@@ -16,6 +16,7 @@ import javafx.scene.image.WritablePixelFormat;
 import java.lang.reflect.Type;
 import java.nio.IntBuffer;
 import java.util.Base64;
+import java.util.List;
 
 public class Account{
     private static final String UUID_URL = "https://api.mojang.com/profiles/minecraft";
@@ -81,7 +82,7 @@ public class Account{
             return this;
 
         try{
-            String accInfoJson = NetUtils.post(UUID_URL, "[\"" + username + "\"]", Requester.Parameter.contentType("application/json"));
+            String accInfoJson = NetUtils.post(UUID_URL, "[\"" + username + "\"]", List.of(RequestParameter.contentType("application/json")));
             var accInfo = GsonUtils.empty().fromJson(accInfoJson, JsonArray.class);
             if (accInfo.size() > 0){
 

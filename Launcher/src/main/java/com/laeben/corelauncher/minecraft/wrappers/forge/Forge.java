@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.wrappers.forge;
 
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
@@ -9,8 +10,7 @@ import com.laeben.corelauncher.minecraft.wrappers.forge.entities.ForgeVersion;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 import com.google.gson.JsonObject;
 import org.jsoup.HttpStatusException;
 

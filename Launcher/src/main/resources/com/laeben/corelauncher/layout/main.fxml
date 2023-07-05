@@ -5,6 +5,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.shape.Rectangle?>
 <AnchorPane prefHeight="600" prefWidth="720.0" fx:id="root" stylesheets="@../style/main.css,@../style/controls/defcontrols.css,@../style/controls/listing.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.Main">
     <background>
         <Background>
@@ -23,40 +24,42 @@
                 <Font name="Minecraft" size="26.0" />
             </font>
         </Label>
-        <Label fx:id="gameVersion" alignment="CENTER" style="-fx-font-family: 'Minecraft'; -fx-font-size: 26pt;" AnchorPane.bottomAnchor="160" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <Label fx:id="gameVersion" alignment="CENTER" style="-fx-font-family: 'Minecraft'; -fx-font-size: 26pt;" AnchorPane.bottomAnchor="200" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
             <font>
                 <Font name="Minecraft" size="26.0" />
             </font>
         </Label>
 
-        <Label fx:id="gameDescription" alignment="CENTER" AnchorPane.bottomAnchor="120" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <Label fx:id="gameDescription" alignment="CENTER" AnchorPane.bottomAnchor="160" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
             <font>
                 <Font name="Calibri" size="20.0" />
             </font>
         </Label>
-        <HBox alignment="CENTER" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-            <VBox alignment="CENTER">
+        <VBox alignment="CENTER" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+            <HBox alignment="CENTER">
                 <AnchorPane>
-                    <ProgressIndicator  fx:id="prg" minHeight="100" minWidth="100" progress="0" />
+                    <ProgressIndicator fx:id="prg" minHeight="100" minWidth="100" progress="0" />
                     <CButton fx:id="btnStart" maxHeight="80" maxWidth="80" prefHeight="70" prefWidth="70" styleClass="play-button" text="⯈" AnchorPane.leftAnchor="15" AnchorPane.topAnchor="5.5" />
                 </AnchorPane>
-            </VBox>
-
-
-        </HBox>
+            </HBox>
+            <Rectangle height="10"/>
+            <Label fx:id="status" textFill="WHITE" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="5" AnchorPane.rightAnchor="60">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+        </VBox>
     </AnchorPane>
     <AnchorPane AnchorPane.bottomAnchor="150" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="15">
         <ListView fx:id="lvProfiles" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" />
-        <CButton fx:id="btnAddProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="+" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10" />
-        <CButton fx:id="btnImportProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="⇲" style="-fx-font-size: 13pt;" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="65"/>
+        <CButton fx:id="btnAddProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="+" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="65" />
+        <CButton fx:id="btnImportProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="⇲" style="-fx-font-size: 13pt;" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10"/>
     </AnchorPane>
 
     <AnchorPane prefHeight="130" AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15">
-        <Label fx:id="status" textFill="WHITE" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="5" AnchorPane.rightAnchor="60">
-            <font>
-                <Font size="24.0" />
-            </font>
-        </Label>
+
+        <TextField fx:id="txtSearch" style="-fx-background-color: #252525;" promptText="%search" prefHeight="35" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="70" AnchorPane.leftAnchor="10" />
+
         <HBox prefHeight="1" styleClass="separator" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="70" AnchorPane.topAnchor="60"/>
 
         <TextArea fx:id="detailedStatus" editable="false"  AnchorPane.bottomAnchor="0" prefHeight="60" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="65"/>

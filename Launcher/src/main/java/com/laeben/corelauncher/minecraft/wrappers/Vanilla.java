@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.wrappers;
 
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entities.MainInfo;
 import com.laeben.corelauncher.minecraft.entities.Version;
@@ -8,8 +9,7 @@ import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.corelauncher.utils.entities.LogType;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
-import com.laeben.corelauncher.utils.entities.Path;
+import com.laeben.core.entity.Path;
 
 import java.util.List;
 
@@ -75,6 +75,8 @@ public class Vanilla extends Wrapper<Version> {
         return null;
     }
 
+
+
     @Override
     public void install(Version v) {
         if (v.id == null)
@@ -98,7 +100,7 @@ public class Vanilla extends Wrapper<Version> {
             else
                 info = GsonUtils.empty().fromJson(jsonPath.read(), Version.class);
 
-            if (!clientPath.exists() || disableCache/* || NetUtils.getContentLength(info.downloads.client.url) != clientPath.getSize()*/){
+            if (!clientPath.exists() || disableCache || !checkLen(info.downloads.client.url, clientPath)){
                 logState("clientDownload");
                 Logger.getLogger().printLog(LogType.INFO, "Downloading client " + v.id + "...");
                 NetUtils.download(info.downloads.client.url, clientPath, false, handler::execute);

@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.wrappers.quilt;
 
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
@@ -9,7 +10,6 @@ import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.JavaMan;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
-import com.laeben.corelauncher.utils.entities.NoConnectionException;
 
 public class Quilt extends Fabric {
 
