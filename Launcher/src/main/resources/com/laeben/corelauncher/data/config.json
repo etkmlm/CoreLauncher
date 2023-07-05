@@ -1,0 +1,22 @@
+{
+  "gamePath": null,
+  "user": {
+    "name": "IAMUSER",
+    "isOnline": false
+  },
+  "autoUpdate": true,
+  "language": "en_US",
+  "background": null,
+  "defaultJVMArgs": "",
+  "lastSelectedProfile": null,
+  "customJavaVersions": null,
+  "defaultMinRAM": 0,
+  "defaultMaxRAM": 4096,
+  "showOldReleases": false,
+  "showSnapshots": false,
+  "logMode": true,
+  "hideAfter": true
+}
+
+
+

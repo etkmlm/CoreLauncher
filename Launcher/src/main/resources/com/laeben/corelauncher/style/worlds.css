@@ -1,0 +1,46 @@
+.list-view{
+    -fx-background-color: #323232!important;
+    -fx-font-size: 10pt;
+    -fx-padding: 10px;
+}
+
+.list-cell{
+    -fx-background-radius: 5px;
+    -fx-alignment: center;
+}
+
+.list-cell:selected{
+    -fx-background-color: teal;
+}
+
+#lblLevelName{
+    -fx-font-size: 14pt;
+    -fx-text-fill: white;
+}
+
+#lblSpawn,#lblSeed{
+    -fx-cursor: hand;
+}
+
+.all{
+    -fx-background-color: #202020;
+}
+
+.panel{
+    -fx-background-color: #323232;
+    -fx-background-radius: 10px;
+}
+
+.prop-label{
+    -fx-padding: 10px;
+    -fx-background-color: #383838;
+    -fx-background-radius: 10px;
+    -fx-font-size: 11pt;
+}
+
+.prop{
+    -fx-padding: 10px;
+    -fx-background-color: #354545;
+    -fx-background-radius: 10px;
+    -fx-font-size: 11pt;
+}

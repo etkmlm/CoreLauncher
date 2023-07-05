@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<HBox alignment="CENTER" prefHeight="600" prefWidth="590.0" styleClass="all" stylesheets="@../style/settings.css,@../style/controls/defcontrols.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.Settings">
+    <VBox alignment="CENTER">
+        <VBox>
+            <Label styleClass="title" text="%settings.title.general" />
+            <Rectangle height="15" />
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints prefWidth="30" />
+                    <ColumnConstraints prefWidth="180" />
+                    <ColumnConstraints />
+                </columnConstraints>
+
+                <Label styleClass="prop-key" text="%settings.customBackground" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <HBox GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <TextField fx:id="txtCustomBackground" editable="false" />
+                    <Rectangle width="5" />
+                    <CButton styleClass="sel-button" fx:id="btnSelectBackground" text="..." />
+                </HBox>
+
+                <Label styleClass="prop-key" text="%settings.language" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <ChoiceBox fx:id="cbLanguage" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+                <Label styleClass="prop-key" text="%settings.gamePath" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <HBox GridPane.columnIndex="2" GridPane.rowIndex="3">
+                    <TextField fx:id="txtGamePath" editable="false" />
+                    <Rectangle width="5" />
+                    <CButton styleClass="sel-button" fx:id="btnSelectGamePath" text="..." />
+                </HBox>
+
+                <Label styleClass="prop-key" text="%account" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <HBox GridPane.columnIndex="2" GridPane.rowIndex="4">
+                    <TextField fx:id="txtAccount" minWidth="160" />
+                    <Rectangle width="5" />
+                    <CheckBox alignment="CENTER" maxHeight="Infinity" fx:id="chkOnline" text="%online" />
+                </HBox>
+
+                <Label styleClass="prop-key" text="Java" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <HBox GridPane.columnIndex="2" GridPane.rowIndex="5">
+                    <ChoiceBox fx:id="cbJava" minWidth="160" />
+                    <Rectangle width="5" />
+                    <CButton styleClass="sel-button" fx:id="btnJavaMan" text="..." />
+                </HBox>
+            <rowConstraints>
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+            </rowConstraints>
+            </GridPane>
+
+            <Rectangle height="10" />
+        </VBox>
+        <VBox>
+            <Label styleClass="title" text="%settings.title.launch" />
+            <Rectangle height="15" />
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints prefWidth="30" />
+                    <ColumnConstraints prefWidth="180" />
+                    <ColumnConstraints />
+                </columnConstraints>
+
+                <Label styleClass="prop-key" text="%minMaxRam" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <GridPane maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="0">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="47" />
+                        <ColumnConstraints percentWidth="6" />
+                        <ColumnConstraints percentWidth="47" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints prefHeight="30" />
+                        <RowConstraints prefHeight="10" />
+                        <RowConstraints prefHeight="30" />
+                        <RowConstraints prefHeight="30" />
+                    </rowConstraints>
+                    <Spinner fx:id="txtMinRAM" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <Spinner fx:id="txtMaxRAM" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                    <Slider fx:id="sldRAM" majorTickUnit="2048" max="32768" minorTickCount="0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+                    <HBox alignment="BOTTOM_RIGHT" GridPane.columnIndex="2" GridPane.rowIndex="3">
+                        <Rectangle height="40"/>
+                        <CButton fx:id="btnSaveRAM" styleClass="def-button" prefWidth="70" text="%save" />
+                    </HBox>
+                </GridPane>
+
+                <Label styleClass="prop-key" text="%settings.oldReleases" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <CheckBox fx:id="chkOldReleases" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+
+                <Label styleClass="prop-key" text="%settings.showSnaps" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <CheckBox fx:id="chkShowSnaps" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+                <Label styleClass="prop-key" text="%settings.logMode" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <CheckBox fx:id="chkLogMode" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+
+                <Label styleClass="prop-key" text="%settings.hideAfter" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <CheckBox fx:id="chkHideAfter" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+
+                <Label styleClass="prop-key" text="%settings.autoUpdate" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <CheckBox fx:id="chkAutoUpdate" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+            <rowConstraints>
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+            </rowConstraints>
+
+
+
+            </GridPane>
+        </VBox>
+    </VBox>
+
+</HBox>

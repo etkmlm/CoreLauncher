@@ -1,0 +1,34 @@
+.title{
+    -fx-font-size: 12pt;
+    -fx-text-fill: aqua;
+}
+
+.version{
+    -fx-text-fill: white;
+    -fx-font-size: 8pt;
+}
+
+.main{
+    -fx-background-color: #323537;
+    -fx-background-radius: 10px;
+}
+
+.label{
+    -fx-text-fill: white;
+}
+
+.button{
+    -fx-background-color: #434748;
+    -fx-background-radius: 50%;
+}
+
+.profile-unsel{
+    -fx-background-color: #434748;
+    -fx-font-size: 11pt;
+}
+
+
+.profile-sel{
+    -fx-background-color: #535a5b;
+    -fx-font-size: 11pt;
+}

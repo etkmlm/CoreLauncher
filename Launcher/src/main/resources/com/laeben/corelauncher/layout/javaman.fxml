@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.controls.CButton?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.laeben.corelauncher.ui.controller.JavaManager"
+            styleClass="all" prefHeight="400.0" prefWidth="600.0" stylesheets="@../style/controls/defcontrols.css,@../style/controls/listing.css,@../style/javaman.css">
+    <ListView fx:id="lvJava" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.bottomAnchor="10" />
+    <CButton fx:id="btnAdd" styleClass="circle-button,add-button" text="+" AnchorPane.rightAnchor="30" AnchorPane.bottomAnchor="30" prefWidth="40" prefHeight="40"/>
+</AnchorPane>

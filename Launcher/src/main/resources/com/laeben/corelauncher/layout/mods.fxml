@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.laeben.corelauncher.ui.controls.CButton?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.laeben.corelauncher.ui.controller.Mods"
+            prefHeight="600.0" prefWidth="760.0" styleClass="all" stylesheets="@../style/mods.css,@../style/controls/listing.css,@../style/controls/defcontrols.css">
+    <GridPane hgap="10" vgap="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints percentHeight="50"/>
+            <RowConstraints percentHeight="50"/>
+            <RowConstraints percentHeight="5"/>
+        </rowConstraints>
+
+        <VBox GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <HBox alignment="CENTER_RIGHT"><Label text="%mods.type.mods" style="-fx-font-size: 12pt;" /></HBox>
+            <Rectangle height="5"/>
+            <ListView fx:id="lvMods" />
+        </VBox>
+
+        <VBox GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <ListView fx:id="lvWorlds"/>
+            <Rectangle height="5"/>
+            <HBox alignment="CENTER_RIGHT"><Label text="%mods.type.worlds" style="-fx-font-size: 12pt;" AnchorPane.rightAnchor="0" /></HBox>
+        </VBox>
+
+        <VBox GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <Label text="%mods.type.modpacks" style="-fx-font-size: 12pt;"/>
+            <Rectangle height="5"/>
+            <ListView fx:id="lvModpacks"/>
+        </VBox>
+
+        <VBox GridPane.columnIndex="0" GridPane.rowIndex="1">
+            <ListView fx:id="lvResources"/>
+            <Rectangle height="5"/>
+            <Label text="%mods.type.resources" style="-fx-font-size: 12pt;"/>
+        </VBox>
+
+        <GridPane maxHeight="Infinity" hgap="5" GridPane.columnIndex="0" GridPane.rowIndex="2">
+            <rowConstraints>
+                <RowConstraints percentHeight="100"/>
+            </rowConstraints>
+            <columnConstraints>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="25"/>
+            </columnConstraints>
+            <CButton fx:id="btnBrowse" styleClass="def-button" maxHeight="Infinity" text="%mods.all.browse" maxWidth="Infinity" GridPane.columnIndex="0"/>
+            <CButton fx:id="btnOpti" styleClass="def-button" maxHeight="Infinity" text="OptiFine" maxWidth="Infinity" GridPane.columnIndex="1"/>
+            <CButton fx:id="btnSodium" styleClass="def-button" maxHeight="Infinity" text="Sodium" maxWidth="Infinity" GridPane.columnIndex="2"/>
+            <CButton fx:id="btnUpdate" styleClass="def-button" maxHeight="Infinity" text="%mods.all.update" maxWidth="Infinity" GridPane.columnIndex="3"/>
+        </GridPane>
+
+        <TextField fx:id="txtSearch" maxHeight="Infinity" promptText="%search" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    </GridPane>
+
+
+
+</AnchorPane>
