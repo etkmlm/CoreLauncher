@@ -17,7 +17,7 @@ import com.laeben.corelauncher.minecraft.wrappers.fabric.Fabric;
 import com.laeben.corelauncher.minecraft.wrappers.forge.Forge;
 import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.laeben.corelauncher.minecraft.wrappers.quilt.Quilt;
-import com.laeben.core.util.EventHandler;
+import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
@@ -26,6 +26,7 @@ import com.laeben.core.entity.Path;
 import com.google.gson.*;
 import javafx.scene.image.Image;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -46,13 +47,22 @@ public abstract class Wrapper<H extends Version> {
 
     protected EventHandler<BaseEvent> handler;
     protected boolean disableCache;
+    protected boolean stopRequested;
 
     public Wrapper(){
         handler = new EventHandler<>();
     }
 
+    public boolean isStopRequested(){
+        return stopRequested;
+    }
+
     public EventHandler<BaseEvent> getHandler(){
         return handler;
+    }
+
+    public void setStopRequested(boolean val){
+        stopRequested = val;
     }
 
     protected void logState(String key){
@@ -126,40 +136,37 @@ public abstract class Wrapper<H extends Version> {
         if (v.libraries == null)
             return;
 
-        try{
-            for(var lib : v.libraries)
-            {
-                try{
-                    Logger.getLogger().printLog(LogType.INFO, "LIB: " + lib.name);
-                    logState("lib" + lib.name);
-                    if (!lib.checkAvailability(CoreLauncher.SYSTEM_OS))
-                    {
-                        Logger.getLogger().printLog(LogType.INFO, "PASS\n");
-                        continue;
-                    }
-
-                    var mainAsset = lib.getMainAsset();
-                    var nativeAsset = lib.getNativeAsset();
-
-                    if (mainAsset != null)
-                        downloadLibraryAsset(mainAsset, libDir, nativeDir, null);
-
-                    if (nativeAsset != null)
-                        downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude);
-
-                    Logger.getLogger().printLog(LogType.INFO, "OK\n");
+        for(var lib : v.libraries)
+        {
+            if (stopRequested)
+                break;
+            try{
+                Logger.getLogger().printLog(LogType.INFO, "LIB: " + lib.name);
+                logState("lib" + lib.name);
+                if (!lib.checkAvailability(CoreLauncher.SYSTEM_OS))
+                {
+                    Logger.getLogger().printLog(LogType.INFO, "PASS\n");
+                    continue;
                 }
-                catch (NoConnectionException e){
-                    throw e;
-                }
-                catch (Exception e){
-                    Logger.getLogger().log(LogType.INFO, "ERRLIB: " + lib.name);
-                    Logger.getLogger().log(e);
-                }
+
+                var mainAsset = lib.getMainAsset();
+                var nativeAsset = lib.getNativeAsset();
+
+                if (mainAsset != null)
+                    downloadLibraryAsset(mainAsset, libDir, nativeDir, null);
+
+                if (nativeAsset != null)
+                    downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude);
+
+                Logger.getLogger().printLog(LogType.INFO, "OK\n");
             }
-        }
-        catch (Exception e){
-            Logger.getLogger().log(e);
+            catch (NoConnectionException e){
+                throw e;
+            }
+            catch (Exception e){
+                Logger.getLogger().log(LogType.INFO, "ERRLIB: " + lib.name);
+                Logger.getLogger().log(e);
+            }
         }
     }
 
@@ -175,8 +182,10 @@ public abstract class Wrapper<H extends Version> {
         Path legacyDir = getGameDir().to("assets", "virtual", "legacy");
         Path veryLegacyDir = getGameDir().to("assets", "virtual", "verylegacy");
 
-        try{
 
+        AssetIndex index;
+
+        try{
             String asstText;
             if (!assetFile.exists()){
                 if (vIndex.url == null)
@@ -188,49 +197,56 @@ public abstract class Wrapper<H extends Version> {
 
             var n = GsonUtils.empty().fromJson(asstText, JsonObject.class);
 
-            var index = new AssetIndex();
+            index = new AssetIndex();
             index.objects = new ArrayList<>();
 
             for (var x : n.getAsJsonObject("objects").entrySet())
                 index.objects.add(new Asset(x.getKey(), x.getValue().getAsJsonObject().get("hash").getAsString(), x.getValue().getAsJsonObject().get("size").getAsInt()));
 
-            int count = index.objects.size();
-            int i = 1;
-            for (var asset : index.objects)
-            {
-                try{
-                    String hash = asset.SHA1;
-                    String nhash = hash.substring(0, 2);
-                    String url = ASSET_URL + nhash + "/" + hash;
-
-                    Path path = assetDir.to(nhash, hash);
-                    if (!path.exists() || disableCache)
-                        NetUtils.download(url, path.forceSetDir(false), false, handler::execute);
-
-                    if (vIndex.isLegacy()){
-                        var f = legacyDir.to(asset.path);
-                        path.copy(f);
-                    }
-                    else if (vIndex.isVeryLegacy()){
-                        var f = veryLegacyDir.to(asset.path);
-                        path.copy(f);
-                    }
-
-                    Logger.getLogger().printLog(LogType.INFO, (i++) + " / " + count);
-                    logState("asset" + i + "/" + count);
-                    //logProgress(i, count);
-                }
-                catch (NoConnectionException e){
-                    throw e;
-                }
-                catch (Exception e){
-                    Logger.getLogger().log(LogType.INFO, "ERRASST: " + asset.id);
-                    Logger.getLogger().log(e);
-                }
-            }
+        }
+        catch (NoConnectionException e){
+            throw e;
         }
         catch (Exception e){
             Logger.getLogger().log(e);
+            return;
+        }
+
+        int count = index.objects.size();
+        int i = 1;
+        for (var asset : index.objects)
+        {
+            if (stopRequested)
+                return;
+            try{
+                String hash = asset.SHA1;
+                String nhash = hash.substring(0, 2);
+                String url = ASSET_URL + nhash + "/" + hash;
+
+                Path path = assetDir.to(nhash, hash);
+                if (!path.exists() || disableCache)
+                    NetUtils.download(url, path.forceSetDir(false), false, handler::execute);
+
+                if (vIndex.isLegacy()){
+                    var f = legacyDir.to(asset.path);
+                    path.copy(f);
+                }
+                else if (vIndex.isVeryLegacy()){
+                    var f = veryLegacyDir.to(asset.path);
+                    path.copy(f);
+                }
+
+                Logger.getLogger().printLog(LogType.INFO, (i++) + " / " + count);
+                logState("asset" + i + "/" + count);
+                //logProgress(i, count);
+            }
+            catch (NoConnectionException e){
+                throw e;
+            }
+            catch (Exception e){
+                Logger.getLogger().log(LogType.INFO, "ERRASST: " + asset.id);
+                Logger.getLogger().log(e);
+            }
         }
     }
 

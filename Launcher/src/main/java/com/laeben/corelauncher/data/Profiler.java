@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.data;
 
 import com.laeben.corelauncher.data.entities.Profile;
-import com.laeben.core.util.EventHandler;
+import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.core.entity.Path;
@@ -110,6 +110,8 @@ public class Profiler {
             String n = profile.getName();
             if (set != null)
                 set.accept(profile);
+            if (profile.getName() == null)
+                return profile;
             profile.save();
             if (!profile.getName().equals(n)){
                 profilesDir.to(n).move(profile.getPath());

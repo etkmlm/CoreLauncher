@@ -44,3 +44,7 @@
     -fx-background-radius: 10px;
     -fx-font-size: 11pt;
 }
+
+#btnImport{
+    -fx-font-size: 12pt;
+}

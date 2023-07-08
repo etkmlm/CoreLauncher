@@ -3,7 +3,7 @@ package com.laeben.corelauncher.data;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.data.entities.Config;
 import com.laeben.corelauncher.data.entities.Profile;
-import com.laeben.core.util.EventHandler;
+import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.core.entity.Path;

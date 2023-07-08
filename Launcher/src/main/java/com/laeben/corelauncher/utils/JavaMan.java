@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.utils;
 
 import com.laeben.core.entity.exception.NoConnectionException;
-import com.laeben.core.util.EventHandler;
+import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.data.Configurator;
@@ -95,6 +95,9 @@ public class JavaMan {
                 return null;
             var obj = object.getAsJsonObject();
             return new JavaDownloadInfo(obj.get("release_name").getAsString(), obj.getAsJsonObject("binary").getAsJsonObject("package").get("link").getAsString(), j.majorVersion);
+        }
+        catch (NoConnectionException e){
+            throw e;
         }
         catch (Exception e){
             Logger.getLogger().log(e);

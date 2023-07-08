@@ -12,8 +12,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class Session {
-    private Thread inputThread;
-    private Thread errorThread;
+    private final Thread inputThread;
+    private final Thread errorThread;
 
     private boolean stopRequested;
     private BufferedReader inReader;
@@ -22,9 +22,7 @@ public class Session {
     private final Path workDir;
     private final Path logFile;
     private static int lastSessionId = 0;
-    private int sessionId;
-
-    //private Thread tokenThread;
+    private final int sessionId;
 
     public Session(Path workDir, List<String> commands){
         this.commands = commands;

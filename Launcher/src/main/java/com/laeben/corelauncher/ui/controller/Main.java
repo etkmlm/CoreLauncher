@@ -31,6 +31,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 import java.util.Arrays;
@@ -120,7 +121,15 @@ public class Main{
         lvProfiles.setItems(profiles);
         lvProfiles.setCellFactory((x) -> new CProfile());
 
-        btnStart.setOnMouseClicked((a) -> launch(selectedProfile, a.isShiftDown()));
+        btnStart.setOnMouseClicked((a) -> {
+            if (selectedProfile == null)
+                return;
+            if (btnStart.getText().equals("⯈"))
+                launch(selectedProfile, a.isShiftDown());
+            else{
+                selectedProfile.getWrapper().setStopRequested(true);
+            }
+        });
 
         btnSettings.setOnMouseClicked((a) -> FXManager.getManager().applyStage("settings").show());
 
@@ -176,19 +185,21 @@ public class Main{
         selectedProfile = p;
 
         try{
-            if (p != null){
-                gameVersion.setText(p.getVersionId());
-                gameDescription.setText(p.getName());
-                setUser(p.getUser() == null ? Configurator.getConfig().getUser().reload() : p.getUser().reload());
-            }
-            else{
-                gameVersion.setText(null);
-                gameDescription.setText(null);
-                setUser(Configurator.getConfig().getUser().reload());
-            }
+            Platform.runLater(() -> {
+                if (p != null){
+                    gameVersion.setText(p.getVersionId());
+                    gameDescription.setText(p.getName());
+                    setUser(p.getUser() == null ? Configurator.getConfig().getUser().reload() : p.getUser().reload());
+                }
+                else{
+                    gameVersion.setText(null);
+                    gameDescription.setText(null);
+                    setUser(Configurator.getConfig().getUser().reload());
+                }
 
-            Configurator.getConfig().setLastSelectedProfile(p);
-            Configurator.save();
+                Configurator.getConfig().setLastSelectedProfile(p);
+                Configurator.save();
+            });
         }
         catch (Exception e){
             Logger.getLogger().log(e);
@@ -196,24 +207,35 @@ public class Main{
     }
 
     private void launch(Profile p, boolean cache){
-        if (selectedProfile == null)
-            return;
-
         var wr = (Wrapper<?>)p.getWrapper();
+        Vanilla.getVanilla().setDisableCache(cache);
         wr.setDisableCache(cache).getHandler().addHandler("main", this::onGeneralEvent);
         new Thread(() -> {
             try{
+                Platform.runLater(() -> btnStart.setText("||"));
                 Launcher.getLauncher().prepare(p);
-                Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
-                if (Configurator.getConfig().hideAfter())
-                    FXManager.getManager().showAll();
+                if (!wr.isStopRequested()){
+                    Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
+                    if (Configurator.getConfig().hideAfter())
+                        FXManager.getManager().showAll();
+                }
+                Platform.runLater(() -> {
+                    wr.setStopRequested(false);
+                    status.setText(null);
+                    detailedStatus.setText(null);
+                    prg.setProgress(0);
+                    btnStart.setText("⯈");
+                });
+                lvProfiles.refresh();
                 wr.setDisableCache(false);
+                Vanilla.getVanilla().setDisableCache(false);
             }
             catch (NoConnectionException e){
                 Platform.runLater(() -> {
                     prg.setProgress(0);
                     status.setText(Translator.translate("error.connection"));
                     detailedStatus.setText(e.getMessage());
+                    btnStart.setText("⯈");
                 });
             }
             catch (Exception e){
@@ -222,6 +244,7 @@ public class Main{
                     prg.setProgress(0);
                     status.setText(Translator.translate("error.unknown"));
                     detailedStatus.setText(e.getMessage());
+                    btnStart.setText("⯈");
                 });
             }
         }).start();
@@ -277,6 +300,13 @@ public class Main{
                 var s = key.split(":\\.");
                 status = dot(s[1]);
                 Platform.runLater(() -> detailedStatus.setText(s[0].substring(1)));
+            }
+            else if (key.equals("stop")){
+                status = "";
+                Platform.runLater(() -> {
+                    detailedStatus.setText(null);
+                    prg.setProgress(0);
+                });
             }
             else
                 status = key;

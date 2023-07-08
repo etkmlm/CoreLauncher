@@ -147,7 +147,8 @@ public class CoreLauncher {
         CoreLauncherFX.launchFX();
 
         Configurator.getConfig().getTemporaryFolder().getFiles().forEach(Path::delete);
-        Configurator.getConfig().getLauncherPath().to("gamelog").getFiles().forEach(Path::delete);
+        if (Configurator.getConfig().delGameLogs())
+            Configurator.getConfig().getLauncherPath().to("gamelog").getFiles().forEach(Path::delete);
 
         System.exit(0);
     }

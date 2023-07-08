@@ -5,7 +5,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<AnchorPane prefHeight="86" prefWidth="100" styleClass="main" stylesheets="@../style/controls/cprofile.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane prefHeight="86" prefWidth="100" fx:id="root" styleClass="main" stylesheets="@../style/controls/cprofile.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
     <VBox alignment="CENTER" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="0">
         <ImageView fx:id="imgProfile" fitHeight="42.0" fitWidth="42.0" />
     </VBox>

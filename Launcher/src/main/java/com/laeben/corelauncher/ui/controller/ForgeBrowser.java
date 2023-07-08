@@ -144,7 +144,7 @@ public class ForgeBrowser {
                 return;
 
             var category = categories.stream().filter(x -> x.name.equals(value)).findFirst();
-            search.categoryId = category.map(category1 -> category1.id).orElse(0);
+            search.categoryId = category.map(category1 -> category1.id).orElse(-1);
         });
 
         var sorts = ModsSearchSortField.class.getEnumConstants();

@@ -26,6 +26,7 @@ public class Config {
     private boolean logMode;
     private boolean hideAfter;
     private boolean autoUpdate;
+    private boolean delGameLogs;
 
     public Path getGamePath(){
         return (gamePath == null ? DEFAULT_GAME_PATH : gamePath).forceSetDir(true);
@@ -90,6 +91,14 @@ public class Config {
     }
     public void setAutoUpdate(boolean autoUpdate){
         this.autoUpdate = autoUpdate;
+    }
+
+    public boolean delGameLogs(){
+        return delGameLogs;
+    }
+
+    public void setDelGameLogs(boolean a){
+        delGameLogs = a;
     }
 
     public void setShowSnapshots(boolean showSnapshots) {

@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
 import java.io.IOException;
@@ -53,7 +54,8 @@ public class FXManager {
             var stage = new LStage()
                     .setStageScene(newScene)
                     .setStageTitle(title)
-                    .setStyle(StageStyle.TRANSPARENT);
+                    .setStyle(StageStyle.TRANSPARENT)
+                    .setName(name);
 
             openStages.add(stage);
             stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, (a) -> closeStage(stage));
@@ -101,6 +103,15 @@ public class FXManager {
             applyStage("main").show();
         });
 
+    }
+
+    public void focus(String name){
+        var f = openStages.stream().filter(x -> x.getName().equals(name)).findFirst();
+        f.ifPresent(Window::requestFocus);
+    }
+
+    public LStage get(String name){
+        return openStages.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
     }
 
     public void hideAll(){

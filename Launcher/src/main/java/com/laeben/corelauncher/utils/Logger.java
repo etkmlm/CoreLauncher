@@ -49,7 +49,7 @@ public class Logger {
     private static String beginBlock(String title, String inner){
         String b = beginTitle(title);
 
-        return b + "\n" + inner + "\n" + generateHyph(b.length() + title.length());
+        return b + "\n" + inner + "\n" + generateHyph(b.length() + title.length()) + "\n\n";
     }
 
     private static String beginTitle(String title){

@@ -2,7 +2,7 @@ package com.laeben.corelauncher.minecraft.modding.curseforge;
 
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.NoConnectionException;
-import com.laeben.core.util.EventHandler;
+import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.core.util.RequesterFactory;
 import com.laeben.core.util.events.BaseEvent;
@@ -278,6 +278,7 @@ public class CurseForge {
         var manifest = path.to("manifest-" + name + ".json");
         if (!manifest.exists()){
             var ppp = download(mp.fileUrl, zip, false);
+            handler.execute(new KeyEvent("stop"));
             zip.extract(tempDir, null);
             ppp.delete();
             tempDir.to("manifest.json").move(manifest);
@@ -314,7 +315,6 @@ public class CurseForge {
     }
 
     public void includeMods(Profile p, List<Mod> mods, boolean includeDependencies){
-        String v = p.getVersionId();
         var dependencies = includeDependencies ? getDependencies(mods, p) : mods;
         for (var d : dependencies){
             if (p.getMods().stream().anyMatch(x -> x.id == d.id))

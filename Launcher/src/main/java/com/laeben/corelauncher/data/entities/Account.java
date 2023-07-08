@@ -90,28 +90,30 @@ public class Account{
 
                 String js = NetUtils.urlToString(PROFILE_URL + uuid);
 
-                var properties = GsonUtils.empty().fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
+                if (js != null){
+                    var properties = GsonUtils.empty().fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
 
-                var b64textures = properties.asList().stream().map(JsonElement::getAsJsonObject).filter(x -> x.get("name").getAsString().equals("textures")).findFirst().orElse(null);
-                String base64profile = b64textures == null ? null : b64textures.get("value").getAsString();
+                    var b64textures = properties.asList().stream().map(JsonElement::getAsJsonObject).filter(x -> x.get("name").getAsString().equals("textures")).findFirst().orElse(null);
+                    String base64profile = b64textures == null ? null : b64textures.get("value").getAsString();
 
-                var textures = GsonUtils.empty().fromJson(new String(Base64.getDecoder().decode(base64profile)), JsonObject.class).get("textures").getAsJsonObject();
+                    var textures = GsonUtils.empty().fromJson(new String(Base64.getDecoder().decode(base64profile)), JsonObject.class).get("textures").getAsJsonObject();
 
-                var skin = textures.get("SKIN");
-                if (skin != null)
-                    this.skin = skin.getAsJsonObject().get("url").getAsString();
-                else
-                    this.skin = null;
+                    var skin = textures.get("SKIN");
+                    if (skin != null)
+                        this.skin = skin.getAsJsonObject().get("url").getAsString();
+                    else
+                        this.skin = null;
 
-                var cape = textures.get("CAPE");
-                if (cape != null)
-                    this.cape = cape.getAsJsonObject().get("url").getAsString();
-                else
-                    this.cape = null;
+                    var cape = textures.get("CAPE");
+                    if (cape != null)
+                        this.cape = cape.getAsJsonObject().get("url").getAsString();
+                    else
+                        this.cape = null;
+                }
             }
 
         }
-        catch (NoConnectionException ignored){
+        catch (NoConnectionException | NullPointerException ignored){
 
         }
         catch (Exception e){

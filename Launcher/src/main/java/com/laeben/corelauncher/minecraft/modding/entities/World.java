@@ -26,6 +26,7 @@ public class World extends CResource{
     public boolean isHardcore;
     public Coordinate worldSpawn;
     public String gameVersion;
+    public boolean allowCommands;
     public long seed;
 
     public static World fromResource(String vId, String loader, Resource r){
@@ -46,6 +47,7 @@ public class World extends CResource{
         var data = nbt.first().asCompound().firstForName("Data").asCompound();
 
         world.levelName = data.firstForName("LevelName").value().toString();
+
         world.difficulty = Difficulty.values()[data.firstForName("Difficulty").intValue()];
         int spawnX = data.firstForName("SpawnX").intValue();
         int spawnY = data.firstForName("SpawnY").intValue();
@@ -56,6 +58,7 @@ public class World extends CResource{
         try{
             world.isHardcore = data.firstForName("hardcore").intValue() == 1;
             world.seed = data.firstForName("WorldGenSettings").asCompound().firstForName("seed").longValue();
+            world.allowCommands = data.firstForName("allowCommands").intValue() == 1;
         }
         catch (Exception ignored){
 

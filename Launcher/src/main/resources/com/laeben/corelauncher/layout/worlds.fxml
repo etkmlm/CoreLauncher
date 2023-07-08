@@ -6,12 +6,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
+<?import com.laeben.corelauncher.ui.controls.CButton?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.laeben.corelauncher.ui.controller.Worlds"
             stylesheets="@../style/worlds.css,@../style/controls/defcontrols.css,@../style/controls/listing.css"
             prefHeight="400.0" prefWidth="650.0" styleClass="all">
     <ListView fx:id="lvWorlds" AnchorPane.bottomAnchor="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" prefWidth="175"/>
+    <CButton fx:id="btnImport" styleClass="circle-button" prefWidth="40" prefHeight="40" text="⇲" AnchorPane.leftAnchor="135" AnchorPane.bottomAnchor="20"/>
     <AnchorPane styleClass="panel" AnchorPane.leftAnchor="195" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10">
         <Label alignment="CENTER" fx:id="lblLevelName" AnchorPane.topAnchor="20" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10"/>
         <GridPane alignment="CENTER" vgap="10" hgap="10" AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.leftAnchor="10">
@@ -39,6 +41,13 @@
             <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="3">
                 <Label fx:id="lblSpawn"/>
             </HBox>
+
+            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.allowCheats" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                <Label fx:id="lblCheats"/>
+            </HBox>
+
+            <CButton fx:id="btnBackup" styleClass="def-button" maxWidth="Infinity" text="Backup" GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2"/>
         </GridPane>
     </AnchorPane>
 </AnchorPane>

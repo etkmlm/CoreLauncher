@@ -23,6 +23,7 @@ public class LStage extends Stage {
     }
 
     private LScene scene;
+    private String name;
 
     public LStage(){
         getIcons().add(LOGO16);
@@ -36,6 +37,15 @@ public class LStage extends Stage {
         loader.setResources(Translator.getTranslator().getBundle());
 
         return loader;
+    }
+
+    public LStage setName(String name){
+        this.name = name;
+        return this;
+    }
+
+    public String getName(){
+        return name;
     }
 
     public LStage setStyle(StageStyle style){

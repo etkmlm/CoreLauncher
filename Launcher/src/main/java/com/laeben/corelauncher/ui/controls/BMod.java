@@ -4,6 +4,7 @@ import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.File;
 import com.laeben.corelauncher.minecraft.modding.entities.CResource;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.entities.LModLink;
 import com.laeben.corelauncher.ui.utils.FXManager;
 import javafx.application.Platform;
@@ -21,8 +22,8 @@ public class BMod extends ListCell<LModLink> {
     private CResource exists;
 
     private final ContextMenu menu;
-    //private CResource rs;
     private List<File> allFiles;
+
 
     public BMod(){
         var path = CoreLauncherFX.class.getResource("/com/laeben/corelauncher/entities/bmod.fxml");
@@ -77,24 +78,27 @@ public class BMod extends ListCell<LModLink> {
     @FXML
     private void initialize(){
 
-        btnInstall.setOnMouseClicked(a -> Platform.runLater(() -> {
+        btnInstall.setOnMouseClicked(a -> new Thread(() -> {
             var profile = link.profile();
 
             if (exists == null){
                 var resource = CurseForge.getForge().getFullResource(profile.getVersionId(), profile.getWrapper().getType(), link.resource());
                 var mod = CResource.fromResourceGeneric(profile.getVersionId(), profile.getWrapper().getIdentifier(), resource);
+                Platform.runLater(() -> FXManager.getManager().focus("main"));
                 CurseForge.getForge().include(profile, mod);
-                btnInstall.setText("-");
+                Platform.runLater(() -> {
+                    btnInstall.setText("-");
+                    FXManager.getManager().focus("mods");
+                });
 
                 exists = mod;
             }
             else{
                 CurseForge.getForge().remove(profile, CResource.fromResourceGeneric(profile.getVersionId(), profile.getWrapper().getIdentifier(), link.resource()));
-                btnInstall.setText("⭳");
-
+                Platform.runLater(() -> btnInstall.setText("⭳"));
                 exists = null;
             }
-        }));
+        }).start());
 
         btnMore.setOnMouseClicked(a -> {
             menu.getItems().clear();
@@ -112,7 +116,6 @@ public class BMod extends ListCell<LModLink> {
                 item.setText(file.fileName);
                 item.setOnAction(b -> {
 
-                    //var path = profile.getPath().to(file.fileName);
                     if (exists != null){
                         CurseForge.getForge().remove(profile, exists);
                     }

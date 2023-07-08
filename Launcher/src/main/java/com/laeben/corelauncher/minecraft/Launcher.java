@@ -9,7 +9,7 @@ import com.laeben.corelauncher.minecraft.entities.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.laeben.corelauncher.minecraft.utils.CommandConcat;
-import com.laeben.core.util.EventHandler;
+import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.JavaMan;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.entities.LogType;
@@ -152,6 +152,8 @@ public class Launcher {
             handleState("sessionStart");
             // Start new session
             new Session(info.dir, finalCmds).start();
+
+            handleState("sessionEnd");
         }
         catch (VersionNotFoundException e){
             handleState(".error.noVersion");

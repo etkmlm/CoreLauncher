@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.ui.controller;
 
+import com.laeben.core.entity.Path;
+import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.data.entities.Profile;
@@ -9,17 +11,19 @@ import com.laeben.corelauncher.ui.utils.FXManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 public class Worlds {
-
     private Profile profile;
 
     public static LStage open(Profile p){
@@ -67,7 +71,12 @@ public class Worlds {
     public Label lblGameType;
     @FXML
     public Label lblSpawn;
-
+    @FXML
+    public Label lblCheats;
+    @FXML
+    public Button btnBackup;
+    @FXML
+    public Button btnImport;
     private World selectedWorld;
 
     @FXML
@@ -98,6 +107,58 @@ public class Worlds {
 
             setClipboard(selectedWorld.worldSpawn.toString());
         });
+
+        btnBackup.setOnMouseClicked(a -> {
+            if (selectedWorld == null)
+                return;
+
+            var worlds = profile.getPath().to("saves");
+            var worldFolder = worlds.to(selectedWorld.levelName);
+            if (!worldFolder.exists())
+                return;
+
+            var chooser = new FileChooser();
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
+            chooser.setInitialFileName(selectedWorld.getIdentifier() + ".zip");
+            var f = chooser.showSaveDialog(btnBackup.getScene().getWindow());
+            if (f == null)
+                return;
+            var path = Path.begin(f.toPath());
+
+            new Thread(() -> worldFolder.zip(path)).start();
+        });
+
+        btnImport.setOnMouseClicked(a -> {
+            var chooser = new FileChooser();
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
+            var f = chooser.showOpenDialog(btnImport.getScene().getWindow());
+            if (f == null)
+                return;
+            var path = Path.begin(f.toPath());
+            var saves = profile.getPath().to("saves");
+            var temp = Configurator.getConfig().getTemporaryFolder().to(path.getNameWithoutExtension());
+            Path w;
+            path.extract(temp, null);
+
+            var files = temp.getFiles();
+            if (files.size() == 1 && files.get(0).isDirectory())
+                w = files.get(0);
+            else
+                w = temp;
+
+            String name = w.getName();
+
+            if (saves.getFiles().stream().anyMatch(x -> x.getName().equals(name))){
+                temp.delete();
+                return;
+            }
+
+            w.move(saves.to(name));
+
+
+
+            Profiler.getProfiler().setProfile(profile.getName(), null);
+        });
     }
 
     public void setClipboard(Object text){
@@ -112,5 +173,6 @@ public class Worlds {
         lblDifficulty.setText(Translator.translate("world.difficulty." + w.difficulty.name().toLowerCase(Locale.US)));
         lblGameType.setText(Translator.translate("world.type." + w.gameType.name().toLowerCase(Locale.US)));
         lblSpawn.setText(w.worldSpawn.toString());
+        lblCheats.setText(w.allowCommands ? "+" : "-");
     }
 }

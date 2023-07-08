@@ -12,10 +12,12 @@ import com.laeben.corelauncher.ui.entities.LStage;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.OSUtils;
 import com.laeben.core.entity.Path;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 
 import java.io.IOException;
@@ -65,6 +67,8 @@ public class CProfile extends ListCell<LProfile> {
     private MenuItem btnOpenFolder;
     @FXML
     private MenuItem btnDelete;
+    @FXML
+    private AnchorPane root;
 
     @Override
     protected void updateItem(LProfile profile, boolean empty) {
@@ -135,9 +139,10 @@ public class CProfile extends ListCell<LProfile> {
             lblProfileDescription.setText(resInfo);
 
         btnDelete.setOnAction((a) ->
-                Profiler.getProfiler().deleteProfile(p));
+                Platform.runLater(() -> Profiler.getProfiler().deleteProfile(p)));
 
 
+        root.setOnMouseClicked(a -> profile.setSelected(true));
         btnPlay.setOnMouseClicked((a) -> profile.setSelected(true));
 
 

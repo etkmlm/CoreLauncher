@@ -4,15 +4,15 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
-<HBox alignment="CENTER" prefHeight="600" prefWidth="590.0" styleClass="all" stylesheets="@../style/settings.css,@../style/controls/defcontrols.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.Settings">
-    <VBox alignment="CENTER">
-        <VBox>
+<HBox alignment="CENTER" prefHeight="600" prefWidth="610" styleClass="all" stylesheets="@../style/settings.css,@../style/controls/defcontrols.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.Settings">
+    <VBox alignment="CENTER" maxWidth="Infinity">
+        <VBox maxWidth="Infinity">
             <Label styleClass="title" text="%settings.title.general" />
             <Rectangle height="15" />
-            <GridPane hgap="10" vgap="10">
+            <GridPane hgap="10" vgap="10" maxWidth="Infinity">
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
-                    <ColumnConstraints prefWidth="180" />
+                    <ColumnConstraints prefWidth="220" />
                     <ColumnConstraints />
                 </columnConstraints>
 
@@ -58,13 +58,13 @@
 
             <Rectangle height="10" />
         </VBox>
-        <VBox>
+        <VBox maxWidth="Infinity">
             <Label styleClass="title" text="%settings.title.launch" />
             <Rectangle height="15" />
-            <GridPane hgap="10" vgap="10">
+            <GridPane hgap="10" vgap="10" maxWidth="Infinity">
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
-                    <ColumnConstraints prefWidth="180" />
+                    <ColumnConstraints prefWidth="220" />
                     <ColumnConstraints />
                 </columnConstraints>
 
@@ -104,6 +104,9 @@
 
                 <Label styleClass="prop-key" text="%settings.autoUpdate" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                 <CheckBox fx:id="chkAutoUpdate" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+
+                <Label styleClass="prop-key" text="%settings.gameLog" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <CheckBox fx:id="chkGamelog" GridPane.columnIndex="2" GridPane.rowIndex="6" />
             <rowConstraints>
                <RowConstraints />
                <RowConstraints />

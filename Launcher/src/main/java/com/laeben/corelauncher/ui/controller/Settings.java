@@ -64,6 +64,8 @@ public class Settings {
     public CheckBox chkAutoUpdate;
     @FXML
     public CButton btnSaveRAM;
+    @FXML
+    public CheckBox chkGamelog;
 
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMinRAM;
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMaxRAM;
@@ -214,6 +216,11 @@ public class Settings {
             Configurator.save();
         });
 
+        chkGamelog.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setDelGameLogs(chkGamelog.isSelected());
+            Configurator.save();
+        });
+
         btnSelectGamePath.setOnMouseClicked(x -> {
             DirectoryChooser chooser = new DirectoryChooser();
             var file = chooser.showDialog(btnSelectGamePath.getScene().getWindow());
@@ -250,8 +257,6 @@ public class Settings {
         });
 
         txtAccount.setOnKeyPressed(a -> {
-            if (a.getCode() != KeyCode.ENTER)
-                return;
             Configurator.getConfig().setUser(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isEmpty() || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
             Configurator.save();
         });

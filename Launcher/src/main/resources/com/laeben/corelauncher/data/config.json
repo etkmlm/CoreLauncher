@@ -11,6 +11,7 @@
   "lastSelectedProfile": null,
   "customJavaVersions": null,
   "defaultMinRAM": 0,
+  "delGameLogs": true,
   "defaultMaxRAM": 4096,
   "showOldReleases": false,
   "showSnapshots": false,
