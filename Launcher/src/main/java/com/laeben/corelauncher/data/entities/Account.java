@@ -53,6 +53,10 @@ public class Account{
         this.username = username;
     }
 
+    /**
+     * Authenticate the account with Mojang.
+     * @return the account
+     */
     public Account authenticate(){
         if (!isOnline || !NetUtils.check())
             return this;
@@ -67,6 +71,11 @@ public class Account{
         return tokener;
     }
 
+    /**
+     * Create a new account from the username.
+     * @param username the username
+     * @return new account
+     */
     public static Account fromUsername(String username){
         return new Account(username);
     }
@@ -76,6 +85,12 @@ public class Account{
         return username;
     }
 
+    /**
+     * Reload the account.
+     * <br/>
+     * Helps to retrieve the uuid, skin, cape, and head.
+     * @return the account
+     */
     public Account reload(){
 
         if (isReloaded)
@@ -127,6 +142,10 @@ public class Account{
         return this;
     }
 
+    /**
+     * Mark the account as Mojang or not.
+     * @param isOnline is online
+     */
     public Account setOnline(boolean isOnline){
         this.isOnline = isOnline;
 
@@ -136,6 +155,7 @@ public class Account{
     public boolean isOnline(){
         return isOnline;
     }
+
 
     private void reloadHead(){
         if (skin == null){

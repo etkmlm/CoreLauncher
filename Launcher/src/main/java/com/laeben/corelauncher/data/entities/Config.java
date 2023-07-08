@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class Config {
-    private static final Path DEFAULT_GAME_PATH = new Path(OSUtils.getAppFolder());
+    private static final Path DEFAULT_GAME_PATH = Path.begin(OSUtils.getAppFolder());
 
     private Account user;
     private Path gamePath;
@@ -134,7 +134,6 @@ public class Config {
     }
 
     public Account getUser(){
-
         if (user == null){
             setUser(Configurator.generateDefaultConfig().getUser());
         }

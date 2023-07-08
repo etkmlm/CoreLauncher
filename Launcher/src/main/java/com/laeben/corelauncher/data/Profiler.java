@@ -46,6 +46,10 @@ public class Profiler {
         return instance;
     }
 
+    /**
+     * Move profiles to the current game path from the old game path.
+     * @param oldGamePath the old game path
+     */
     public void moveProfiles(Path oldGamePath){
         try{
             oldGamePath.to("launcher").to("profiles").getFiles().forEach(x -> x.copy(profilesDir.to(x.getName())));
@@ -63,11 +67,20 @@ public class Profiler {
         return profiles.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(Profile.empty());
     }
 
+    /**
+     * Backup the profile to the target zip file.
+     * @param p the profile
+     * @param to target zip file
+     */
     public static void backup(Profile p, Path to){
         var path = p.getPath();
         path.zip(to);
     }
 
+    /**
+     * Import profile from the zip file.
+     * @param path zip file
+     */
     public void importProfile(Path path){
         var ext = path.getExtension();
         var tempProfiles = Configurator.getConfig().getTemporaryFolder();
@@ -100,18 +113,32 @@ public class Profiler {
         handler.execute(new ChangeEvent("profileCreate", null, p));
     }
 
-    public Profile setProfile(String name, Consumer<Profile> set){
+    /**
+     * Set profile from the name.
+     * <br/>
+     * Execute the profile handlers.
+     * @param name name of the profile
+     * @param set executor
+     */
+    public void setProfile(String name, Consumer<Profile> set){
         var profile = getProfile(name);
-        return setProfile(profile, set);
+        setProfile(profile, set);
     }
 
-    private Profile setProfile(Profile profile, Consumer<Profile> set){
+    /**
+     * Set profile.
+     * <br/>
+     * Execute the profile handlers.
+     * @param profile the profile
+     * @param set executor
+     */
+    private void setProfile(Profile profile, Consumer<Profile> set){
         try{
             String n = profile.getName();
             if (set != null)
                 set.accept(profile);
             if (profile.getName() == null)
-                return profile;
+                return;
             profile.save();
             if (!profile.getName().equals(n)){
                 profilesDir.to(n).move(profile.getPath());
@@ -122,7 +149,7 @@ public class Profiler {
         catch (Exception e){
             Logger.getLogger().log(e);
         }
-        return profile;
+        return;
     }
 
     public void reload(){
@@ -155,7 +182,8 @@ public class Profiler {
         var profile = createProfile(name);
         if (profile.isEmpty())
             return getProfile(name);
-        return setProfile(profile, set);
+        setProfile(profile, set);
+        return profile;
     }
 
     public void deleteProfile(Profile p){

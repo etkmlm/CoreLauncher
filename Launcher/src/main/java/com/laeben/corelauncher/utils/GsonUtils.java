@@ -35,6 +35,13 @@ public class GsonUtils {
             .registerTypeAdapter(Image.class, new Image.ImageFactory())
             .create();
 
+    /**
+     * Shortcut for gson.fromJson()
+     * @param obj target json element
+     * @param type type of the deserialization context
+     * @param <T> generic of the deserialization
+     * @return context
+     */
     public static <T> T fromJson(JsonElement obj, Type type){
         return empty().fromJson(obj, type);
     }

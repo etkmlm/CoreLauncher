@@ -4,7 +4,7 @@ import com.laeben.core.LaebenApp;
 import com.laeben.corelauncher.minecraft.entities.Library;
 
 public final class LauncherConfig {
-    public static final double VERSION = 1.02;
+    public static final double VERSION = 1.03;
     private static final String APP_ID = "clauncher";
     public static final LaebenApp APPLICATION;
 

@@ -1,8 +1,7 @@
 package com.laeben.corelauncher;
 
 import com.laeben.core.LaebenApp;
-import com.laeben.core.util.events.KeyEvent;
-import com.laeben.core.util.events.ObjectEvent;
+import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
@@ -117,7 +116,7 @@ public class CoreLauncher {
         OS_64 = OSUtils.is64BitOS();
 
         LaebenApp.getHandler().addHandler("clauncher", a -> {
-            if (a instanceof ObjectEvent oe){
+            if (a instanceof ValueEvent oe){
                 if (oe.getKey().equals("exception"))
                     Logger.getLogger().log((Exception) oe.getValue());
                 else if (oe.getKey().equals("netException")){

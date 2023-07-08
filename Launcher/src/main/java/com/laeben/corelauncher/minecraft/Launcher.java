@@ -51,6 +51,10 @@ public class Launcher {
         handler.execute(new KeyEvent(key));
     }
 
+    /**
+     * Prepares the profile to launch.
+     * @param profile target profile
+     */
     public void prepare(Profile profile){
         handleState("prepare" + profile.getName());
 
@@ -65,6 +69,10 @@ public class Launcher {
         CurseForge.getForge().installResourcepacks(profile, profile.getResources());
     }
 
+    /**
+     * Launch the game.
+     * @param info info for the execution
+     */
     public void launch(ExecutionInfo info)
     {
         if (info.version == null || info.version.id == null)
