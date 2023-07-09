@@ -71,5 +71,82 @@ If you listen to my advice, you should create a new folder for the launcher, bec
 
 ## How can I use it?
 
-### Main Page
+### Main
+![](images/maindesc.png)
 
+1) User section. (If you don't set a profile user, default user will be used.)
+2) Selected profile info.
+   1) Game version.
+   2) Profile name.
+3) Start button.
+   - You can start the launching process when the button has the play icon.
+   - You can stop the launching process when the button has the pause icon.
+   - If you click this button when pressing the shift, all game files will download again.
+4) Profile info.
+   1) Loader icon.
+   2) Profile name.
+   3) Game version.
+   4) Description.
+      - If the loader is Vanilla or custom, it shows only count of resourcepacks and worlds.
+      - Else, it shows the loader version, count of mods, modpacks, resourcepacks, and worlds.
+   5) Action buttons.
+      1) Menu button. Opens the profile menu.
+      2) Select button. Selects the profile.
+   6) The profile menu.
+      1) **Mods and Resources:** Opens the resources page. (Contains included mods, modpacks, resourcepacks, and worlds.)
+      2) **Worlds:** Opens the local worlds page.
+      3) **Complete Backup:** Creates a compressed backup (zip) of the profile.
+      4) **Export:** Exports the configuration of the profile. You can easily share this file to another.
+      5) **Open Folder:** Opens the profile folder.
+      6) **Edit:** Opens the profile edit page.
+      7) **Delete:** Deletes the profile.
+   7) Add button. Opens an empty profile edit page.
+   8) Import button. Imports a profile from zip or json file.
+   9) Search field. Searches in the profiles.
+   10) Detailed description.
+       - Generally, it shows the remaining and total mbs while downloading.
+       - Also, it shows the loader installing process while installing the loader.
+   11) Settings button.
+   12) About button.
+
+## Settings
+![](images/settingsdesc.png)
+
+1) Custom background image selector.
+   - If you select any image, the main page controls be a little transparent, and the background has changed.
+2) Game path selector.
+   - When you select a new game path, an alert shows to move your profies to the new game path. Click yes if you wish.
+3) Account selector.
+   1) Username field.
+   2) Mojang account selector. If you check it, the account will mark as a Mojang account.
+4) Java selector.
+   1) Java versions will show up in this format: {Version Name} - {Java Version}
+   2) Option button opens the java manager page.
+5) Min RAM field.
+6) Max RAM field.
+7) Max RAM slider.
+8) RAM save button. (Other settings will be saved same time.)
+9) Checkboxes.
+
+## Java Manager
+![](images/javamandesc.png)
+
+## Profile Edit
+![](images/peditdesc.png)
+
+## Mods and Resource
+![](images/modsdesc.png)
+
+## Browser
+![](images/browserdesc.png)
+
+## Worlds
+![](images/worldsdesc.png)
+
+It doesn't show corrupted or non installed worlds.
+
+1) List of the worlds. (By level name.)
+2) Import button. Imports the world from a zip file.
+   - The zip file has to contain the level folder in its root, then the level files in it.
+3) Level name of the selected world.
+4) Backup button. Compresses the selected world as a zip file.
