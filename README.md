@@ -159,11 +159,29 @@ You don't need to add a custom Java. The launcher downloads the required Java se
    - Fill it like "-Dfoo=bar -db -x -d abc"
 5) Save and close button.
 
-## Mods and Resource
+## Mods and Resources
 ![](images/modsdesc.png)
 
+1) Identifier of the resource.
+2) Resource info.
+   1) Icon.
+   2) Name.
+   3) File name.
+3) Remove button.
+4) Browse button. Opens the browser page.
+5) OptiFine button.
+   - Only works when the selected loader is Forge.
+   - It shows available OptiFine versions to include.
+   - {Version Name} - {Forge Version}
+6) Sodium button.
+   - Only works when the selected loader is Fabric or Quilt.
+   - It shows available Sodium versions to include.
+   - {Version}
+7) Update button. Updates all mods to their latest version.
+8) Search field. Searches in all resources. (Mods, modpacks, resourcepacks, and worlds.)
+
 ## Browser
-![](images/browserdesc.png)
+![](images/browsedesc.png)
 
 1) Main categories. (Mods, modpacks, resourcepacks, and worlds.)
 2) Categories. (Depends on the main category.)
