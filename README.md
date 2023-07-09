@@ -3,6 +3,10 @@
 # CoreLauncher
 A minimalized, deeply customizable launcher for Minecraft.
 
+# Social
+
+[Reddit](https://www.reddit.com/r/corelauncher/)
+
 ## Why should I use CoreLauncher?
 Because,
 - It is fast.
