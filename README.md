@@ -1,4 +1,4 @@
-<img src="logo.png" width="100" height="100"/>
+<img src="images/logo.png" width="100" height="100"/>
 
 # CoreLauncher
 A minimalized, deeply customizable launcher for Minecraft.
@@ -131,14 +131,47 @@ If you listen to my advice, you should create a new folder for the launcher, bec
 ## Java Manager
 ![](images/javamandesc.png)
 
+You don't need to add a custom Java. The launcher downloads the required Java self. But you may need to add your custom Java to activate your graphic settings. To add, see below.
+
+1) Major version.
+2) Version name. (If it is downloaded by the launcher, starts with "JDK".)
+3) Path selector. (Not changeable. If you want to change, you need to delete it and add a new one.)
+4) Action button.
+   - Delete, if the version exists.
+   - Add, if the version non exists.
+5) Creates a empty row to add a new custom version.
+
 ## Profile Edit
 ![](images/peditdesc.png)
+
+1) Profile name.
+2) Loader type.
+   1) Vanilla
+   2) Forge
+   3) Fabric
+   4) Quilt
+   5) OptiFine
+   6) Custom
+3) Loader version.
+   - If you selected Vanilla, OptiFine or custom, it will be empty.
+   - If you selected another loader, you cannot save the profile without select a loader version.
+4) JVM args.
+   - Fill it like "-Dfoo=bar -db -x -d abc"
+5) Save and close button.
 
 ## Mods and Resource
 ![](images/modsdesc.png)
 
 ## Browser
 ![](images/browserdesc.png)
+
+1) Main categories. (Mods, modpacks, resourcepacks, and worlds.)
+2) Categories. (Depends on the main category.)
+3) Sort by. (Featured, popularity, last update, name, author, total download, category, and game version.)
+4) Sort order. (Ascending or descending)
+5) Remove button.
+6) Menu button. (Includes all versions of the resource.)
+   - It includes the latest version in normal, you can select another version with this button.
 
 ## Worlds
 ![](images/worldsdesc.png)
