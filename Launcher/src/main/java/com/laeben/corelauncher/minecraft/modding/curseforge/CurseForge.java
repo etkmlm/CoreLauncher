@@ -2,6 +2,7 @@ package com.laeben.corelauncher.minecraft.modding.curseforge;
 
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.core.util.RequesterFactory;
@@ -342,7 +343,19 @@ public class CurseForge {
 
             //System.out.println(++i + " / " + size + " - " + a.fileName);
 
-            if (download(a.fileUrl, path.to(a.fileName), false) == null){
+            String url = a.fileUrl;
+            if (url.startsWith("OptiFine")){
+                var f = OptiFine.getOptiFine().getVersion(p.getVersionId(), url);
+                if (f == null){
+                    System.out.println("ERR");
+                    continue;
+                }
+                OptiFine.installForge(f, path);
+                continue;
+            }
+
+
+            if (download(url, path.to(a.fileName), false) == null){
                 String x = Modrinth.getModrinth().getMod(a.name, a.fileName);
                 if (x == null){
                     System.out.println("ERR");

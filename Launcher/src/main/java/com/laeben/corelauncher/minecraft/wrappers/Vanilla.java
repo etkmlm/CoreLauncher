@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.minecraft.wrappers;
 
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entities.MainInfo;
 import com.laeben.corelauncher.minecraft.entities.Version;
@@ -91,6 +92,9 @@ public class Vanilla extends Wrapper<Version> {
         Version info;
 
         try{
+
+            if (stopRequested)
+                return;
             if (!jsonPath.exists() || disableCache)
             {
                 String vJson = getVersionString(v.id);
@@ -108,7 +112,7 @@ public class Vanilla extends Wrapper<Version> {
 
             Logger.getLogger().printLog(LogType.INFO, "Vanilla Version " + v.id + " up to date!");
         }
-        catch (NoConnectionException e){
+        catch (NoConnectionException | StopException e){
             throw e;
         }
         catch (Exception e){

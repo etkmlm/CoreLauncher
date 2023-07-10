@@ -1,6 +1,8 @@
 package com.laeben.corelauncher.ui.controller;
 
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.util.Cat;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.data.Configurator;
@@ -22,6 +24,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ProgressEvent;
+import com.laeben.corelauncher.utils.NetUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,7 +34,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 import java.util.Arrays;
@@ -128,6 +130,8 @@ public class Main{
                 launch(selectedProfile, a.isShiftDown());
             else{
                 selectedProfile.getWrapper().setStopRequested(true);
+                Vanilla.getVanilla().setStopRequested(true);
+                NetUtils.stop();
             }
         });
 
@@ -214,33 +218,57 @@ public class Main{
             try{
                 Platform.runLater(() -> btnStart.setText("||"));
                 Launcher.getLauncher().prepare(p);
-                if (!wr.isStopRequested()){
-                    Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
-                    if (Configurator.getConfig().hideAfter())
-                        FXManager.getManager().showAll();
-                }
+                Cat.sleep(200);
                 Platform.runLater(() -> {
-                    wr.setStopRequested(false);
                     status.setText(null);
                     detailedStatus.setText(null);
                     prg.setProgress(0);
                     btnStart.setText("⯈");
                 });
+
+                if (wr.isStopRequested()){
+                    wr.setStopRequested(false);
+                    Vanilla.getVanilla().setStopRequested(false);
+                    return;
+                }
+
+                Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
+
+                if (Configurator.getConfig().hideAfter())
+                    FXManager.getManager().showAll();
+
                 lvProfiles.refresh();
                 wr.setDisableCache(false);
                 Vanilla.getVanilla().setDisableCache(false);
             }
             catch (NoConnectionException e){
+                Cat.sleep(200);
                 Platform.runLater(() -> {
+                    wr.setStopRequested(false);
+                    Vanilla.getVanilla().setStopRequested(false);
                     prg.setProgress(0);
                     status.setText(Translator.translate("error.connection"));
                     detailedStatus.setText(e.getMessage());
                     btnStart.setText("⯈");
                 });
             }
+            catch (StopException e){
+                Cat.sleep(200);
+                Platform.runLater(() -> {
+                    wr.setStopRequested(false);
+                    Vanilla.getVanilla().setStopRequested(false);
+                    status.setText(null);
+                    detailedStatus.setText(null);
+                    prg.setProgress(0);
+                    btnStart.setText("⯈");
+                });
+            }
             catch (Exception e){
                 Logger.getLogger().log(e);
+                Cat.sleep(200);
                 Platform.runLater(() -> {
+                    wr.setStopRequested(false);
+                    Vanilla.getVanilla().setStopRequested(false);
                     prg.setProgress(0);
                     status.setText(Translator.translate("error.unknown"));
                     detailedStatus.setText(e.getMessage());
@@ -258,7 +286,7 @@ public class Main{
     private void onGeneralEvent(BaseEvent e){
         if (e instanceof ProgressEvent p){
             Platform.runLater(() -> {
-                String id = p.key.equals("download") ? "mb" : p.key;
+                String id = p.getKey().equals("download") ? "mb" : p.getKey();
                 detailedStatus.setText(p.getRemain() + id + " / " + p.getTotal() + id);
                 prg.setProgress(p.getProgress());
             });
@@ -282,11 +310,15 @@ public class Main{
             }
             else if (key.startsWith("sessionStart")){
                 status = "";
-                if (Configurator.getConfig().hideAfter())
-                    FXManager.getManager().hideAll();
+                selectedProfile.getWrapper().setStopRequested(false);
+                Vanilla.getVanilla().setStopRequested(false);
+                detailedStatus.setText(null);
+                prg.setProgress(0);
+                btnStart.setText("⯈");
                 Platform.runLater(() -> {
-                    detailedStatus.setText(null);
-                    prg.setProgress(0);
+
+                    if (Configurator.getConfig().hideAfter())
+                        FXManager.getManager().hideAll();
                 });
             }
             else if (key.startsWith("acqVersion"))

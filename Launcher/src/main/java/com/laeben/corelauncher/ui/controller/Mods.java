@@ -112,12 +112,9 @@ public class Mods {
                     var item = new MenuItem();
                     item.setText(v.getWrapperVersion() + " - " + v.forgeWrapperVersion + (v.checkForge(ver) ? " *" : ""));
                     item.setOnAction(a -> {
-                        OptiFine.getOptiFine().refreshUrl(v);
-                        if (v.url == null)
-                            return;
                         var mod = new Mod();
                         mod.fileName = v.getJsonName() + ".jar";
-                        mod.fileUrl = v.url;
+                        mod.fileUrl = v.getWrapperVersion();
                         mod.name = v.getJsonName();
                         mod.logoUrl = "/com/laeben/corelauncher/images/optifine.png";
                         mod.classId = ClassType.MOD.getId();

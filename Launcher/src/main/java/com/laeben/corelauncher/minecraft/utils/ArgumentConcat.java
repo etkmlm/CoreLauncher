@@ -52,7 +52,10 @@ public class ArgumentConcat {
 
         for (int i = 0; i < argz.size(); i++){
             String a = argz.get(i);
-            if (a.startsWith("--")){
+            if (a.startsWith("--add-")){
+                args.add(new Arg(a + (a.contains("=") ? "" : "=" + argz.get(++i))));
+            }
+            else if (a.startsWith("--")){
                 var arg = new Arg(a).setValue(argz.get(++i));
                 if (arg.isOpens() || arg.isExports() || arg.isModules())
                     args.add(0, arg);

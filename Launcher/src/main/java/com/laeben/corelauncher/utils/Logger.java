@@ -6,11 +6,15 @@ import com.laeben.core.entity.Path;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
+import java.util.Date;
 
 public class Logger {
     private static Logger instance;
     private static final String logLines = generateHyph(10);
+    private static final SimpleDateFormat format = new SimpleDateFormat("HH:mm");
 
     private Path logDir;
 
@@ -76,10 +80,14 @@ public class Logger {
         log(generateHyph(len));
     }
 
+    private String getTime(){
+        return format.format(Date.from(Instant.now()));
+    }
+
     private void log(String content){
         System.out.println(content);
         if (Configurator.getConfig().getLogMode())
-            todayLogFile().append("\n" + content);
+            todayLogFile().append("\n[" + getTime() + "] " + content);
     }
 
     public void log(LogType type, String content){

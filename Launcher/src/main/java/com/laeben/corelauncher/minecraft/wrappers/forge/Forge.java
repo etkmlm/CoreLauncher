@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.minecraft.wrappers.forge;
 
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
@@ -133,6 +134,9 @@ public class Forge extends Wrapper<ForgeVersion> {
             var path = Configurator.getConfig().getTemporaryFolder();
             path = NetUtils.download(art.getUrl(), path, true, null);
 
+            if (stopRequested)
+                throw new StopException();
+
             var target = Configurator.getConfig().getGamePath().toFile();
 
             logState(".forge.state.install");
@@ -201,7 +205,7 @@ public class Forge extends Wrapper<ForgeVersion> {
                 versionsPath.to(name).delete();
             }
         }
-        catch (NoConnectionException e){
+        catch (NoConnectionException | StopException e){
             throw e;
         }
         catch (Exception e){

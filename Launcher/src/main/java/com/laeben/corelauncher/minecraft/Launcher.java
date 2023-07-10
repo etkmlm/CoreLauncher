@@ -102,6 +102,8 @@ public class Launcher {
                         info.java = JavaMan.getDefault();
                         if (info.java.majorVersion != linfo.java.majorVersion){
                             // Last solution, download new Java and relaunch (if there is internet here of course...)
+                            info.java = null;
+
                             handleState("java" + linfo.java.majorVersion);
                             Logger.getLogger().log(LogType.INFO, "Downloading Java " + linfo.java.majorVersion);
                             try{
@@ -139,7 +141,7 @@ public class Launcher {
                     "-Dfml.ignoreInvalidMinecraftCertificates=true"
             };
 
-            // If version lower than 1.7.2 (very legacy) then copy all textures to resources folder in profile folder
+            // If the version lower than 1.7.2 (very legacy) then copy all textures to resources folder in profile folder
             if (linfo.assets.isVeryLegacy()){
                 var resources = info.dir.to("resources");
                 gameDir.to("assets", "virtual", "verylegacy").copy(resources);
@@ -158,10 +160,10 @@ public class Launcher {
                     .generate();
 
             handleState("sessionStart");
-            // Start new session
+            // Start a new session
             new Session(info.dir, finalCmds).start();
 
-            handleState("sessionEnd");
+            //handleState("sessionEnd");
         }
         catch (VersionNotFoundException e){
             handleState(".error.noVersion");

@@ -13,6 +13,6 @@ public class PathFactory implements JsonSerializer<Path>, JsonDeserializer<Path>
 
     @Override
     public Path deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-        return new Path(java.nio.file.Path.of(jsonElement.getAsString()));
+        return Path.begin(java.nio.file.Path.of(jsonElement.getAsString()));
     }
 }

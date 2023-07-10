@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.minecraft.wrappers.fabric;
 
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
@@ -120,6 +121,9 @@ public class Fabric extends Wrapper<FabricVersion> {
             String installer = getInstaller();
             var path = NetUtils.download(installer, temp.to("quiltinstaller.jar"), false, null);
 
+            if (stopRequested)
+                throw new StopException();
+
             logState(".fabric.state.install");
             try{
                 var process = new ProcessBuilder()
@@ -138,7 +142,7 @@ public class Fabric extends Wrapper<FabricVersion> {
 
             logState(".launch.state.finish");
         }
-        catch (NoConnectionException e){
+        catch (NoConnectionException | StopException e){
             throw e;
         }
         catch (Exception e){

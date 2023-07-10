@@ -24,11 +24,11 @@
 
 .profile-unsel{
     -fx-background-color: #434748;
-    -fx-font-size: 11pt;
+    -fx-font-size: 10pt;
 }
 
 
 .profile-sel{
     -fx-background-color: #535a5b;
-    -fx-font-size: 11pt;
+    -fx-font-size: 10pt;
 }

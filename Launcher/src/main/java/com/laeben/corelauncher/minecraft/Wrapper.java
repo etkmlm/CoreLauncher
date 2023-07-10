@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.minecraft;
 
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
@@ -26,7 +27,6 @@ import com.laeben.core.entity.Path;
 import com.google.gson.*;
 import javafx.scene.image.Image;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -139,7 +139,7 @@ public abstract class Wrapper<H extends Version> {
         for(var lib : v.libraries)
         {
             if (stopRequested)
-                break;
+                throw new StopException();
             try{
                 Logger.getLogger().printLog(LogType.INFO, "LIB: " + lib.name);
                 logState("lib" + lib.name);
@@ -185,6 +185,9 @@ public abstract class Wrapper<H extends Version> {
 
         AssetIndex index;
 
+        if (stopRequested)
+            throw new StopException();
+
         try{
             String asstText;
             if (!assetFile.exists()){
@@ -217,7 +220,7 @@ public abstract class Wrapper<H extends Version> {
         for (var asset : index.objects)
         {
             if (stopRequested)
-                return;
+                throw new StopException();
             try{
                 String hash = asset.SHA1;
                 String nhash = hash.substring(0, 2);
