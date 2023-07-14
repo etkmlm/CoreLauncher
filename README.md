@@ -116,8 +116,11 @@ If you listen to my advice, you should create a new folder for the launcher, bec
 ## Settings
 ![](images/settingsdesc.png)
 
+You can scroll the RAM fields to increase and decrease the RAM.
+
 1) Custom background image selector.
    - If you select any image, the main page controls be a little transparent, and the background has changed.
+   - Right click resets the background.
 2) Game path selector.
    - When you select a new game path, an alert shows to move your profies to the new game path. Click yes if you wish.
 3) Account selector.
