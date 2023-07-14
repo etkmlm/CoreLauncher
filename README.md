@@ -73,6 +73,18 @@ If you not changed the JAR path, the launch script and launcher must be in the s
 
 If you listen to my advice, you should create a new folder for the launcher, because the launcher creates a config.json and all of your settings are stored in this file. You don't want to lose it :)
 
+## CLI Commands
+
+### --profile
+
+**Usage:** <code>--profile "profile name"</code>
+
+Starts the launcher directly with the selected profile without opening any GUI.
+
+## --offline
+
+Starts the launcher in offline mode.
+
 ## How can I use it?
 
 ### Main
