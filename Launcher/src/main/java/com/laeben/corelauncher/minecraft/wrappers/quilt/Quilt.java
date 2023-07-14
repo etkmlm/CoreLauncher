@@ -46,7 +46,7 @@ public class Quilt extends Fabric {
         try{
             logState(".quilt.state.download");
             String installer = getInstaller();
-            var path = NetUtils.download(installer, temp.to("quiltinstaller.jar"), false, null);
+            var path = NetUtils.download(installer, temp.to("quiltinstaller.jar"), false, false);
 
             if (stopRequested)
                 throw new StopException();

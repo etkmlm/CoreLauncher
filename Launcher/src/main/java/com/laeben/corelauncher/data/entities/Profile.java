@@ -201,6 +201,7 @@ public class Profile {
                     .setProfileName(profilePath.getName()).save();
         }
         catch (Exception e){
+            Logger.getLogger().logHyph("CORRUPT PROFILE: " + profilePath);
             Logger.getLogger().log(e);
             return null;
         }

@@ -28,6 +28,7 @@ import com.laeben.corelauncher.utils.NetUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -83,17 +84,18 @@ public class Main{
     public Main(){
         reloadProfiles();
 
-        Launcher.getLauncher().getHandler().addHandler("main", this::onGeneralEvent);
-        Vanilla.getVanilla().getHandler().addHandler("main", this::onGeneralEvent);
-        CurseForge.getForge().getHandler().addHandler("main", this::onGeneralEvent);
-        Profiler.getProfiler().getHandler().addHandler("mainWindow", this::onProfilerEvent);
+        Launcher.getLauncher().getHandler().addHandler("main", this::onGeneralEvent, true);
+        Vanilla.getVanilla().getHandler().addHandler("main", this::onGeneralEvent, true);
+        CurseForge.getForge().getHandler().addHandler("main", this::onGeneralEvent, true);
+        Profiler.getProfiler().getHandler().addHandler("main", this::onProfilerEvent, true);
+        NetUtils.getHandler().addHandler("main", this::onProgressEvent, true);
 
         Configurator.getConfigurator().getHandler().addHandler("main", a -> {
             if (a.getKey().equals("bgChange")){
                 var path = (Path)a.getNewValue();
                 setBackground(path);
             }
-        });
+        }, true);
     }
 
     private void setBackground(Path path){
@@ -181,10 +183,6 @@ public class Main{
         }
     }
 
-    public void setProgress(double p){
-        prg.setProgress(p);
-    }
-
     public void selectProfile(Profile p){
         selectedProfile = p;
 
@@ -213,10 +211,12 @@ public class Main{
     private void launch(Profile p, boolean cache){
         var wr = (Wrapper<?>)p.getWrapper();
         Vanilla.getVanilla().setDisableCache(cache);
-        wr.setDisableCache(cache).getHandler().addHandler("main", this::onGeneralEvent);
-        new Thread(() -> {
-            try{
-                Platform.runLater(() -> btnStart.setText("||"));
+        wr.setDisableCache(cache).getHandler().addHandler("main", this::onGeneralEvent, true);
+        btnStart.setText("||");
+
+        var task = new Task<>() {
+            @Override
+            protected Object call() {
                 Launcher.getLauncher().prepare(p);
                 Cat.sleep(200);
                 Platform.runLater(() -> {
@@ -229,19 +229,25 @@ public class Main{
                 if (wr.isStopRequested()){
                     wr.setStopRequested(false);
                     Vanilla.getVanilla().setStopRequested(false);
-                    return;
+                    return null;
                 }
 
                 Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
 
+                Cat.sleep(200);
                 if (Configurator.getConfig().hideAfter())
                     FXManager.getManager().showAll();
-
-                lvProfiles.refresh();
+                Platform.runLater(() -> lvProfiles.refresh());
                 wr.setDisableCache(false);
                 Vanilla.getVanilla().setDisableCache(false);
+
+                return null;
             }
-            catch (NoConnectionException e){
+        };
+
+        task.setOnFailed(a -> {
+            var f = a.getSource().getException();
+            if (f instanceof NoConnectionException e){
                 Cat.sleep(200);
                 Platform.runLater(() -> {
                     wr.setStopRequested(false);
@@ -252,7 +258,7 @@ public class Main{
                     btnStart.setText("⯈");
                 });
             }
-            catch (StopException e){
+            else if (f instanceof StopException){
                 Cat.sleep(200);
                 Platform.runLater(() -> {
                     wr.setStopRequested(false);
@@ -263,7 +269,7 @@ public class Main{
                     btnStart.setText("⯈");
                 });
             }
-            catch (Exception e){
+            else if (f instanceof Exception e){
                 Logger.getLogger().log(e);
                 Cat.sleep(200);
                 Platform.runLater(() -> {
@@ -275,7 +281,9 @@ public class Main{
                     btnStart.setText("⯈");
                 });
             }
-        }).start();
+        });
+
+        new Thread(task).start();
     }
 
     private void setUser(Account acc){
@@ -285,11 +293,7 @@ public class Main{
 
     private void onGeneralEvent(BaseEvent e){
         if (e instanceof ProgressEvent p){
-            Platform.runLater(() -> {
-                String id = p.getKey().equals("download") ? "mb" : p.getKey();
-                detailedStatus.setText(p.getRemain() + id + " / " + p.getTotal() + id);
-                prg.setProgress(p.getProgress());
-            });
+            onProgressEvent(p);
         }
         else if (e instanceof KeyEvent k){
             String status;
@@ -302,11 +306,18 @@ public class Main{
                 status = Translator.translate("launch.state.download.client");
             else if (key.startsWith("lib")){
                 status = key.substring(3);
-                //Platform.runLater(() -> );
+            }
+            else if (key.equals("jvdown")){
+                status = "";
+                detailedStatus.setText(null);
+                prg.setProgress(0);
+            }
+            else if (key.startsWith("sessionEnd")){
+                String code = key.substring(10);
+                status = code.equals("0") ? "" : Translator.translateFormat("error.crash", code);
             }
             else if (key.startsWith("asset")){
                 status = Translator.translate("launch.state.download.assets") + " " + key.substring(5);
-                //Platform.runLater(() -> detailedStatus.setText();
             }
             else if (key.startsWith("sessionStart")){
                 status = "";
@@ -315,11 +326,8 @@ public class Main{
                 detailedStatus.setText(null);
                 prg.setProgress(0);
                 btnStart.setText("⯈");
-                Platform.runLater(() -> {
-
-                    if (Configurator.getConfig().hideAfter())
-                        FXManager.getManager().hideAll();
-                });
+                if (Configurator.getConfig().hideAfter())
+                    FXManager.getManager().hideAll();
             }
             else if (key.startsWith("acqVersion"))
                 status = Translator.translateFormat("launch.state.acquire", key.substring(10));
@@ -331,21 +339,27 @@ public class Main{
             else if (key.startsWith(",")){
                 var s = key.split(":\\.");
                 status = dot(s[1]);
-                Platform.runLater(() -> detailedStatus.setText(s[0].substring(1)));
+                detailedStatus.setText(s[0].substring(1));
             }
             else if (key.equals("stop")){
                 status = "";
-                Platform.runLater(() -> {
-                    detailedStatus.setText(null);
-                    prg.setProgress(0);
-                });
+                detailedStatus.setText(null);
+                prg.setProgress(0);
             }
             else
                 status = key;
 
-            Platform.runLater(() -> this.status.setText(status));
+            this.status.setText(status);
 
         }
+    }
+
+    private void onProgressEvent(ProgressEvent p){
+        Platform.runLater(() -> {
+            String id = p.getKey().equals("download") ? "mb" : p.getKey();
+            detailedStatus.setText(p.getRemain() + id + " / " + p.getTotal() + id);
+            prg.setProgress(p.getProgress());
+        });
     }
 
     private String dot(String f){

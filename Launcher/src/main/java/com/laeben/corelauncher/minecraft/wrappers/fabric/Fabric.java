@@ -119,7 +119,7 @@ public class Fabric extends Wrapper<FabricVersion> {
             logState(".fabric.state.download");
 
             String installer = getInstaller();
-            var path = NetUtils.download(installer, temp.to("quiltinstaller.jar"), false, null);
+            var path = NetUtils.download(installer, temp.to("quiltinstaller.jar"), false, false);
 
             if (stopRequested)
                 throw new StopException();

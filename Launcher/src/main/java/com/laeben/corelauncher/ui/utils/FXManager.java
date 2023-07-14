@@ -71,8 +71,9 @@ public class FXManager {
         if (stage.isShowing())
             stage.close();
         openStages.remove(stage);
-        if (openStages.size() == 0 && implicit)
+        if (openStages.size() == 0 && implicit){
             Platform.exit();
+        }
     }
 
     public Node open(Object controller, URL url){

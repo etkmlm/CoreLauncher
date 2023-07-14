@@ -87,7 +87,7 @@ public abstract class Wrapper<H extends Version> {
         Path libPath = libDir.to(asset.path.split("/"));
         if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || disableCache)
         {
-            NetUtils.download(asset.url, libPath, false, handler::execute);
+            NetUtils.download(asset.url, libPath, false, true);
         }
 
         if (exclude != null)
@@ -228,7 +228,7 @@ public abstract class Wrapper<H extends Version> {
 
                 Path path = assetDir.to(nhash, hash);
                 if (!path.exists() || disableCache)
-                    NetUtils.download(url, path.forceSetDir(false), false, handler::execute);
+                    NetUtils.download(url, path.forceSetDir(false), false, true);
 
                 if (vIndex.isLegacy()){
                     var f = legacyDir.to(asset.path);

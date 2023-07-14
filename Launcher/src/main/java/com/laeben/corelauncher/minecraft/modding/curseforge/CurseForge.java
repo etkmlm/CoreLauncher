@@ -368,7 +368,7 @@ public class CurseForge {
 
     private Path download(String url, Path path, boolean uon){
         try{
-            return NetUtils.download(url, path, uon, handler::execute);
+            return NetUtils.download(url, path, uon, true);
         }
         catch (NoConnectionException e){
             throw e;

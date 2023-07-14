@@ -132,7 +132,7 @@ public class Forge extends Wrapper<ForgeVersion> {
         try{
             logState(".forge.state.download");
             var path = Configurator.getConfig().getTemporaryFolder();
-            path = NetUtils.download(art.getUrl(), path, true, null);
+            path = NetUtils.download(art.getUrl(), path, true, false);
 
             if (stopRequested)
                 throw new StopException();

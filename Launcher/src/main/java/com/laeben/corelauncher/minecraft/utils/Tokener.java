@@ -35,6 +35,10 @@ public class Tokener {
                 .setAuthInfo(Authenticator.getAuthenticator().getATokenFromToken(xbl.xbl()));
     }
 
+    public String getXUID(){
+        return auth.username();
+    }
+
     public String getAccessToken(){
 
         if (now().getTime() > expireDate.getTime())

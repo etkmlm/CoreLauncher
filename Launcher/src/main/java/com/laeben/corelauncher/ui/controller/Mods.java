@@ -74,7 +74,7 @@ public class Mods {
             if (a.getKey().equals("profileUpdate")){
                 reload();
             }
-        });
+        }, false);
 
         String cStyle = "-fx-background-color: #252525;";
         cmOptifine = new ContextMenu();
@@ -84,28 +84,29 @@ public class Mods {
     }
 
     public void reload(){
-        mods.clear();
-        modpacks.clear();
-        worlds.clear();
-        resources.clear();
-        txtSearch.clear();
+        Platform.runLater(() -> {
+            mods.clear();
+            modpacks.clear();
+            worlds.clear();
+            resources.clear();
+            txtSearch.clear();
+        });
 
         if (profile == null)
             return;
-
-        mods.addAll(profile.getMods().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
-        modpacks.addAll(profile.getModpacks().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
-        resources.addAll(profile.getResources().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
-        worlds.addAll(profile.getOnlineWorlds().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
-
         new Thread(() -> {
+
             Platform.runLater(() -> {
+                mods.addAll(profile.getMods().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
+                modpacks.addAll(profile.getModpacks().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
+                resources.addAll(profile.getResources().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
+                worlds.addAll(profile.getOnlineWorlds().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
+
                 cmOptifine.getItems().clear();
                 cmSodium.getItems().clear();
             });
 
             if (profile.getWrapper() instanceof Forge){
-
                 String ver = profile.getWrapperVersion();
                 var vers = OptiFine.getOptiFine().getVersions(profile.getVersionId()).stream().sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeWrapperVersion), y.checkForge(y.forgeWrapperVersion))).toList();
                 for (var v : vers){

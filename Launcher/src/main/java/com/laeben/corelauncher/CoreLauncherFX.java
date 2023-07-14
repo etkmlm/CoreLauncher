@@ -46,7 +46,7 @@ public class CoreLauncherFX extends Application {
             if (result.isPresent() && result.get() == ButtonType.YES){
                 var n = CoreLauncher.LAUNCHER_PATH.to("clnew.jar");
                 new Thread(() -> {
-                    NetUtils.download(latest.url(), n, false, x -> Platform.runLater(() -> main.setProgress(x.getProgress())));
+                    NetUtils.download(latest.url(), n, false, true);
 
                     try{
                         var name = CoreLauncher.LAUNCHER_EX_PATH;
@@ -69,5 +69,6 @@ public class CoreLauncherFX extends Application {
 
     public static void launchFX(){
         launch();
+
     }
 }

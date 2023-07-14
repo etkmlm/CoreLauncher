@@ -133,7 +133,7 @@ public class ProfileEdit {
                         cbJavaVersion.setValue("...");
                 }
             }
-        });
+        }, true);
     }
 
     @FXML

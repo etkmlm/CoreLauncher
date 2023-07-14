@@ -27,7 +27,7 @@ public class Logger {
 
             logDir = logDir();
 
-        });
+        }, false);
 
         instance = this;
     }

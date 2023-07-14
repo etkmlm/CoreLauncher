@@ -46,7 +46,7 @@ public class Worlds {
                 return;
 
             reload();
-        });
+        }, true);
     }
 
     public void reload(){

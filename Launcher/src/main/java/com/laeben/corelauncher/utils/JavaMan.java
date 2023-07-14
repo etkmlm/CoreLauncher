@@ -33,7 +33,7 @@ public class JavaMan {
 
     private static JavaMan instance;
 
-    private EventHandler<ChangeEvent> handler;
+    private final EventHandler<ChangeEvent> handler;
     private List<Java> javaVersions;
 
     private Path javaDir;
@@ -48,7 +48,7 @@ public class JavaMan {
             javaDir = javaDir();
 
             reload();
-        });
+        }, false);
 
         handler = new EventHandler<>();
 
@@ -109,7 +109,7 @@ public class JavaMan {
         return javaVersions.stream().filter(x -> x.getName().equals(j.getName()) || x.majorVersion == j.majorVersion).findFirst().orElse(null);
     }
 
-    public void download(Java java, Consumer<ProgressEvent> onProgress){
+    public void download(Java java){
         if (java.majorVersion == 0)
             return;
 
@@ -119,7 +119,7 @@ public class JavaMan {
             return;
 
         try{
-            var file = NetUtils.download(info.url, javaDir, true, onProgress);
+            var file = NetUtils.download(info.url, javaDir, true, true);
             file.extract(null, null);
             file.delete();
 

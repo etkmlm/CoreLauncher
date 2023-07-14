@@ -15,7 +15,6 @@ import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.entities.LogType;
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.KeyEvent;
-import javafx.event.Event;
 
 import java.io.File;
 
@@ -34,7 +33,7 @@ public class Launcher {
                 return;
 
             gameDir = (Path) a.getNewValue();
-        });
+        }, false);
 
         instance = this;
     }
@@ -107,7 +106,8 @@ public class Launcher {
                             handleState("java" + linfo.java.majorVersion);
                             Logger.getLogger().log(LogType.INFO, "Downloading Java " + linfo.java.majorVersion);
                             try{
-                                JavaMan.getManager().download(linfo.java, handler::execute);
+                                JavaMan.getManager().download(linfo.java);
+                                handler.execute(new KeyEvent("jvdown"));
                             }
                             catch (NoConnectionException e){
                                 handleState(".error.launch.java");
@@ -161,9 +161,10 @@ public class Launcher {
 
             handleState("sessionStart");
             // Start a new session
-            new Session(info.dir, finalCmds).start();
+            var session = new Session(info.dir, finalCmds);
+            session.start();
 
-            //handleState("sessionEnd");
+            handleState("sessionEnd" + session.getExitCode());
         }
         catch (VersionNotFoundException e){
             handleState(".error.noVersion");

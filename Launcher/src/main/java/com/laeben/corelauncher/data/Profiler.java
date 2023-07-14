@@ -8,6 +8,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public class Profiler {
             profilesDir = profilesDir();
 
             reload();
-        });
+        }, false);
 
         instance = this;
     }
@@ -155,6 +156,7 @@ public class Profiler {
     public void reload(){
         try{
             profiles = profilesDir.getFiles().stream().map(Profile::get).collect(Collectors.toList());
+            profiles.removeIf(Objects::isNull);
             handler.execute(new ChangeEvent("reload", null, null));
         }
         catch (Exception e){

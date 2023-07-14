@@ -107,7 +107,7 @@ public class Vanilla extends Wrapper<Version> {
             if (!clientPath.exists() || disableCache || !checkLen(info.downloads.client.url, clientPath)){
                 logState("clientDownload");
                 Logger.getLogger().printLog(LogType.INFO, "Downloading client " + v.id + "...");
-                NetUtils.download(info.downloads.client.url, clientPath, false, handler::execute);
+                NetUtils.download(info.downloads.client.url, clientPath, false, true);
             }
 
             Logger.getLogger().printLog(LogType.INFO, "Vanilla Version " + v.id + " up to date!");

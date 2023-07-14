@@ -5,7 +5,6 @@ import com.laeben.corelauncher.utils.Logger;
 import com.laeben.core.entity.Path;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +15,7 @@ public class Session {
     private final Thread errorThread;
 
     private boolean stopRequested;
-    private BufferedReader inReader;
+    private BufferedReader inputReader;
     private BufferedReader errorReader;
     private final List<String> commands;
     private final Path workDir;
@@ -24,12 +23,14 @@ public class Session {
     private static int lastSessionId = 0;
     private final int sessionId;
 
+    private int exitCode;
+
     public Session(Path workDir, List<String> commands){
         this.commands = commands;
         this.workDir = workDir;
 
-        inputThread = new Thread(this::input);
-        errorThread = new Thread(this::error);
+        inputThread = new Thread(() -> reader(inputReader, "IN"));
+        errorThread = new Thread(() -> reader(errorReader, "ERROR"));
 
         sessionId = lastSessionId++;
         var dtt = LocalDateTime.now(ZoneId.systemDefault());
@@ -38,24 +39,30 @@ public class Session {
         logFile = Configurator.getConfig().getLauncherPath().to("gamelog", dt + " - S" + sessionId + ".log");
     }
 
+    public int getExitCode(){
+        return exitCode;
+    }
+
     public Session start(){
         stopRequested = false;
 
         try{
             Logger.getLogger().logHyph("SESSION START: " + sessionId);
-
             var process = new ProcessBuilder()
                     .directory(workDir.toFile())
                     .command(commands)
                     .start();
 
-            inReader = process.inputReader();
+            inputReader = process.inputReader();
             errorReader = process.errorReader();
 
             inputThread.start();
             errorThread.start();
 
-            process.waitFor();
+            String exit = "\n" + "EXIT CODE: " + (exitCode = process.waitFor());
+            logFile.append(exit);
+            System.out.println(exit);
+            process.destroyForcibly();
         }
         catch (Exception e){
             Logger.getLogger().logHyph("SESSION ERROR: " + sessionId);
@@ -71,37 +78,23 @@ public class Session {
         stopRequested = true;
     }
 
-    private void input(){
-        String read;
-        while (true){
-            try {
-                if (stopRequested || (read = inReader.readLine()) == null) break;
-
-                String msg = "[S" + sessionId + "IN] " + read;
-                System.out.println(msg);
-                logFile.append("\n" + msg);
-
-            } catch (IOException ignored) {
-
-            }
-
-        }
+    private void log(String prefix, String line){
+        String msg = "[S" + sessionId + prefix + "] " + line;
+        System.out.println(msg);
+        logFile.append("\n" + msg);
     }
 
-    private void error(){
+    private void reader(BufferedReader reader, String prefix){
         String read;
         while (true){
-            try {
-                if (stopRequested || (read = errorReader.readLine()) == null) break;
-
-                String msg = "[S" + sessionId + "ERROR] " + read;
-                System.out.println(msg);
-                logFile.append("\n" + msg);
-
-            } catch (IOException ignored) {
-
+            try{
+                if (stopRequested || (read = reader.readLine()) == null)
+                    break;
+                log(prefix, read);
             }
-
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
         }
     }
 

@@ -177,7 +177,8 @@ public class ExecutionInfo{
                     .register("${user_type}", "msa")
                     .register("${version_type}", version.type == null ? "release" : version.type)
                     .register("${clientid}", version.id)
-                    .register("${auth_xuid}", "X")
+                    //.register("${auth_xuid}", "null")
+                    .disable("--xuid")
                     .register("${auth_session}", "X")
                     .build();
         }

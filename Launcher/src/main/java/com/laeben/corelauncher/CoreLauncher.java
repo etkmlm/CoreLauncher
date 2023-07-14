@@ -32,6 +32,9 @@ public class CoreLauncher {
     public static final OS SYSTEM_OS = OS.getSystemOS();
     public static final Path LAUNCHER_PATH = Path.begin(java.nio.file.Path.of(System.getProperty("user.dir")));
     public static final Path LAUNCHER_EX_PATH;
+
+
+    public static boolean RESTART = false;
     static {
         Path p;
         try{
@@ -132,7 +135,7 @@ public class CoreLauncher {
                     Logger.getLogger().printLog(LogType.ERROR, "Error on request to " + spl[0] + ": " + spl[1]);
                 }
             }
-        });
+        }, false);
         //
 
         int index = listArgs.indexOf("--profile");
@@ -151,11 +154,15 @@ public class CoreLauncher {
             System.exit(0);
         }
 
-        CoreLauncherFX.launchFX();
+        do{
+            CoreLauncherFX.launchFX();
+        }
+        while (RESTART);
 
         Configurator.getConfig().getTemporaryFolder().getFiles().forEach(Path::delete);
-        if (Configurator.getConfig().delGameLogs())
+        if (Configurator.getConfig().delGameLogs()){
             Configurator.getConfig().getLauncherPath().to("gamelog").getFiles().forEach(Path::delete);
+        }
 
         System.exit(0);
     }

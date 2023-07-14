@@ -92,7 +92,7 @@ public class Settings {
                 var path = (Path)x.getNewValue();
                 txtCustomBackground.setText(path == null ? null : path.toString());
             }
-        });
+        }, true);
 
         JavaMan.getManager().getHandler().addHandler("settings", (a) -> {
             switch (a.getKey()){
@@ -107,7 +107,7 @@ public class Settings {
                         cbJava.setValue("...");
                 }
             }
-        });
+        }, true);
     }
 
     @FXML
@@ -303,6 +303,7 @@ public class Settings {
             chkLogMode.setSelected(c.getLogMode());
             chkHideAfter.setSelected(c.hideAfter());
             chkAutoUpdate.setSelected(c.isEnabledAutoUpdate());
+            chkGamelog.setSelected(c.delGameLogs());
 
             var bgi = c.getBackgroundImage();
             if (bgi != null)

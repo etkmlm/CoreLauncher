@@ -76,7 +76,7 @@ public class ForgeBrowser {
                 return;
 
             search();
-        });
+        }, true);
     }
 
     @FXML
