@@ -39,7 +39,7 @@ CoreLauncher works with Java 17, so first you have to download and add to the sy
 
 ### Downloading Launcher
 You can download the latest version of the launcher from it's website.
-[Click Me]()!
+[Click Me](https://etkmlm.github.io/CoreLauncher)!
 
 ### Launching Launcher
 You have two options to launch.
