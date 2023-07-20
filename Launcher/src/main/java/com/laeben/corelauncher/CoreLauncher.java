@@ -147,7 +147,7 @@ public class CoreLauncher {
                 Launcher.getLauncher().prepare(profile);
                 Launcher.getLauncher().launch(ExecutionInfo.fromProfile(profile));
             }
-            catch (Exception e){
+            catch (Throwable e){
                 Logger.getLogger().log(LogType.INFO, "No version...");
             }
 

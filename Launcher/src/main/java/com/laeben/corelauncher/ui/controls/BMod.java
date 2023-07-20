@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.ui.controls;
 
+import com.laeben.core.entity.exception.HttpException;
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.File;
@@ -85,13 +87,17 @@ public class BMod extends ListCell<LModLink> {
                 var resource = CurseForge.getForge().getFullResource(profile.getVersionId(), profile.getWrapper().getType(), link.resource());
                 var mod = CResource.fromResourceGeneric(profile.getVersionId(), profile.getWrapper().getIdentifier(), resource);
                 Platform.runLater(() -> FXManager.getManager().focus("main"));
-                CurseForge.getForge().include(profile, mod);
-                Platform.runLater(() -> {
-                    btnInstall.setText("-");
-                    FXManager.getManager().focus("mods");
-                });
+                try{
+                    CurseForge.getForge().include(profile, mod);
+                    Platform.runLater(() -> {
+                        btnInstall.setText("-");
+                        FXManager.getManager().focus("forgebrowser");
+                    });
 
-                exists = mod;
+                    exists = mod;
+                } catch (NoConnectionException | HttpException e) {
+                    exists = null;
+                }
             }
             else{
                 CurseForge.getForge().remove(profile, CResource.fromResourceGeneric(profile.getVersionId(), profile.getWrapper().getIdentifier(), link.resource()));
@@ -123,10 +129,14 @@ public class BMod extends ListCell<LModLink> {
                     var mod = CResource.fromResourceGeneric(profile.getVersionId(), profile.getWrapper().getIdentifier(), link.resource());
                     mod.setFile(file);
 
-                    CurseForge.getForge().include(profile, mod);
+                    try{
+                        CurseForge.getForge().include(profile, mod);
 
-                    exists = mod;
-                    btnInstall.setText("-");
+                        exists = mod;
+                        btnInstall.setText("-");
+                    } catch (NoConnectionException | HttpException e) {
+                        exists = null;
+                    }
                 });
 
                 menu.getItems().add(item);

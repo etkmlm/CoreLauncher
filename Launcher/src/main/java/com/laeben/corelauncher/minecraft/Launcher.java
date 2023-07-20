@@ -1,6 +1,8 @@
 package com.laeben.corelauncher.minecraft;
 
+import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.entities.Profile;
@@ -54,7 +56,7 @@ public class Launcher {
      * Prepares the profile to launch.
      * @param profile target profile
      */
-    public void prepare(Profile profile){
+    public void prepare(Profile profile) throws NoConnectionException, StopException, HttpException {
         handleState("prepare" + profile.getName());
 
         profile.getWrapper().install(profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion()));

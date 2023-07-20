@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.laeben.corelauncher.ui.controls.CButton?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.laeben.corelauncher.ui.controller.MultipleMod"
+            prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #202020;" stylesheets="@../style/controls/defcontrols.css,@../style/controls/listing.css,@../style/multiplemod.css">
+    <GridPane hgap="10" AnchorPane.bottomAnchor="50" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+
+        <TextArea fx:id="txtQuery" GridPane.columnIndex="0"/>
+        <ListView fx:id="lvMods" GridPane.columnIndex="1" />
+    </GridPane>
+    <HBox AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10">
+        <Label styleClass="status" alignment="CENTER" maxHeight="Infinity" fx:id="lblStatus" />
+        <Rectangle width="10"/>
+        <CButton styleClass="def-button" fx:id="btnSearch" text="%search"/>
+        <Rectangle width="5"/>
+        <CButton styleClass="def-button" fx:id="btnApply" text="%apply"/>
+    </HBox>
+
+    <HBox AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10">
+        <CButton styleClass="def-button" fx:id="btnFromWorld" text="%import.multiple.world"/>
+        <Rectangle width="5"/>
+        <CButton styleClass="def-button" fx:id="btnFromFolder" text="%import.multiple.mods"/>
+    </HBox>
+</AnchorPane>

@@ -250,7 +250,7 @@ public class ProfileEdit {
         btnSave.setOnMouseClicked(a -> {
             String name = StringUtils.pure(txtName.getText());
 
-            if (name == null || name.isEmpty() || name.isBlank())
+            if (name == null || name.isBlank())
                 return;
 
             if (name.endsWith("."))
@@ -261,12 +261,12 @@ public class ProfileEdit {
                     .setJvmArgs(txtArgs.getText().split(" "))
                     .setMinRAM(fMinRAM.getValue())
                     .setMaxRAM(fMaxRAM.getValue());
-            if (txtAccount.getText() == null || txtAccount.getText().isEmpty() || txtAccount.getText().isBlank())
+            if (txtAccount.getText() == null || txtAccount.getText().isBlank())
                 tempProfile.setCustomUser(null);
             else
                 tempProfile.setCustomUser(Account.fromUsername(txtAccount.getText()).setOnline(chkAccOnline.isSelected()));
 
-            if ((tempProfile.getWrapper() != null && !(tempProfile.getWrapper() instanceof Vanilla) && (tempProfile.getWrapperVersion() == null || tempProfile.getWrapperVersion().isEmpty() || tempProfile.getWrapperVersion().isBlank() || tempProfile.getWrapperVersion().equals("..."))))
+            if ((tempProfile.getWrapper() != null && !(tempProfile.getWrapper() instanceof Vanilla) && (tempProfile.getWrapperVersion() == null || tempProfile.getWrapperVersion().isBlank() || tempProfile.getWrapperVersion().equals("..."))))
                 return;
 
             try{

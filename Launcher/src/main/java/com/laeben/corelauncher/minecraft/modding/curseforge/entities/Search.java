@@ -5,18 +5,17 @@ public class Search {
     public String gameVersion;
     public int classId;
     public int categoryId;
+    public int pageSize;
     public int index;
     public ModsSearchSortField sortField;
     public String sortOrder;
     public CurseWrapper.Type modLoaderType;
 
-    public Search setSortOrder(boolean desc){
-        sortOrder = desc ? "desc" : "asc";
-
-        return this;
+    public void setSortOrder(boolean asc){
+        sortOrder = asc ? "asc" : "desc";
     }
 
     public void setSearchFilter(String filter){
-        searchFilter = filter.replace(" ", "$20");
+        searchFilter = filter.replace(" ", "+");
     }
 }

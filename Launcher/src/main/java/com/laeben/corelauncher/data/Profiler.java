@@ -6,6 +6,7 @@ import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
+import com.laeben.corelauncher.utils.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -169,7 +170,7 @@ public class Profiler {
             if (profilesDir.getFiles().stream().anyMatch(x -> x.getName().equals(name)))
                 return Profile.empty();
 
-            var profile = Profile.get(profilesDir.to(name));
+            var profile = Profile.get(profilesDir.to(StringUtils.pure(name)));
             profiles.add(profile);
             handler.execute(new ChangeEvent("profileCreate", null, profile));
             return profile;

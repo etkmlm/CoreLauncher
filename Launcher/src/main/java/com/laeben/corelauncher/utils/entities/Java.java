@@ -97,7 +97,6 @@ public class Java {
             return loaded = true;
         }
         catch (IOException e){
-            Logger.getLogger().log(e);
 
             return loaded = false;
         }

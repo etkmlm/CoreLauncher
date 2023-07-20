@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.wrappers.fabric;
 
+import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.data.Configurator;
@@ -49,7 +50,7 @@ public class Fabric extends Wrapper<FabricVersion> {
         return getVersions(id).stream().filter(x -> x.getWrapperVersion().equals(wrId)).findFirst().orElse(null);
     }
 
-    protected String getInstaller(){
+    protected String getInstaller() throws NoConnectionException, HttpException {
         if (cacheInstaller != null && !disableCache)
             return cacheInstaller;
         var arr = gson.fromJson(NetUtils.urlToString(getInstallerUrl()), JsonArray.class);
@@ -104,7 +105,7 @@ public class Fabric extends Wrapper<FabricVersion> {
     }
 
     @Override
-    public void install(FabricVersion v) {
+    public void install(FabricVersion v) throws NoConnectionException, StopException {
         Vanilla.getVanilla().install(v);
 
         var gameDir = Configurator.getConfig().getGamePath();
@@ -141,9 +142,6 @@ public class Fabric extends Wrapper<FabricVersion> {
             path.delete();
 
             logState(".launch.state.finish");
-        }
-        catch (NoConnectionException | StopException e){
-            throw e;
         }
         catch (Exception e){
             Logger.getLogger().log(e);

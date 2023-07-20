@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.utils;
 
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.NetUtils;
 import com.laeben.corelauncher.CoreLauncher;
@@ -86,7 +87,7 @@ public class JavaMan {
         return new Java(Path.begin(OSUtils.getRunningJavaDir()));
     }
 
-    private static JavaDownloadInfo getJavaInfo(Java j, boolean is64Bit){
+    private static JavaDownloadInfo getJavaInfo(Java j, boolean is64Bit) throws NoConnectionException {
         try{
             var os = CoreLauncher.SYSTEM_OS;
             String url = ADOPTIUM + j.majorVersion + "/hotspot?os=" + os.getName() + "&image_type=jdk&architecture=" + (is64Bit ? "x64" : "x86");
@@ -109,7 +110,7 @@ public class JavaMan {
         return javaVersions.stream().filter(x -> x.getName().equals(j.getName()) || x.majorVersion == j.majorVersion).findFirst().orElse(null);
     }
 
-    public void download(Java java){
+    public void download(Java java) throws NoConnectionException {
         if (java.majorVersion == 0)
             return;
 
@@ -129,6 +130,9 @@ public class JavaMan {
         }
         catch (NoConnectionException e){
             throw e;
+        }
+        catch (StopException ignored){
+
         }
         catch (Exception e){
             Logger.getLogger().log(e);

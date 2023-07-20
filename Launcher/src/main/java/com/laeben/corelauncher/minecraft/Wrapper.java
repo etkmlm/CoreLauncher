@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft;
 
+import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
@@ -53,6 +54,10 @@ public abstract class Wrapper<H extends Version> {
         handler = new EventHandler<>();
     }
 
+    public static List<String> getWrappers(){
+        return wrappers.keySet().stream().toList();
+    }
+
     public boolean isStopRequested(){
         return stopRequested;
     }
@@ -71,7 +76,7 @@ public abstract class Wrapper<H extends Version> {
 
     protected boolean checkLen(String url, Path file){
         try{
-            return NetUtils.getContentLength(url) == file.getSize();
+            return !NetUtils.check() || NetUtils.getContentLength(url) == file.getSize();
         }
         catch (NoConnectionException e){
             return true;
@@ -82,8 +87,7 @@ public abstract class Wrapper<H extends Version> {
         return Configurator.getConfig().getGamePath();
     }
 
-    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude)
-    {
+    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude) throws NoConnectionException, StopException, HttpException {
         Path libPath = libDir.to(asset.path.split("/"));
         if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || disableCache)
         {
@@ -124,8 +128,7 @@ public abstract class Wrapper<H extends Version> {
         }
     }
 
-    protected void downloadLibraries(Version v)
-    {
+    protected void downloadLibraries(Version v) throws StopException, NoConnectionException {
         Logger.getLogger().printLog(LogType.INFO, "Retrieving libraries...");
 
         Path libDir = getGameDir().to("libraries");
@@ -170,8 +173,7 @@ public abstract class Wrapper<H extends Version> {
         }
     }
 
-    protected void downloadAssets(Version v)
-    {
+    protected void downloadAssets(Version v) throws StopException, NoConnectionException {
         Logger.getLogger().printLog(LogType.INFO, "Retrieving assets...");
 
         var vIndex = v.getAssetIndex();
@@ -318,6 +320,6 @@ public abstract class Wrapper<H extends Version> {
     public abstract H getVersion(String id, String wrId);
     public abstract List<H> getAllVersions();
     public abstract List<H> getVersions(String id);
-    public abstract void install(H v);
+    public abstract void install(H v) throws NoConnectionException, StopException;
     public abstract CurseWrapper.Type getType();
 }

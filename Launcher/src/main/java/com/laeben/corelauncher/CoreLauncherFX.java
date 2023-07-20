@@ -1,5 +1,8 @@
 package com.laeben.corelauncher;
 
+import com.laeben.core.entity.exception.HttpException;
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.ui.controller.Main;
@@ -38,7 +41,7 @@ public class CoreLauncherFX extends Application {
 
         // Version check
         var latest = LauncherConfig.APPLICATION.getLatest();
-        if (LauncherConfig.VERSION < latest.version() && Configurator.getConfig().isEnabledAutoUpdate()){
+        if (latest != null && LauncherConfig.VERSION < latest.version() && Configurator.getConfig().isEnabledAutoUpdate()){
             var result = CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("update.title"), Translator.translateFormat("update.newVersion", latest.version()))
                     .setButtons(ButtonType.YES, ButtonType.NO)
                     .showAndWait();
@@ -46,7 +49,12 @@ public class CoreLauncherFX extends Application {
             if (result.isPresent() && result.get() == ButtonType.YES){
                 var n = CoreLauncher.LAUNCHER_PATH.to("clnew.jar");
                 new Thread(() -> {
-                    NetUtils.download(latest.url(), n, false, true);
+                    try{
+                        NetUtils.download(latest.url(), n, false, true);
+                    }
+                    catch (NoConnectionException | StopException | HttpException e){
+                        return;
+                    }
 
                     try{
                         var name = CoreLauncher.LAUNCHER_EX_PATH;

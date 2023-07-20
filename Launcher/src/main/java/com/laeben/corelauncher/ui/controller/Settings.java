@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller;
 
+import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
@@ -7,6 +8,7 @@ import com.laeben.corelauncher.data.entities.Account;
 import com.laeben.corelauncher.data.entities.Config;
 import com.laeben.corelauncher.ui.controls.CButton;
 import com.laeben.corelauncher.ui.controls.CMsgBox;
+import com.laeben.corelauncher.ui.entities.LStage;
 import com.laeben.corelauncher.ui.utils.ControlUtils;
 import com.laeben.corelauncher.ui.utils.FXManager;
 import com.laeben.corelauncher.utils.JavaMan;
@@ -257,12 +259,12 @@ public class Settings {
         });
 
         txtAccount.setOnKeyPressed(a -> {
-            Configurator.getConfig().setUser(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isEmpty() || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
+            Configurator.getConfig().setUser(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
             Configurator.save();
         });
 
         chkOnline.selectedProperty().addListener(a -> {
-            Configurator.getConfig().setUser(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isEmpty() || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
+            Configurator.getConfig().setUser(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
             Configurator.save();
         });
 

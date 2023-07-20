@@ -49,15 +49,17 @@
                 <RowConstraints percentHeight="100"/>
             </rowConstraints>
             <columnConstraints>
-                <ColumnConstraints percentWidth="25"/>
-                <ColumnConstraints percentWidth="25"/>
-                <ColumnConstraints percentWidth="25"/>
-                <ColumnConstraints percentWidth="25"/>
+                <ColumnConstraints percentWidth="20"/>
+                <ColumnConstraints percentWidth="20"/>
+                <ColumnConstraints percentWidth="20"/>
+                <ColumnConstraints percentWidth="20"/>
+                <ColumnConstraints percentWidth="20"/>
             </columnConstraints>
             <CButton fx:id="btnBrowse" styleClass="def-button" maxHeight="Infinity" text="%mods.all.browse" maxWidth="Infinity" GridPane.columnIndex="0"/>
             <CButton fx:id="btnOpti" styleClass="def-button" maxHeight="Infinity" text="OptiFine" maxWidth="Infinity" GridPane.columnIndex="1"/>
             <CButton fx:id="btnSodium" styleClass="def-button" maxHeight="Infinity" text="Sodium" maxWidth="Infinity" GridPane.columnIndex="2"/>
             <CButton fx:id="btnUpdate" styleClass="def-button" maxHeight="Infinity" text="%mods.all.update" maxWidth="Infinity" GridPane.columnIndex="3"/>
+            <CButton fx:id="btnCustom" styleClass="def-button" maxHeight="Infinity" text="%mods.custom" maxWidth="Infinity" GridPane.columnIndex="4"/>
         </GridPane>
 
         <TextField fx:id="txtSearch" maxHeight="Infinity" promptText="%search" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>

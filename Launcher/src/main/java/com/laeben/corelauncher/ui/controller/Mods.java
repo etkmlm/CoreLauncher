@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.ui.controller;
 
+import com.laeben.core.entity.exception.HttpException;
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.data.entities.Profile;
@@ -55,6 +57,8 @@ public class Mods {
     public Button btnOpti;
     @FXML
     public Button btnUpdate;
+    @FXML
+    public Button btnCustom;
 
     private final ObservableList<LMod> mods;
     private final ObservableList<LMod> resources;
@@ -121,8 +125,6 @@ public class Mods {
                         mod.classId = ClassType.MOD.getId();
 
                         Profiler.getProfiler().setProfile(profile.getName(), x -> x.getMods().add(mod));
-
-                        //OptiFine.installForge(v, modsPath);
                     });
                     item.setStyle("-fx-text-fill: white;");
                     Platform.runLater(() -> cmOptifine.getItems().add(item));
@@ -130,12 +132,17 @@ public class Mods {
             }
             else if (profile.getWrapper() instanceof Fabric){
                 var identifier = profile.getWrapper().getIdentifier();
-                var vers = Modrinth.getModrinth().searchSodium(identifier, profile.getVersionId());
-                for (var v : vers){
-                    var item = new MenuItem();
-                    item.setText(v.name);
-                    item.setOnAction(a -> Profiler.getProfiler().setProfile(profile.getName(), x -> x.getMods().add(v)));
-                    Platform.runLater(() -> cmSodium.getItems().add(item));
+                try{
+                    var vers = Modrinth.getModrinth().searchSodium(identifier, profile.getVersionId());
+                    for (var v : vers){
+                        var item = new MenuItem();
+                        item.setText(v.name);
+                        item.setOnAction(a -> Profiler.getProfiler().setProfile(profile.getName(), x -> x.getMods().add(v)));
+                        Platform.runLater(() -> cmSodium.getItems().add(item));
+                    }
+                }
+                catch (NoConnectionException | HttpException ignored){
+
                 }
             }
         }).start();
@@ -156,7 +163,7 @@ public class Mods {
 
         txtSearch.textProperty().addListener(x -> {
             String text = txtSearch.getText();
-            if (text.isEmpty() || text.isBlank()){
+            if (text.isBlank()){
                 lvMods.setItems(mods);
                 lvModpacks.setItems(modpacks);
                 lvResources.setItems(resources);
@@ -182,6 +189,8 @@ public class Mods {
                 return;
             ForgeBrowser.open(profile).show();
         });
+
+        btnCustom.setOnMouseClicked(a -> ImportMod.open(profile).show());
 
         btnSodium.setContextMenu(cmSodium);
         btnSodium.setOnMouseClicked(x -> {
@@ -220,7 +229,11 @@ public class Mods {
                     continue;
 
                 CurseForge.getForge().remove(profile, m);
-                CurseForge.getForge().include(profile, mod.get());
+                try {
+                    CurseForge.getForge().include(profile, mod.get());
+                } catch (NoConnectionException | HttpException ignored) {
+
+                }
 
             }
         });

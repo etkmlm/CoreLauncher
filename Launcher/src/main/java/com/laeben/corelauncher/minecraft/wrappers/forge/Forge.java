@@ -115,7 +115,7 @@ public class Forge extends Wrapper<ForgeVersion> {
     }
 
     @Override
-    public void install(ForgeVersion version){
+    public void install(ForgeVersion version) throws NoConnectionException, StopException {
         var versionsPath = Configurator.getConfig().getGamePath().to("versions");
         var verPath = versionsPath.to(version.getJsonName());
         var verJsonPath = verPath.to(version.getJsonName() + ".json");
@@ -204,9 +204,6 @@ public class Forge extends Wrapper<ForgeVersion> {
                 versionsPath.to(name, name + ".json").move(verPath.to(version.getJsonName() + ".json"));
                 versionsPath.to(name).delete();
             }
-        }
-        catch (NoConnectionException | StopException e){
-            throw e;
         }
         catch (Exception e){
             Logger.getLogger().log(e);

@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller;
 
+import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.Cat;
@@ -9,6 +10,7 @@ import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.data.entities.Account;
+import com.laeben.corelauncher.data.entities.Config;
 import com.laeben.corelauncher.data.entities.Profile;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.Wrapper;
@@ -18,6 +20,7 @@ import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
 import com.laeben.corelauncher.ui.controls.CMsgBox;
 import com.laeben.corelauncher.ui.controls.CProfile;
 import com.laeben.corelauncher.ui.entities.LProfile;
+import com.laeben.corelauncher.ui.entities.LStage;
 import com.laeben.corelauncher.ui.utils.FXManager;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.core.entity.Path;
@@ -89,6 +92,7 @@ public class Main{
         CurseForge.getForge().getHandler().addHandler("main", this::onGeneralEvent, true);
         Profiler.getProfiler().getHandler().addHandler("main", this::onProfilerEvent, true);
         NetUtils.getHandler().addHandler("main", this::onProgressEvent, true);
+        FXManager.getManager().getHandler().addHandler("main", this::onFXEvent, true);
 
         Configurator.getConfigurator().getHandler().addHandler("main", a -> {
             if (a.getKey().equals("bgChange")){
@@ -144,7 +148,7 @@ public class Main{
 
         txtSearch.textProperty().addListener(a -> {
             var text = txtSearch.getText();
-            if (text == null || text.isBlank() || text.isEmpty())
+            if (text == null || text.isBlank())
                 lvProfiles.setItems(profiles);
             else
                 lvProfiles.setItems(profiles.filtered(x -> x.getProfile().getName().toLowerCase().contains(text.toLowerCase())));
@@ -214,9 +218,11 @@ public class Main{
         wr.setDisableCache(cache).getHandler().addHandler("main", this::onGeneralEvent, true);
         btnStart.setText("||");
 
+
+
         var task = new Task<>() {
             @Override
-            protected Object call() {
+            protected Object call() throws NoConnectionException, StopException, HttpException {
                 Launcher.getLauncher().prepare(p);
                 Cat.sleep(200);
                 Platform.runLater(() -> {
@@ -247,14 +253,13 @@ public class Main{
 
         task.setOnFailed(a -> {
             var f = a.getSource().getException();
-            if (f instanceof NoConnectionException e){
+            if (f instanceof NoConnectionException){
                 Cat.sleep(200);
                 Platform.runLater(() -> {
                     wr.setStopRequested(false);
                     Vanilla.getVanilla().setStopRequested(false);
                     prg.setProgress(0);
                     status.setText(Translator.translate("error.connection"));
-                    detailedStatus.setText(e.getMessage());
                     btnStart.setText("⯈");
                 });
             }
@@ -296,31 +301,30 @@ public class Main{
             onProgressEvent(p);
         }
         else if (e instanceof KeyEvent k){
-            String status;
             String key = k.getKey();
             if (key.startsWith("java")){
                 String major = k.getKey().substring(4);
-                status = Translator.translateFormat("launch.state.download.java", major);
+                status.setText(Translator.translateFormat("launch.state.download.java", major));
             }
             else if (key.equals("clientDownload"))
-                status = Translator.translate("launch.state.download.client");
+                status.setText(Translator.translate("launch.state.download.client"));
             else if (key.startsWith("lib")){
-                status = key.substring(3);
+                status.setText(key.substring(3));
             }
             else if (key.equals("jvdown")){
-                status = "";
+                status.setText(null);
                 detailedStatus.setText(null);
                 prg.setProgress(0);
             }
             else if (key.startsWith("sessionEnd")){
                 String code = key.substring(10);
-                status = code.equals("0") ? "" : Translator.translateFormat("error.crash", code);
+                status.setText(code.equals("0") ? "" : Translator.translateFormat("error.crash", code));
             }
             else if (key.startsWith("asset")){
-                status = Translator.translate("launch.state.download.assets") + " " + key.substring(5);
+                status.setText(Translator.translate("launch.state.download.assets") + " " + key.substring(5));
             }
             else if (key.startsWith("sessionStart")){
-                status = "";
+                status.setText(null);
                 selectedProfile.getWrapper().setStopRequested(false);
                 Vanilla.getVanilla().setStopRequested(false);
                 detailedStatus.setText(null);
@@ -330,27 +334,24 @@ public class Main{
                     FXManager.getManager().hideAll();
             }
             else if (key.startsWith("acqVersion"))
-                status = Translator.translateFormat("launch.state.acquire", key.substring(10));
+                status.setText(Translator.translateFormat("launch.state.acquire", key.substring(10)));
             else if (key.startsWith("prepare")){
-                status = Translator.translateFormat("launch.state.prepare", key.substring(7));
+                status.setText(Translator.translateFormat("launch.state.prepare", key.substring(7)));
             }
             else if (key.startsWith("."))
-                status = dot(key.substring(1));
+                status.setText(dot(key.substring(1)));
             else if (key.startsWith(",")){
                 var s = key.split(":\\.");
-                status = dot(s[1]);
+                status.setText(dot(s[1]));
                 detailedStatus.setText(s[0].substring(1));
             }
             else if (key.equals("stop")){
-                status = "";
+                status.setText(null);
                 detailedStatus.setText(null);
                 prg.setProgress(0);
             }
             else
-                status = key;
-
-            this.status.setText(status);
-
+                status.setText(key);
         }
     }
 
@@ -379,8 +380,12 @@ public class Main{
             }
             case "profileDelete" -> {
                 profiles.removeIf(x -> x.getProfile() == oldProfile);
-                if (profiles.stream().noneMatch(LProfile::selected) && profiles.size() > 0) {
-                    profiles.stream().findFirst().get().setSelected(true);
+                if (profiles.stream().noneMatch(LProfile::selected)) {
+                    if (profiles.size() > 0)
+                        profiles.stream().findFirst().get().setSelected(true);
+                    else{
+                        selectProfile(null);
+                    }
                 }
             }
             case "profileUpdate" -> {
@@ -412,5 +417,17 @@ public class Main{
         lvProfiles.setCellFactory(x -> new CProfile());
         lvProfiles.refresh();
     }
+    private void onFXEvent(BaseEvent a){
+        if (!(a instanceof KeyEvent e))
+            return;
+        if (!e.getKey().equals("close"))
+            return;
+        var stage = (LStage)e.getSource();
+        if (!stage.getName().equals("settings"))
+            return;
+        if (selectedProfile != null && !selectedProfile.isEmpty())
+            return;
 
+        setUser(Configurator.getConfig().getUser().reload());
+    }
 }

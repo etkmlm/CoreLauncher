@@ -14,6 +14,10 @@ public class NBTList extends NBTTag{
         tags = new ArrayList<>();
     }
 
+    public List<NBTTag> getItems(){
+        return tags;
+    }
+
     @Override
     public NBTTag deserialize(ByteReader reader){
         String name = readName(reader);

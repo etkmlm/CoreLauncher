@@ -35,6 +35,7 @@ public class CResource {
         p.desc = r.summary;
         if (r.logo != null)
             p.logoUrl = r.logo.url;
+
         var files = r.searchGame(versionId, loader);
         if (files.size() == 0)
             return p;
@@ -43,7 +44,7 @@ public class CResource {
     }
 
     public Image getIcon(){
-        if (logoUrl == null)
+        if (logoUrl == null || logoUrl.isBlank())
             return null;
         return logoUrl.startsWith("/") ? new Image(Objects.requireNonNull(CResource.class.getResourceAsStream(logoUrl))) : new Image(logoUrl, true);
     }

@@ -173,10 +173,10 @@ public class ForgeBrowser {
 
             int index = cbSort.getItems().indexOf(value);
 
-            search.sortOrder = index == 0 ? "asc" : "desc";
+            search.setSortOrder(index == 0);
         });
 
-        txtQuery.textProperty().addListener(a -> search.searchFilter = txtQuery.getText());
+        txtQuery.textProperty().addListener(a -> search.setSearchFilter(txtQuery.getText()));
     }
 
     public void reset(){

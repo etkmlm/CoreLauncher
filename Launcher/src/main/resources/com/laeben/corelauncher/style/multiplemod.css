@@ -1,0 +1,17 @@
+.text-area{
+    -fx-font-size: 11pt;
+    -fx-background-color: #303232;
+    -fx-background-radius: 10px;
+}
+
+.text-area .context-menu{
+    -fx-opacity: 0;
+}
+
+.text-area *{
+    -fx-cursor: text;
+}
+
+.status{
+    -fx-font-size: 10pt;
+}

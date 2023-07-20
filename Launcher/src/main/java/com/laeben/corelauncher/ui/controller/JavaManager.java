@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller;
 
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.util.Cat;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.minecraft.Launcher;
@@ -12,6 +13,7 @@ import com.laeben.corelauncher.utils.entities.Java;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListView;
@@ -69,13 +71,25 @@ public class JavaManager {
             item.setOnAction(a -> {
                 if (JavaMan.getManager().getAllJavaVersions().stream().anyMatch(y -> y.getName().equals(name)))
                     return;
-                new Thread(() -> {
-                    Platform.runLater(() -> FXManager.getManager().focus("main"));
-                    JavaMan.getManager().download(Java.fromVersion(x));
-                    Launcher.getLauncher().getHandler().execute(new KeyEvent("jvdown"));
+                var task = new Task<>() {
+                    @Override
+                    protected Object call() throws Exception {
+                        Platform.runLater(() -> FXManager.getManager().focus("main"));
+                        try{
+                            JavaMan.getManager().download(Java.fromVersion(x));
+                        }
+                        catch (NoConnectionException ignored){
+
+                        }
+                        Launcher.getLauncher().getHandler().execute(new KeyEvent("jvdown"));
+                        return null;
+                    }
+                };
+                task.setOnSucceeded(y -> {
                     Cat.sleep(500);
                     Platform.runLater(() -> FXManager.getManager().focus("javaman"));
-                }).start();
+                });
+                new Thread(task).start();
             });
             return item;
         }).toList());

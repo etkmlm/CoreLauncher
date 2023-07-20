@@ -1,7 +1,6 @@
 package com.laeben.corelauncher.ui.controls;
 
 import com.laeben.corelauncher.CoreLauncherFX;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entities.Resource;
 import com.laeben.corelauncher.minecraft.modding.entities.Mod;
 import com.laeben.corelauncher.ui.entities.LMod;
 import com.laeben.corelauncher.ui.utils.FXManager;
@@ -14,7 +13,6 @@ import javafx.scene.image.ImageView;
 
 public class CMod extends ListCell<LMod> {
     private final Node gr;
-    private Resource resource;
 
     public CMod(){
         var path = CoreLauncherFX.class.getResource("/com/laeben/corelauncher/entities/cmod.fxml");

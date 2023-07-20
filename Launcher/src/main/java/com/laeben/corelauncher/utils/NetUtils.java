@@ -14,7 +14,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 public class NetUtils extends com.laeben.core.util.NetUtils{
-    public static Document getDocumentFromUrl(String url) throws IOException {
+    public static Document getDocumentFromUrl(String url) throws IOException, NoConnectionException {
         if (offline)
             throw new NoConnectionException();
         try{

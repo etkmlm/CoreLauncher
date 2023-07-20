@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.minecraft.utils;
 
+import com.laeben.core.entity.exception.NoConnectionException;
+
 import java.time.Instant;
 import java.util.Date;
 
@@ -11,6 +13,10 @@ public class Tokener {
     public Tokener(Authenticator.XblInfo xbl, Authenticator.AuthInfo auth){
         setXblInfo(xbl);
         setAuthInfo(auth);
+    }
+
+    public static Tokener empty(String username){
+        return new Tokener(new Authenticator.XblInfo("", "", 1000), new Authenticator.AuthInfo(username, "T", 1000));
     }
 
     private Date now(){
@@ -30,7 +36,7 @@ public class Tokener {
         return this;
     }
 
-    public Tokener refreshToken(){
+    public Tokener refreshToken() throws NoConnectionException {
         return setXblInfo(Authenticator.getAuthenticator().refreshXbl(xbl.refresh()))
                 .setAuthInfo(Authenticator.getAuthenticator().getATokenFromToken(xbl.xbl()));
     }
@@ -41,8 +47,14 @@ public class Tokener {
 
     public String getAccessToken(){
 
-        if (now().getTime() > expireDate.getTime())
-            refreshToken();
+        if (now().getTime() > expireDate.getTime()){
+            try{
+                refreshToken();
+            }
+            catch (NoConnectionException ignored){
+
+            }
+        }
 
         return auth.acessToken();
     }

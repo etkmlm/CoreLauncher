@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.wrappers;
 
+import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.minecraft.Wrapper;
@@ -13,6 +14,7 @@ import com.laeben.corelauncher.utils.entities.LogType;
 import com.laeben.core.entity.Path;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Vanilla extends Wrapper<Version> {
     private static final String INFO_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
@@ -41,7 +43,14 @@ public class Vanilla extends Wrapper<Version> {
 
     private String getVersionString(String id){
         var v = getAllVersions().stream().filter(x -> x.checkId(id)).findFirst();
-        return v.map(version -> NetUtils.urlToString(version.url)).orElse(null);
+        return v.map(version -> {
+            try{
+                return NetUtils.urlToString(version.url);
+            }
+            catch (NoConnectionException | HttpException e){
+                return null;
+            }
+        }).orElse(null);
     }
 
     @Override
@@ -79,7 +88,7 @@ public class Vanilla extends Wrapper<Version> {
 
 
     @Override
-    public void install(Version v) {
+    public void install(Version v) throws NoConnectionException, StopException {
         if (v.id == null)
             return;
 
@@ -111,9 +120,6 @@ public class Vanilla extends Wrapper<Version> {
             }
 
             Logger.getLogger().printLog(LogType.INFO, "Vanilla Version " + v.id + " up to date!");
-        }
-        catch (NoConnectionException | StopException e){
-            throw e;
         }
         catch (Exception e){
             Logger.getLogger().log(e);

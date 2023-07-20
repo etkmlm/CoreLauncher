@@ -1,6 +1,8 @@
 package com.laeben.corelauncher.minecraft.modding.modrinth;
 
 import com.laeben.core.entity.RequestParameter;
+import com.laeben.core.entity.exception.HttpException;
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.util.RequesterFactory;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.ClassType;
 import com.laeben.corelauncher.minecraft.modding.entities.Mod;
@@ -32,7 +34,7 @@ public class Modrinth {
         return instance;
     }
 
-    public String getMod(String name, String fileName){
+    public String getMod(String name, String fileName) throws NoConnectionException, HttpException {
         String str = factory.create()
                 .to("/v2/project/" + name + "/version")
                 .getString();
@@ -55,7 +57,7 @@ public class Modrinth {
     }
 
 
-    public List<Mod> searchSodium(String loader, String vId){
+    public List<Mod> searchSodium(String loader, String vId) throws NoConnectionException, HttpException {
         String str = factory.create()
                 .to("/v2/project/" + SODIUM_ID + "/version")
                 .withParam(new RequestParameter("game_versions", "%5b%22" + vId + "%22%5d"))

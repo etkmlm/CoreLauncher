@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.minecraft.wrappers;
 
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entities.Version;
@@ -49,7 +51,7 @@ public class Custom extends Wrapper<Version> {
     }
 
     @Override
-    public void install(Version v) {
+    public void install(Version v) throws NoConnectionException, StopException {
         logState("prepare" + v.id);
 
         downloadLibraries(v);

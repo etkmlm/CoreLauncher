@@ -1,7 +1,9 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge;
 
 import com.laeben.core.entity.RequestParameter;
+import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.NetUtils;
@@ -18,7 +20,6 @@ import com.google.gson.*;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.StringUtils;
-import javafx.event.Event;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -117,7 +118,7 @@ public class CurseForge {
         return mds;
     }
 
-    public void include(Profile p, CResource r){
+    public void include(Profile p, CResource r) throws NoConnectionException, HttpException {
         //var r = CResource.fromResourceGeneric(p.getVersionId(), p.getWrapper().getIdentifier(), res);
         if (r instanceof Mod m)
             includeMods(p, List.of(m), true);
@@ -206,7 +207,7 @@ public class CurseForge {
         return abc.distinct().toList();
     }
 
-    public void includeModpack(Profile p, Modpack mp){
+    public void includeModpack(Profile p, Modpack mp) throws NoConnectionException, HttpException {
         var path = p.getPath();
         String vId = p.getVersionId();
 
@@ -237,7 +238,7 @@ public class CurseForge {
            a.getOnlineWorlds().add(w);
         });
     }
-    public void installWorlds(Profile p, List<World> ws){
+    public void installWorlds(Profile p, List<World> ws) throws NoConnectionException, HttpException {
 
         var worlds = p.getPath().to("saves");
 
@@ -265,14 +266,11 @@ public class CurseForge {
         Profiler.getProfiler().setProfile(p.getName(), null);
     }
 
-    public void installModpacks(Profile p, List<Modpack> mps){
+    public void installModpacks(Profile p, List<Modpack> mps) throws NoConnectionException, HttpException {
         for (var mp : mps)
             extractModpack(p.getPath(), mp);
-
-        //installMods(p, p.getMods().stream().filter(x -> x.mpId == mp.id).toList());
-        //installResourcepacks(p, p.getResources().stream().filter(x -> x.mpId == mp.id).toList());
     }
-    private Path extractModpack(Path path, Modpack mp){
+    private Path extractModpack(Path path, Modpack mp) throws NoConnectionException, HttpException {
         var zip = path.to("mpInfo.zip");
         String name = StringUtils.pure(mp.name);
         var tempDir = path.to(name);
@@ -300,7 +298,7 @@ public class CurseForge {
 
         Profiler.getProfiler().setProfile(p.getName(), null);
     }
-    public void installResourcepacks(Profile p, List<Resourcepack> rs){
+    public void installResourcepacks(Profile p, List<Resourcepack> rs) throws NoConnectionException, HttpException {
         var path = p.getPath().to("resourcepacks");
         int i = 0;
         int size = rs.size();
@@ -327,7 +325,7 @@ public class CurseForge {
         }
         Profiler.getProfiler().setProfile(p.getName(), null);
     }
-    public void installMods(Profile p, List<Mod> mods){
+    public void installMods(Profile p, List<Mod> mods) throws NoConnectionException, StopException, HttpException {
         var path = p.getPath().to("mods");
         int i = 0;
         int size = mods.size();
@@ -340,8 +338,6 @@ public class CurseForge {
                 continue;
 
             handler.execute(new KeyEvent("," + a.name + ":.resource.progress;" + (++i) + ";" + size));
-
-            //System.out.println(++i + " / " + size + " - " + a.fileName);
 
             String url = a.fileUrl;
             if (url.startsWith("OptiFine")){
@@ -366,21 +362,17 @@ public class CurseForge {
         }
     }
 
-    private Path download(String url, Path path, boolean uon){
+    private Path download(String url, Path path, boolean uon) throws NoConnectionException, HttpException {
         try{
             return NetUtils.download(url, path, uon, true);
         }
-        catch (NoConnectionException e){
-            throw e;
+        catch (StopException ignored){
+
         }
         catch (RuntimeException ex){
             if (ex.getMessage().equals("fo")){
                 return null;
             }
-        }
-        catch (Exception e){
-            Logger.getLogger().log(e);
-
         }
 
         return path;

@@ -32,7 +32,7 @@ public class Quilt extends Fabric {
     }
 
     @Override
-    public void install(FabricVersion v){
+    public void install(FabricVersion v) throws NoConnectionException, StopException {
         Vanilla.getVanilla().install(v);
 
         var gameDir = Configurator.getConfig().getGamePath();
@@ -76,9 +76,6 @@ public class Quilt extends Fabric {
             v = GsonUtils.DEFAULT_GSON.fromJson(jsonPath.read(), FabricVersion.class).setWrapperVersion(v.getWrapperVersion());
             downloadLibraries(v);
 
-        }
-        catch (NoConnectionException | StopException e){
-            throw e;
         }
         catch (Exception e){
             Logger.getLogger().log(e);

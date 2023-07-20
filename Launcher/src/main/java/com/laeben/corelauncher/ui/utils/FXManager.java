@@ -1,16 +1,21 @@
 package com.laeben.corelauncher.ui.utils;
 
+import com.laeben.core.util.events.BaseEvent;
+import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.ui.controller.Frame;
 import com.laeben.corelauncher.ui.entities.LScene;
 import com.laeben.corelauncher.ui.entities.LStage;
+import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.Logger;
 import javafx.application.Platform;
+import javafx.fxml.LoadException;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
@@ -23,6 +28,7 @@ import java.util.List;
 public class FXManager {
 
     private static FXManager instance;
+    private EventHandler<BaseEvent> handler;
 
     private final List<LStage> openStages;
 
@@ -30,9 +36,15 @@ public class FXManager {
 
     public FXManager(){
         openStages = new ArrayList<>();
+        handler = new EventHandler<>();
 
         instance = this;
     }
+
+    public EventHandler<BaseEvent> getHandler(){
+        return handler;
+    }
+
     public LStage applyStage(String name){
         try{
             String title = Translator.translate("frame.title." + name);
@@ -67,12 +79,17 @@ public class FXManager {
         }
     }
 
-    public void closeStage(LStage stage){
-        if (stage.isShowing())
-            stage.close();
-        openStages.remove(stage);
-        if (openStages.size() == 0 && implicit){
-            Platform.exit();
+    public void closeStage(Window s){
+        var st = (Stage) s;
+        if (st.isShowing())
+            st.close();
+
+        if (st instanceof LStage stage){
+            openStages.remove(stage);
+            handler.execute(new KeyEvent("close").setSource(stage));
+            if (openStages.size() == 0 && implicit){
+                Platform.exit();
+            }
         }
     }
 

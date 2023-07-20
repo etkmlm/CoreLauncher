@@ -36,13 +36,19 @@ public class World extends CResource{
         return pack;
     }
 
+    public static NBTFile openNBT(Path path){
+        byte[] gzip = path.openAsGzip();
+        var nbt = new NBTFile(gzip);
+
+        return nbt.first() == null ? null : nbt;
+    }
+
     public static World fromGzip(World world, Path path){
         if (world == null)
             world = new World();
 
-        byte[] gzip = path.openAsGzip();
-        var nbt = new NBTFile(gzip);
-        if (nbt.first() == null)
+        var nbt = openNBT(path);
+        if (nbt == null)
             return world;
         var data = nbt.first().asCompound().firstForName("Data").asCompound();
 

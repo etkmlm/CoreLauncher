@@ -61,13 +61,13 @@ public class Account{
         if (!isOnline || !NetUtils.check())
             return this;
         if (tokener == null)
-            tokener = Authenticator.getAuthenticator().authenticate();
+            tokener = Authenticator.getAuthenticator().authenticate(username);
         return this;
     }
 
     public Tokener getTokener(){
         if (tokener == null)
-            return new Tokener(new Authenticator.XblInfo("", "", 1000), new Authenticator.AuthInfo(username, "T", 1000));
+            return Tokener.empty(username);
         return tokener;
     }
 

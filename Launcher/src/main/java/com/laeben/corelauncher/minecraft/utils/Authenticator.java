@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.minecraft.utils;
 
 import com.laeben.core.entity.RequestParameter;
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.NetUtils;
@@ -16,8 +17,7 @@ public class Authenticator {
     public record XblInfo(String xbl, String refresh, int expiresIn){
 
     }
-    //private static final String CLIENT = "957eb4bd-6505-49e7-b2b6-12cf64e8cacc";
-    private static final String CLIENT = "e39cc675-eb52-4475-b5f8-82aaae14eeba";
+    private static final String CLIENT = "957eb4bd-6505-49e7-b2b6-12cf64e8cacc";
     private static final int LOCALHOST_PORT = 57131;
     private static final String LOCALHOST = "http://localhost:" + LOCALHOST_PORT;
     private static final String MICROSOFT_X = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
@@ -63,7 +63,7 @@ public class Authenticator {
         return m.matches() ? m.group(1) : null;
     }
 
-    public XblInfo refreshXbl(String refreshToken){
+    public XblInfo refreshXbl(String refreshToken) throws NoConnectionException {
         String link = NetUtils.post(MICROSOFT_X,
                 "client_id=" + CLIENT +
                 "&scope=XboxLive.signin offline_access" +
@@ -78,7 +78,7 @@ public class Authenticator {
         return new XblInfo(token, rToken, ein);
     }
 
-    public XblInfo getXbl(String code){
+    public XblInfo getXbl(String code) throws NoConnectionException {
         String token_con = "client_id=" + CLIENT +
                 "&code=" + code +
                 "&grant_type=authorization_code&redirect_uri=" + LOCALHOST;
@@ -92,7 +92,7 @@ public class Authenticator {
         return new XblInfo(accessToken, refreshAccessToken, expiresIn);
     }
 
-    public AuthInfo getATokenFromToken(String token){
+    public AuthInfo getATokenFromToken(String token) throws NoConnectionException {
         String json =
                 """
                 {
@@ -139,15 +139,19 @@ public class Authenticator {
         return new AuthInfo(name, mcAccessToken, expiresIn);
     }
 
-    public Tokener authenticate(){
+    public Tokener authenticate(String username){
+        try{
+            OSUtils.openURL(CODE_URL);
+            String code = listen("code");
 
-        OSUtils.openURL(CODE_URL);
-        String code = listen("code");
+            var xbl = getXbl(code);
 
-        var xbl = getXbl(code);
+            var info = getATokenFromToken(xbl.xbl);
 
-        var info = getATokenFromToken(xbl.xbl);
-
-        return new Tokener(xbl, info);
+            return new Tokener(xbl, info);
+        }
+        catch (NoConnectionException e){
+            return Tokener.empty(username);
+        }
     }
 }
