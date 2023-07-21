@@ -6,6 +6,7 @@ A minimalized, deeply customizable launcher for Minecraft.
 # Social
 
 [Discord](https://discord.gg/MEJQtCvwqf)
+
 [Reddit](https://www.reddit.com/r/corelauncher/)
 
 ## Why should I use CoreLauncher?
