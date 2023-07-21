@@ -5,6 +5,7 @@ A minimalized, deeply customizable launcher for Minecraft.
 
 # Social
 
+[Discord](https://discord.gg/MEJQtCvwqf)
 [Reddit](https://www.reddit.com/r/corelauncher/)
 
 ## Why should I use CoreLauncher?
@@ -198,6 +199,30 @@ You don't need to add a custom Java. The launcher downloads the required Java se
    - {Version}
 7) Update button. Updates all mods to their latest version.
 8) Search field. Searches in all resources. (Mods, modpacks, resourcepacks, and worlds.)
+9) Custom button. Opens the custom adding page.
+
+## Custom Resource Adding
+![](images/custommoddesc.png)
+
+1) File name field. The file name of the resource, it's existing checking on the launch process. You can automize it by selecting a file.
+2) File URL field. If you want to share this profile, or use in the future, you have to fill this field. File downloaded from this url when not exists.
+3) Type box. It contains "Mod", "Resourcepack", and "World".
+4) Multiple button. Opens the multiple adding page.
+5) Save button. Adds the mod to your profile.
+
+## Multiple Mod Adding
+![](images/multiplemoddesc.png)
+
+1) Query area.
+   - You should write names like searching in Curse Forge.
+   - After the search, unfoundable names will appear here.
+2) Result list. Displays the founded mods.
+3) From world button. Shows a world selector. When you select a world, it extracts all mods in it and searches.
+   - Only works with Forge for now. (Because of level.dat restrictions.)
+4) From mods button. Select the folder that contains your mods, all mod names will appear in query area. (You may want to edit this names, it's not true always.)
+5) Status label.
+6) Search button. Starts the searching process.
+7) Apply button. Adds the mods into the profile.
 
 ## Browser
 ![](images/browsedesc.png)
