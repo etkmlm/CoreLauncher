@@ -11,8 +11,6 @@ import com.laeben.corelauncher.ui.utils.FXManager;
 import com.laeben.corelauncher.utils.JavaMan;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
-import com.laeben.corelauncher.utils.OSUtils;
-import com.laeben.corelauncher.utils.entities.OS;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;

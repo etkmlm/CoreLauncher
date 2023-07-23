@@ -5,13 +5,11 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.data.entities.Profile;
-import com.laeben.corelauncher.data.nbt.entities.NBTCompound;
 import com.laeben.corelauncher.data.nbt.entities.NBTList;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.ClassType;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.ModsSearchSortField;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.Search;
-import com.laeben.corelauncher.minecraft.modding.entities.CResource;
 import com.laeben.corelauncher.minecraft.modding.entities.Mod;
 import com.laeben.corelauncher.minecraft.modding.entities.World;
 import com.laeben.corelauncher.minecraft.wrappers.forge.Forge;
@@ -24,14 +22,11 @@ import com.laeben.corelauncher.ui.utils.FXManager;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class MultipleMod {
 

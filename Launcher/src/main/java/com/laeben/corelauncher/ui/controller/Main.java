@@ -10,7 +10,6 @@ import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.data.entities.Account;
-import com.laeben.corelauncher.data.entities.Config;
 import com.laeben.corelauncher.data.entities.Profile;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.Wrapper;
@@ -37,6 +36,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 
@@ -107,12 +107,19 @@ public class Main{
             root.setBackground(bg);
             leftRoot.setOpacity(1);
             lvProfiles.setOpacity(1);
+            btnSettings.setOpacity(1);
+            btnAbout.setOpacity(1);
+            txtSearch.setOpacity(1);
         }
         else {
-            var nbg = new Background(new BackgroundImage(new Image(path.toString()), null, null, null, null));
+            var fill = new BackgroundFill(new ImagePattern(new Image(path.toString())), null, null);
+            var nbg = new Background(fill);
             root.setBackground(nbg);
             leftRoot.setOpacity(0.9);
             lvProfiles.setOpacity(0.9);
+            btnSettings.setOpacity(0.9);
+            btnAbout.setOpacity(0.9);
+            txtSearch.setOpacity(0.9);
         }
     }
 
@@ -216,9 +223,7 @@ public class Main{
         var wr = (Wrapper<?>)p.getWrapper();
         Vanilla.getVanilla().setDisableCache(cache);
         wr.setDisableCache(cache).getHandler().addHandler("main", this::onGeneralEvent, true);
-        btnStart.setText("||");
-
-
+        btnStart.setText("⏸");
 
         var task = new Task<>() {
             @Override

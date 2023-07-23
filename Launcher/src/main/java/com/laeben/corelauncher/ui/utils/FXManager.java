@@ -10,7 +10,6 @@ import com.laeben.corelauncher.ui.entities.LStage;
 import com.laeben.corelauncher.utils.EventHandler;
 import com.laeben.corelauncher.utils.Logger;
 import javafx.application.Platform;
-import javafx.fxml.LoadException;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;

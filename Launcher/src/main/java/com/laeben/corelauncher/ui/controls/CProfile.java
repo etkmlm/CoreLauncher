@@ -3,7 +3,9 @@ package com.laeben.corelauncher.ui.controls;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
+import com.laeben.corelauncher.minecraft.wrappers.Custom;
 import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
+import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.laeben.corelauncher.ui.controller.Mods;
 import com.laeben.corelauncher.ui.controller.ProfileEdit;
 import com.laeben.corelauncher.ui.controller.Worlds;
@@ -129,7 +131,7 @@ public class CProfile extends ListCell<LProfile> {
         var lw = p.getLocalWorlds();
         String resInfo = res.size() + Translator.translate("profile.resources") + " / " + (Stream.concat(ow.stream(), lw.stream()).distinct().count()) + Translator.translate("profile.worlds");
 
-        if (!(p.getWrapper() instanceof Vanilla)){
+        if (!(p.getWrapper() instanceof Vanilla) && !(p.getWrapper() instanceof OptiFine) && !(p.getWrapper() instanceof Custom)){
             var mods = p.getMods();
             var packs = p.getModpacks();
 

@@ -16,7 +16,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import java.util.HashMap;

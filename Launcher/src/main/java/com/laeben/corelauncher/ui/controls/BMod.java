@@ -6,7 +6,6 @@ import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.File;
 import com.laeben.corelauncher.minecraft.modding.entities.CResource;
-import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.entities.LModLink;
 import com.laeben.corelauncher.ui.utils.FXManager;
 import javafx.application.Platform;

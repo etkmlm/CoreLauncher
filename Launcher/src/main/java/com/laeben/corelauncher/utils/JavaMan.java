@@ -10,11 +10,9 @@ import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.utils.entities.Java;
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
-import com.laeben.core.util.events.ProgressEvent;
 import com.google.gson.JsonArray;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

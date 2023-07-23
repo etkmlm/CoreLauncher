@@ -20,11 +20,6 @@ import com.laeben.corelauncher.utils.entities.LogType;
 import com.laeben.corelauncher.utils.entities.OS;
 import com.laeben.core.entity.Path;
 
-import javax.net.ssl.*;
-import java.net.HttpURLConnection;
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
 public class CoreLauncher {

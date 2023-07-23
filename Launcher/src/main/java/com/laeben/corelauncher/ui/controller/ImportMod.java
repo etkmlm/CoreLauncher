@@ -94,7 +94,7 @@ public class ImportMod {
 
         btnMultiple.setOnMouseClicked(a -> {
             MultipleMod.open(profile).show();
-            FXManager.getManager().closeStage((LStage) btnMultiple.getScene().getWindow());
+            FXManager.getManager().closeStage(btnMultiple.getScene().getWindow());
         });
     }
 

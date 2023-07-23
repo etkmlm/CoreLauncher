@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller;
 
+import com.laeben.core.entity.Path;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
@@ -9,7 +10,7 @@ import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.wrappers.Custom;
 import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
 import com.laeben.corelauncher.minecraft.wrappers.entities.WrapperVersion;
-import com.laeben.corelauncher.ui.entities.LStage;
+import com.laeben.corelauncher.ui.controls.CMsgBox;
 import com.laeben.corelauncher.ui.utils.ControlUtils;
 import com.laeben.corelauncher.ui.utils.FXManager;
 import com.laeben.corelauncher.utils.JavaMan;
@@ -17,13 +18,11 @@ import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.OSUtils;
 import com.laeben.corelauncher.utils.StringUtils;
 import com.laeben.corelauncher.utils.entities.Java;
-import com.laeben.core.entity.Path;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 import javafx.util.StringConverter;
@@ -70,8 +69,6 @@ public class ProfileEdit {
     private Spinner<Integer> txtMaxRAM;
     @FXML
     private Slider sldRAM;
-    @FXML
-    private AnchorPane root;
     @FXML
     private GridPane pWrapper;
     @FXML
@@ -250,8 +247,10 @@ public class ProfileEdit {
         btnSave.setOnMouseClicked(a -> {
             String name = StringUtils.pure(txtName.getText());
 
-            if (name == null || name.isBlank())
+            if (name == null || name.isBlank()){
+                CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("profile.edit.error.name"));
                 return;
+            }
 
             if (name.endsWith("."))
                 name = StringUtils.trimEnd(name, '.');
@@ -266,8 +265,10 @@ public class ProfileEdit {
             else
                 tempProfile.setCustomUser(Account.fromUsername(txtAccount.getText()).setOnline(chkAccOnline.isSelected()));
 
-            if ((tempProfile.getWrapper() != null && !(tempProfile.getWrapper() instanceof Vanilla) && (tempProfile.getWrapperVersion() == null || tempProfile.getWrapperVersion().isBlank() || tempProfile.getWrapperVersion().equals("..."))))
+            if ((tempProfile.getWrapper() != null && !(tempProfile.getWrapper() instanceof Vanilla) && (tempProfile.getWrapperVersion() == null || tempProfile.getWrapperVersion().isBlank() || tempProfile.getWrapperVersion().equals("...")))){
+                CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("profile.edit.error.wrapper"));
                 return;
+            }
 
             try{
                 if (profile == null){
@@ -282,7 +283,7 @@ public class ProfileEdit {
                 Logger.getLogger().log(e);
             }
 
-            FXManager.getManager().closeStage((LStage)btnSave.getScene().getWindow());
+            FXManager.getManager().closeStage(btnSave.getScene().getWindow());
         });
 
         reload();

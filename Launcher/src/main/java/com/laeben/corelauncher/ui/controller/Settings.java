@@ -1,6 +1,5 @@
 package com.laeben.corelauncher.ui.controller;
 
-import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
@@ -8,7 +7,6 @@ import com.laeben.corelauncher.data.entities.Account;
 import com.laeben.corelauncher.data.entities.Config;
 import com.laeben.corelauncher.ui.controls.CButton;
 import com.laeben.corelauncher.ui.controls.CMsgBox;
-import com.laeben.corelauncher.ui.entities.LStage;
 import com.laeben.corelauncher.ui.utils.ControlUtils;
 import com.laeben.corelauncher.ui.utils.FXManager;
 import com.laeben.corelauncher.utils.JavaMan;
@@ -21,7 +19,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;

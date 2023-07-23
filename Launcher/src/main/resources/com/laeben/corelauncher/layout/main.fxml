@@ -64,7 +64,7 @@
 
         <TextArea fx:id="detailedStatus" editable="false"  AnchorPane.bottomAnchor="0" prefHeight="60" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="65"/>
 
-        <CButton fx:id="btnSettings" prefHeight="50" prefWidth="50" styleClass="ench-button" text="✦" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" />
+        <CButton fx:id="btnSettings" prefHeight="50" prefWidth="50" styleClass="ench-button" style="-fx-font-size: 11pt" text="☰" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" />
         <CButton fx:id="btnAbout" prefHeight="50" prefWidth="50" styleClass="ench-button" text="🛈" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="0" />
     </AnchorPane>
 

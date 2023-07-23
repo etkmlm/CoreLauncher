@@ -14,7 +14,6 @@ import com.laeben.corelauncher.utils.entities.LogType;
 import com.laeben.core.entity.Path;
 
 import java.util.List;
-import java.util.Objects;
 
 public class Vanilla extends Wrapper<Version> {
     private static final String INFO_URL = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
