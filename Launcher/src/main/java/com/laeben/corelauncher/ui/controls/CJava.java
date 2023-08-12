@@ -21,8 +21,7 @@ public class CJava extends ListCell<Java> {
     private Java java;
 
     public CJava(){
-        var path = CoreLauncherFX.class.getResource("/com/laeben/corelauncher/entities/cjava.fxml");
-        setGraphic(gr = FXManager.getManager().open(this, path));
+        setGraphic(gr = FXManager.getManager().applyControl(this, "cjava"));
     }
 
     @FXML

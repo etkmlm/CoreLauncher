@@ -8,6 +8,7 @@ import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.entities.Profile;
 import com.laeben.corelauncher.minecraft.entities.ExecutionInfo;
 import com.laeben.corelauncher.minecraft.entities.VersionNotFoundException;
+import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
 import com.laeben.corelauncher.minecraft.utils.CommandConcat;
@@ -19,6 +20,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.KeyEvent;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Launcher {
     public static Launcher instance;
@@ -56,18 +58,19 @@ public class Launcher {
      * Prepares the profile to launch.
      * @param profile target profile
      */
-    public void prepare(Profile profile) throws NoConnectionException, StopException, HttpException {
+    public void prepare(Profile profile) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
         handleState("prepare" + profile.getName());
 
         profile.getWrapper().install(profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion()));
 
         if (profile.getWrapper().getType() != CurseWrapper.Type.ANY){
-            CurseForge.getForge().installModpacks(profile, profile.getModpacks());
-            CurseForge.getForge().installMods(profile, profile.getMods());
+            Modder.getModder().installModpacks(profile, profile.getModpacks());
+            Modder.getModder().installMods(profile, profile.getMods());
         }
 
-        CurseForge.getForge().installWorlds(profile, profile.getOnlineWorlds());
-        CurseForge.getForge().installResourcepacks(profile, profile.getResources());
+        Modder.getModder().installWorlds(profile, profile.getOnlineWorlds());
+        Modder.getModder().installResourcepacks(profile, profile.getResources());
+        Modder.getModder().installShaders(profile, profile.getShaders());
     }
 
     /**
@@ -160,6 +163,9 @@ public class Launcher {
                     .add(linfo.mainClass)
                     .add(gameCmds)
                     .generate();
+
+            // Due to some reasons, authentication process does not complete without requesting to the certificate URL, so we are requesting here.
+            info.account.validate();
 
             handleState("sessionStart");
             // Start a new session

@@ -19,4 +19,7 @@ public class Manifest {
     public String author;
     public List<ManifestFile> files;
     public Minecraft minecraft;
+
+
+
 }

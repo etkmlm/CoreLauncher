@@ -16,7 +16,6 @@ public class Configurator {
     private static Configurator instance;
     private final EventHandler<ChangeEvent> handler;
 
-    private static Config defaultConfig;
     private static Config config;
     private final Path configFilePath;
     private static final Gson gson = GsonUtils.DEFAULT_GSON.newBuilder().registerTypeAdapter(Profile.class, new Profile.ProfileFactory()).create();
@@ -24,8 +23,6 @@ public class Configurator {
 
     public Configurator(Path configPath){
         configFilePath = configPath.to("config.json");
-
-        defaultConfig = generateDefaultConfig();
         handler = new EventHandler<>();
 
         instance = this;
@@ -55,7 +52,7 @@ public class Configurator {
             config = gson.fromJson(read, Config.class);
         }
         else{
-            save(defaultConfig);
+            save(generateDefaultConfig());
             return reloadConfig();
         }
 
@@ -92,6 +89,21 @@ public class Configurator {
 
     public static Configurator getConfigurator(){
         return instance;
+    }
+
+    public void reset(){
+        var path = config.getGamePath();
+        var backup = config;
+        config = generateDefaultConfig();
+        if (config == null){
+            config = backup;
+            return;
+        }
+        config.setGamePath(path);
+        save();
+
+        handler.execute(new ChangeEvent("languageChange", null, config.getLanguage()));
+        handler.execute(new ChangeEvent("bgChange", null, config.getBackgroundImage()));
     }
 
     private void save(Config c){

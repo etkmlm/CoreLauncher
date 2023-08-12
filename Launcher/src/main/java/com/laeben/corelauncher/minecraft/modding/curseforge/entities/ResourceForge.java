@@ -6,7 +6,7 @@ import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Resource {
+public class ResourceForge {
 
     public int id;
     public String name;
@@ -15,16 +15,16 @@ public class Resource {
     public int primaryCategoryId;
     public int classId;
     public int mainFileId;
-    public List<Category> categories;
+    public List<ForgeCategory> categories;
     public List<Author> authors;
     public Image logo;
     public List<Image> screenshots;
-    public List<File> latestFiles;
+    public List<ForgeFile> latestFiles;
     public Date dateCreated;
     public Date dateModified;
     public Date dateReleased;
 
-    public List<File> searchGame(String versionId, String loader){
+    public List<ForgeFile> searchGame(String versionId, String loader){
         String[] spl = versionId.split("\\.");
         String base = versionId;
 

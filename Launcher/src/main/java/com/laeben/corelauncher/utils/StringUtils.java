@@ -1,5 +1,8 @@
 package com.laeben.corelauncher.utils;
 
+import java.util.List;
+import java.util.Locale;
+
 public class StringUtils {
 
     private static final char[] INVALID_CHARS = {
@@ -32,5 +35,13 @@ public class StringUtils {
         for(char i : INVALID_CHARS)
             source = source.replace(String.valueOf(i), "");
         return source;
+    }
+
+    public static String toUpperFirst(String target){
+        return target.substring(0, 1).toUpperCase(Locale.US) + target.substring(1);
+    }
+
+    public static String jsArray(List<String> values){
+        return "[" + String.join(",", values.stream().map(x -> x.startsWith("[") ? x : "\"" + x + "\"").toList()) + "]";
     }
 }

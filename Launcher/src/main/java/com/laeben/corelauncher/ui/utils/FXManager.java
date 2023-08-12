@@ -27,7 +27,7 @@ import java.util.List;
 public class FXManager {
 
     private static FXManager instance;
-    private EventHandler<BaseEvent> handler;
+    private final EventHandler<BaseEvent> handler;
 
     private final List<LStage> openStages;
 
@@ -44,10 +44,13 @@ public class FXManager {
         return handler;
     }
 
-    public LStage applyStage(String name){
+    public LStage applyStage(String name, Object controller, String title){
         try{
-            String title = Translator.translate("frame.title." + name);
+            if (title == null)
+                title = Translator.translate("frame.title." + name);
             var loader = LStage.getDefaultLoader(CoreLauncherFX.class.getResource("layout/" + name + ".fxml"));
+            if (controller != null)
+                loader.setController(controller);
             var frameLoader = LStage.getDefaultLoader(CoreLauncherFX.class.getResource("layout/frame.fxml"));
             var frame = (Parent)frameLoader.load();
             var content = (Pane)frame.getChildrenUnmodifiable().stream().filter(x -> x.getId() != null && x.getId().equals("content")).findFirst().get();
@@ -55,12 +58,10 @@ public class FXManager {
 
             ((Frame)frameLoader.getController()).setTitle(title);
 
-            var controller = loader.getController();
-
             content.getChildren().clear();
             content.getChildren().add(c);
 
-            var newScene = new LScene<>(frame, controller);
+            var newScene = new LScene<>(frame, loader.getController());
             newScene.setFill(Color.TRANSPARENT);
             var stage = new LStage()
                     .setStageScene(newScene)
@@ -78,6 +79,10 @@ public class FXManager {
         }
     }
 
+    public LStage applyStage(String name){
+        return applyStage(name, null, null);
+    }
+
     public void closeStage(Window s){
         var st = (Stage) s;
         if (st.isShowing())
@@ -86,14 +91,14 @@ public class FXManager {
         if (st instanceof LStage stage){
             openStages.remove(stage);
             handler.execute(new KeyEvent("close").setSource(stage));
-            if (openStages.size() == 0 && implicit){
+            if (openStages.isEmpty() && implicit){
                 Platform.exit();
             }
         }
     }
 
-    public Node open(Object controller, URL url){
-        var manager = LStage.getDefaultLoader(url);
+    public Node applyControl(Object controller, String fxml){
+        var manager = LStage.getDefaultLoader(CoreLauncherFX.class.getResource("entities/" + fxml + ".fxml"));
         manager.setController(controller);
         try{
             return manager.load();

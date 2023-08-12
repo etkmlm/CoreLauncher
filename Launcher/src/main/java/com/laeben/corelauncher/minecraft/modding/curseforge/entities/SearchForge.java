@@ -1,6 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge.entities;
 
-public class Search {
+public class SearchForge {
     public String searchFilter;
     public String gameVersion;
     public int classId;

@@ -28,6 +28,7 @@ import com.laeben.core.entity.Path;
 import com.google.gson.*;
 import javafx.scene.image.Image;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -56,6 +57,14 @@ public abstract class Wrapper<H extends Version> {
 
     public static List<String> getWrappers(){
         return wrappers.keySet().stream().toList();
+    }
+
+    public static boolean isFlat(Wrapper wr){
+        return wr instanceof Vanilla || wr instanceof Custom;
+    }
+
+    public static boolean isFlatO(Wrapper wr){
+        return isFlat(wr) || wr instanceof OptiFine;
     }
 
     public boolean isStopRequested(){
@@ -87,7 +96,7 @@ public abstract class Wrapper<H extends Version> {
         return Configurator.getConfig().getGamePath();
     }
 
-    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude) throws NoConnectionException, StopException, HttpException {
+    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
         Path libPath = libDir.to(asset.path.split("/"));
         if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || disableCache)
         {

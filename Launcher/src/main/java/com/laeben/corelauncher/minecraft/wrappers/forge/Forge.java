@@ -75,8 +75,8 @@ public class Forge extends Wrapper<ForgeVersion> {
                 ForgeVersion forge = new ForgeVersion(versionId)
                         .setWrapperVersion(s);
 
-                boolean latest = element.getElementsByClass("promo-latest").size() != 0;
-                boolean recommended = element.getElementsByClass("promo-recommended").size() != 0;
+                boolean latest = !element.getElementsByClass("promo-latest").isEmpty();
+                boolean recommended = !element.getElementsByClass("promo-recommended").isEmpty();
 
                 forge.forgeVersionType = latest ? ForgeVersion.ForgeVersionType.LATEST : recommended ? ForgeVersion.ForgeVersionType.RECOMMENDED : ForgeVersion.ForgeVersionType.NORMAL;
                 String date = element.getElementsByClass("download-time").get(0).attr("title");

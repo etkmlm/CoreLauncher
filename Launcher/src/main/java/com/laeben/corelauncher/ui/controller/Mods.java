@@ -5,13 +5,17 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.data.entities.Profile;
+import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entities.ClassType;
+import com.laeben.corelauncher.minecraft.modding.entities.CResource;
 import com.laeben.corelauncher.minecraft.modding.entities.Mod;
+import com.laeben.corelauncher.minecraft.modding.entities.Modpack;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
-import com.laeben.corelauncher.minecraft.wrappers.fabric.Fabric;
 import com.laeben.corelauncher.minecraft.wrappers.forge.Forge;
 import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
+import com.laeben.corelauncher.ui.controller.browser.ForgeBrowser;
+import com.laeben.corelauncher.ui.controller.browser.ModBrowser;
+import com.laeben.corelauncher.ui.controller.browser.ModrinthBrowser;
 import com.laeben.corelauncher.ui.controls.CMod;
 import com.laeben.corelauncher.ui.controls.CMsgBox;
 import com.laeben.corelauncher.ui.entities.LMod;
@@ -24,7 +28,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Stream;
 
 public class Mods {
 
@@ -50,9 +58,9 @@ public class Mods {
     @FXML
     public TextField txtSearch;
     @FXML
-    public Button btnBrowse;
+    public Button btnBrowseForge;
     @FXML
-    public Button btnSodium;
+    public Button btnBrowseRinth;
     @FXML
     public Button btnOpti;
     @FXML
@@ -66,7 +74,6 @@ public class Mods {
     private final ObservableList<LMod> worlds;
 
     private final ContextMenu cmOptifine;
-    private final ContextMenu cmSodium;
 
     public Mods(){
         mods = FXCollections.observableArrayList();
@@ -82,9 +89,7 @@ public class Mods {
 
         String cStyle = "-fx-background-color: #252525;";
         cmOptifine = new ContextMenu();
-        cmSodium = new ContextMenu();
         cmOptifine.setStyle(cStyle);
-        cmSodium.setStyle(cStyle);
     }
 
     public void reload(){
@@ -103,11 +108,10 @@ public class Mods {
             Platform.runLater(() -> {
                 mods.addAll(profile.getMods().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
                 modpacks.addAll(profile.getModpacks().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
-                resources.addAll(profile.getResources().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
+                resources.addAll(Stream.concat(profile.getResources().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)), profile.getShaders().stream().map(x -> new LMod(x, profile).setAction(this::onRemove))).toList());
                 worlds.addAll(profile.getOnlineWorlds().stream().map(x -> new LMod(x, profile).setAction(this::onRemove)).toList());
 
                 cmOptifine.getItems().clear();
-                cmSodium.getItems().clear();
             });
 
             if (profile.getWrapper() instanceof Forge){
@@ -122,27 +126,11 @@ public class Mods {
                         mod.fileUrl = v.getWrapperVersion();
                         mod.name = v.getJsonName();
                         mod.logoUrl = "/com/laeben/corelauncher/images/optifine.png";
-                        mod.classId = ClassType.MOD.getId();
 
                         Profiler.getProfiler().setProfile(profile.getName(), x -> x.getMods().add(mod));
                     });
                     item.setStyle("-fx-text-fill: white;");
                     Platform.runLater(() -> cmOptifine.getItems().add(item));
-                }
-            }
-            else if (profile.getWrapper() instanceof Fabric){
-                var identifier = profile.getWrapper().getIdentifier();
-                try{
-                    var vers = Modrinth.getModrinth().searchSodium(identifier, profile.getVersionId());
-                    for (var v : vers){
-                        var item = new MenuItem();
-                        item.setText(v.name);
-                        item.setOnAction(a -> Profiler.getProfiler().setProfile(profile.getName(), x -> x.getMods().add(v)));
-                        Platform.runLater(() -> cmSodium.getItems().add(item));
-                    }
-                }
-                catch (NoConnectionException | HttpException ignored){
-
                 }
             }
         }).start();
@@ -184,20 +172,19 @@ public class Mods {
             lvWorlds.setItems(fWorlds);
         });
 
-        btnBrowse.setOnAction(x -> {
+        btnBrowseForge.setOnAction(x -> {
             if (!NetUtils.check())
                 return;
-            ForgeBrowser.open(profile).show();
+            ModBrowser.open(profile, new ForgeBrowser(), "forgebrowser").show();
         });
 
         btnCustom.setOnMouseClicked(a -> ImportMod.open(profile).show());
 
-        btnSodium.setContextMenu(cmSodium);
-        btnSodium.setOnMouseClicked(x -> {
-            if (!(profile.getWrapper() instanceof Fabric))
+        btnBrowseRinth.setOnMouseClicked(x -> {
+            if (!NetUtils.check())
                 return;
 
-            cmSodium.show(btnSodium, x.getScreenX(), x.getScreenY());
+            ModBrowser.open(profile, new ModrinthBrowser(), "rinthbrowser").show();
         });
         btnOpti.setContextMenu(cmOptifine);
         btnOpti.setOnMouseClicked(x -> {
@@ -219,20 +206,22 @@ public class Mods {
             if (f.isEmpty() || f.get() != ButtonType.YES)
                 return;
 
-            var mods = profile.getMods().stream().filter(x -> x.mpId == 0).toList();
-            String vId = profile.getVersionId();
+            var mods = Stream.concat(profile.getMods().stream().filter(x -> x.getModpackId() == null), profile.getModpacks().stream()).toList();
 
-            var all = CurseForge.getForge().getResources(vId, mods.stream().map(x -> x.id).toList(), profile, false).stream().map(x -> (Mod)x).toList();
-            for (var m : mods){
-                var mod = all.stream().filter(x -> x.id == m.id).findFirst();
-                if (mod.isEmpty() || mod.get().fileName.equals(m.fileName))
-                    continue;
+            List<CResource> allMods = getLastVersions(mods);
 
-                CurseForge.getForge().remove(profile, m);
-                try {
-                    CurseForge.getForge().include(profile, mod.get());
-                } catch (NoConnectionException | HttpException ignored) {
+            if (!allMods.isEmpty()){
+                for (var m : mods){
+                    var mod = allMods.stream().filter(m::equals).findFirst();
+                    if (mod.isEmpty() || mod.get().fileName.equals(m.fileName))
+                        continue;
 
+                    Modder.getModder().remove(profile, m);
+                    try {
+                        Modder.getModder().include(profile, mod.get());
+                    } catch (NoConnectionException | HttpException ignored) {
+
+                    }
                 }
 
             }
@@ -240,7 +229,24 @@ public class Mods {
 
     }
 
+    private <T extends CResource> List<T> getLastVersions(List<T> olds){
+        List<T> all = new ArrayList<>();
+        var vId = profile.getVersionId();
+        try {
+            var rinth = olds.stream().filter(T::isModrinth).map(x -> x.id.toString()).toList();
+            var forge = olds.stream().filter(T::isForge).map(x -> (int)x.id).toList();
+            if (!rinth.isEmpty())
+                all.addAll(Modrinth.getModrinth().getCResources(rinth, vId, profile.getWrapper().getIdentifier()));
+            if (!forge.isEmpty())
+                all.addAll(CurseForge.getForge().getResources(vId, forge, profile, false).stream().map(x -> (T)x).toList());
+        } catch (NoConnectionException | HttpException ignored) {
+
+        }
+
+        return all;
+    }
+
     public void onRemove(LMod mod){
-        new Thread(() -> CurseForge.getForge().remove(profile, mod.get())).start();
+        new Thread(() -> Modder.getModder().remove(profile, mod.get())).start();
     }
 }

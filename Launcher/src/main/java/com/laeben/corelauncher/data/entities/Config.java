@@ -14,6 +14,7 @@ public class Config {
 
     private Account user;
     private Path gamePath;
+    private Path lastBackupPath;
     private Locale language;
     private Path backgroundImage;
     private Profile lastSelectedProfile;
@@ -40,6 +41,12 @@ public class Config {
 
     public void setGamePath(Path gamePath){
         this.gamePath = gamePath;
+    }
+
+
+    public Path getLastBackupPath() { return lastBackupPath; }
+    public void setLastBackupPath(Path path){
+        this.lastBackupPath = path;
     }
 
     public void setLanguage(Locale l){

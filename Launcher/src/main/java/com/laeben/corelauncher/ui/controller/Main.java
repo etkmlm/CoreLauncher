@@ -14,6 +14,7 @@ import com.laeben.corelauncher.data.entities.Profile;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entities.ExecutionInfo;
+import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
 import com.laeben.corelauncher.ui.controls.CMsgBox;
@@ -40,6 +41,7 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.stage.FileChooser;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -89,7 +91,7 @@ public class Main{
 
         Launcher.getLauncher().getHandler().addHandler("main", this::onGeneralEvent, true);
         Vanilla.getVanilla().getHandler().addHandler("main", this::onGeneralEvent, true);
-        CurseForge.getForge().getHandler().addHandler("main", this::onGeneralEvent, true);
+        Modder.getModder().getHandler().addHandler("main", this::onGeneralEvent, true);
         Profiler.getProfiler().getHandler().addHandler("main", this::onProfilerEvent, true);
         NetUtils.getHandler().addHandler("main", this::onProgressEvent, true);
         FXManager.getManager().getHandler().addHandler("main", this::onFXEvent, true);
@@ -151,7 +153,7 @@ public class Main{
         btnSettings.setOnMouseClicked((a) -> FXManager.getManager().applyStage("settings").show());
 
         btnAbout.setOnMouseClicked((a) ->
-                CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm", LauncherConfig.APPLICATION.getName())).show());
+                CMsgBox.msgBean(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm", "https://discord.gg/MEJQtCvwqf", LauncherConfig.APPLICATION.getName())).show());
 
         txtSearch.textProperty().addListener(a -> {
             var text = txtSearch.getText();
@@ -227,7 +229,7 @@ public class Main{
 
         var task = new Task<>() {
             @Override
-            protected Object call() throws NoConnectionException, StopException, HttpException {
+            protected Object call() throws NoConnectionException, StopException, HttpException, FileNotFoundException {
                 Launcher.getLauncher().prepare(p);
                 Cat.sleep(200);
                 Platform.runLater(() -> {
@@ -386,7 +388,7 @@ public class Main{
             case "profileDelete" -> {
                 profiles.removeIf(x -> x.getProfile() == oldProfile);
                 if (profiles.stream().noneMatch(LProfile::selected)) {
-                    if (profiles.size() > 0)
+                    if (!profiles.isEmpty())
                         profiles.stream().findFirst().get().setSelected(true);
                     else{
                         selectProfile(null);
@@ -430,7 +432,7 @@ public class Main{
         var stage = (LStage)e.getSource();
         if (!stage.getName().equals("settings"))
             return;
-        if (selectedProfile != null && !selectedProfile.isEmpty())
+        if (selectedProfile != null && !selectedProfile.isEmpty() && selectedProfile.getUser() != null)
             return;
 
         setUser(Configurator.getConfig().getUser().reload());

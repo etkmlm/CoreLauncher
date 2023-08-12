@@ -55,9 +55,9 @@
                 <ColumnConstraints percentWidth="20"/>
                 <ColumnConstraints percentWidth="20"/>
             </columnConstraints>
-            <CButton fx:id="btnBrowse" styleClass="def-button" maxHeight="Infinity" text="%mods.all.browse" maxWidth="Infinity" GridPane.columnIndex="0"/>
-            <CButton fx:id="btnOpti" styleClass="def-button" maxHeight="Infinity" text="OptiFine" maxWidth="Infinity" GridPane.columnIndex="1"/>
-            <CButton fx:id="btnSodium" styleClass="def-button" maxHeight="Infinity" text="Sodium" maxWidth="Infinity" GridPane.columnIndex="2"/>
+            <CButton fx:id="btnBrowseForge" styleClass="def-button" maxHeight="Infinity" text="%mods.all.curse" maxWidth="Infinity" GridPane.columnIndex="0"/>
+            <CButton fx:id="btnBrowseRinth" styleClass="def-button" maxHeight="Infinity" text="%mods.all.modrinth" maxWidth="Infinity" GridPane.columnIndex="1"/>
+            <CButton fx:id="btnOpti" styleClass="def-button" maxHeight="Infinity" text="OptiFine" maxWidth="Infinity" GridPane.columnIndex="2"/>
             <CButton fx:id="btnUpdate" styleClass="def-button" maxHeight="Infinity" text="%mods.all.update" maxWidth="Infinity" GridPane.columnIndex="3"/>
             <CButton fx:id="btnCustom" styleClass="def-button" maxHeight="Infinity" text="%mods.custom" maxWidth="Infinity" GridPane.columnIndex="4"/>
         </GridPane>

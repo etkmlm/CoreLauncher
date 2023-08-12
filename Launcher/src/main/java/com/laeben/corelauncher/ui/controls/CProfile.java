@@ -11,6 +11,7 @@ import com.laeben.corelauncher.ui.controller.ProfileEdit;
 import com.laeben.corelauncher.ui.controller.Worlds;
 import com.laeben.corelauncher.ui.entities.LProfile;
 import com.laeben.corelauncher.ui.entities.LStage;
+import com.laeben.corelauncher.ui.utils.FXManager;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.OSUtils;
 import com.laeben.core.entity.Path;
@@ -27,18 +28,11 @@ import java.util.stream.Stream;
 
 public class CProfile extends ListCell<LProfile> {
 
-    private Node gr;
+    private final Node gr;
     private LProfile profile;
 
     public CProfile(){
-        var loader = LStage.getDefaultLoader(CoreLauncherFX.class.getResource("/com/laeben/corelauncher/entities/cprofile.fxml"));
-        loader.setController(this);
-        try{
-            setGraphic(gr = loader.load());
-        }
-        catch (IOException e){
-            Logger.getLogger().log(e);
-        }
+        setGraphic(gr = FXManager.getManager().applyControl(this, "cprofile"));
     }
 
     @FXML
@@ -127,9 +121,10 @@ public class CProfile extends ListCell<LProfile> {
         });
 
         var res = p.getResources();
+        var shd = p.getShaders();
         var ow = p.getOnlineWorlds();
         var lw = p.getLocalWorlds();
-        String resInfo = res.size() + Translator.translate("profile.resources") + " / " + (Stream.concat(ow.stream(), lw.stream()).distinct().count()) + Translator.translate("profile.worlds");
+        String resInfo = (res.size() + shd.size()) + Translator.translate("profile.resources") + " / " + (Stream.concat(ow.stream(), lw.stream()).distinct().count()) + Translator.translate("profile.worlds");
 
         if (!(p.getWrapper() instanceof Vanilla) && !(p.getWrapper() instanceof OptiFine) && !(p.getWrapper() instanceof Custom)){
             var mods = p.getMods();

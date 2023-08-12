@@ -6,9 +6,11 @@ import com.laeben.corelauncher.data.Configurator;
 import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.data.Translator;
 import com.laeben.corelauncher.minecraft.Launcher;
+import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.entities.ExecutionInfo;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
+import com.laeben.corelauncher.minecraft.modding.modrinth.entities.SearchRinth;
 import com.laeben.corelauncher.minecraft.utils.Authenticator;
 import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
 import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
@@ -21,6 +23,7 @@ import com.laeben.corelauncher.utils.entities.OS;
 import com.laeben.core.entity.Path;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class CoreLauncher {
 
@@ -117,7 +120,8 @@ public class CoreLauncher {
         new Launcher();
         new JavaMan().reload();
         new CurseForge().reload();
-        new Modrinth();
+        new Modrinth().reload();
+        new Modder();
         new Authenticator();
         OS_64 = OSUtils.is64BitOS();
 
@@ -148,6 +152,23 @@ public class CoreLauncher {
 
             System.exit(0);
         }
+
+        /*try{
+            var rinth = Modrinth.getModrinth();
+            var search = new SearchRinth();
+            search.query = "sodium";
+            search.limit = 20;
+            search.facets = List.of(SearchRinth.Facet.get("versions", "1.19.2"));
+
+            var s = rinth.search(search);
+            var r = s.get(0);
+            var versions = rinth.getVersions(r.getId(), "1.19.2", "fabric", false);
+
+            int x = 0;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }*/
 
         do{
             CoreLauncherFX.launchFX();

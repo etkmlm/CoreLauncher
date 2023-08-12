@@ -129,11 +129,20 @@ public class Worlds {
 
         btnImport.setOnMouseClicked(a -> {
             var chooser = new FileChooser();
+            var p = Configurator.getConfig().getLastBackupPath();
+
+            if (p != null && p.exists())
+                chooser.setInitialDirectory(p.toFile());
+
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
             var f = chooser.showOpenDialog(btnImport.getScene().getWindow());
             if (f == null)
                 return;
             var path = Path.begin(f.toPath());
+
+            Configurator.getConfig().setLastBackupPath(path.parent());
+            Configurator.save();
+
             var saves = profile.getPath().to("saves");
             var temp = Configurator.getConfig().getTemporaryFolder().to(path.getNameWithoutExtension());
             Path w;
@@ -153,7 +162,6 @@ public class Worlds {
             }
 
             w.move(saves.to(name));
-
 
 
             Profiler.getProfiler().setProfile(profile.getName(), null);

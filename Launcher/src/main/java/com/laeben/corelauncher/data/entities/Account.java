@@ -81,6 +81,19 @@ public class Account{
     }
 
 
+    /**
+     * Validates account access token.
+     */
+    public void validate(){
+        final String url = "https://api.minecraftservices.com/player/certificates";
+        try {
+            NetUtils.post(url, "", List.of(RequestParameter.bearer(tokener.getAccessToken())));
+        } catch (NoConnectionException ignored) {
+
+        }
+
+    }
+
     public String getUsername(){
         return username;
     }
@@ -99,7 +112,7 @@ public class Account{
         try{
             String accInfoJson = NetUtils.post(UUID_URL, "[\"" + username + "\"]", List.of(RequestParameter.contentType("application/json")));
             var accInfo = GsonUtils.empty().fromJson(accInfoJson, JsonArray.class);
-            if (accInfo.size() > 0){
+            if (!accInfo.isEmpty()){
 
                 uuid = accInfo.get(0).getAsJsonObject().get("id").getAsString();
 

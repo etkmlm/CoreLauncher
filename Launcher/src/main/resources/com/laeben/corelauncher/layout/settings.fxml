@@ -118,5 +118,5 @@
             </GridPane>
         </VBox>
     </VBox>
-
+    <CButton text="Reset to Defaults" fx:id="btnReset"/>
 </HBox>

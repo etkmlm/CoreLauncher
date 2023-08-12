@@ -60,7 +60,12 @@ public class ImportMod {
             String url = txtURL.getText();
 
             if (file == null || (!file.endsWith(".zip") && !file.endsWith(".jar"))){
-                CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("import.error.wrong")).show();
+                CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("import.error.wrongFile")).show();
+                return;
+            }
+
+            if (url == null || url.isBlank()){
+                CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("import.error.invalidURL")).show();
                 return;
             }
 
@@ -100,7 +105,7 @@ public class ImportMod {
 
     public <T extends CResource> T setRes(String file, String url, String name, String icon, T res){
         res.fileName = file;
-        res.fileUrl = url == null || url.isBlank() ? null : url;
+        res.fileUrl = url;
         res.name = name == null || name.isBlank() ? file : name;
         res.logoUrl = icon == null || icon.isBlank() ? null : icon;
 

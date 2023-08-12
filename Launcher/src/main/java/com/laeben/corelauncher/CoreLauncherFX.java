@@ -18,6 +18,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
+import java.io.FileNotFoundException;
 import java.util.Objects;
 
 public class CoreLauncherFX extends Application {
@@ -50,7 +51,7 @@ public class CoreLauncherFX extends Application {
                     try{
                         NetUtils.download(latest.url(), n, false, true);
                     }
-                    catch (NoConnectionException | StopException | HttpException e){
+                    catch (NoConnectionException | StopException | HttpException | FileNotFoundException e){
                         return;
                     }
 

@@ -4,6 +4,7 @@ import com.laeben.corelauncher.data.Profiler;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.entities.*;
 import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
+import com.laeben.corelauncher.ui.entities.LStage;
 import com.laeben.corelauncher.utils.GsonUtils;
 import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.entities.Java;
@@ -39,6 +40,7 @@ public class Profile {
     private List<Resourcepack> resources;
     private List<Modpack> modpacks;
     private List<World> worlds;
+    private List<Shader> shaders;
     private int minRAM;
     private int maxRAM;
     private Wrapper wrapper;
@@ -81,6 +83,12 @@ public class Profile {
 
         return mods;
     }
+    public List<Shader> getShaders(){
+        if (shaders == null)
+            shaders = new ArrayList<>();
+
+        return shaders;
+    }
 
     public List<Modpack> getModpacks(){
         if (modpacks == null)
@@ -89,25 +97,30 @@ public class Profile {
         return modpacks;
     }
 
-    public CResource getResource(int id){
-        var r1 = getMods().stream().filter(x -> x.id == id).findFirst();
+    public CResource getResource(Object id){
+        var r1 = getMods().stream().filter(x -> id.equals(x.id)).findFirst();
 
         if (r1.isPresent())
             return r1.get();
 
-        var r2 = getModpacks().stream().filter(x -> x.id == id).findFirst();
+        var r2 = getModpacks().stream().filter(x -> id.equals(x.id)).findFirst();
 
         if (r2.isPresent())
             return r2.get();
 
-        var r3 = getResources().stream().filter(x -> x.id == id).findFirst();
+        var r3 = getResources().stream().filter(x -> id.equals(x.id)).findFirst();
 
         if (r3.isPresent())
             return r3.get();
 
-        var r4 = getOnlineWorlds().stream().filter(x -> x.id == id).findFirst();
+        var r4 = getOnlineWorlds().stream().filter(x -> id.equals(x.id)).findFirst();
 
-        return r4.orElse(null);
+        if (r4.isPresent())
+            return r4.get();
+
+        var r5 = getShaders().stream().filter(x -> id.equals(x.id)).findFirst();
+
+        return r5.orElse(null);
 
     }
 

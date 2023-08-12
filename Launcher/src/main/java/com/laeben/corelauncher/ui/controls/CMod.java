@@ -1,7 +1,9 @@
 package com.laeben.corelauncher.ui.controls;
 
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.minecraft.modding.entities.Mod;
+import com.laeben.corelauncher.minecraft.modding.entities.Modpack;
+import com.laeben.corelauncher.minecraft.modding.entities.ModpackContent;
+import com.laeben.corelauncher.minecraft.modding.entities.Resourcepack;
 import com.laeben.corelauncher.ui.entities.LMod;
 import com.laeben.corelauncher.ui.utils.FXManager;
 import javafx.fxml.FXML;
@@ -11,12 +13,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.ImageView;
 
+import java.lang.reflect.Method;
+import java.util.Optional;
+
 public class CMod extends ListCell<LMod> {
     private final Node gr;
 
     public CMod(){
-        var path = CoreLauncherFX.class.getResource("/com/laeben/corelauncher/entities/cmod.fxml");
-        setGraphic(gr = FXManager.getManager().open(this, path));
+        setGraphic(gr = FXManager.getManager().applyControl(this, "cmod"));
     }
 
     @FXML
@@ -43,12 +47,13 @@ public class CMod extends ListCell<LMod> {
 
         img.setImage(item.getIcon());
 
-        if (item instanceof Mod m && m.mpId != 0){
-            var mp = i.getProfile().getModpacks().stream().filter(x -> x.id == m.mpId).findFirst();
-            mp.ifPresent(x -> lblPack.setText(x.name));
-        }
+        Optional<Modpack> mp = Optional.empty();
+        if (item instanceof ModpackContent mpc && mpc.getModpackId() != null)
+            mp = i.getProfile().getModpacks().stream().filter(mpc::belongs).findFirst();
         else
             lblPack.setText("");
+
+        mp.ifPresent(x -> lblPack.setText(x.name));
 
         lblFileName.setText(item.fileName);
         lblName.setText(item.name);

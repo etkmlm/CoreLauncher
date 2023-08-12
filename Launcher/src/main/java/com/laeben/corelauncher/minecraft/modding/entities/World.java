@@ -1,8 +1,10 @@
 package com.laeben.corelauncher.minecraft.modding.entities;
 
 import com.laeben.corelauncher.data.nbt.NBTFile;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entities.Resource;
+import com.laeben.corelauncher.minecraft.modding.curseforge.entities.ResourceForge;
 import com.laeben.core.entity.Path;
+
+import java.io.IOException;
 
 public class World extends CResource{
     public enum Difficulty{
@@ -29,15 +31,20 @@ public class World extends CResource{
     public boolean allowCommands;
     public long seed;
 
-    public static World fromResource(String vId, String loader, Resource r){
-        var pack = fromResource(new World(), vId, loader, r);
-        if (pack.modules.size() != 0)
-            pack.name = pack.modules.stream().findFirst().get().name;
+    public static World fromResource(String vId, String loader, ResourceForge r){
+        var pack = fromForgeResource(new World(), vId, loader, r);
+        if (!pack.forgeModules.isEmpty())
+            pack.name = pack.forgeModules.stream().findFirst().get().name;
         return pack;
     }
 
     public static NBTFile openNBT(Path path){
-        byte[] gzip = path.openAsGzip();
+        byte[] gzip;
+        try {
+            gzip = path.openAsGzip();
+        } catch (IOException e) {
+            return null;
+        }
         var nbt = new NBTFile(gzip);
 
         return nbt.first() == null ? null : nbt;

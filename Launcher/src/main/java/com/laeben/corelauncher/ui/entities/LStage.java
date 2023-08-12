@@ -38,7 +38,6 @@ public class LStage extends Stage {
 
         return loader;
     }
-
     public LStage setName(String name){
         this.name = name;
         return this;

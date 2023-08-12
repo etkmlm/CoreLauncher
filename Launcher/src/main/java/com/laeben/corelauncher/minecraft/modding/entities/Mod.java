@@ -1,14 +1,28 @@
 package com.laeben.corelauncher.minecraft.modding.entities;
 
-import com.laeben.corelauncher.minecraft.modding.curseforge.entities.Resource;
+import com.laeben.corelauncher.minecraft.modding.curseforge.entities.ResourceForge;
+import com.laeben.corelauncher.minecraft.modding.modrinth.entities.ResourceRinth;
+import com.laeben.corelauncher.minecraft.modding.modrinth.entities.RinthFile;
+import com.laeben.corelauncher.minecraft.modding.modrinth.entities.Version;
 
-public class Mod extends CResource {
-    public int mpId;
+public class Mod extends CResource implements ModpackContent {
+    private Object mpId;
 
-    public static Mod fromResource(String vId, String loader, Resource r){
-        var mod = fromResource(new Mod(), vId, loader, r);
-
-        return mod;
+    @Override
+    public Object getModpackId() {
+        return mpId;
     }
 
+    @Override
+    public void setModpackId(Object id) {
+        mpId = id;
+    }
+
+    public static Mod fromForgeResource(String vId, String loader, ResourceForge r){
+        return fromForgeResource(new Mod(), vId, loader, r);
+    }
+
+    public static Mod fromRinthResource(ResourceRinth r, Version v){
+        return fromRinthResource(new Mod(), r, v);
+    }
 }

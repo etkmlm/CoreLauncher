@@ -65,11 +65,15 @@ public class Settings {
     public CButton btnSaveRAM;
     @FXML
     public CheckBox chkGamelog;
+    @FXML
+    public CButton btnReset;
+
 
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMinRAM;
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMaxRAM;
     private final ObservableList<String> languages;
     private final ObservableList<String> javas;
+
 
 
     public Settings(){
@@ -91,7 +95,11 @@ public class Settings {
                 var path = (Path)x.getNewValue();
                 txtCustomBackground.setText(path == null ? null : path.toString());
             }
+            else if (x.getKey().equals("languageChange"))
+                FXManager.getManager().restart();
         }, true);
+
+
 
         JavaMan.getManager().getHandler().addHandler("settings", (a) -> {
             switch (a.getKey()){
@@ -131,6 +139,18 @@ public class Settings {
             fMaxRAM.setValue((int) sldRAM.getValue());
         });
 
+        btnReset.setOnMouseClicked(a -> {
+            var opt = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
+                    .setButtons(ButtonType.YES, ButtonType.NO)
+                    .showAndWait();
+
+            if (opt.isEmpty() || opt.get() != ButtonType.YES)
+                return;
+
+            Configurator.getConfigurator().reset();
+            FXManager.getManager().closeStage(btnReset.getScene().getWindow());
+        });
+
         cbLanguage.valueProperty().addListener(x -> {
             try{
                 String val = cbLanguage.getValue();
@@ -141,7 +161,6 @@ public class Settings {
 
                 Translator.getTranslator().setLanguage(l);
                 Configurator.getConfigurator().setLanguage(l);
-                FXManager.getManager().restart();
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
