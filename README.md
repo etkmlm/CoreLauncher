@@ -189,18 +189,15 @@ You don't need to add a custom Java. The launcher downloads the required Java se
    2) Name.
    3) File name.
 3) Remove button.
-4) Browse button. Opens the browser page.
-5) OptiFine button.
+4) CurseForge Browser button. Browse in CurseForge.
+5) Modrinth Browser button. Browse in Modrinth.
+6) OptiFine button.
    - Only works when the selected loader is Forge.
    - It shows available OptiFine versions to include.
    - {Version Name} - {Forge Version}
-6) Sodium button.
-   - Only works when the selected loader is Fabric or Quilt.
-   - It shows available Sodium versions to include.
-   - {Version}
-7) Update button. Updates all mods to their latest version.
-8) Search field. Searches in all resources. (Mods, modpacks, resourcepacks, and worlds.)
-9) Custom button. Opens the custom adding page.
+7) Update button. Updates all mods and modpacks to their latest version.
+8) Custom button. Opens the custom adding page.
+9) Search field. Searches in all resources. (Mods, modpacks, resourcepacks, and worlds.)
 
 ## Custom Resource Adding
 ![](images/custommoddesc.png)
@@ -215,15 +212,17 @@ You don't need to add a custom Java. The launcher downloads the required Java se
 ![](images/multiplemoddesc.png)
 
 1) Query area.
-   - You should write names like searching in Curse Forge.
-   - After the search, unfoundable names will appear here.
+   - You should write names like searching in a browser.
+   - After the search, unfoundable names will appear here again.
+   - You can add browser name (curseforge and modrinth for now) into your query, if you want to search separately from your browser selection. For example, "actually additions curseforge" query will search in CurseForge even if you select Modrinth.
 2) Result list. Displays the founded mods.
 3) From world button. Shows a world selector. When you select a world, it extracts all mods in it and searches.
    - Only works with Forge for now. (Because of level.dat restrictions.)
 4) From mods button. Select the folder that contains your mods, all mod names will appear in query area. (You may want to edit this names, it's not true always.)
-5) Status label.
-6) Search button. Starts the searching process.
-7) Apply button. Adds the mods into the profile.
+5) Browser selector. Select a browser to search in.
+6) Status label.
+7) Search button. Starts the searching process.
+8) Apply button. Adds the mods into the profile.
 
 ## Browser
 ![](images/browsedesc.png)
