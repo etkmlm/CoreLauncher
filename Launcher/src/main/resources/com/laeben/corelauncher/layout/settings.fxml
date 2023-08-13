@@ -117,6 +117,7 @@
 
             </GridPane>
         </VBox>
+        <Rectangle height="10"/>
+        <CButton text="Reset to Defaults" styleClass="def-button" fx:id="btnReset" maxWidth="Infinity"/>
     </VBox>
-    <CButton text="Reset to Defaults" fx:id="btnReset"/>
 </HBox>
