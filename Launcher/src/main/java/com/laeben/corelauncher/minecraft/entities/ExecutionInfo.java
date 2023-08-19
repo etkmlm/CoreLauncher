@@ -84,6 +84,8 @@ public class ExecutionInfo{
             if (v0 == null)
                 throw new VersionNotFoundException();
             var v = GsonUtils.empty().fromJson(wrappedJsonPath.read(), Version.class);
+            if (v == null)
+                throw new VersionNotFoundException();
             assets = v0.getAssetIndex();
             java = v0.javaVersion == null ? Java.fromCodeName("legacy") : v0.javaVersion;
             mainClass = v.mainClass;

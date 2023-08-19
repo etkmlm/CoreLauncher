@@ -6,11 +6,11 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.laeben.corelauncher.ui.controller.Frame" fx:id="root" style="-fx-background-radius: 10px; -fx-border-radius: 10px; -fx-background-color: #303030;" minWidth="200">
-    <Label fx:id="lblTitle" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="5" prefHeight="30" text="Title" style="-fx-text-fill: wheat;-fx-font-size: 9pt;" alignment="CENTER"/>
-    <HBox AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <CButton fx:id="btnMinimize" text="🗕" style="-fx-padding: 0 0 -10 0;" prefWidth="30" prefHeight="20"/>
-        <CButton fx:id="btnMaximize" style="-fx-font-size: 23px; -fx-padding: 1 0 0 0; " alignment="CENTER" text="▢" prefWidth="30" prefHeight="30"/>
-        <CButton fx:id="btnClose" style="-fx-padding: 0 0 -15 0;" text="X" prefWidth="30" prefHeight="20"/>
+    <Label fx:id="lblTitle" text="Title" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="5" minHeight="40" maxHeight="50" style="-fx-text-fill: wheat;-fx-font-size: 9pt;" />
+    <HBox AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" minHeight="40" maxHeight="50" alignment="TOP_CENTER">
+        <CButton fx:id="btnMinimize" text="🗕" style="-fx-padding: 0 0 -10 0;" prefWidth="30" prefHeight="25"/>
+        <CButton fx:id="btnMaximize" style="-fx-font-size: 23px; -fx-padding: 0 0 0 0; " alignment="CENTER" text="▢" minWidth="30" minHeight="40"/>
+        <CButton fx:id="btnClose" style="-fx-padding: 0 0 -15 0;" text="X" prefWidth="30" prefHeight="25"/>
     </HBox>
-    <StackPane fx:id="content" AnchorPane.topAnchor="30" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0"/>
+    <StackPane fx:id="content" AnchorPane.topAnchor="35" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0"/>
 </AnchorPane>

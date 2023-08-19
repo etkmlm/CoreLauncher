@@ -21,6 +21,7 @@ import java.util.List;
 public class Account{
     private static final String UUID_URL = "https://api.mojang.com/profiles/minecraft";
     private static final String PROFILE_URL = "https://sessionserver.mojang.com/session/minecraft/profile/";
+    private static final String CERT_URL = "https://api.minecraftservices.com/player/certificates";
 
     public static final class AccountFactory implements JsonSerializer<Account>, JsonDeserializer<Account> {
         @Override
@@ -85,9 +86,10 @@ public class Account{
      * Validates account access token.
      */
     public void validate(){
-        final String url = "https://api.minecraftservices.com/player/certificates";
+        if (tokener == null)
+            return;
         try {
-            NetUtils.post(url, "", List.of(RequestParameter.bearer(tokener.getAccessToken())));
+            NetUtils.post(CERT_URL, "", List.of(RequestParameter.bearer(tokener.getAccessToken())));
         } catch (NoConnectionException ignored) {
 
         }
