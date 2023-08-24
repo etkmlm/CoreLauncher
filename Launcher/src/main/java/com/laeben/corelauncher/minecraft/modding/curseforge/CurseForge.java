@@ -184,5 +184,4 @@ public class CurseForge {
     public List<ForgeCategory> getCategories(){
         return categories;
     }
-
 }

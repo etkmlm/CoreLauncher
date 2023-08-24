@@ -52,8 +52,8 @@
     </AnchorPane>
     <AnchorPane AnchorPane.bottomAnchor="150" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="15">
         <ListView fx:id="lvProfiles" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" />
-        <CButton fx:id="btnAddProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="+" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="65" />
-        <CButton fx:id="btnImportProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="⇲" style="-fx-font-size: 13pt;" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10"/>
+        <CButton fx:id="btnAddProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="+" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="65" />
+        <CButton fx:id="btnImportProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="⇲" style="-fx-font-size: 13pt;" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10"/>
     </AnchorPane>
 
     <AnchorPane prefHeight="130" AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15">

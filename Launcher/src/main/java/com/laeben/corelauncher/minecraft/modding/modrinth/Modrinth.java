@@ -172,6 +172,9 @@ public class Modrinth {
 
     private List<Version> processVersions(String json, DependencyInfo dp) throws NoConnectionException, HttpException {
         var response = gson.fromJson(json, JsonArray.class);
+        if (response == null)
+            return List.of();
+
         var list = response.asList().stream().map(x -> gson.fromJson(x, Version.class)).collect(Collectors.toList());
 
         if (dp.includeDependencies()){

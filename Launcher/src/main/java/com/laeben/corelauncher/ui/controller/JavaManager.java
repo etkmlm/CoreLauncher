@@ -37,11 +37,8 @@ public class JavaManager {
     public static void openManager(){
         if (getManager().isShowing())
             getManager().requestFocus();
-        else{
-            getManager().close();
-            instance = null;
+        else
             getManager().show();
-        }
     }
 
     public JavaManager(){
@@ -59,6 +56,15 @@ public class JavaManager {
                 }
                 case "delJava" -> javas.remove((Java) a.getOldValue());
             }
+        }, true);
+
+        FXManager.getManager().getHandler().addHandler("javaman", a -> {
+            if (!(a instanceof KeyEvent e) || !e.getKey().equals("close"))
+                return;
+            if (!e.getSource().equals(instance))
+                return;
+
+            instance = null;
         }, true);
 
         menu = new ContextMenu();

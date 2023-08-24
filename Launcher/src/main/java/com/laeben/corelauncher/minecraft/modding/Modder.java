@@ -14,7 +14,9 @@ import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entities.DependencyInfo;
 import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
 import com.laeben.corelauncher.utils.EventHandler;
+import com.laeben.corelauncher.utils.Logger;
 import com.laeben.corelauncher.utils.NetUtils;
+import javafx.application.Platform;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -42,15 +44,15 @@ public class Modder {
         var path = p.getPath().to("mods");
         int i = 0;
         int size = mods.size();
-        for (var a : mods){
+        for (var a : mods.stream().toList()){
+            handler.execute(new KeyEvent("," + a.name + ":.resource.progress;" + (++i) + ";" + size));
+
             if (a.fileUrl == null)
                 continue;
 
             var pxx = path.to(a.fileName);
             if (pxx.exists())
                 continue;
-
-            handler.execute(new KeyEvent("," + a.name + ":.resource.progress;" + (++i) + ";" + size));
 
             String url = a.fileUrl;
             if (url.startsWith("OptiFine")){
@@ -63,8 +65,23 @@ public class Modder {
                 continue;
             }
 
+            if (NetUtils.download(url, path.to(a.fileName), false) != null)
+                continue;
 
-            if (NetUtils.download(url, path.to(a.fileName), false) == null){
+            var up = update(p, a);
+            if (url.equals(up.fileUrl))
+                continue;
+
+            Platform.runLater(() -> {
+                remove(p, a);
+                try {
+                    include(p, up);
+                } catch (NoConnectionException | HttpException e) {
+                    Logger.getLogger().log(e);
+                }
+            });
+
+            if (NetUtils.download(up.fileUrl, path.to(up.fileName), false) == null){
                 var x = Modrinth.getModrinth().getProjectVersions(a.name, p.getVersionId(), p.getWrapper().getIdentifier(), DependencyInfo.noDependencies());
                 var s = x.stream().flatMap(f -> f.getFiles().stream()).filter(f -> f.filename != null && f.filename.equals(a.fileName)).findFirst();
 
@@ -75,6 +92,18 @@ public class Modder {
                 NetUtils.download(s.get().url, path.to(a.fileName), false);
             }
         }
+    }
+    public CResource update(Profile p, CResource m) throws NoConnectionException, HttpException {
+        if (m.id == null)
+            return m;
+
+        List<CResource> all = List.of();
+        if (m.isForge())
+            all = CurseForge.getForge().getResources(p.getVersionId(), List.of((int)m.id), p, true);
+        else if (m.isModrinth())
+            all = Modrinth.getModrinth().getCResources(List.of(m.id.toString()), p.getVersionId(), p.getWrapper().getIdentifier());
+
+        return all.isEmpty() ? m : all.get(0);
     }
     public void includeMods(Profile p, List<Mod> mods){
         for (var m : mods){
