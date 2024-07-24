@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import com.laeben.corelauncher.ui.control.CView?>
+<?import com.laeben.corelauncher.ui.control.CCombo?>
+<?import com.laeben.corelauncher.ui.control.CWorker?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.laeben.corelauncher.ui.controller.page.MultipleBrowserPage"
+      prefHeight="400.0" style="-fx-padding: 10px" prefWidth="650.0" spacing="10" stylesheets="@../../style/controls/clui.css,@../../style/pages/multiplebrowser.css">
+    <HBox alignment="CENTER_LEFT" styleClass="top-bar" prefHeight="40">
+        <CButton fx:id="btnBack" styleClass="transparent"/>
+        <Rectangle width="20"/>
+        <CView fx:id="profileIcon" fitWidth="30" fitHeight="30"/>
+        <Rectangle width="10"/>
+        <Label fx:id="lblProfileName" styleClass="title" text="Profile Name"/>
+    </HBox>
+
+    <GridPane VBox.vgrow="ALWAYS" hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="40"/>
+            <ColumnConstraints percentWidth="60"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints prefHeight="40"/>
+            <RowConstraints/>
+        </rowConstraints>
+
+        <TextArea style="-fx-padding: 10px" fx:id="txtQuery" GridPane.vgrow="ALWAYS" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <ListView fx:id="lvResources" GridPane.vgrow="ALWAYS" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.rowSpan="1" />
+        <Label alignment="CENTER_RIGHT" maxHeight="Infinity" fx:id="lblStatus" maxWidth="Infinity" GridPane.hgrow="ALWAYS" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <HBox spacing="10" GridPane.hgrow="ALWAYS" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="0">
+            <CCombo fx:id="cbSource" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <CCombo fx:id="cbMainType" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <CButton fx:id="btnSearch" text="🔎" styleClass="transparent"/>
+            <CWorker fx:id="worker"/>
+        </HBox>
+    </GridPane>
+    <HBox alignment="CENTER">
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <CButton fx:id="btnFromWorld" styleClass="transparent" text="%import.multiple.world"/>
+            <CButton fx:id="btnFromFolder" styleClass="transparent" text="%import.multiple.mods"/>
+        </HBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <CButton fx:id="btnClear" styleClass="transparent" text="%option.clear"/>
+        <CButton fx:id="btnApply" styleClass="transparent" text="%option.apply"/>
+    </HBox>
+</VBox>

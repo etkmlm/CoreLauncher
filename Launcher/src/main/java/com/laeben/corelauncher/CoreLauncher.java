@@ -1,38 +1,49 @@
 package com.laeben.corelauncher;
 
 import com.laeben.core.LaebenApp;
+import com.laeben.core.entity.exception.HttpException;
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ValueEvent;
-import com.laeben.corelauncher.data.Configurator;
-import com.laeben.corelauncher.data.Profiler;
-import com.laeben.corelauncher.data.Translator;
+import com.laeben.corelauncher.api.ui.entity.Announcement;
+import com.laeben.corelauncher.api.util.OSUtil;
+import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.api.Profiler;
+import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
-import com.laeben.corelauncher.minecraft.entities.ExecutionInfo;
+import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
-import com.laeben.corelauncher.minecraft.modding.modrinth.entities.SearchRinth;
-import com.laeben.corelauncher.minecraft.utils.Authenticator;
-import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
-import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
-import com.laeben.corelauncher.utils.JavaMan;
-import com.laeben.corelauncher.utils.Logger;
-import com.laeben.corelauncher.utils.NetUtils;
-import com.laeben.corelauncher.utils.OSUtils;
-import com.laeben.corelauncher.utils.entities.LogType;
-import com.laeben.corelauncher.utils.entities.OS;
+import com.laeben.corelauncher.minecraft.util.Authenticator;
+import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
+import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
+import com.laeben.corelauncher.ui.controller.Main;
+import com.laeben.corelauncher.ui.control.CMsgBox;
+import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.api.util.NetUtil;
+import com.laeben.corelauncher.util.entity.LogType;
+import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.core.entity.Path;
+import javafx.scene.control.Alert;
+import javafx.util.Duration;
 
+import java.io.FileNotFoundException;
+import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Date;
 
 public class CoreLauncher {
 
     public static final OS SYSTEM_OS = OS.getSystemOS();
     public static final Path LAUNCHER_PATH = Path.begin(java.nio.file.Path.of(System.getProperty("user.dir")));
-    public static final Path LAUNCHER_EX_PATH;
+    public static final Path LAUNCHER_EXECUTE_PATH;
 
-
+    public static boolean OS_64;
+    public static boolean GUI_INIT = false;
     public static boolean RESTART = false;
+
     static {
         Path p;
         try{
@@ -48,17 +59,21 @@ public class CoreLauncher {
             p = null;
         }
 
-        LAUNCHER_EX_PATH = p;
+        LAUNCHER_EXECUTE_PATH = p;
+        OSUtil.setSystemOS(SYSTEM_OS);
     }
-    public static boolean OS_64;
-    public static boolean GUI_INIT = false;
+
+    public static Path getLogDir(){
+        return Configurator.getConfig().getLauncherPath().to("logs");
+    }
+
     public static void main(String[] args){
         var listArgs = Arrays.stream(args).toList();
 
         if (listArgs.contains("--old")){
             try{
                 Thread.sleep(2000);
-                var j = OSUtils.getJavaFile(OSUtils.getRunningJavaDir().toString());
+                var j = OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString());
                 String oldJar = listArgs.get(listArgs.indexOf("--old") + 1);
                 var old = LAUNCHER_PATH.to("clold.jar");
                 LAUNCHER_PATH.to(oldJar).move(old);
@@ -76,7 +91,7 @@ public class CoreLauncher {
         else if (listArgs.contains("--new")){
             try{
                 Thread.sleep(2000);
-                var j = OSUtils.getJavaFile(OSUtils.getRunningJavaDir().toString());
+                var j = OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString());
                 String newJar = listArgs.get(listArgs.indexOf("--new") + 1);
                 var n = LAUNCHER_PATH.to(newJar);
                 LAUNCHER_PATH.to("clnew.jar").move(n);
@@ -103,10 +118,10 @@ public class CoreLauncher {
         System.setProperty("java.net.preferIPv4Stack", "true");
         System.setProperty("com.sun.net.ssl.checkRevocation", "false");
 
-        NetUtils.patchSSL();
+        NetUtil.patchSSL();
 
         if (listArgs.contains("--offline"))
-            NetUtils.setOffline(true);
+            NetUtil.setOffline(true);
 
         new Configurator(LAUNCHER_PATH).reloadConfig();
 
@@ -114,24 +129,33 @@ public class CoreLauncher {
 
         // Needs to be initialized after initialization of configurator
         new Logger();
+        Logger.getLogger().setLogDir(getLogDir());
         new Profiler().reload();
         new Vanilla().asInstance().getAllVersions();
         new OptiFine().asInstance();
         new Launcher();
-        new JavaMan().reload();
+        new JavaManager().reload();
         new CurseForge().reload();
         new Modrinth().reload();
         new Modder();
         new Authenticator();
-        OS_64 = OSUtils.is64BitOS();
+        OS_64 = OSUtil.is64BitOS(JavaManager.getDefault());
 
+
+        Configurator.getConfigurator().getHandler().addHandler("logger", (a) -> {
+            if (!a.getKey().equals("gamePathChange"))
+                return;
+
+            Logger.getLogger().setLogDir(getLogDir());
+
+        }, false);
         LaebenApp.getHandler().addHandler("clauncher", a -> {
             if (a instanceof ValueEvent oe){
                 if (oe.getKey().equals("exception"))
                     Logger.getLogger().log((Exception) oe.getValue());
                 else if (oe.getKey().equals("netException")){
                     String[] spl = oe.getValue().toString().split("\\$\\$\\$");
-                    Logger.getLogger().printLog(LogType.ERROR, "Error on request to " + spl[0] + ": " + spl[1]);
+                    Logger.getLogger().logDebug(LogType.ERROR, "Error on request to " + spl[0] + ": " + spl[1]);
                 }
             }
         }, false);
@@ -153,27 +177,16 @@ public class CoreLauncher {
             System.exit(0);
         }
 
-        /*try{
-            var rinth = Modrinth.getModrinth();
-            var search = new SearchRinth();
-            search.query = "sodium";
-            search.limit = 20;
-            search.facets = List.of(SearchRinth.Facet.get("versions", "1.19.2"));
-
-            var s = rinth.search(search);
-            var r = s.get(0);
-            var versions = rinth.getVersions(r.getId(), "1.19.2", "fabric", false);
-
-            int x = 0;
+        if (Debug.DEBUG)
+            Debug.run();
+        else{
+            do{
+                System.setProperty("glass.win.uiScale", "100%");
+                CoreLauncherFX.launchFX();
+            }
+            while (RESTART);
         }
-        catch (Exception e){
-            e.printStackTrace();
-        }*/
 
-        do{
-            CoreLauncherFX.launchFX();
-        }
-        while (RESTART);
 
         Configurator.getConfig().getTemporaryFolder().getFiles().forEach(Path::delete);
         if (Configurator.getConfig().delGameLogs()){
@@ -181,5 +194,67 @@ public class CoreLauncher {
         }
 
         System.exit(0);
+    }
+
+    public static void updateCheck(){
+        var latest = LauncherConfig.APPLICATION.getLatest();
+        if (latest != null && LauncherConfig.VERSION < latest.version() && Configurator.getConfig().isEnabledAutoUpdate()){
+            var result = CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("update.title"), Translator.translateFormat("update.newVersion", latest.version()))
+                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                    .executeForResult();
+
+            if (result.isPresent() && result.get().result() == CMsgBox.ResultType.YES){
+                var n = CoreLauncher.LAUNCHER_PATH.to("clnew.jar");
+                new Thread(() -> {
+                    try{
+                        NetUtil.download(latest.url(), n, false, true);
+                    }
+                    catch (NoConnectionException | StopException | HttpException | FileNotFoundException e){
+                        return;
+                    }
+
+                    try{
+                        var name = CoreLauncher.LAUNCHER_EXECUTE_PATH;
+                        if (name == null)
+                            return;
+                        new ProcessBuilder()
+                                .command(JavaManager.getDefault().getExecutable().toString(), "-jar", n.toString(), "--old", name.getName())
+                                .start();
+                        System.exit(0);
+                    }
+                    catch (Exception e){
+                        Logger.getLogger().log(e);
+                    }
+                }).start();
+            }
+        }
+    }
+
+    public static void announcementCheck(){
+        var now = Date.from(Instant.now());
+        var showed = Configurator.getConfig().getShowedAnnounces();
+        var locale = Configurator.getConfig().getLanguage();
+
+        showed.removeIf(a -> LauncherConfig.APPLICATION.getAnnouncements().stream().noneMatch(x -> x.getId() == a));
+
+        for (var ann : LauncherConfig.APPLICATION.getAnnouncements()){
+            if (!ann.containingVersion(String.valueOf(LauncherConfig.VERSION)) || ann.getDate().after(now)){
+                showed.remove(ann.getId());
+                continue;
+            }
+
+            if (showed.contains(ann.getId()))
+                continue;
+
+            String title = ann.getTitle(locale);
+            String content = ann.getContent(locale);
+
+            if (Main.getMain() == null)
+                continue;
+
+            Configurator.getConfig().getShowedAnnounces().add(ann.getId());
+            Main.getMain().announceLater(title, content, Announcement.AnnouncementType.BROADCAST, Duration.millis(ann.getDuration()));
+        }
+        Configurator.save();
     }
 }

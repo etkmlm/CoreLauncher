@@ -1,62 +1,111 @@
-.progress-bar{
-    -fx-background-color: #303030;
-}
-
-.label{
-    -fx-text-fill: white;
-}
-
-.progress-bar > .track{
-    -fx-background-color: #303030;
-}
-
-.progress-bar > .bar{
-    -fx-background-color: aqua;
-}
-
-.progress-indicator{
-    -fx-progress-color: #208080;
-}
-
-.progress-indicator .indicator{
-    -fx-padding: 0;
-    -fx-background-color: #2c2c48;
-}
-
-.progress-indicator .percentage{
-    -fx-fill: none;
-}
-
-.progress-indicator .tick{
-    -fx-background-color: none;
-}
-
-.text-field{
-    -fx-background-color: #303030;
-    -fx-text-fill: white;
-}
-
-.launch-bar{
-    -fx-background-color: #252540;
-    -fx-background-radius: 0 15px 15px 0;
-}
-
-.progress-indicator{
+.menu{
+    -fx-background-color: #2a292faa;
+    -fx-background-radius: 8px;
     -fx-padding: 0;
 }
 
-.play-button{
-    -fx-background-radius: 50%;
-    -fx-background-color: #383852;
-    -fx-font-size: 18pt;
-}
-
-.ench-button{
+.menu-button{
+    -fx-background-radius: 50%!important;
+    -fx-background-color: #38405a;
     -fx-font-size: 15pt;
-    -fx-background-radius: 50%;
-    -fx-background-color: #2a2a30;
 }
 
-#lvProfiles .scroll-bar:horizontal{
+.tab-pane{
+    -fx-border-color: none;
+}
+
+.tab-pane .tab{
+    /*-fx-background-color: #252540;*/
+    -fx-background-color: #303030;
+    -fx-background-radius: 5px 5px 0 0;
+    -fx-background-insets: 0;
+    -fx-padding: 8px 8px 8px 15px;
+}
+
+.tab-pane .tab .focus-indicator{
     -fx-opacity: 0;
+}
+
+.tab-pane .tab:selected{
+    -fx-background-color: #252525;
+}
+
+.tab-pane .tab .tab-label{
+    -fx-text-fill: white;
+    -fx-font-size: 13pt;
+    -fx-padding: 0 0 -5px 0;
+}
+
+.tab-pane .tab{
+
+}
+
+.tab-pane .tab .tab-close-button{
+    -fx-background-color: #404545;
+    -fx-shape: 'M 0 0 H 1.5 L 6.75 5.25 L 12 0 H 13.5 V 1.5 L 8.25 6.75 L 13.5 12 V 13.5 H 12 L 6.75 8.25 L 1.5 13.5 H 0 V 12 L 5.25 6.75 L 0 1.5 V 0';
+    -fx-scale-shape: false;
+    -fx-pref-width: 30px;
+    -fx-pref-height: 30px;
+    -fx-effect: none;
+}
+
+.tab-pane .tab .tab-close-button:hover{
+    -fx-background-color: teal;
+}
+
+
+.tab-pane .control-buttons-tab{
+    -fx-padding: 0 100px 0 0;
+    -fx-opacity: 0;
+}
+
+.tab-pane .tab-header-area{
+    -fx-padding: 0 0 0 0;
+}
+
+.tab-pane .tab-header-area .tab-header-background{
+    -fx-opacity: 0;
+}
+
+.player-head {
+
+}
+
+.button{
+    -fx-font-size: 13pt;
+    -fx-font-weight: 400;
+}
+
+#btnMaximize{
+    -fx-font-size: 18pt;
+    -fx-padding: -5px 0 0 0;
+}
+
+#btnMinimize{
+    -fx-padding: -5px 0 0 0;
+}
+
+#lblProfileName{
+    -fx-font-size: 18pt;
+    -fx-font-weight: 800;
+}
+
+#btnPlay{
+    -fx-background-color: #383852;
+    -fx-font-size: 25pt;
+}
+
+#favBox{
+    -fx-background-radius: 5px;
+    -fx-background-color: #252525;
+}
+
+#lblStatus{
+    -fx-font-size: 11pt;
+}
+
+.progress-bar .bar{
+    -fx-background-color: #007777!important;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0 5px 5px 5px;
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CField?>
+<?import com.laeben.corelauncher.ui.control.CList?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<?import org.controlsfx.control.SearchableComboBox?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="510.0" prefWidth="650.0">
+    <CButton AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" prefWidth="48" prefHeight="48" fx:id="btnClose" style="-fx-font-size: 15pt;-fx-background-color: #00000001" text="X"/>
+
+    <VBox style="-fx-background-color: #252525bb; -fx-background-radius: 15px; -fx-padding: 10px" fx:id="pBox" maxWidth="Infinity" maxHeight="Infinity" AnchorPane.rightAnchor="40" AnchorPane.leftAnchor="40" AnchorPane.topAnchor="45" AnchorPane.bottomAnchor="30">
+        <Pane fx:id="pa" managed="false" visible="false" prefWidth="200">
+            <SearchableComboBox viewOrder="-1" fx:id="cGroups"/>
+        </Pane>
+
+        <CField fx:id="txtSearch" promptText="%search" style="-fx-background-color: #252525"/>
+        <Rectangle height="15"/>
+        <ScrollPane VBox.vgrow="ALWAYS" styleClass="w-scroll-pane" fitToWidth="true" hbarPolicy="NEVER" fx:id="scroll">
+            <CList fx:id="pList"/>
+        </ScrollPane>
+    </VBox>
+</AnchorPane>

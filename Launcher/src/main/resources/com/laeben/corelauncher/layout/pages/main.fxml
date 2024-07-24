@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.SelectionPane?>
+<SelectionPane xmlns="http://javafx.com/javafx"
+               xmlns:fx="http://javafx.com/fxml"
+               fx:controller="com.laeben.corelauncher.ui.controller.page.MainPage" styleClass="root" stylesheets="@../../style/controls/clui.css,@../../style/pages/main.css"
+               prefHeight="400.0" fx:id="root" prefWidth="600.0">
+
+</SelectionPane>

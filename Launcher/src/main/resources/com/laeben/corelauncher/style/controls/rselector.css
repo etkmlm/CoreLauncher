@@ -1,0 +1,9 @@
+#root{
+    -fx-padding: 15px;
+    -fx-background-color: #222222aa;
+}
+
+.btn{
+    -fx-background-color: transparent;
+    -fx-font-size: 15pt;
+}

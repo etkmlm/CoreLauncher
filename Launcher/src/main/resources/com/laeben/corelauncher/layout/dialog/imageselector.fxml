@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CView?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="400.0" fx:id="root" prefWidth="400.0" stylesheets="@../../style/controls/iselector.css">
+    <CButton prefWidth="48" prefHeight="48" text="X" fx:id="btnClose" AnchorPane.rightAnchor="16" AnchorPane.topAnchor="16"/>
+    <Label text="%imageselector.title" AnchorPane.topAnchor="24" AnchorPane.leftAnchor="16" style="-fx-font-size: 16pt"/>
+
+    <VBox alignment="CENTER" AnchorPane.rightAnchor="8" AnchorPane.leftAnchor="8" AnchorPane.bottomAnchor="64" AnchorPane.topAnchor="64">
+        <HBox spacing="15" alignment="CENTER" >
+            <Pane prefWidth="128" prefHeight="128">
+                <Rectangle fx:id="rectImage" height="128" width="128"/>
+                <CView fx:id="image" fitHeight="128" fitWidth="128" />
+            </Pane>
+            <FlowPane prefWrapLength="101" prefWidth="101" hgap="5" vgap="5" fx:id="pnImages">
+
+            </FlowPane>
+        </HBox>
+        <Rectangle height="20"/>
+        <HBox alignment="CENTER">
+            <TextField promptText="%imageselector.prompt" fx:id="txtInput" HBox.hgrow="ALWAYS"/>
+            <Rectangle width="10"/>
+            <CButton fx:id="btnSelect" text="%option.select" />
+        </HBox>
+    </VBox>
+
+    <CheckBox fx:id="chkOffline" text="%imageselector.download" AnchorPane.bottomAnchor="8" AnchorPane.leftAnchor="8" />
+    <CButton fx:id="btnDone" text="%option.done" AnchorPane.bottomAnchor="8" AnchorPane.rightAnchor="8" />
+</AnchorPane>

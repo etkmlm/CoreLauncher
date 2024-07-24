@@ -4,18 +4,18 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
-import com.laeben.corelauncher.data.Configurator;
-import com.laeben.corelauncher.data.entities.Profile;
-import com.laeben.corelauncher.minecraft.entities.ExecutionInfo;
-import com.laeben.corelauncher.minecraft.entities.VersionNotFoundException;
+import com.laeben.core.util.events.ValueEvent;
+import com.laeben.corelauncher.api.exception.PerformException;
+import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
+import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.modding.Modder;
-import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
-import com.laeben.corelauncher.minecraft.utils.CommandConcat;
-import com.laeben.corelauncher.utils.EventHandler;
-import com.laeben.corelauncher.utils.JavaMan;
-import com.laeben.corelauncher.utils.Logger;
-import com.laeben.corelauncher.utils.entities.LogType;
+import com.laeben.corelauncher.minecraft.util.CommandConcat;
+import com.laeben.corelauncher.util.EventHandler;
+import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.KeyEvent;
 
@@ -58,12 +58,12 @@ public class Launcher {
      * Prepares the profile to launch.
      * @param profile target profile
      */
-    public void prepare(Profile profile) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
+    public void prepare(Profile profile) throws NoConnectionException, StopException, PerformException, HttpException, FileNotFoundException {
         handleState("prepare" + profile.getName());
 
         profile.getWrapper().install(profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion()));
 
-        if (profile.getWrapper().getType() != CurseWrapper.Type.ANY){
+        if (!profile.getWrapper().getType().isNative()){
             Modder.getModder().installModpacks(profile, profile.getModpacks());
             Modder.getModder().installMods(profile, profile.getMods());
         }
@@ -77,8 +77,7 @@ public class Launcher {
      * Launch the game.
      * @param info info for the execution
      */
-    public void launch(ExecutionInfo info)
-    {
+    public void launch(ExecutionInfo info) throws StopException, VersionNotFoundException {
         if (info.version == null || info.version.id == null)
             return;
 
@@ -100,10 +99,10 @@ public class Launcher {
                 info.java = Configurator.getConfig().getDefaultJava();
                 if (info.java == null || info.java.majorVersion != linfo.java.majorVersion){
                     // If this Java is unusable, try to get any Java that fits to version from all
-                    info.java = JavaMan.getManager().tryGet(linfo.java);
+                    info.java = JavaManager.getManager().tryGet(linfo.java);
                     if (info.java == null){
                         // If no result, use launcher's Java
-                        info.java = JavaMan.getDefault();
+                        info.java = JavaManager.getDefault();
                         if (info.java.majorVersion != linfo.java.majorVersion){
                             // Last solution, download new Java and relaunch (if there is internet here of course...)
                             info.java = null;
@@ -111,10 +110,9 @@ public class Launcher {
                             handleState("java" + linfo.java.majorVersion);
                             Logger.getLogger().log(LogType.INFO, "Downloading Java " + linfo.java.majorVersion);
                             try{
-                                JavaMan.getManager().download(linfo.java);
-                                handler.execute(new KeyEvent("jvdown"));
-                            }
-                            catch (NoConnectionException e){
+                                JavaManager.getManager().downloadAndInclude(linfo.java);
+                                //handler.execute(new KeyEvent("jvdown"));
+                            } catch (NoConnectionException e){
                                 handleState(".error.launch.java");
                                 return;
                             }
@@ -127,11 +125,13 @@ public class Launcher {
             }
 
             if (!info.java.getExecutable().exists()){
-                JavaMan.getManager().reload();
+                JavaManager.getManager().reload();
                 info.java = null;
                 launch(info);
                 return;
             }
+
+            Logger.getLogger().log(LogType.INFO, "Java Path: " + info.java.getPath());
 
             String libPath = "-Djava.library.path=" + linfo.nativePath;
             String c = String.valueOf(File.pathSeparatorChar);
@@ -167,15 +167,16 @@ public class Launcher {
             // Due to some reasons, authentication process does not complete without requesting to the certificate URL, so we are requesting here.
             info.account.validate();
 
-            handleState("sessionStart");
             // Start a new session
             var session = new Session(info.dir, finalCmds);
+
+            handleState("sessionStart" + info.executor);
             session.start();
 
-            handleState("sessionEnd" + session.getExitCode());
+            handler.execute(new ValueEvent("sessionEnd" + info.executor, session.getExitCode()));
         }
-        catch (VersionNotFoundException e){
-            handleState(".error.noVersion");
+        catch (StopException | VersionNotFoundException e){
+            throw e;
         }
         catch (Exception e){
             Logger.getLogger().log(e);

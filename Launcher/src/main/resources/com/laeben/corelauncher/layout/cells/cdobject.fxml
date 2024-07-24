@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CMenu?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:id="root" stylesheets="@../../style/cells/cdobject.css" >
+    <Pane prefHeight="128" prefWidth="128" >
+        <GridPane visible="false" managed="false" vgap="8" hgap="8" prefHeight="128" prefWidth="128" fx:id="folderRoot" >
+            <columnConstraints>
+                <ColumnConstraints percentWidth="50"/>
+                <ColumnConstraints percentWidth="50"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints percentHeight="50"/>
+                <RowConstraints percentHeight="50"/>
+            </rowConstraints>
+        </GridPane>
+        <AnchorPane visible="false" managed="false" prefHeight="128" prefWidth="128" fx:id="imgRoot">
+
+            <!--<CButton fx:id="btnMenu" text="…" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"/>-->
+            <CMenu fx:id="menu" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0"/>
+            <CButton fx:id="btnSelect" text="⯈" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" translateY="80" AnchorPane.leftAnchor="0" alignment="CENTER" AnchorPane.rightAnchor="0"/>
+        </AnchorPane>
+    </Pane>
+    <Rectangle height="8"/>
+    <!--<Text fx:id="lblName" text="hebele" wrappingWidth="130" textAlignment="CENTER" />-->
+    <Label fx:id="lblName" text="hebele" maxWidth="128" textAlignment="CENTER" alignment="CENTER" />
+
+</VBox>

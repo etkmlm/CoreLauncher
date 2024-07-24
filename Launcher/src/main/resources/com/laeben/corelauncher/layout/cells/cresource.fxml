@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      alignment="CENTER" style="-fx-padding: 5px;" stylesheets="@../../style/cells/resource.css">
+    <HBox spacing="10" prefHeight="175" fx:id="root" alignment="CENTER">
+        <CView fitWidth="72" fitHeight="72" fx:id="icon"/>
+        <VBox>
+            <Label fx:id="lblName"/>
+            <Rectangle height="3"/>
+            <Label fx:id="lblAuthor"/>
+            <Rectangle height="5"/>
+            <TextArea fx:id="txtDesc" editable="false"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <CButton fx:id="btnDelete" text="—" />
+    </HBox>
+</VBox>

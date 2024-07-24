@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      minHeight="200.0" maxHeight="400" minWidth="500.0" maxWidth="800" fx:id="root" stylesheets="@../../style/controls/msgbox.css" >
+    <HBox alignment="CENTER">
+        <CView fx:id="icon" fitHeight="48" fitWidth="48"/>
+        <Rectangle width="10"/>
+        <Label fx:id="title"/>
+        <Region maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        <CButton fx:id="btnClose" text="X" prefHeight="48" prefWidth="48"/>
+    </HBox>
+    <Rectangle height="10"/>
+    <TextArea fx:id="content" wrapText="true" editable="false"/>
+    <Region maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+    <HBox spacing="10" fx:id="buttons" alignment="CENTER_RIGHT">
+
+    </HBox>
+</VBox>

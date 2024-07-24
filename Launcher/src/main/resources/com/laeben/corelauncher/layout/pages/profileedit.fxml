@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import org.controlsfx.control.SearchableComboBox?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane prefHeight="600" prefWidth="1000" styleClass="root" stylesheets="@../../style/profileedit.css,@../../style/controls/clui.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.page.EditProfilePage">
+    <HBox alignment="CENTER" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <VBox alignment="CENTER">
+            <HBox alignment="CENTER" minHeight="84">
+                <CView fx:id="icon" fitWidth="96" fitHeight="96"/>
+                <Rectangle width="25"/>
+                <TextField fx:id="txtName" minWidth="230" promptText="%profile.edit.name" styleClass="underline-text-field" />
+            </HBox>
+            <Rectangle height="20"/>
+            <GridPane alignment="CENTER_LEFT" hgap="20" vgap="20" >
+                <columnConstraints>
+                    <ColumnConstraints minWidth="160" hgrow="SOMETIMES" />
+                    <ColumnConstraints minWidth="500" hgrow="ALWAYS" />
+                    <ColumnConstraints minWidth="100"/>
+                </columnConstraints>
+                <Label styleClass="property-key" text="%profile.edit.type" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
+                <HBox alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0">
+
+                    <VBox alignment="CENTER" styleClass="rad-option">
+                        <ImageView fx:id="imgVanilla" fitHeight="48" fitWidth="48">
+                            <Image url="@../../images/wrapper/vanilla.png" />
+                        </ImageView>
+                        <RadioButton fx:id="vanilla" />
+                    </VBox>
+                    <VBox alignment="CENTER" styleClass="rad-option">
+                        <ImageView fx:id="imgForge" fitHeight="48" fitWidth="48">
+                            <Image url="@../../images/wrapper/forge.png" />
+                        </ImageView>
+                        <RadioButton fx:id="forge" />
+                    </VBox>
+                    <VBox alignment="CENTER" styleClass="rad-option">
+                        <ImageView fx:id="imgFabric" fitHeight="48" fitWidth="48">
+                            <Image url="@../../images/wrapper/fabric.png" />
+                        </ImageView>
+                        <RadioButton fx:id="fabric" />
+                    </VBox>
+                    <VBox alignment="CENTER" styleClass="rad-option">
+                        <ImageView fx:id="imgQuilt" fitHeight="48" fitWidth="48">
+                            <Image url="@../../images/wrapper/quilt.png" />
+                        </ImageView>
+                        <RadioButton fx:id="quilt" />
+                    </VBox>
+                    <VBox alignment="CENTER" styleClass="rad-option">
+                        <ImageView fx:id="imgOptiFine" fitHeight="48" fitWidth="48">
+                            <Image url="@../../images/wrapper/optifine.png" />
+                        </ImageView>
+                        <RadioButton fx:id="optifine" />
+                    </VBox>
+                    <VBox alignment="CENTER" styleClass="rad-option">
+                        <ImageView fx:id="imgCustom" fitHeight="48" fitWidth="48">
+                            <Image url="@../../images/wrapper/custom.png" />
+                        </ImageView>
+                        <RadioButton fx:id="custom" />
+                    </VBox>
+                </HBox>
+
+                <Label styleClass="property-key" text="%profile.edit.wrapperVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                <SearchableComboBox fx:id="cbWrapperVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <GridPane fx:id="pWrapper" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="90" />
+                        <ColumnConstraints percentWidth="10" />
+                    </columnConstraints>
+                    <TextField editable="false" fx:id="txtWrapper" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" />
+                    <CButton styleClass="transparent" fx:id="btnSelectWrapper" maxWidth="Infinity" text="..." GridPane.columnIndex="1" />
+                </GridPane>
+
+                <Label styleClass="property-key" text="%profile.edit.gameVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
+                <SearchableComboBox fx:id="cbGameVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <Label styleClass="property-key" text="Java" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
+                <ComboBox fx:id="cbJavaVersion" maxWidth="Infinity" prefHeight="30"  GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <CButton styleClass="transparent" fx:id="btnJavaManager" text="..."  GridPane.columnIndex="2" GridPane.rowIndex="3" />
+
+                <Label styleClass="property-key" text="%java.args" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
+                <TextField fx:id="txtArgs" maxWidth="Infinity" prefHeight="30" styleClass="field" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                <Label styleClass="property-key" text="%account" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
+                <TextField fx:id="txtAccount" maxWidth="Infinity" prefHeight="30" styleClass="field" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                <CheckBox fx:id="chkAccOnline" maxWidth="Infinity" text="%online" GridPane.columnIndex="2" GridPane.rowIndex="5"/>
+
+                <Label styleClass="property-key" text="%minMaxRam" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
+                <GridPane maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="47" />
+                        <ColumnConstraints percentWidth="6" />
+                        <ColumnConstraints percentWidth="47" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints prefHeight="30" />
+                        <RowConstraints prefHeight="10" />
+                        <RowConstraints prefHeight="60" />
+                    </rowConstraints>
+                    <Spinner fx:id="txtMinRAM" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <Spinner fx:id="txtMaxRAM" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                    <Slider fx:id="sldRAM" majorTickUnit="2048" max="32768" minorTickCount="0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+                </GridPane>
+            </GridPane>
+        </VBox>
+    </HBox>
+    <CButton fx:id="btnBack" text="Back" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="10" styleClass="transparent" />
+    <CButton fx:id="btnSave" prefWidth="64" prefHeight="64" styleClass="circle-button" AnchorPane.bottomAnchor="20" AnchorPane.rightAnchor="20"/>
+</AnchorPane>

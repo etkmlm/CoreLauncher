@@ -1,0 +1,21 @@
+#root{
+    -fx-cursor: hand;
+}
+
+#lblName{
+    -fx-fill: white;
+    -fx-text-fill: white;
+    -fx-font-size: 13pt;
+    -fx-font-weight: 700;
+}
+
+#btnSelect{
+    -fx-background-color: transparent;
+    -fx-font-size: 40pt;
+}
+
+#folderRoot{
+    -fx-background-color: #303030;
+    -fx-background-radius: 15px;
+    -fx-padding: 8px;
+}

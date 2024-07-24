@@ -1,0 +1,33 @@
+.radio-button{
+    -fx-font-size: 13pt;
+}
+
+.title{
+    -fx-font-size: 15pt;
+    -fx-font-weight: bold;
+}
+
+#lblProfileName{
+    -fx-font-size: 15pt;
+    -fx-font-weight: bold;
+}
+
+#txtQuery{
+    -fx-background-color: #262626aa;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1.5px;
+    -fx-font-size: 13pt;
+}
+
+#lvResources{
+    -fx-background-color: #262626aa;
+}
+
+.scroll-pane, .scroll-bar{
+    -fx-hbar-policy: never;
+}
+
+.clear-button{
+    -fx-background-color: #252525;
+}

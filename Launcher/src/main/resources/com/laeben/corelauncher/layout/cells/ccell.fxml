@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.shape.Rectangle?>
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml" prefWidth="200" fx:id="root" maxWidth="Infinity" style="-fx-padding: 10px 5px 10px 5px">
+    <Rectangle width="5"/>
+    <CView fx:id="image" fitHeight="32" fitWidth="32"/>
+    <Rectangle width="15"/>
+    <Label maxHeight="Infinity" textAlignment="CENTER" fx:id="lblName"/>
+    <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    <Rectangle width="5"/>
+    <HBox alignment="CENTER_RIGHT" fx:id="box">
+
+    </HBox>
+</HBox>

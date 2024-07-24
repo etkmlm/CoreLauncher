@@ -1,0 +1,14 @@
+#btnClose{
+    -fx-background-color: transparent;
+    -fx-font-size: 15pt;
+}
+
+.button{
+    -fx-font-size: 14pt;
+}
+
+#root{
+    -fx-background-color: #252525ee;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+}

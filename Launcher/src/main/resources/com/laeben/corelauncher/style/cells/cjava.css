@@ -1,0 +1,32 @@
+.orange{
+    -fx-background-color: #9e5808ef;
+}
+
+.red{
+    -fx-background-color: #562e75ef;
+}
+
+.green{
+    -fx-background-color: #206e64ef;
+}
+
+#lblVersion{
+    -fx-font-size: 20pt;
+    -fx-text-fill: wheat;
+    -fx-background-radius: 10px;
+}
+
+#btnAction{
+    -fx-font-size: 18pt;
+}
+
+.text-field{
+    -fx-background-color: transparent;
+    -fx-font-size: 14pt;
+}
+
+#root{
+    -fx-padding: 10px;
+    -fx-background-color: #232323aa;
+    -fx-background-radius: 10px;
+}

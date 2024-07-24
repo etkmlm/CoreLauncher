@@ -1,14 +1,12 @@
 package com.laeben.corelauncher.ui.controller;
 
-import com.laeben.corelauncher.ui.controls.CButton;
-import com.laeben.corelauncher.ui.entities.LStage;
-import com.laeben.corelauncher.ui.utils.FXManager;
+import com.laeben.corelauncher.api.ui.Controller;
+import com.laeben.corelauncher.ui.control.CButton;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 
-public class Frame {
+public class Frame extends Controller implements com.laeben.corelauncher.api.ui.entity.Frame {
     @FXML
     private CButton btnClose;
     @FXML
@@ -17,23 +15,26 @@ public class Frame {
     private CButton btnMaximize;
     @FXML
     private StackPane content;
-    @FXML
-    private AnchorPane root;
-    @FXML
-    private Label lblTitle;
+
 
     public void setTitle(String title){
-        lblTitle.setText(title);
-    }
-    @FXML
-    private void initialize(){
-        btnClose.setOnMouseClicked(a -> FXManager.getManager().closeStage(getStage()));
-        btnMinimize.setOnMouseClicked(a -> getStage().setIconified(true));
-        btnMaximize.setOnMouseClicked(a -> getStage().setMaximized(!getStage().isMaximized()));
-        //content.setClip(root);
+        //
     }
 
-    private LStage getStage(){
-        return (LStage) content.getScene().getWindow();
+    @Override
+    public void setContent(Node node) {
+        content.getChildren().clear();
+        content.getChildren().add(node);
+    }
+
+
+    @Override
+    public void preInit(){
+        btnClose.enableTransparentAnimation();
+        btnMaximize.enableTransparentAnimation();
+        btnMinimize.enableTransparentAnimation();
+        btnClose.setOnMouseClicked(a -> close());
+        btnMinimize.setOnMouseClicked(a -> getStage().setIconified(true));
+        btnMaximize.setOnMouseClicked(a -> getStage().setMaximized(!getStage().isMaximized()));
     }
 }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      prefHeight="100" spacing="20" prefWidth="450" alignment="CENTER_LEFT" fx:id="root" stylesheets="@../../style/cells/cjava.css,@../../style/controls/clui.css">
+    <Label maxHeight="Infinity" fx:id="lblVersion" alignment="CENTER" text="17" prefWidth="100"/>
+    <VBox HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-padding: 5px">
+        <CField styleClass="underline-field,name-box" promptText="%java.name" fx:id="txtName" />
+        <TextField styleClass="sel-box" fx:id="txtPath" editable="false" />
+    </VBox>
+    <CButton styleClass="transparent" fx:id="btnAction" text="—" />
+</HBox>

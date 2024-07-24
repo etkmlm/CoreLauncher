@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.laeben.corelauncher.ui.controller.page.ProfilePage"
+            prefWidth="900.0" styleClass="root" stylesheets="@../../style/pages/profile.css,@../../style/controls/clui.css">
+    <CView fx:id="imgProfile" fitHeight="128" fitWidth="128" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="10"/>
+    <HBox fx:id="boxUser" AnchorPane.topAnchor="145" AnchorPane.leftAnchor="10">
+        <ImageView fitWidth="32" fitHeight="32" fx:id="imgUserHead">
+
+        </ImageView>
+        <Rectangle width="5"/>
+        <VBox alignment="CENTER">
+            <Label fx:id="lblUsername" text="Username"/>
+        </VBox>
+    </HBox>
+    <VBox AnchorPane.leftAnchor="145" AnchorPane.rightAnchor="350" AnchorPane.topAnchor="10">
+        <Label fx:id="lblProfileName" text="Profile Name"/>
+        <Rectangle height="10"/>
+        <Label fx:id="lblGameVersion" text="Game Version"/>
+        <Rectangle height="10"/>
+        <HBox fx:id="badges" alignment="CENTER_LEFT">
+
+        </HBox>
+    </VBox>
+    <HBox styleClass="mini-box" spacing="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10">
+        <CButton fx:id="btnCopySettings" prefWidth="48" prefHeight="48">
+            <tooltip>
+                <Tooltip text="%profile.menu.copyset"/>
+            </tooltip>
+        </CButton>
+        <CButton fx:id="btnUpdate" prefWidth="48" prefHeight="48">
+            <tooltip>
+                <Tooltip text="%mods.all.update"/>
+            </tooltip>
+        </CButton>
+        <CButton fx:id="btnBackup" prefWidth="48" prefHeight="48">
+            <tooltip>
+                <Tooltip text="%profile.menu.backup"/>
+            </tooltip>
+        </CButton>
+        <CButton fx:id="btnExport" prefWidth="48" prefHeight="48">
+            <tooltip>
+                <Tooltip text="%profile.menu.export"/>
+            </tooltip>
+        </CButton>
+        <CButton fx:id="btnDelete" prefWidth="48" prefHeight="48">
+            <tooltip>
+                <Tooltip text="%option.delete"/>
+            </tooltip>
+        </CButton>
+        <CButton fx:id="btnEdit" prefWidth="48" prefHeight="48">
+            <tooltip>
+                <Tooltip text="%option.edit"/>
+            </tooltip>
+        </CButton>
+    </HBox>
+    <HBox styleClass="mega-box" spacing="15" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="68">
+        <CButton fx:id="btnWorlds" prefWidth="64" prefHeight="64">
+            <tooltip>
+                <Tooltip text="%frame.title.worlds"/>
+            </tooltip>
+        </CButton>
+        <CButton fx:id="btnAdd" prefWidth="64" prefHeight="64">
+            <tooltip>
+                <Tooltip text="%frame.title.browser"/>
+            </tooltip>
+        </CButton>
+        <CButton fx:id="btnAddMultiple" prefWidth="64" prefHeight="64">
+            <tooltip>
+                <Tooltip text="%frame.title.multiplemod"/>
+            </tooltip>
+        </CButton>
+    </HBox>
+
+    <CField promptText="%search" fx:id="txtSearch" AnchorPane.topAnchor="180" AnchorPane.rightAnchor="10"/>
+    <GridPane fx:id="grid" hgap="20" vgap="20" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="230" AnchorPane.bottomAnchor="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <VBox fx:id="vModpacks" GridPane.columnIndex="0" GridPane.rowIndex="0">
+            <Label styleClass="header" text="%mods.type.modpacks"/>
+            <Rectangle height="10"/>
+            <!--<CVerticalList fx:id="lvModpacks"/>-->
+        </VBox>
+        <VBox fx:id="vResources" GridPane.columnIndex="1" GridPane.rowIndex="0">
+            <Label styleClass="header" text="%mods.type.resources"/>
+            <Rectangle height="10"/>
+            <!--<CVerticalList fx:id="lvResources"/>-->
+        </VBox>
+        <VBox fx:id="vShaders" GridPane.columnIndex="0" GridPane.rowIndex="1">
+            <Label styleClass="header" text="%mods.type.shader"/>
+            <Rectangle height="10"/>
+            <!--<CVerticalList fx:id="lvShaders"/>-->
+        </VBox>
+        <VBox fx:id="vWorlds" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Label styleClass="header" text="%mods.type.worlds"/>
+            <Rectangle height="10"/>
+            <!--<CVerticalList fx:id="lvWorlds"/>-->
+        </VBox>
+        <VBox fx:id="vMods" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
+            <Label styleClass="header" text="%mods.type.mods"/>
+            <Rectangle height="10"/>
+            <!--<CVerticalList fx:id="lvMods"/>-->
+        </VBox>
+    </GridPane>
+    <VBox fx:id="boxDrag" visible="false" managed="false" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="230" AnchorPane.bottomAnchor="10" alignment="TOP_CENTER" style="-fx-background-color: #252525aa">
+        <HBox alignment="CENTER">
+            <Label text="%import.drop" style="-fx-font-size: 30pt; -fx-padding: 30px; -fx-font-weight: bold"/>
+        </HBox>
+    </VBox>
+</AnchorPane>

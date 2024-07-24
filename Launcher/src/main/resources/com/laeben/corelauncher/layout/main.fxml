@@ -1,71 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.laeben.corelauncher.ui.controls.CButton?>
+<?import com.laeben.corelauncher.ui.control.CAnnouncer?>
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CMenu?>
+<?import com.laeben.corelauncher.ui.control.CView?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.shape.Rectangle?>
-<AnchorPane prefHeight="600" prefWidth="720.0" fx:id="root" stylesheets="@../style/main.css,@../style/controls/defcontrols.css,@../style/controls/listing.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.Main">
-    <background>
-        <Background>
-            <fills>
-                <BackgroundFill fill="#202020" />
-            </fills>
-        </Background>
-    </background>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.laeben.corelauncher.ui.controller.Main"
+            prefHeight="800" prefWidth="1300" fx:id="root" styleClass="main" stylesheets="@../style/main.css,@../style/controls/clui.css">
 
-    <AnchorPane fx:id="leftRoot" prefWidth="300" styleClass="launch-bar" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0">
-        <HBox alignment="CENTER" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="30">
-            <ImageView fx:id="imgHeadView" fitHeight="128" fitWidth="128" pickOnBounds="true" preserveRatio="true"/>
-        </HBox>
-        <Label fx:id="lblPlayerName" alignment="CENTER" text="IAMUSER" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="200">
-            <font>
-                <Font name="Minecraft" size="26.0" />
-            </font>
-        </Label>
-        <Label fx:id="gameVersion" alignment="CENTER" style="-fx-font-family: 'Minecraft'; -fx-font-size: 26pt;" AnchorPane.bottomAnchor="200" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-            <font>
-                <Font name="Minecraft" size="26.0" />
-            </font>
-        </Label>
+    <TabPane fx:id="tab" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="105" />
 
-        <Label fx:id="gameDescription" alignment="CENTER" AnchorPane.bottomAnchor="160" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-            <font>
-                <Font name="Calibri" size="20.0" />
-            </font>
-        </Label>
-        <VBox alignment="CENTER" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-            <HBox alignment="CENTER">
-                <AnchorPane>
-                    <ProgressIndicator fx:id="prg" minHeight="100" minWidth="100" progress="0" />
-                    <CButton fx:id="btnStart" maxHeight="80" maxWidth="80" prefHeight="70" prefWidth="70" styleClass="play-button" text="⯈" AnchorPane.leftAnchor="15" AnchorPane.topAnchor="5.5" />
-                </AnchorPane>
-            </HBox>
-            <Rectangle height="10"/>
-            <Label fx:id="status" textFill="WHITE" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="5" AnchorPane.rightAnchor="60">
-                <font>
-                    <Font size="14.0" />
-                </font>
-            </Label>
+    <AnchorPane fx:id="menu" styleClass="menu" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.leftAnchor="10" prefHeight="100">
+        <VBox fx:id="menuInner" prefHeight="30" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="10" AnchorPane.leftAnchor="10" alignment="CENTER">
+            <AnchorPane>
+                <CButton fx:id="btnPlay" styleClass="menu-button" AnchorPane.leftAnchor="0" prefWidth="64" prefHeight="64" text="⯈" />
+                <Label fx:id="lblProfileName" AnchorPane.leftAnchor="80" text="ABC"/>
+                <Label fx:id="lblProfileDescription" AnchorPane.leftAnchor="80" AnchorPane.bottomAnchor="0" text="1.12.2 Forge"/>
+
+                <CMenu AnchorPane.rightAnchor="0" fx:id="cMenu"/>
+
+                <CView fx:id="head" styleClass="player-head" preserveRatio="true" pickOnBounds="true" AnchorPane.rightAnchor="80" fitHeight="64" fitWidth="64">
+                    <Image url="@../images/steve.png"/>
+                </CView>
+
+                <Label fx:id="lblStatus" AnchorPane.bottomAnchor="2" alignment="CENTER" AnchorPane.leftAnchor="200" AnchorPane.rightAnchor="200" textAlignment="CENTER"/>
+            </AnchorPane>
+
         </VBox>
-    </AnchorPane>
-    <AnchorPane AnchorPane.bottomAnchor="150" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="15">
-        <ListView fx:id="lvProfiles" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" />
-        <CButton fx:id="btnAddProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="+" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="65" />
-        <CButton fx:id="btnImportProfile" prefHeight="45.0" prefWidth="45.0" styleClass="circle-button" text="⇲" style="-fx-font-size: 13pt;" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="10"/>
+
+        <ProgressBar scaleY="0" progress="0.5" fx:id="progress" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" prefHeight="7"/>
     </AnchorPane>
 
-    <AnchorPane prefHeight="130" AnchorPane.bottomAnchor="15" AnchorPane.leftAnchor="320" AnchorPane.rightAnchor="15">
+    <CAnnouncer fx:id="announcer" translateX="620" AnchorPane.topAnchor="50" AnchorPane.rightAnchor="20"/>
 
-        <TextField fx:id="txtSearch" style="-fx-background-color: #252525;" promptText="%search" prefHeight="35" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="70" AnchorPane.leftAnchor="10" />
-
-        <HBox prefHeight="1" styleClass="separator" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="70" AnchorPane.topAnchor="60"/>
-
-        <TextArea fx:id="detailedStatus" editable="false"  AnchorPane.bottomAnchor="0" prefHeight="60" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="65"/>
-
-        <CButton fx:id="btnSettings" prefHeight="50" prefWidth="50" styleClass="ench-button" style="-fx-font-size: 11pt" text="☰" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10" />
-        <CButton fx:id="btnAbout" prefHeight="50" prefWidth="50" styleClass="ench-button" text="🛈" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="0" />
-    </AnchorPane>
-
+    <Region style="-fx-background-color: #10101077" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" maxWidth="Infinity" maxHeight="Infinity" fx:id="dialogLayer" visible="false"/>
 </AnchorPane>

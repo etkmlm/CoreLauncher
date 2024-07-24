@@ -1,0 +1,20 @@
+#txtQuery, #lvResources{
+    -fx-background-color: #232323aa;
+    -fx-background-radius: 10px;
+}
+
+.text-area .context-menu{
+    -fx-opacity: 0;
+}
+
+.text-area *{
+    -fx-cursor: text;
+}
+
+.ccombo{
+    -fx-background-color: #262626aa!important;
+}
+
+#lblStatus{
+    -fx-font-size: 14pt;
+}

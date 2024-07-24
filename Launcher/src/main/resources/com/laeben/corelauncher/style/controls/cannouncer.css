@@ -1,0 +1,17 @@
+#root{
+    -fx-background-color: #30303044;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-color: rgba(51, 39, 193, 0.5);
+    -fx-border-width: 1px;
+}
+
+#lblTitle{
+    -fx-font-size: 17pt;
+    -fx-font-weight: bolder;
+}
+
+#txtContent{
+    -fx-font-size: 13pt;
+    -fx-fill: white;
+}

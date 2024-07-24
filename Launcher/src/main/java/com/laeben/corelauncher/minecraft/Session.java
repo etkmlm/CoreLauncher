@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.minecraft;
 
-import com.laeben.corelauncher.data.Configurator;
-import com.laeben.corelauncher.utils.Logger;
+import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.entity.Path;
 
 import java.io.BufferedReader;
@@ -39,6 +39,10 @@ public class Session {
         logFile = Configurator.getConfig().getLauncherPath().to("gamelog", dt + " - S" + sessionId + ".log");
     }
 
+    public int getSessionId(){
+        return sessionId;
+    }
+
     public int getExitCode(){
         return exitCode;
     }
@@ -61,7 +65,7 @@ public class Session {
 
             String exit = "\n" + "EXIT CODE: " + (exitCode = process.waitFor());
             logFile.append(exit);
-            System.out.println(exit);
+            Logger.getLogger().logDebug(exit);
             process.destroyForcibly();
         }
         catch (Exception e){

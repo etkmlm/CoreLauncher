@@ -1,0 +1,24 @@
+#root{
+    -fx-background-color: #252525ee;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+}
+
+.message-box-button{
+    -fx-font-size: 14pt;
+    -fx-min-width: 64px;
+}
+
+
+#btnClose{
+    -fx-background-color: transparent;
+    -fx-font-size: 13pt;
+}
+
+#title{
+    -fx-font-size: 18pt;
+}
+
+#content{
+    -fx-font-size: 14pt;
+}

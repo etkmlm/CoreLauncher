@@ -1,0 +1,25 @@
+.radio-button{
+    -fx-font-size: 14pt;
+}
+
+.label{
+    -fx-font-size: 16pt;
+    -fx-font-weight: bold;
+}
+
+#root{
+    -fx-background-color: #222222aa;
+    -fx-background-radius: 16px;
+}
+
+.text-field{
+    -fx-font-size: 14pt;
+}
+
+.cbutton{
+    -fx-font-size: 15pt;
+}
+
+#btnSelect{
+    -fx-font-size: 18pt;
+}

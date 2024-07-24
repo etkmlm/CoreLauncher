@@ -1,25 +1,8 @@
 .title{
-    -fx-font-size: 18pt;
-    -fx-text-fill: aqua;
-}
-
-.label{
-    -fx-text-fill: white;
-}
-
-.all{
-    -fx-background-color: #252525;
-    -fx-padding: 10px;
-}
-
-.prop-key{
-    -fx-font-size: 12pt;
+    -fx-font-size: 24pt;
+    -fx-font-weight: 700;
 }
 
 .text-field .context-menu{
     -fx-opacity: 0;
-}
-
-.sel-button{
-    -fx-background-color: #252525;
 }

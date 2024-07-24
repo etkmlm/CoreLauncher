@@ -1,0 +1,43 @@
+#root{
+    -fx-background-color: #232323aa;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+}
+
+.cbutton{
+    -fx-background-color: #232323;
+    -fx-background-radius: 8px;
+    -fx-font-size: 20pt;
+    -fx-pref-width: 64px;
+    -fx-pref-height: 64px;
+}
+
+.cbutton:hover{
+    -fx-background-color: #202020ef;
+}
+
+#lblName{
+    -fx-font-size: 15pt;
+    -fx-font-weight: bold;
+    -fx-background-color: #202020;
+    -fx-background-radius: 8px;
+    -fx-padding: 5px;
+}
+
+#lblAuthor{
+    -fx-font-size: 12pt;
+    -fx-padding: 0 0 0 5px;
+}
+
+#txtDesc{
+    -fx-font-size: 10pt;
+}
+
+#lblCategory{
+    -fx-font-size: 10pt;
+    -fx-padding: 0 0 0 10px;
+}
+
+#lblName:hover{
+    -fx-background-color: #303a3a;
+}

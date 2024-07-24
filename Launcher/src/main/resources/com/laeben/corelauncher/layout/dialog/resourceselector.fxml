@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox spacing="20" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      prefHeight="400.0" prefWidth="600.0" fx:id="root" stylesheets="@../../style/controls/rselector.css">
+    <GridPane VBox.vgrow="ALWAYS" maxWidth="Infinity" vgap="10" hgap="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="35" halignment="CENTER"/>
+            <ColumnConstraints percentWidth="65"/>
+        </columnConstraints>
+
+        <Label text="%import.name" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="txtName" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="%import.icon" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="txtIcon" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="%import.file" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <HBox spacing="10" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <TextField fx:id="txtFileName" HBox.hgrow="ALWAYS"/>
+            <CButton styleClass="btn" fx:id="btnSelectFile" text="..."/>
+        </HBox>
+
+        <Label text="%import.url" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextField fx:id="txtURL" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+        <Label text="%import.type" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <ChoiceBox fx:id="cbType" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+    </GridPane>
+
+    <HBox alignment="CENTER" spacing="10">
+        <CStatusLabel fx:id="lblStatus" managed="false" visible="false" text="0" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <CButton text="%option.cancel" fx:id="btnCancel" styleClass="btn" />
+        <CButton text="%option.save" fx:id="btnSave" styleClass="btn" />
+        <CButton text="%option.done" fx:id="btnDone" styleClass="btn" />
+    </HBox>
+</VBox>

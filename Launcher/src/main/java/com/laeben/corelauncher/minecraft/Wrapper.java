@@ -6,24 +6,21 @@ import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
+import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.LauncherConfig;
-import com.laeben.corelauncher.data.Configurator;
-import com.laeben.corelauncher.minecraft.entities.Asset;
-import com.laeben.corelauncher.minecraft.entities.AssetIndex;
-import com.laeben.corelauncher.minecraft.entities.Library;
-import com.laeben.corelauncher.minecraft.entities.Version;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entities.CurseWrapper;
-import com.laeben.corelauncher.minecraft.wrappers.Custom;
-import com.laeben.corelauncher.minecraft.wrappers.Vanilla;
-import com.laeben.corelauncher.minecraft.wrappers.fabric.Fabric;
-import com.laeben.corelauncher.minecraft.wrappers.forge.Forge;
-import com.laeben.corelauncher.minecraft.wrappers.optifine.OptiFine;
-import com.laeben.corelauncher.minecraft.wrappers.quilt.Quilt;
-import com.laeben.corelauncher.utils.EventHandler;
-import com.laeben.corelauncher.utils.GsonUtils;
-import com.laeben.corelauncher.utils.Logger;
-import com.laeben.corelauncher.utils.NetUtils;
-import com.laeben.corelauncher.utils.entities.LogType;
+import com.laeben.corelauncher.api.exception.PerformException;
+import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.minecraft.entity.Asset;
+import com.laeben.corelauncher.minecraft.entity.AssetIndex;
+import com.laeben.corelauncher.minecraft.entity.Library;
+import com.laeben.corelauncher.minecraft.entity.Version;
+import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
+import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
+import com.laeben.corelauncher.util.EventHandler;
+import com.laeben.corelauncher.util.GsonUtil;
+import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.api.util.NetUtil;
+import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.core.entity.Path;
 import com.google.gson.*;
 import javafx.scene.image.Image;
@@ -31,20 +28,9 @@ import javafx.scene.image.Image;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class Wrapper<H extends Version> {
-    protected static final Map<String, Type> wrappers = new HashMap<>(){{
-       put("forge", Forge.class);
-       put("vanilla", Vanilla.class);
-       put("optifine", OptiFine.class);
-       put("fabric", Fabric.class);
-       put("quilt", Quilt.class);
-       put("custom", Custom.class);
-    }};
     private static final String ASSET_URL = "https://resources.download.minecraft.net/";
 
     protected EventHandler<BaseEvent> handler;
@@ -56,15 +42,7 @@ public abstract class Wrapper<H extends Version> {
     }
 
     public static List<String> getWrappers(){
-        return wrappers.keySet().stream().toList();
-    }
-
-    public static boolean isFlat(Wrapper wr){
-        return wr instanceof Vanilla || wr instanceof Custom;
-    }
-
-    public static boolean isFlatO(Wrapper wr){
-        return isFlat(wr) || wr instanceof OptiFine;
+        return Arrays.stream(LoaderType.values()).map(LoaderType::getIdentifier).toList();
     }
 
     public boolean isStopRequested(){
@@ -85,7 +63,7 @@ public abstract class Wrapper<H extends Version> {
 
     protected boolean checkLen(String url, Path file){
         try{
-            return !NetUtils.check() || NetUtils.getContentLength(url) == file.getSize();
+            return !NetUtil.check() || NetUtil.getContentLength(url) == file.getSize();
         }
         catch (NoConnectionException e){
             return true;
@@ -100,7 +78,7 @@ public abstract class Wrapper<H extends Version> {
         Path libPath = libDir.to(asset.path.split("/"));
         if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || disableCache)
         {
-            NetUtils.download(asset.url, libPath, false, true);
+            NetUtil.download(asset.url, libPath, false, true);
         }
 
         if (exclude != null)
@@ -127,7 +105,8 @@ public abstract class Wrapper<H extends Version> {
         for (Library l : LauncherConfig.LAUNCHER_LIBRARIES){
             Path p = libDir.to(l.calculatePath());
             if (!p.exists()){
-                try(var fixer = Wrapper.class.getResourceAsStream("/com/laeben/corelauncher/libraries/" + l.fileName)){
+                try(var fixer = CoreLauncherFX.class.getResourceAsStream("libraries/" + l.fileName)){
+                    assert fixer != null;
                     fixer.transferTo(new FileOutputStream(p.prepare().toFile()));
                 }
                 catch (Exception e){
@@ -138,7 +117,7 @@ public abstract class Wrapper<H extends Version> {
     }
 
     protected void downloadLibraries(Version v) throws StopException, NoConnectionException {
-        Logger.getLogger().printLog(LogType.INFO, "Retrieving libraries...");
+        Logger.getLogger().logDebug("Retrieving libraries...");
 
         Path libDir = getGameDir().to("libraries");
         Path nativeDir = getGameDir().to("versions", v.getJsonName(), "natives");
@@ -153,11 +132,11 @@ public abstract class Wrapper<H extends Version> {
             if (stopRequested)
                 throw new StopException();
             try{
-                Logger.getLogger().printLog(LogType.INFO, "LIB: " + lib.name);
+                Logger.getLogger().logDebug("LIB: " + lib.name);
                 logState("lib" + lib.name);
                 if (!lib.checkAvailability(CoreLauncher.SYSTEM_OS))
                 {
-                    Logger.getLogger().printLog(LogType.INFO, "PASS\n");
+                    Logger.getLogger().logDebug("PASS\n");
                     continue;
                 }
 
@@ -170,7 +149,7 @@ public abstract class Wrapper<H extends Version> {
                 if (nativeAsset != null)
                     downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude);
 
-                Logger.getLogger().printLog(LogType.INFO, "OK\n");
+                Logger.getLogger().logDebug("OK\n");
             }
             catch (NoConnectionException e){
                 throw e;
@@ -183,7 +162,7 @@ public abstract class Wrapper<H extends Version> {
     }
 
     protected void downloadAssets(Version v) throws StopException, NoConnectionException {
-        Logger.getLogger().printLog(LogType.INFO, "Retrieving assets...");
+        Logger.getLogger().logDebug("Retrieving assets...");
 
         var vIndex = v.getAssetIndex();
 
@@ -204,12 +183,12 @@ public abstract class Wrapper<H extends Version> {
             if (!assetFile.exists()){
                 if (vIndex.url == null)
                     return;
-                assetFile.write(asstText = NetUtils.urlToString(vIndex.url));
+                assetFile.write(asstText = NetUtil.urlToString(vIndex.url));
             }
             else
                 asstText = assetFile.read();
 
-            var n = GsonUtils.empty().fromJson(asstText, JsonObject.class);
+            var n = GsonUtil.empty().fromJson(asstText, JsonObject.class);
 
             index = new AssetIndex();
             index.objects = new ArrayList<>();
@@ -239,7 +218,7 @@ public abstract class Wrapper<H extends Version> {
 
                 Path path = assetDir.to(nhash, hash);
                 if (!path.exists() || disableCache)
-                    NetUtils.download(url, path.forceSetDir(false), false, true);
+                    NetUtil.download(url, path.forceSetDir(false), false, true);
 
                 if (vIndex.isLegacy()){
                     var f = legacyDir.to(asset.path);
@@ -250,11 +229,11 @@ public abstract class Wrapper<H extends Version> {
                     path.copy(f);
                 }
 
-                Logger.getLogger().printLog(LogType.INFO, (i++) + " / " + count);
+                Logger.getLogger().logDebug((i++) + " / " + count);
                 logState("asset" + i + "/" + count);
                 //logProgress(i, count);
             }
-            catch (NoConnectionException e){
+            catch (NoConnectionException | StopException e){
                 throw e;
             }
             catch (Exception e){
@@ -266,9 +245,10 @@ public abstract class Wrapper<H extends Version> {
 
     public static <T extends Wrapper> T getWrapper(String identifier){
         try {
-            return (T)((Class)wrappers.get(identifier)).getDeclaredConstructors()[0].newInstance();
+            var n = Arrays.stream(LoaderType.values()).filter(a -> a.getIdentifier().equals(identifier)).findFirst();
+            return (T)n.get().getCls().getDeclaredConstructors()[0].newInstance();
         } catch (Exception e) {
-            Logger.getLogger().log(e);
+            //Logger.getLogger().log(e);
             return (T) new Vanilla();
         }
     }
@@ -290,7 +270,7 @@ public abstract class Wrapper<H extends Version> {
 
         @Override
         public JsonElement serialize(Wrapper wrapper, Type type, JsonSerializationContext jsonSerializationContext) {
-            return new JsonPrimitive(wrapper.getIdentifier());
+            return new JsonPrimitive(wrapper.getType().getIdentifier());
         }
     }
 
@@ -321,14 +301,14 @@ public abstract class Wrapper<H extends Version> {
     }
 
     public final Image getIcon(){
-        var str = Wrapper.class.getResourceAsStream("/com/laeben/corelauncher/images/" + getIdentifier() + ".png");
+        var str = Wrapper.class.getResourceAsStream("/com/laeben/corelauncher/images/wrapper/" + getType().getIdentifier() + ".png");
         return str == null ? null : new Image(str);
     }
-    public abstract String getIdentifier();
+
+    public abstract LoaderType getType();
     public abstract H getVersionFromIdentifier(String identifier, String inherits);
     public abstract H getVersion(String id, String wrId);
     public abstract List<H> getAllVersions();
     public abstract List<H> getVersions(String id);
-    public abstract void install(H v) throws NoConnectionException, StopException;
-    public abstract CurseWrapper.Type getType();
+    public abstract void install(H v) throws NoConnectionException, StopException, PerformException;
 }

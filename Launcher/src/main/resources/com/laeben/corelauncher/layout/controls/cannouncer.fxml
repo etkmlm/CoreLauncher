@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CView?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Text?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:id="root"
+            prefHeight="120.0" prefWidth="400.0" maxWidth="400" stylesheets="@../../style/controls/cannouncer.css,@../../style/controls/clui.css">
+    <VBox alignment="CENTER" AnchorPane.rightAnchor="8" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+        <CView fx:id="icon" fitWidth="80" fitHeight="80"/>
+    </VBox>
+
+    <VBox alignment="CENTER" maxWidth="250" prefHeight="80" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="8">
+        <Label fx:id="lblTitle" text="Title" maxWidth="250" />
+        <Rectangle height="10"/>
+        <Text wrappingWidth="250" fx:id="txtContent" text="content" />
+    </VBox>
+</AnchorPane>

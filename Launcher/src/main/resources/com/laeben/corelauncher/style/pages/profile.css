@@ -1,0 +1,92 @@
+#lblProfileName{
+    -fx-font-size: 20pt;
+    -fx-font-weight: 700;
+}
+
+#lblGameVersion{
+    -fx-font-size: 12pt;
+}
+
+#txtSearch{
+    -fx-font-size: 13pt;
+}
+
+#lblUsername{
+    -fx-font-size: 11pt;
+}
+
+#scroll-view{
+    -fx-background-color: transparent;
+}
+
+.header{
+    -fx-font-size: 18pt;
+
+}
+.mini-box .cbutton{
+    -fx-background-color: #282828aa;
+}
+
+.mega-box .cbutton{
+    -fx-background-color: #292929aa;
+}
+
+#btnCopySettings{
+    -fx-background-image: url(../../images/opt.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnUpdate{
+    -fx-background-image: url(../../images/update.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnSave{
+    -fx-background-image: url(../../images/save.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnBackup{
+    -fx-background-image: url(../../images/backup.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnExport{
+    -fx-background-image: url(../../images/export.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnDelete{
+    -fx-background-image: url(../../images/delete.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnEdit{
+    -fx-background-image: url(../../images/edit.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnWorlds{
+    -fx-background-image: url(../../images/world.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnAdd{
+    -fx-background-image: url(../../images/add.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
+#btnAddMultiple{
+    -fx-background-image: url(../../images/search.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}

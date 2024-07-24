@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="450.0" prefWidth="600.0" style="-fx-background-color: #202020ef;-fx-background-radius: 10px">
+    <CButton fx:id="btnClose" text="X" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="5" style="-fx-background-color: transparent;-fx-font-size: 13pt;"/>
+    <CView fx:id="icon" fitWidth="128" fitHeight="128" AnchorPane.topAnchor="15" AnchorPane.leftAnchor="15" />
+    <Label fx:id="lblName" AnchorPane.topAnchor="15" AnchorPane.leftAnchor="153" AnchorPane.rightAnchor="70" text="Name" style="-fx-font-size: 15pt; -fx-font-weight: bold" />
+    <TextArea fx:id="txtDesc" editable="false" AnchorPane.leftAnchor="153" AnchorPane.topAnchor="50" AnchorPane.rightAnchor="15" prefHeight="100"/>
+
+    <ScrollPane AnchorPane.rightAnchor="15" AnchorPane.leftAnchor="15" AnchorPane.bottomAnchor="15" AnchorPane.topAnchor="160" fitToWidth="true" styleClass="w-scroll-pane" VBox.vgrow="ALWAYS" maxWidth="Infinity">
+        <VBox>
+            <HBox fx:id="mpButtonContainer">
+                <CButton fx:id="btnModpack" style="-fx-font-size: 12pt;" text="%mods.detailed"/>
+                <Rectangle width="10"/>
+                <CWorker fx:id="wModpack"/>
+            </HBox>
+            <VBox fx:id="mpContentContainer" visible="false" managed="false">
+                <Label text="%mods.content" style="-fx-font-size: 14pt; -fx-font-weight: bold" />
+                <Rectangle height="10"/>
+                <TextArea editable="false" fx:id="txtModpackContent"/>
+            </VBox>
+            <Rectangle height="8"/>
+            <VBox>
+                <HBox>
+                    <Label text="%mods.all.versions" style="-fx-font-size: 14pt; -fx-font-weight: bold" />
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <TextField fx:id="txtSearchVersion" style="-fx-background-color: #222222"/>
+                </HBox>
+                <Rectangle height="5"/>
+                <CList fx:id="lvVersions" />
+            </VBox>
+        </VBox>
+    </ScrollPane>
+
+</AnchorPane>

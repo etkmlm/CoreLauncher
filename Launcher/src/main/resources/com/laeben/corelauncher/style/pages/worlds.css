@@ -1,0 +1,62 @@
+.list-view{
+    -fx-background-color: #232323aa!important;
+    -fx-padding: 10px;
+}
+
+.panel{
+    -fx-background-color: #232323aa;
+    -fx-background-radius: 10px;
+}
+
+.list-cell{
+    -fx-background-radius: 5px;
+    -fx-alignment: center;
+}
+
+.list-cell:selected{
+    -fx-background-color: #282828ef;
+}
+
+#lblLevelName{
+    -fx-font-size: 25pt;
+    -fx-font-weight: bold;
+}
+
+#lblSpawn,#lblSeed{
+    -fx-cursor: hand;
+}
+
+.prop-label{
+    -fx-padding: 10px;
+    -fx-background-color: transparent;
+    -fx-background-radius: 10px;
+    -fx-font-size: 13pt;
+}
+
+.prop-label:hover{
+    -fx-background-color: #252525;
+}
+
+.prop{
+    -fx-padding: 10px;
+    /*-fx-background-color: #354545;*/
+    -fx-background-color: #203030aa;
+    -fx-background-radius: 10px;
+    -fx-font-size: 11pt;
+}
+
+#btnBackup{
+    -fx-background-image: url(../../images/backup.png);
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+}
+
+#btnDelete{
+    -fx-background-image: url(../../images/delete.png);
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+}
+
+#btnImport{
+    -fx-font-size: 16pt;
+}

@@ -1,0 +1,270 @@
+*{
+    -def-background: #252525aa;
+}
+
+.root{
+    -fx-background-color: -def-background;
+}
+
+/*
+    Listing
+*/
+
+.cnav .cnav-button{
+    -fx-font-size: 13pt;
+    -fx-background-color: transparent;
+}
+
+.tab-pane *.pane{
+    -fx-background-color: transparent;
+}
+
+.list-view{
+    -fx-background-color: #282828;
+    -fx-background-radius: 10px;
+    -fx-font-size: 12pt;
+}
+
+.list-view .list-cell:hover{
+    -fx-opacity: 0.9;
+}
+
+.list-cell{
+    -fx-background-color: none;
+    -fx-text-fill: white;
+}
+
+.scroll-pane{
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar{
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.scroll-bar .thumb{
+    -fx-background-color: #308080;
+}
+
+.scroll-bar .decrement-button, .scroll-bar .increment-button{
+    -fx-background-color: transparent;
+}
+
+.w-scroll-pane .scroll-bar .thumb{
+    -fx-background-color: rgba(38, 69, 69, 0.67);;
+}
+
+.combo-box, .ccombo{
+    -fx-border-radius: 3px;
+    -fx-background-color: #353538;
+    -fx-font-size: 12pt;
+}
+
+.combo-box .list-view, .ccombo .list-view{
+    -fx-background-color: #383838;
+}
+
+.combo-box .list-cell, .lvlv .list-cell, .ccombo .list-cell{
+    -fx-border-width: 0;
+}
+
+.combo-box .text-input, .ccombo .text-input{
+    -fx-border-width: 0;
+    -fx-text-fill: white;
+}
+
+.combo-box:focused, .ccombo:focused .text-input, .field:focused, .spinner:focused{
+    -fx-border-color: teal;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #353538dd;
+    -fx-background-radius: 0 0 5 5;
+    -fx-effect: none;
+}
+
+.context-menu{
+    -fx-background-color: #333840bb;
+    -fx-background-radius: 5px;
+}
+
+/*
+    Controls
+*/
+
+.dialog-pane .graphic-container {
+    -fx-padding: 0; /* 10px 0px 0px 10px */
+}
+
+.dialog-pane{
+
+}
+
+.scroll-pane > .viewport{
+    -fx-background-color: transparent;
+}
+
+.text-area{
+    -fx-font-size: 13pt;
+    -fx-wrap-text: true;
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+}
+.text-area *{
+    -fx-background-color: transparent!important;
+    -fx-cursor: normal;
+}
+
+.label{
+    -fx-text-fill: white;
+    -fx-font-size: 13pt;
+}
+
+.rad-option {
+    -fx-padding: 0 10px 0 10px;
+}
+
+.property-key{
+    -fx-font-size: 16pt;
+}
+
+.radio-button{
+    -fx-text-fill: white;
+}
+
+.radio-button .radio, .check-box .box{
+    -fx-background-color: #262628;
+}
+
+.radio-button:selected .dot, .check-box:selected .mark{
+    -fx-background-color: darkviolet;
+}
+
+.slider{
+    -fx-font-size: 13pt;
+}
+
+.slider .track{
+    -fx-background-color: #353538;
+}
+
+.slider .thumb{
+    -fx-background-color: teal;
+}
+
+.slider .axis {
+    -fx-tick-label-fill: white;
+}
+
+.cbutton{
+    -fx-background-color: #303030;
+    -fx-background-radius: 8px;
+}
+
+.text-field .context-menu{
+    -fx-opacity: 0;
+}
+
+.selection-menu{
+    -fx-background-color: #1042497F;
+    -fx-background-radius: 8px;
+}
+
+.check-box{
+    -fx-text-fill: white;
+    -fx-font-size: 13pt;
+}
+
+.spinner{
+    -fx-background-color: transparent;
+    -fx-border-radius: 3px;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button,
+.combo-box-base .arrow-button,
+.combo-box, .searchable-combo-box,
+.text-field,
+.choice-box{
+    -fx-background-color: #202022;
+}
+
+.text-field, .searchable-combo-box{
+    -fx-text-fill: white;
+    -fx-border-radius: 3px;
+    -fx-font-size: 12pt;
+    -fx-border-color: transparent;
+}
+
+.underline-text-field{
+    -fx-font-size: 12pt;
+    -fx-background-color: transparent!important;
+    -fx-border-width: 0 0 1 0!important;
+    -fx-border-radius: 0!important;
+    -fx-border-color: white;
+    -fx-text-fill: white;
+}
+
+.underline-text-field:focused{
+    -fx-border-color: teal;
+}
+
+.default-button{
+    -fx-font-size: 13pt;
+    -fx-font-weight: bold;
+    -fx-background-color: #333840;
+    -fx-background-radius: 5px;
+}
+
+.transparent{
+    -fx-background-color: transparent;
+}
+
+.circle-button{
+    -fx-background-color: #25254064;
+    -fx-background-radius: 50%!important;
+    -fx-border-radius: 50%;
+    -fx-border-color: #505070;
+    -fx-text-fill: white;
+    -fx-font-size: 15pt;
+}
+
+.progress-bar{
+
+}
+
+.progress-bar .bar{
+    -fx-background-color: aqua;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0 5px 5px 5px;
+}
+
+.progress-bar .track{
+    -fx-background-color: #303030;
+    -fx-background-radius: 0 0 5px 5px;
+    -fx-background-insets: 0;
+}
+
+.top-bar {
+    -fx-background-color: #282830;
+    -fx-background-radius: 8px;
+}
+
+.cpaginator{
+    -fx-padding: 10px;
+    -fx-font-size: 15pt;
+    -fx-background-color: #303030aa;
+    -fx-spacing: 10px;
+    -fx-background-radius: 10px;
+}
+
+.cpaginator .button{
+    -fx-background-color: transparent;
+}
+
+.cpaginator .ccombo .text-field{
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}

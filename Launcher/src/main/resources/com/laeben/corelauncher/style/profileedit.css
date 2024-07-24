@@ -1,14 +1,4 @@
-.all{
-    -fx-background-color: #252525;
-}
-
-
-.combo-box-base{
-    -fx-background-color: transparent;
-}
-
-.prop-key{
-    -fx-font-size: 12pt;
+.property-key{
     -fx-font-weight: bold;
 }
 
@@ -16,21 +6,22 @@
     -fx-padding: 10px 0 0 0;
 }
 
-.def-button{
-    -fx-padding: 5px 10px 5px 10px!important;
-    -fx-font-size: 12pt;
-    -fx-background-radius: 10px;
-}
-
-.java-sel{
-    -fx-background-color: transparent!important;
-}
 .text-field .context-menu, #cbGameVersion .context-menu{
     -fx-opacity: 0;
+}
+
+.underline-text-field{
+    -fx-font-size: 25pt;
 }
 
 .game-version{
     -fx-font-size: 12pt;
     -fx-text-fill: aquamarine;
     -fx-font-weight: bold;
+}
+
+#btnSave{
+    -fx-background-image: url(../images/save.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
 }
