@@ -102,6 +102,7 @@ a{
 .head-sec .one{
     background-image: url('../images/back.png');
     background-size: cover;
+    background-position: center;
     background-blend-mode: difference;
 }
 
