@@ -6,6 +6,15 @@
     <link rel="icon" href="web/images/logo.png" />
     <title>Core Launcher</title>
     <meta name="google-site-verification" content="sgcMEWtJsTpILbadoZxEPp3r24Z41Bm8FtJHmKRq_oM" />
+    <script>
+        window.onload = function(){
+            fetch("https://laeben-update-default-rtdb.europe-west1.firebasedatabase.app/apps/clauncher/latestFile.json")
+                .then(a => a.json().then(ver => {
+                    var jarbtn = document.getElementById("jar");
+                    jarbtn.href = ver;
+            }));
+        };
+    </script>
 </head>
 
 <body>
@@ -13,7 +22,9 @@
         <div class="one flex-xcenter flex-ycenter">
             <div class="precious-pane">
                 <h1>Open, customize, play.</h1>
-                <a style="background: #33b2f533;" href="https://github.com/etkmlm/CoreLauncher/releases/download/beta1.1/CoreLauncher-1.1.jar" class="center">Download Now</a>
+                <a style="background: #33b2f533;" id="installer" href="https://github.com/etkmlm/CoreLauncherInstaller/releases/download/1.0/CoreLauncherInstaller.exe" class="center">Installer</a>
+                <br/>
+                <a style="background: #33b2f533;" id="jar" href="https://github.com/etkmlm/CoreLauncher/releases/download/beta1.1.2/CoreLauncher-1.1.2.jar" class="center">Portable</a>
                 <br/>
                 <a style="background: #33b2b533;" href="https://github.com/etkmlm/CoreLauncher" class="center">Wiki and Source</a>
             </div>
