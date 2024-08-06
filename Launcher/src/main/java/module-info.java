@@ -13,6 +13,7 @@ module com.laeben.corelauncher {
     requires jdk.jfr;
     requires java.management;
     requires java.sql;
+    requires org.apache.commons.lang3;
 
     opens com.laeben.corelauncher.ui.controller.page to javafx.fxml;
     opens com.laeben.corelauncher to javafx.fxml, com.laeben.core;

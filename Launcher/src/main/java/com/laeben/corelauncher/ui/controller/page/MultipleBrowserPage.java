@@ -204,7 +204,7 @@ public class MultipleBrowserPage extends HandlerController {
         .onStatus(a -> Platform.runLater(() -> lblStatus.setText(a.getStatus())))
         .onDone(a -> Platform.runLater(() -> {
             txtQuery.setText(null);
-            resources.addAll(a.getValue().found());
+            resources.addAll(a.getValue().found().stream().distinct().toList());
             a.getValue().unfound().forEach(this::println);
             a.setTaskStatus(null);
         })).onFailed(a -> {

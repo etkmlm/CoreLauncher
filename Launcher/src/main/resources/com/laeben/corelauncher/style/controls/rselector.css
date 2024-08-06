@@ -1,6 +1,7 @@
 #root{
     -fx-padding: 15px;
     -fx-background-color: #222222aa;
+    -fx-background-radius: 16px;
 }
 
 .btn{

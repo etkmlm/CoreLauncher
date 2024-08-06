@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import org.controlsfx.control.SearchableComboBox?>
 <?import javafx.scene.shape.Rectangle?>
-<AnchorPane prefHeight="600" prefWidth="1000" styleClass="root" stylesheets="@../../style/profileedit.css,@../../style/controls/clui.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.page.EditProfilePage">
+<AnchorPane prefHeight="600" prefWidth="1000" styleClass="root" stylesheets="@../../style/pages/profileedit.css,@../../style/controls/clui.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.page.EditProfilePage">
     <HBox alignment="CENTER" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <VBox alignment="CENTER">
             <HBox alignment="CENTER" minHeight="84">

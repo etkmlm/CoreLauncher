@@ -1,8 +1,11 @@
 package com.laeben.corelauncher.minecraft.modding.entity;
 
 import com.laeben.corelauncher.api.nbt.NBTFile;
+import com.laeben.corelauncher.api.nbt.entity.NBTCompound;
+import com.laeben.corelauncher.api.nbt.entity.NBTTag;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ResourceForge;
 import com.laeben.core.entity.Path;
+import org.apache.commons.lang3.builder.Diff;
 
 import java.io.IOException;
 
@@ -76,17 +79,25 @@ public class World extends CResource{
 
         world.levelName = data.firstForName("LevelName").value().toString();
 
-        world.difficulty = Difficulty.values()[data.firstForName("Difficulty").intValue()];
+        var diff = data.firstForName("Difficulty");
+        world.difficulty = diff == null ? Difficulty.NORMAL : Difficulty.values()[diff.intValue()];
         int spawnX = data.firstForName("SpawnX").intValue();
         int spawnY = data.firstForName("SpawnY").intValue();
         int spawnZ = data.firstForName("SpawnZ").intValue();
         world.worldSpawn = new Coordinate(spawnX, spawnY, spawnZ);
-        world.gameVersion = data.firstForName("Version").asCompound().firstForName("Name").stringValue();
+
+        var ver = data.firstForName("Version");
+        world.gameVersion = ver == null ? null : ver.asCompound().firstForName("Name").stringValue();
         world.gameType = GameType.values()[data.firstForName("GameType").intValue()];
+
+        var allowCmd = data.firstForName("allowCommands");
+        world.allowCommands = allowCmd != null && allowCmd.intValue() == 1;
+
+        var hc = data.firstForName("hardcore");
+        world.isHardcore = hc != null && hc.intValue() == 1;
         try{
-            world.isHardcore = data.firstForName("hardcore").intValue() == 1;
-            world.seed = data.firstForName("WorldGenSettings").asCompound().firstForName("seed").longValue();
-            world.allowCommands = data.firstForName("allowCommands").intValue() == 1;
+            var seedOld = data.firstForName("RandomSeed");
+            world.seed = seedOld != null ? seedOld.longValue() : data.firstForName("WorldGenSettings").asCompound().firstForName("seed").longValue();
         }
         catch (Exception ignored){
 

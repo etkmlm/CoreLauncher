@@ -28,7 +28,7 @@
         </columnConstraints>
         <rowConstraints>
             <RowConstraints prefHeight="40"/>
-            <RowConstraints />
+            <RowConstraints vgrow="ALWAYS"/>
         </rowConstraints>
 
         <ScrollPane styleClass="w-scroll-pane" fitToWidth="true" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.rowSpan="2">

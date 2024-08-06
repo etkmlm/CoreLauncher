@@ -53,21 +53,24 @@ public class CJava extends CCell<Java> {
     public CJava setItem(Java item) {
         this.java = item;
 
-        editMode.set(false);
+        txtName.setEditable(false);
+        txtName.setCursor(Cursor.DEFAULT);
 
         if (java == null || java.isEmpty()){
             super.getChildren().clear();
             return this;
         }
 
-
         btnAction.enableTransparentAnimation();
 
         txtPath.setCursor(Cursor.HAND);
 
-        txtName.setOnMouseClicked(a -> {
-            if (!editMode.get())
+        txtName.focusedProperty().addListener(a -> {
+            if (txtName.isFocused() && !editMode.get())
                 editMode.set(true);
+
+            if (!txtName.isFocused() && editMode.get())
+                editMode.set(false);
         });
         txtName.setOnKeyPressed(a -> {
             if (a.getCode() == KeyCode.ENTER)

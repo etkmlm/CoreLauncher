@@ -21,7 +21,7 @@
 }
 
 #btnSave{
-    -fx-background-image: url(../images/save.png);
+    -fx-background-image: url(../../images/save.png);
     -fx-background-repeat: no-repeat;
     -fx-background-position: center;
 }

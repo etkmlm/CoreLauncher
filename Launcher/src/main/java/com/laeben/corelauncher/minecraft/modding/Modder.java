@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.minecraft.modding;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
@@ -192,7 +193,7 @@ public class Modder {
         String version = null;
         String loader = null;
 
-        if (p.getExtension().equals("jar"))
+        if (!p.getExtension().equals("jar"))
             return null;
 
         var rd = p.tryReadZipEntry("mcmod.info", "META-INF/mods.toml", "fabric.mod.json");
@@ -201,17 +202,37 @@ public class Modder {
             return null;
 
         if (rd.getOrder() == 0){ // Minecraft Forge <= 1.12.2
-            var read = GsonUtil.DEFAULT_GSON.fromJson(rd.getValue(), JsonArray.class);
-            if (read == null || read.isEmpty())
+            var read = GsonUtil.DEFAULT_GSON.fromJson(rd.getValue(), JsonElement.class);
+            if (read == null)
                 return null;
-            var item = read.get(0).getAsJsonObject();
-            name = item.get("name").getAsString();
+            JsonObject item;
+
+            if (read.isJsonArray()){
+                if (read.getAsJsonArray().isEmpty())
+                    return null;
+                item = read.getAsJsonArray().get(0).getAsJsonObject();
+            }
+            else if (read.isJsonObject()){
+                var obj = read.getAsJsonObject();
+                if (obj.has("modList")){
+                    var list = obj.get("modList").getAsJsonArray();
+                    if (list.isEmpty())
+                        return null;
+                    item = list.get(0).getAsJsonObject();
+                }
+                else
+                    return null;
+            }
+            else
+                return null;
+
+            name = item.has("name") ? item.get("name").getAsString() : null;
             if (name == null || name.startsWith("$"))
                 return null;
-            versionId = item.get("mcversion").getAsString();
+            versionId = item.has("mcversion") ? item.get("mcversion").getAsString() : null;
             if (versionId != null && versionId.startsWith("$"))
                 versionId = null;
-            version = item.get("version").getAsString();
+            version = item.has("version") ? item.get("version").getAsString() : null;
             if (version != null && version.startsWith("$"))
                 version = null;
 

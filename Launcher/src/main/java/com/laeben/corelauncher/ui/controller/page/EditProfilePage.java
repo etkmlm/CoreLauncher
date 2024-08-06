@@ -37,6 +37,8 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.controlsfx.control.SearchableComboBox;
 
+import java.util.regex.Pattern;
+
 public class EditProfilePage extends HandlerController {
 
     @FXML
@@ -171,6 +173,12 @@ public class EditProfilePage extends HandlerController {
                 }
             }
         }
+    }
+
+    private boolean isValidName(String name){
+        final Pattern pattern = Pattern.compile("^[a-zA-Z0-9_\\-.\\s]*$");
+
+        return pattern.matcher(name).matches();
     }
 
     @Override
@@ -310,7 +318,14 @@ public class EditProfilePage extends HandlerController {
         txtMinRAM.setOnScroll(ControlUtil::scroller);
 
         btnSave.setOnMouseClicked(a -> {
-            String name = StrUtil.pure(txtName.getText());
+            String name = txtName.getText();
+            if (!isValidName(name)){
+                Main.getMain().getAnnouncer().announce(new Announcement(
+                        Translator.translate("error.oops"),
+                        Translator.translate("profile.edit.error.invalidName"),
+                        Announcement.AnnouncementType.ERROR), Duration.seconds(2));
+                return;
+            }
 
             if (name == null || name.isBlank()){
                 Main.getMain().getAnnouncer().announce(new Announcement(
@@ -411,6 +426,8 @@ public class EditProfilePage extends HandlerController {
             tempProfile = Profile.empty().cloneFrom(profile);
 
         try{
+            btnBack.setVisible(profile != null);
+
             txtName.setText(tempProfile.getName());
             reloadTitle(tempProfile);
 

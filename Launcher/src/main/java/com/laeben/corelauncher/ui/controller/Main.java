@@ -43,7 +43,9 @@ import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.io.FileNotFoundException;
@@ -316,8 +318,6 @@ public class Main extends HandlerController {
             }
             else
                 selectProfile(null);
-
-            setBackground(Configurator.getConfig().getBackgroundImage());
         }
         catch (Exception e){
             Logger.getLogger().log(e);
@@ -354,24 +354,55 @@ public class Main extends HandlerController {
 
     private void setBackground(Path path) {
         try {
-            root.setBackground(new Background(new BackgroundImage(
+            var background = new Background(new BackgroundImage(
                     new Image(path.toFile().toURI().toURL().toExternalForm()),
                     null,
                     null,
                     BackgroundPosition.CENTER,
-                    new BackgroundSize(root.getWidth(), root.getHeight(), true, true, true, true))));
+                    new BackgroundSize(root.getWidth(),root.getHeight(), false, false, true, true)));
+            double r = 10;
+            double w = 1300;
+            double h = 800;
+            root.setStyle("-fx-shape:\"M " + r + " 0 " + " L " + (w - r) + " " + "0" + " Q " + w + " 0 " + w + " " + r + " L " + w + " " + (h - r) + " Q " + w + " " + h + " " + (w - r) + " " + h + " L " + r + " " + h + " Q 0 " + h + " 0 " + (h - r) + " L 0 " + r + " Q 0 0 " + r + " 0 Z\"");
+            root.setBackground(background);
         } catch (Exception e) {
             root.setBackground(null);
+            root.setStyle(null);
         }
     }
 
     @Override
     public void init() {
         var scene = getStage().getLScene();
-        tab.setOnMousePressed(scene::onMousePressed);
+        tab.setOnMousePressed(a -> {
+            if (a.getTarget() instanceof StackPane sp && sp.getStyleClass().contains("tab-header-background"))
+                scene.onMousePressed(a);
+        });
         tab.setOnMouseDragged(scene::onMouseDragged);
 
+        scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, x -> {
+            if (!x.isShiftDown() || x.getTarget() instanceof TextField)
+                return;
+
+            if (x.getCode() == KeyCode.LEFT){
+                var selTab = tab.getSelectionModel().getSelectedItem();
+                int i1 = tab.getTabs().indexOf(selTab);
+                if (i1 <= 1)
+                    return;
+                relocateTab(i1, i1 - 1);
+            }
+            else if (x.getCode() == KeyCode.RIGHT){
+                var selTab = tab.getSelectionModel().getSelectedItem();
+                int i1 = tab.getTabs().indexOf(selTab);
+                if (i1 == 0)
+                    return;
+                relocateTab(i1, i1 + 1);
+            }
+        });
+
         addTab("pages/main", "        ", false, MainPage.class);
+
+        setBackground(Configurator.getConfig().getBackgroundImage());
     }
 
     private ScrollPane getScroll(){
@@ -383,6 +414,15 @@ public class Main extends HandlerController {
     }
     public void closeTab(int index){
         tab.getTabs().remove(index);
+    }
+
+    public void relocateTab(int i1, int i2){
+        int limit = tab.getTabs().size() - 1;
+        if (i2 > limit || i1 > limit)
+            return;
+        var tabs = new ArrayList<>(tab.getTabs());
+        Collections.swap(tabs, i1, i2);
+        tab.getTabs().setAll(tabs);
     }
 
     public <T extends Controller> T replaceTab(Controller dest, String fxml, String title, boolean closable, Class<T> type){

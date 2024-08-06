@@ -182,7 +182,7 @@ public class Modrinth implements ModSource {
         if (vId != null)
             str.withParam(new RequestParameter("game_versions", StrUtil.jsArray(List.of(vId))).markAsEscapable());
 
-        if (loader != null && loader.getIdentifier() != null)
+        if (loader != null && loader.getIdentifier() != null && !loader.isNative())
             str.withParam(new RequestParameter("loaders", StrUtil.jsArray(List.of(loader.getIdentifier()))).markAsEscapable());
 
         return processVersions(str.getString());

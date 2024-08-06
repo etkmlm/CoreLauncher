@@ -235,11 +235,16 @@ public class CoreLauncher {
         var showed = Configurator.getConfig().getShowedAnnounces();
         var locale = Configurator.getConfig().getLanguage();
 
-        showed.removeIf(a -> LauncherConfig.APPLICATION.getAnnouncements().stream().noneMatch(x -> x.getId() == a));
+        if (!LaebenApp.isOffline()){
+            showed.removeIf(a -> LauncherConfig.APPLICATION.getAnnouncements().stream().noneMatch(x -> x.getId() == a));
+        }
 
         for (var ann : LauncherConfig.APPLICATION.getAnnouncements()){
-            if (!ann.containingVersion(String.valueOf(LauncherConfig.VERSION)) || ann.getDate().after(now)){
-                showed.remove(ann.getId());
+            boolean versCheck = !ann.containingVersion(String.valueOf(LauncherConfig.VERSION));
+            boolean dateCheck = ann.getDate().after(now);
+            if (versCheck || dateCheck){
+                if (showed.remove((Object)ann.getId()))
+                    Logger.getLogger().logDebug(String.format("Announcement %d removing: version check (%b) and date check (%b)", ann.getId(), versCheck, dateCheck));
                 continue;
             }
 
