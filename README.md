@@ -30,3 +30,7 @@ Create a profile, select you loader (wrapper), customize your resources, and pla
 ## How can I use it?
 
 You can find the detailed guide [here](https://github.com/etkmlm/CoreLauncher/wiki).
+
+## Beta Source
+
+You can find the newest source code on [beta branch](https://github.com/etkmlm/CoreLauncher/tree/beta).
