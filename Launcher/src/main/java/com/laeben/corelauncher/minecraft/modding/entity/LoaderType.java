@@ -4,6 +4,7 @@ import com.laeben.corelauncher.minecraft.wrapper.Custom;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.minecraft.wrapper.fabric.Fabric;
 import com.laeben.corelauncher.minecraft.wrapper.forge.Forge;
+import com.laeben.corelauncher.minecraft.wrapper.neoforge.NeoForge;
 import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
 import com.laeben.corelauncher.minecraft.wrapper.quilt.Quilt;
 
@@ -16,7 +17,9 @@ public enum LoaderType {
     LITELOADER("liteloader", null, false),
     FABRIC("fabric", Fabric.class, false),
     QUILT("quilt", Quilt.class, false),
+    NEOFORGE("neoforge", NeoForge.class, false),
     OPTIFINE("optifine", OptiFine.class, true);
+
 
     final String identifier;
     final Class cls;

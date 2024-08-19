@@ -37,6 +37,12 @@
                         <RadioButton fx:id="forge" />
                     </VBox>
                     <VBox alignment="CENTER" styleClass="rad-option">
+                        <ImageView fx:id="imgNeoForge" fitHeight="48" fitWidth="48">
+                            <Image url="@../../images/wrapper/neoforge.png" />
+                        </ImageView>
+                        <RadioButton fx:id="neoforge" />
+                    </VBox>
+                    <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgFabric" fitHeight="48" fitWidth="48">
                             <Image url="@../../images/wrapper/fabric.png" />
                         </ImageView>

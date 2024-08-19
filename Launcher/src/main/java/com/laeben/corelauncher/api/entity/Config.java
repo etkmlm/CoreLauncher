@@ -28,6 +28,8 @@ public class Config {
     private boolean hideAfter;
     private boolean autoUpdate;
     private boolean delGameLogs;
+    private boolean showHelloDialog;
+    private boolean placeNewProfileToDock;
     private List<Integer> announces;
 
     public Path getGamePath(){
@@ -93,6 +95,20 @@ public class Config {
 
     public boolean isShowOldReleases() {
         return showOldReleases;
+    }
+
+    public boolean shouldShowHelloDialog(){
+        return showHelloDialog;
+    }
+    public void setShowHelloDialog(boolean s){
+        showHelloDialog = s;
+    }
+
+    public boolean shouldPlaceNewProfileToDock(){
+        return placeNewProfileToDock;
+    }
+    public void setPlaceNewProfileToDock(boolean val){
+        this.placeNewProfileToDock = val;
     }
 
     public void setShowOldReleases(boolean showOldReleases) {
@@ -167,7 +183,7 @@ public class Config {
     }
 
     public Locale getLanguage(){
-        return language;
+        return language == null ? Locale.getDefault() : language;
     }
 
 }

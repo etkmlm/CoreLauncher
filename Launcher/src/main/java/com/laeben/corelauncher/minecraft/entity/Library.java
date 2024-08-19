@@ -4,8 +4,10 @@ import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.entity.OS;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Library {
+
     public DownloadOptions downloads;
     public String name;
     public String url;
@@ -20,7 +22,11 @@ public class Library {
 
     public Asset getAsset(){
         var main = getMainAsset();
-        return main == null ? getNativeAsset() : main;
+        if (main != null){
+            main.base = name;
+            return main;
+        }
+        return getNativeAsset();
     }
     public Asset getNativeAsset(){
         return downloads != null ? (downloads.classifiers != null ? downloads.classifiers.getNatives(CoreLauncher.SYSTEM_OS) : null) : null;

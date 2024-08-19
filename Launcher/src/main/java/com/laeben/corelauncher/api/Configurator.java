@@ -10,6 +10,7 @@ import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.entity.Path;
 import com.google.gson.Gson;
+import com.laeben.corelauncher.util.entity.LogType;
 
 import java.io.InputStreamReader;
 import java.util.Locale;
@@ -19,6 +20,7 @@ public class Configurator {
     private final EventHandler<ChangeEvent> handler;
 
     private static Config config;
+    private static int configLoadIndex = 1;
     private final Path configFilePath;
     private static final Gson gson = GsonUtil.DEFAULT_GSON.newBuilder().registerTypeAdapter(Profile.class, new Profile.ProfileFactory()).create();
 
@@ -37,8 +39,10 @@ public class Configurator {
     public static Config generateDefaultConfig() {
         try{
             var file = CoreLauncherFX.class.getResourceAsStream("data/config.json");
-
-            assert file != null;
+            if (file == null){
+                Logger.getLogger().log(LogType.ERROR,"NOT FOUND DEFAULT CONFIG FILE IN: " + "data/config.json");
+                return null;
+            }
             return GsonUtil.DEFAULT_GSON.fromJson(new InputStreamReader(file), Config.class);
         }
         catch (Exception e){
@@ -51,19 +55,23 @@ public class Configurator {
         return handler;
     }
 
-    public Configurator reloadConfig(){
+    public boolean reloadConfig(){
+        if (configLoadIndex == 5){
+            configLoadIndex = 1;
+            return false;
+        }
+        configLoadIndex++;
         if (configFilePath.exists()){
-
             var read = configFilePath.read();
 
             config = gson.fromJson(read, Config.class);
+
+            configLoadIndex = 1;
+            return true;
         }
         else{
-            save(generateDefaultConfig());
-            return reloadConfig();
+            return save(generateDefaultConfig()) && reloadConfig();
         }
-
-        return this;
     }
 
     public static Config getConfig(){
@@ -121,17 +129,23 @@ public class Configurator {
         handler.execute(new ChangeEvent("userChange", null, config.getUser()));
     }
 
-    private void save(Config c){
+    private boolean save(Config c){
         try{
+            if (c == null)
+                return false;
             String serialized = gson.toJson(c);
             configFilePath.write(serialized);
+
+            return configFilePath.exists();
         }
         catch (Exception e){
             Logger.getLogger().log(e);
+
+            return false;
         }
     }
 
-    public static void save(){
-        instance.save(config);
+    public static boolean save(){
+        return instance.save(config);
     }
 }

@@ -110,8 +110,11 @@
                 <Label styleClass="property-key" text="%settings.debugLogMode" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                 <CheckBox fx:id="chkDebugLogMode" GridPane.columnIndex="2" GridPane.rowIndex="4" />
 
-                <CButton fx:id="btnCheckUpdate" text="%settings.update" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="7"/>
-                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="6">
+                <Label styleClass="property-key" text="%settings.placeDock" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <CheckBox fx:id="chkPlaceDock" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+
+                <CButton fx:id="btnCheckUpdate" text="%settings.update" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="8"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="7">
                     <CButton fx:id="btnClearImages" text="%settings.images.clear"/>
                     <CWorker fx:id="workerImages"/>
                 </HBox>

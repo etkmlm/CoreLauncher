@@ -20,6 +20,7 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.minecraft.entity to com.google.gson;
     opens com.laeben.corelauncher.util.entity to com.google.gson;
     opens com.laeben.corelauncher.minecraft.wrapper.forge.entity to com.google.gson;
+    opens com.laeben.corelauncher.minecraft.wrapper.neoforge.entity to com.google.gson;
     opens com.laeben.corelauncher.minecraft.wrapper.optifine.entity to com.google.gson;
     opens com.laeben.corelauncher.minecraft.wrapper.fabric.entity to com.google.gson;
     opens com.laeben.corelauncher.minecraft.wrapper.entity to com.google.gson;

@@ -37,6 +37,12 @@
     -fx-background-position: center;
 }
 
+#btnOpenFolder{
+    -fx-background-image: url(../../images/folder.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
 #btnUpdate{
     -fx-background-image: url(../../images/update.png);
     -fx-background-repeat: no-repeat;

@@ -73,7 +73,7 @@ public class Logger {
 
     private void log(String content){
         System.out.println(content);
-        if (Configurator.getConfig().getLogMode())
+        if (Configurator.getConfig() != null && Configurator.getConfig().getLogMode())
             todayLogFile().append("\n[" + getTime() + "] " + content);
     }
 

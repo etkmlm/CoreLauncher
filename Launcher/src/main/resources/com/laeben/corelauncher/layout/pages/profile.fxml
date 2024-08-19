@@ -34,6 +34,11 @@
                 <Tooltip text="%profile.menu.copyset"/>
             </tooltip>
         </CButton>
+        <CButton fx:id="btnOpenFolder" prefWidth="48" prefHeight="48">
+            <tooltip>
+                <Tooltip text="%profile.menu.open"/>
+            </tooltip>
+        </CButton>
         <CButton fx:id="btnUpdate" prefWidth="48" prefHeight="48">
             <tooltip>
                 <Tooltip text="%mods.all.update"/>

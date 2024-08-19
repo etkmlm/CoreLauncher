@@ -27,6 +27,7 @@ import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.ui.controller.page.MainPage;
 import com.laeben.corelauncher.ui.controller.page.SettingsPage;
 import com.laeben.corelauncher.ui.control.*;
+import com.laeben.corelauncher.ui.dialog.DStartupConfigurator;
 import com.laeben.corelauncher.ui.util.ControlUtil;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -105,11 +106,13 @@ public class Main extends HandlerController {
         df = new DecimalFormat("0.#");
         running = new SimpleBooleanProperty(false);
         running.addListener(a -> {
-            btnPlay.setText(running.get() ? "⏸" : "⯈");
-            if (!running.get()){
-                setProgress(-1);
-                clearStatus();
-            }
+            Platform.runLater(() -> {
+                btnPlay.setText(running.get() ? "⏸" : "⯈");
+                if (!running.get()){
+                    setProgress(-1);
+                    clearStatus();
+                }
+            });
         });
 
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
@@ -403,6 +406,15 @@ public class Main extends HandlerController {
         addTab("pages/main", "        ", false, MainPage.class);
 
         setBackground(Configurator.getConfig().getBackgroundImage());
+
+
+        if (Configurator.getConfig().shouldShowHelloDialog()){
+            var x = new DStartupConfigurator().execute();
+            if (x){
+                Configurator.getConfig().setShowHelloDialog(false);
+                Configurator.save();
+            }
+        }
     }
 
     private ScrollPane getScroll(){

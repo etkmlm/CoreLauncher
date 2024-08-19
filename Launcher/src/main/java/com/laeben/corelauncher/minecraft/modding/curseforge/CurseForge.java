@@ -53,7 +53,7 @@ public class CurseForge implements ModSource {
         if (ids.isEmpty())
             return null;
         var request = new ModsRequest();
-        request.modIds = ids.toArray(Integer[]::new);
+        request.modIds = ids.stream().map(a -> a instanceof Double da ? da.intValue() : (int)a).toArray(Integer[]::new);
         String json = gson.toJson(request);
         var f = post("/v1/mods", json);
         if (f == null)

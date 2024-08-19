@@ -1,0 +1,20 @@
+#root{
+    -fx-padding: 15px;
+    -fx-background-color: #202222;
+    -fx-background-radius: 16px;
+}
+
+.cbutton{
+    -fx-background-color: transparent;
+    -fx-font-size: 15pt;
+}
+
+.label{
+    -fx-font-size: 14pt;
+    -fx-font-weight: bold;
+}
+
+#lblTitle{
+    -fx-font-size: 20pt;
+    -fx-font-weight: bold;
+}

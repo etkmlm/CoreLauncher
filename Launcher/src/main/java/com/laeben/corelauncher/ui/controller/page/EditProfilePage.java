@@ -2,13 +2,12 @@ package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.Path;
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
-import com.laeben.corelauncher.api.entity.Account;
-import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.wrapper.Custom;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
@@ -22,9 +21,7 @@ import com.laeben.corelauncher.ui.dialog.DImageSelector;
 import com.laeben.corelauncher.ui.util.ControlUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.JavaManager;
-import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.util.StrUtil;
-import com.laeben.corelauncher.api.entity.Java;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -49,6 +46,8 @@ public class EditProfilePage extends HandlerController {
     @FXML
     private RadioButton forge;
     @FXML
+    private RadioButton neoforge;
+    @FXML
     private RadioButton fabric;
     @FXML
     private RadioButton quilt;
@@ -61,6 +60,8 @@ public class EditProfilePage extends HandlerController {
     private ImageView imgVanilla;
     @FXML
     private ImageView imgForge;
+    @FXML
+    private ImageView imgNeoForge;
     @FXML
     private ImageView imgFabric;
     @FXML
@@ -246,6 +247,7 @@ public class EditProfilePage extends HandlerController {
 
         imgVanilla.setOnMouseClicked(a -> wrapperGroup.selectToggle(vanilla));
         imgForge.setOnMouseClicked(a -> wrapperGroup.selectToggle(forge));
+        imgNeoForge.setOnMouseClicked(a -> wrapperGroup.selectToggle(neoforge));
         imgFabric.setOnMouseClicked(a -> wrapperGroup.selectToggle(fabric));
         imgQuilt.setOnMouseClicked(a -> wrapperGroup.selectToggle(quilt));
         imgOptiFine.setOnMouseClicked(a -> wrapperGroup.selectToggle(optifine));
@@ -253,6 +255,7 @@ public class EditProfilePage extends HandlerController {
 
         vanilla.setToggleGroup(wrapperGroup);
         forge.setToggleGroup(wrapperGroup);
+        neoforge.setToggleGroup(wrapperGroup);
         fabric.setToggleGroup(wrapperGroup);
         quilt.setToggleGroup(wrapperGroup);
         optifine.setToggleGroup(wrapperGroup);
@@ -371,7 +374,12 @@ public class EditProfilePage extends HandlerController {
                 Logger.getLogger().log(e);
             }
 
-            Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
+            if (Configurator.getConfig().shouldPlaceNewProfileToDock()){
+                Main.getMain().getTab().getTabs().remove((CTab)getParentObject());
+                Main.getMain().getTab().getSelectionModel().select(0);
+            }
+            else
+                Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
         });
 
 

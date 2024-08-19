@@ -44,7 +44,7 @@ public class Forge extends Wrapper<ForgeVersion> {
     public ForgeVersion getVersionFromIdentifier(String identifier, String inherits){
         if (inherits == null)
             inherits = "*";
-        return identifier.toLowerCase().contains("forge") ? new ForgeVersion(inherits, identifier.split("-")[2]) : null;
+        return identifier.toLowerCase().contains(getType().getIdentifier()) ? new ForgeVersion(inherits, identifier.split("-")[2]) : null;
     }
 
     @Override
@@ -115,7 +115,6 @@ public class Forge extends Wrapper<ForgeVersion> {
         var verJsonPath = verPath.to(version.getJsonName() + ".json");
         if (verJsonPath.exists() && !disableCache)
             return;
-
 
         var art = version.fArtifacts.stream().filter(x -> x.type == FArtifact.Type.INSTALLER).findFirst().orElse(null);
         if (art == null)

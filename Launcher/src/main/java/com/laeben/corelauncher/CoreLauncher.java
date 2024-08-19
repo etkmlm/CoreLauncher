@@ -26,6 +26,7 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.core.entity.Path;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.util.Duration;
 
@@ -69,6 +70,7 @@ public class CoreLauncher {
 
     public static void main(String[] args){
         var listArgs = Arrays.stream(args).toList();
+        new Logger();
 
         if (listArgs.contains("--old")){
             try{
@@ -123,12 +125,18 @@ public class CoreLauncher {
         if (listArgs.contains("--offline"))
             NetUtil.setOffline(true);
 
-        new Configurator(LAUNCHER_PATH).reloadConfig();
+        var cfg = new Configurator(LAUNCHER_PATH);
+
+        if (!cfg.reloadConfig()){
+            Logger.getLogger().log(LogType.ERROR,"FATAL: Couldn't load configuration file, launcher will close...");
+            Platform.exit();
+            return;
+        }
 
         Translator.generateTranslator();
 
         // Needs to be initialized after initialization of configurator
-        new Logger();
+
         Logger.getLogger().setLogDir(getLogDir());
         new Profiler().reload();
         new Vanilla().asInstance().getAllVersions();

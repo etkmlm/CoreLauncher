@@ -9,8 +9,8 @@ public class Version {
     public String id;
     public String type;
     public String url;
-    public Date time;
-    public Date releaseTime;
+    public transient Date time;
+    public transient Date releaseTime;
     public String SHA1;
     public Java javaVersion;
     public List<Library> libraries;

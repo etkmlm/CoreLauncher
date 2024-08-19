@@ -4,6 +4,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.entity.GrabVector;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -91,7 +92,13 @@ public class MainPage extends HandlerController {
             var f = root.localToScreen(root.getBoundsInLocal());
             FloatDock.getDock().place(FDObject.createGroup(List.of(), a.getScreenX() - f.getMinX(), a.getScreenY() - f.getMinY(), FloatDock.getDock().generateName(Translator.translate("dock.menu.group.new"))), false);
         });
-        dockContext.addItem(null, Translator.translate("dock.menu.profile"), a -> Main.getMain().addTab("pages/profileedit", Translator.translate("frame.title.pedit"), true, EditProfilePage.class));
+        dockContext.addItem(null, Translator.translate("dock.menu.profile"), a -> {
+            var f = root.localToScreen(root.getBoundsInLocal());
+            lX = a.getScreenX() - f.getMinX();
+            lY = a.getScreenY() - f.getMinY();
+
+            Main.getMain().addTab("pages/profileedit", Translator.translate("frame.title.pedit"), true, EditProfilePage.class);
+        });
 
         dockGhost = new CButton();
         dockGhost.setScaleX(0);
@@ -140,7 +147,13 @@ public class MainPage extends HandlerController {
                 }
             }
         }, true);
+        registerHandler(Profiler.getProfiler().getHandler(), a -> {
+            if (!a.getKey().equals("profileCreate") || !Configurator.getConfig().shouldPlaceNewProfileToDock())
+                return;
+            var p = ((List<Profile>)a.getNewValue()).get(0);
 
+            FloatDock.getDock().place(FDObject.createSingle(p, lX, lY), false);
+        }, true);
         registerHandler(Main.getMain().getHandler(), a -> {
             if (a.getKey().equals("key")){
                 onKeyPressed((javafx.scene.input.KeyEvent) a.getSource());

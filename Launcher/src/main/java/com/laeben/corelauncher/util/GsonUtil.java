@@ -10,6 +10,7 @@ import com.laeben.corelauncher.minecraft.wrapper.Custom;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.minecraft.wrapper.fabric.Fabric;
 import com.laeben.corelauncher.minecraft.wrapper.forge.Forge;
+import com.laeben.corelauncher.minecraft.wrapper.neoforge.NeoForge;
 import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
 import com.laeben.corelauncher.minecraft.wrapper.quilt.Quilt;
 import com.laeben.corelauncher.api.entity.Java;
@@ -27,6 +28,7 @@ public class GsonUtil {
             .registerTypeAdapter(Java.class, new Java.JavaFactory())
             .registerTypeAdapter(Wrapper.class, new Wrapper.WrapperFactory())
             .registerTypeAdapter(Forge.class, new Wrapper.WrapperFactory())
+            .registerTypeAdapter(NeoForge.class, new Wrapper.WrapperFactory())
             .registerTypeAdapter(Vanilla.class, new Wrapper.WrapperFactory())
             .registerTypeAdapter(OptiFine.class, new Wrapper.WrapperFactory())
             .registerTypeAdapter(Fabric.class, new Wrapper.WrapperFactory())

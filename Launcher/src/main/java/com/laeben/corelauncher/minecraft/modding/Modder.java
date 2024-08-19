@@ -23,6 +23,7 @@ import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
+import com.laeben.corelauncher.util.entity.LogType;
 import javafx.application.Platform;
 
 import java.io.FileNotFoundException;
@@ -117,11 +118,6 @@ public class Modder {
         return all == null ? m : all.get(0);
     }
 
-        private <T extends CResource> void removePresentResource(List<T> resources, CResource m){
-        var match = resources.stream().filter(x -> x.isSameResource(m)).findFirst();
-        match.ifPresent(resources::remove);
-    }
-
     public void installMods(Profile p, List<Mod> mods) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
         var path = p.getPath().to("mods");
         int i = 0;
@@ -166,21 +162,26 @@ public class Modder {
                 }
             });
 
-            if (NetUtil.download(up.fileUrl, path.to(up.fileName), false) == null){
-                var x = Modrinth.getModrinth().getProjectVersions(a.name, p.getVersionId(), p.getWrapper().getType());
-                var s = x.stream().flatMap(f -> f.getFiles().stream()).filter(f -> f.filename != null && f.filename.equals(a.fileName)).findFirst();
+            try{
+                if (NetUtil.download(up.fileUrl, path.to(up.fileName), false) == null){
+                    var x = Modrinth.getModrinth().getProjectVersions(a.name, p.getVersionId(), p.getWrapper().getType());
+                    var s = x.stream().flatMap(f -> f.getFiles().stream()).filter(f -> f.filename != null && f.filename.equals(a.fileName)).findFirst();
 
-                if (s.isEmpty()){
-                    Logger.getLogger().logDebug("ERR");
-                    continue;
+                    if (s.isEmpty()){
+                        Logger.getLogger().logDebug("ERR");
+                        continue;
+                    }
+                    NetUtil.download(s.get().url, path.to(a.fileName), false);
                 }
-                NetUtil.download(s.get().url, path.to(a.fileName), false);
+            }
+            catch (HttpException e){
+                Logger.getLogger().log( LogType.ERROR, "Error while installing mod: " + up.name);
             }
         }
     }
     public void includeMods(Profile p, List<Mod> mods){
         for (var m : mods){
-            removePresentResource(p.getMods(), m);
+            remove(p, m, true, false);
             p.getMods().add(m);
         }
         Profiler.getProfiler().setProfile(p.getName(), null);
@@ -283,7 +284,7 @@ public class Modder {
 
     public void includeResourcepacks(Profile p, List<Resourcepack> r){
         for (var pack : r){
-            removePresentResource(p.getResources(), pack);
+            remove(p, pack, true, false);
             p.getResources().add(pack);
         }
 
@@ -300,7 +301,12 @@ public class Modder {
 
             handler.execute(new KeyEvent("," + pack.name + ":.resource.progress;" + (++i) + ";" + size));
 
-            NetUtil.download(pack.fileUrl, px, false);
+            try{
+                NetUtil.download(pack.fileUrl, px, false);
+            }
+            catch (HttpException e){
+                Logger.getLogger().log( LogType.ERROR, "Error while installing resourcepack: " + pack.name);
+            }
         }
     }
 
@@ -319,7 +325,13 @@ public class Modder {
 
             handler.execute(new KeyEvent("," + w.name + ":.resource.progress;" + (++i) + ";" + size));
 
-            var zip = NetUtil.download(w.fileUrl, worlds.to(w.fileName), false);
+            Path zip = null;
+            try{
+                zip = NetUtil.download(w.fileUrl, worlds.to(w.fileName), false);
+            }
+            catch (HttpException e){
+                Logger.getLogger().log( LogType.ERROR, "Error while installing world: " + w.name);
+            }
             if (zip == null)
                 continue;
 
@@ -374,6 +386,8 @@ public class Modder {
 
         EventHandler.enable();
 
+        handler.execute(new KeyEvent("stop"));
+
         Profiler.getProfiler().setProfile(p.getName(), pxt -> {
             if (mp.logoUrl != null && !mp.logoUrl.isEmpty() && pxt.getIcon() == null){
                 ImageCacheManager.remove(pxt);
@@ -398,11 +412,17 @@ public class Modder {
 
             handler.execute(new KeyEvent("," + shader.name + ":.resource.progress;" + (++i) + ";" + size));
 
-            NetUtil.download(shader.fileUrl, pxx, false, true);
+            try{
+                NetUtil.download(shader.fileUrl, pxx, false, true);
+            }
+            catch (HttpException e){
+                Logger.getLogger().log( LogType.ERROR, "Error while installing shader: " + shader.name);
+            }
+
         }
     }
     public void includeShader(Profile p, Shader s){
-        removePresentResource(p.getShaders(), s);
+        remove(p, s, true, false);
         Profiler.getProfiler().setProfile(p.getName(), a -> a.getShaders().add(s));
     }
 
@@ -425,24 +445,47 @@ public class Modder {
         for (var r : rs)
             include(p, r);
     }
+
     public void remove(Profile profile, CResource r){
+        remove(profile, r, false, true);
+    }
+    public void remove(Profile profile, CResource r, boolean useExistingResource, boolean triggerSet){
         var path = profile.getPath();
         var modsPath = path.to("mods");
         //var savesPath = path.to("saves");
         var resourcesPath = path.to("resourcepacks");
         var shadersPath = path.to("shaderpacks");
 
+        CResource finalR;
+
         if (r instanceof Mod m){
+            if (useExistingResource){
+                var found = profile.getMods().stream().filter(a -> a.isSameResource(r)).findFirst();
+                if (found.isEmpty())
+                    return;
+                else
+                    m = found.get();
+            }
+            finalR = m;
+
             if (m.fileName != null){
                 var pth = modsPath.to(m.fileName);
                 if (pth.exists())
                     pth.delete();
             }
-            Profiler.getProfiler().setProfile(profile.getName(), a -> a.getMods().removeIf(s -> s.isSameResource(m)));
         }
         else if (r instanceof Modpack mp){
-            var mods = profile.getMods().stream().filter(x -> x.belongs(mp)).toList();
-            var packs = profile.getResources().stream().filter(x -> x.belongs(mp)).toList();
+            if (useExistingResource){
+                var found = profile.getModpacks().stream().filter(a -> a.isSameResource(r)).findFirst();
+                if (found.isEmpty())
+                    return;
+                else
+                    mp = found.get();
+            }
+            finalR = mp;
+
+            var mods = profile.getMods().stream().filter(x -> x.belongs((Modpack) finalR)).toList();
+            var packs = profile.getResources().stream().filter(x -> x.belongs((Modpack) finalR)).toList();
             for (var md : mods){
                 if (md.fileName == null)
                     continue;
@@ -457,29 +500,47 @@ public class Modder {
                 if (pth.exists())
                     pth.delete();
             }
-            var manifest = path.to("manifest-" + mp.name + ".json");
+            var manifest = path.to("manifest-" + finalR.name + ".json");
             manifest.delete();
-            Profiler.getProfiler().setProfile(profile.getName(), a -> {
-                a.getMods().removeIf(x -> x.belongs(mp));
-                a.getResources().removeIf(x -> x.belongs(mp));
-                a.getModpacks().removeIf(x -> x.isSameResource(mp));
-            });
         }
         else if (r instanceof Resourcepack p){
-            if (p.fileName != null){
-                var pth = resourcesPath.to(p.fileName);
+            if (useExistingResource){
+                var found = profile.getResources().stream().filter(a -> a.isSameResource(r)).findFirst();
+                if (found.isEmpty())
+                    return;
+                else
+                    p = found.get();
+            }
+            finalR = p;
+
+            if (finalR.fileName != null){
+                var pth = resourcesPath.to(finalR.fileName);
                 if (pth.exists())
                     pth.delete();
             }
-            Profiler.getProfiler().setProfile(profile.getName(), a -> a.getResources().removeIf(x -> x.isSameResource(p)));
         }
         else if (r instanceof World w){
             //savesPath.to(w.name).delete();
-            Profiler.getProfiler().setProfile(profile.getName(), a -> a.getOnlineWorlds().removeIf(x -> x.isSameResource(w)));
+            finalR = w;
         }
         else if (r instanceof Shader s){
-            shadersPath.to(s.name).delete();
-            Profiler.getProfiler().setProfile(profile.getName(), a -> a.getShaders().removeIf(x -> x.isSameResource(s)));
+            if (useExistingResource){
+                var found = profile.getShaders().stream().filter(a -> a.isSameResource(r)).findFirst();
+                if (found.isEmpty())
+                    return;
+                else
+                    s = found.get();
+            }
+            finalR = s;
+
+            shadersPath.to(finalR.name).delete();
         }
+        else
+            finalR = r;
+
+        if (triggerSet)
+            Profiler.getProfiler().setProfile(profile.getName(), a -> a.removeSource(finalR));
+        else
+            profile.removeSource(finalR);
     }
 }

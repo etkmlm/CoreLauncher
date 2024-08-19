@@ -99,7 +99,7 @@ public class Modrinth implements ModSource {
         var manifest = path.to("manifest-" + name + ".json");
         if (!manifest.exists()){
             var ppp = NetUtil.download(mp.fileUrl, zip, false);
-            Modder.getModder().getHandler().execute(new KeyEvent("stop"));
+            //Modder.getModder().getHandler().execute(new KeyEvent("stop"));
             zip.extract(tempDir, null);
             assert ppp != null;
             ppp.delete();

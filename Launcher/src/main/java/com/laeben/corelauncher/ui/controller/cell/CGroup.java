@@ -26,6 +26,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.skin.ScrollPaneSkin;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -69,6 +70,7 @@ public class CGroup extends CDockObject {
     private double height;
 
     private Bounds scenelocal;
+    private HBox topBox;
 
     private Consumer<TransferInfo> onTransfer;
 
@@ -107,6 +109,8 @@ public class CGroup extends CDockObject {
         gPopup.getContent().add(miniatureIn);
         gPopup.setHideOnEscape(false);
 
+
+
         mainPane = new VBox();
         mainPane.setSpacing(10);
         mainPane.setScaleY(0);
@@ -141,6 +145,8 @@ public class CGroup extends CDockObject {
         trns.setDuration(Duration.seconds(0.5));
         trns.setFromY(0);
         trns.setToY(1);
+
+        gPopup.addEventFilter(MouseEvent.MOUSE_CLICKED, this::onClicked);
     }
 
     private void selectAllObjects(){
@@ -184,15 +190,6 @@ public class CGroup extends CDockObject {
             if (result.isEmpty())
                 return;
             FloatDock.getDock().addToGroup(item, result.get().getProfiles());
-        });
-
-        lvProfiles.setOnMouseClicked(a -> {
-            if (a.getButton() != MouseButton.SECONDARY || !a.getTarget().equals(lvProfiles))
-                return;
-
-            menuGroupButton.setLayoutX(a.getX());
-            menuGroupButton.setLayoutY(a.getY());
-            menuGroup.show();
         });
 
         txtName.setOnKeyPressed(a -> {
@@ -239,18 +236,19 @@ public class CGroup extends CDockObject {
                 mainPane.requestFocus();
         });
 
-        var bx = new HBox();
-        bx.setPrefHeight(40);
-        bx.setFillHeight(true);
-        bx.getChildren().add(txtName);
-        bx.getChildren().add(btnRename);
+        topBox = new HBox();
+        topBox.setPrefHeight(40);
+        topBox.setFillHeight(true);
+        topBox.getChildren().add(txtName);
+        topBox.getChildren().add(btnRename);
 
         HBox.setHgrow(txtName, Priority.ALWAYS);
-        mainPane.getChildren().add(bx);
+        mainPane.getChildren().add(topBox);
 
         reloadItems();
 
         lvProfiles.setPrefWidth(480);
+        lvProfiles.setMinHeight(100);
         lvProfiles.setPadding(new Insets(16, 16, 32, 16));
         var scroll = new ScrollPane();
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -266,9 +264,22 @@ public class CGroup extends CDockObject {
         folderRoot.setVisible(true);
         folderRoot.setManaged(true);
 
+
         reloadMeta();
 
         return true;
+    }
+
+    private void onClicked(MouseEvent a){
+        /*var bounds = topBox.localToParent(topBox.getBoundsInLocal());
+        if (a.getButton() != MouseButton.SECONDARY || bounds.contains(a.getX(), a.getY()))
+            return;*/
+        if (a.getButton() != MouseButton.SECONDARY || (!a.getTarget().equals(lvProfiles) && !a.getTarget().getClass().getName().contains("ScrollPaneSkin")))
+            return;
+
+        menuGroupButton.setLayoutX(a.getX());
+        menuGroupButton.setLayoutY(a.getY());
+        menuGroup.show();
     }
 
     private List<CDockObject> getSelectedItems(){

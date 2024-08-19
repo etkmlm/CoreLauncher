@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CCombo?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="400.0" prefWidth="600.0" fx:id="root" stylesheets="@../../style/controls/sconf.css">
+
+
+
+    <Label fx:id="lblTitle" text="Welcome to the Core Launcher!" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="5"/>
+    <GridPane AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="30" alignment="CENTER" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" vgap="10" hgap="10">
+        <columnConstraints>
+            <ColumnConstraints prefWidth="120" halignment="RIGHT"/>
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label fx:id="lblLanguage" text="Language"/>
+        <CCombo fx:id="cbLanguage" GridPane.columnIndex="1" maxWidth="Infinity"/>
+
+        <Label fx:id="lblUsername" text="Username" GridPane.rowIndex="1"/>
+        <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <TextField fx:id="txtUsername" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <CheckBox fx:id="chkOnline" maxWidth="Infinity" text="Online"/>
+        </HBox>
+
+    </GridPane>
+
+    <CButton fx:id="btnApply" text="Apply" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10"/>
+    <CButton fx:id="btnClose" text="X" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10"/>
+</AnchorPane>

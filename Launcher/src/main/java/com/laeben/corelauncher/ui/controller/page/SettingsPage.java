@@ -38,6 +38,7 @@ import javafx.util.StringConverter;
 
 public class SettingsPage extends HandlerController {
 
+
     @FXML
     private TextField txtCustomBackground;
     @FXML
@@ -56,6 +57,8 @@ public class SettingsPage extends HandlerController {
     private ChoiceBox<String> cbJava;
     @FXML
     private CButton btnJavaMan;
+    @FXML
+    private CheckBox chkPlaceDock;
     @FXML
     private Spinner<Integer> txtMinRAM;
     @FXML
@@ -268,6 +271,10 @@ public class SettingsPage extends HandlerController {
 
         btnJavaMan.setOnMouseClicked((a) -> Main.getMain().addTab("pages/java", Translator.translate("frame.title.javaman"), true, JavaPage.class));
 
+        chkPlaceDock.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setPlaceNewProfileToDock(chkPlaceDock.isSelected());
+            Configurator.save();
+        });
         chkShowSnaps.selectedProperty().addListener(x -> {
             Configurator.getConfig().setShowSnapshots(chkShowSnaps.isSelected());
             Configurator.save();
@@ -425,6 +432,7 @@ public class SettingsPage extends HandlerController {
             sldRAM.setValue(c.getDefaultMaxRAM());
             chkOldReleases.setSelected(c.isShowOldReleases());
             chkShowSnaps.setSelected(c.isShowSnapshots());
+            chkPlaceDock.setSelected(c.shouldPlaceNewProfileToDock());
             txtGamePath.setText(c.getGamePath().toString());
             cbLanguage.setValue(c.getLanguage().getDisplayLanguage(c.getLanguage()));
             chkLogMode.setSelected(c.getLogMode());

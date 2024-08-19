@@ -11,6 +11,7 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.CResource;
 import com.laeben.corelauncher.ui.controller.HandlerController;
@@ -124,6 +125,8 @@ public class ProfilePage extends HandlerController {
     private CButton btnCopySettings;
     @FXML
     private CButton btnAddMultiple;
+    @FXML
+    private CButton btnOpenFolder;
 
     private void setUser(){
         var user = profile.tryGetUser().reload();
@@ -199,6 +202,7 @@ public class ProfilePage extends HandlerController {
             if (x.isPresent() && x.get().result() == CMsgBox.ResultType.YES)
                 Profiler.getProfiler().deleteProfile(profile);
         });
+        btnOpenFolder.setOnMouseClicked(a -> OSUtil.openFolder(profile.getPath().toFile().toPath()));
         btnUpdate.setOnMouseClicked(a -> new Thread(() -> {
             try {
                 Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.multiple", profile.getName()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));

@@ -264,6 +264,25 @@ public class Profile {
 
     /* Utils */
 
+    public void removeSource(CResource r){
+        if (r instanceof Mod m)
+            getMods().removeIf(a -> a.isSameResource(m));
+        else if (r instanceof Modpack mp){
+            getMods().removeIf(x -> x.belongs(mp));
+            getResources().removeIf(x -> x.belongs(mp));
+            getModpacks().removeIf(x -> x.isSameResource(mp));
+        }
+        else if (r instanceof Resourcepack rp){
+            getResources().removeIf(x -> x.isSameResource(rp));
+        }
+        else if (r instanceof World w){
+            getOnlineWorlds().removeIf(x -> x.isSameResource(w));
+        }
+        else if (r instanceof Shader s){
+            getShaders().removeIf(x -> x.isSameResource(s));
+        }
+    }
+
     public Profile cloneFrom(Profile p){
         if (this.isEmpty)
             this.isEmpty = false;

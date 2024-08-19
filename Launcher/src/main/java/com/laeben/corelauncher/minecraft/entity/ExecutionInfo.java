@@ -8,6 +8,7 @@ import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.util.ArgumentConcat;
 import com.laeben.corelauncher.minecraft.util.CommandConcat;
+import com.laeben.corelauncher.minecraft.util.LibraryConcat;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.core.entity.Path;
@@ -100,11 +101,19 @@ public class ExecutionInfo{
 
             var libDir = gameDir.to("libraries");
 
-            libraries = Stream.concat(v.libraries.stream(), v0.libraries.stream())
+            libraries = LibraryConcat.begin(libDir)
+                    .addLibraries(v.libraries)
+                    .addLibraries(v0.libraries)
+                    .build()
+                    .paths();
+
+            /*libraries = Stream.concat(v.libraries.stream(), v0.libraries.stream())
                     .filter(x -> x.checkAvailability(CoreLauncher.SYSTEM_OS))
                     .map(Library::getAsset)
                     .filter(Objects::nonNull)
-                    .map(x -> libDir.to(x.path).toString()).distinct().toList();
+                    .map(x -> libDir.to(x.path).toString())
+                    .distinct()
+                    .toList();*/
 
             agentPath = libDir.to(Arrays.stream(LauncherConfig.LAUNCHER_LIBRARIES).filter(x -> x.fileName.startsWith("clfixer")).findFirst().orElse(new Library()).calculatePath());
         }

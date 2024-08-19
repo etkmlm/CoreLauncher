@@ -237,7 +237,7 @@ public class CResource implements Comparable<CResource> {
     }
 
     public boolean isSameResource(Object obj){
-        return obj instanceof CResource res && (res.fileName.equals(fileName) || (res.id != null && ((res.id instanceof Double || res.id instanceof Integer) && (id instanceof Double || id instanceof Integer) ? res.getIntId() == getIntId() : res.id.equals(id))));
+        return obj instanceof CResource res && ((res.fileName != null && res.fileName.equals(fileName)) || (res.id != null && ((res.id instanceof Double || res.id instanceof Integer) && (id instanceof Double || id instanceof Integer) ? res.getIntId() == getIntId() : res.id.equals(id))));
     }
 
     @Override
