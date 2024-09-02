@@ -8,10 +8,12 @@
     <meta name="google-site-verification" content="sgcMEWtJsTpILbadoZxEPp3r24Z41Bm8FtJHmKRq_oM" />
     <script>
         window.onload = function(){
-            fetch("https://laeben-update-default-rtdb.europe-west1.firebasedatabase.app/apps/clauncher/latestFile.json")
-                .then(a => a.json().then(ver => {
+            fetch("https://laeben-update-default-rtdb.europe-west1.firebasedatabase.app/apps/clauncher.json")
+                .then(a => a.json().then(app => {
                     var jarbtn = document.getElementById("jar");
-                    jarbtn.href = ver;
+                    var installer = document.getElementById("installer");
+                    jarbtn.href = app.latestFile;
+					installer.href = app.installer;
             }));
         };
     </script>
@@ -22,9 +24,9 @@
         <div class="one flex-xcenter flex-ycenter">
             <div class="precious-pane">
                 <h1>Open, customize, play.</h1>
-                <a style="background: #33b2f533;" id="installer" href="https://github.com/etkmlm/CoreLauncherInstaller/releases/download/1.0/CoreLauncherInstaller.exe" class="center">Installer</a>
+                <a style="background: #33b2f533;" id="installer" href="https://github.com/etkmlm/CoreLauncherInstaller/releases/download/1.01/CoreLauncherInstaller.exe" class="center">Installer</a>
                 <br/>
-                <a style="background: #33b2f533;" id="jar" href="https://github.com/etkmlm/CoreLauncher/releases/download/beta1.1.2/CoreLauncher-1.1.2.jar" class="center">Portable</a>
+                <a style="background: #33b2f533;" id="jar" href="https://github.com/etkmlm/CoreLauncher/releases/download/beta1.1.4/CoreLauncher-1.1.4.jar" class="center">Portable</a>
                 <br/>
                 <a style="background: #33b2b533;" href="https://github.com/etkmlm/CoreLauncher" class="center">Wiki and Source</a>
             </div>
@@ -34,11 +36,13 @@
             <h1>Core Launcher</h1>
 
             <div class="badges">
-                <img src="web/images/curse.png" alt="l" />
-                <img src="web/images/forge.png" alt="l" />
-                <img src="web/images/fabric.png" alt="l" />
-                <img src="web/images/quilt.png" alt="l" />
-                <img src="web/images/optifine.png" alt="l" />
+				<img src="web/images/curse.png" alt="0" />
+                <img src="web/images/modrinth.png" alt="1" />
+                <img src="web/images/forge.png" alt="2" />
+                <img src="web/images/neoforge.png" alt="3" />
+                <img src="web/images/fabric.png" alt="4" />
+                <img src="web/images/quilt.png" alt="5" />
+                <img src="web/images/optifine.png" alt="6" />
             </div>
         </div>
     </section>
