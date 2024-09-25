@@ -83,6 +83,13 @@ public class ArgumentConcat {
         return this;
     }
 
+    public ArgumentConcat include(String k, String v){
+        args.removeIf(a -> a.key != null && a.key.equals(k));
+        if (v != null)
+            args.add(new Arg(k).setValue(v));
+        return this;
+    }
+
     public ArgumentConcat register(String p, String value){
         if (value == null){
             args.removeIf(x -> x.key.contains(p) || (x.value != null && x.value.contains(p)));

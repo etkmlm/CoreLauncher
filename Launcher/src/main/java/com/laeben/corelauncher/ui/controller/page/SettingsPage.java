@@ -9,6 +9,8 @@ import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Config;
+import com.laeben.corelauncher.discord.Discord;
+import com.laeben.corelauncher.discord.entity.Activity;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
@@ -37,7 +39,6 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 
 public class SettingsPage extends HandlerController {
-
 
     @FXML
     private TextField txtCustomBackground;
@@ -92,10 +93,19 @@ public class SettingsPage extends HandlerController {
     @FXML
     private CWorker workerImages;
 
+    @FXML
+    private CheckBox chkDiscordEnable;
+    @FXML
+    private CheckBox chkInGameRPC;
+    /*@FXML
+    private Spinner txtCommPort;*/
+
+
     private CButton btnSave;
 
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMinRAM;
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fMaxRAM;
+    //private final SpinnerValueFactory.IntegerSpinnerValueFactory fCommPort;
     private final ObservableList<String> languages;
     private final ObservableList<String> javas;
 
@@ -110,11 +120,17 @@ public class SettingsPage extends HandlerController {
         super("settings");
         fMinRAM = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
         fMaxRAM = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
+        //fCommPort = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
         fMinRAM.setAmountToStepBy(512);
         fMaxRAM.setAmountToStepBy(512);
+        //fCommPort.setAmountToStepBy(1);
 
         fMinRAM.valueProperty().addListener(a -> tryToEnableSave());
         fMaxRAM.valueProperty().addListener(a -> tryToEnableSave());
+        /*fCommPort.valueProperty().addListener(a -> {
+            Configurator.getConfig().setCommPort(fCommPort.getValue());
+            Configurator.save();
+        });*/
 
         languages = FXCollections.observableList(Translator.getTranslator().getAllLanguages().stream().map(x -> x.getDisplayLanguage(x)).toList());
         javas = FXCollections.observableArrayList();
@@ -129,8 +145,10 @@ public class SettingsPage extends HandlerController {
                 var path = (Path)x.getNewValue();
                 txtCustomBackground.setText(path == null ? null : path.toString());
             }
-            else if (x.getKey().equals("languageChange"))
+            else if (x.getKey().equals("languageChange")){
+                Discord.getDiscord().setActivity(Activity.setForIdling());
                 UI.getUI().reset();
+            }
         }, true);
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
@@ -306,6 +324,18 @@ public class SettingsPage extends HandlerController {
             Configurator.save();
         });
 
+        chkDiscordEnable.selectedProperty().addListener(x -> {
+            chkInGameRPC.setDisable(!chkDiscordEnable.isSelected());
+            //txtCommPort.setDisable(!chkDiscordEnable.isSelected());
+            Configurator.getConfig().setDisabledRPC(!chkDiscordEnable.isSelected());
+            Configurator.save();
+        });
+
+        chkInGameRPC.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setEnabledInGameRPC(chkInGameRPC.isSelected());
+            Configurator.save();
+        });
+
         btnSelectGamePath.setOnMouseClicked(x -> {
             DirectoryChooser chooser = new DirectoryChooser();
             chooser.setInitialDirectory(Configurator.getConfig().getGamePath().toFile());
@@ -335,6 +365,7 @@ public class SettingsPage extends HandlerController {
 
         txtMaxRAM.setValueFactory(fMaxRAM);
         txtMinRAM.setValueFactory(fMinRAM);
+        //txtCommPort.setValueFactory(fCommPort);
 
         txtMaxRAM.valueProperty().addListener(a -> {
             if (fMaxRAM.getValue() > 32 * 1024)
@@ -429,6 +460,7 @@ public class SettingsPage extends HandlerController {
 
             fMinRAM.setValue(c.getDefaultMinRAM());
             fMaxRAM.setValue(c.getDefaultMaxRAM());
+            //fCommPort.setValue(c.getCommPort());
             sldRAM.setValue(c.getDefaultMaxRAM());
             chkOldReleases.setSelected(c.isShowOldReleases());
             chkShowSnaps.setSelected(c.isShowSnapshots());
@@ -440,6 +472,11 @@ public class SettingsPage extends HandlerController {
             chkAutoUpdate.setSelected(c.isEnabledAutoUpdate());
             chkDebugLogMode.setSelected(c.getDebugLogMode());
             chkGamelog.setSelected(c.delGameLogs());
+
+            chkInGameRPC.setDisable(c.isDisabledRPC());
+            //txtCommPort.setDisable(c.isDisabledRPC());
+            chkDiscordEnable.setSelected(!c.isDisabledRPC());
+            chkInGameRPC.setSelected(c.isEnabledInGameRPC());
 
             var bgi = c.getBackgroundImage();
             if (bgi != null)

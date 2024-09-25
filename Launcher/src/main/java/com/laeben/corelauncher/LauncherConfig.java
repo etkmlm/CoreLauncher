@@ -5,7 +5,7 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.minecraft.entity.Library;
 
 public final class LauncherConfig {
-    public static final double VERSION = 1.13;
+    public static final double VERSION = 1.15;
     private static final String APP_ID = "clauncher";
     public static final LaebenApp APPLICATION;
 
@@ -22,9 +22,11 @@ public final class LauncherConfig {
         APPLICATION = app;
     }
 
-    public static final Library[] LAUNCHER_LIBRARIES = { new Library(){
+    public static final Library[] LAUNCHER_LIBRARIES = { new Library()
+    {
         {
-            name = "com.laeben:clfixer:1.0";
+            name = "com.laeben:clpatcher:1.0";
+            isAgent = true;
         }
-    } };
+    }};
 }

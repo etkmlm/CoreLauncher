@@ -44,7 +44,7 @@ public class Forge extends Wrapper<ForgeVersion> {
     public ForgeVersion getVersionFromIdentifier(String identifier, String inherits){
         if (inherits == null)
             inherits = "*";
-        return identifier.toLowerCase().contains(getType().getIdentifier()) ? new ForgeVersion(inherits, identifier.split("-")[2]) : null;
+        return identifier.toLowerCase().contains("-" + getType().getIdentifier()) ? new ForgeVersion(inherits, identifier.split("-")[2]) : null;
     }
 
     @Override
@@ -113,14 +113,15 @@ public class Forge extends Wrapper<ForgeVersion> {
         var versionsPath = Configurator.getConfig().getGamePath().to("versions");
         var verPath = versionsPath.to(version.getJsonName());
         var verJsonPath = verPath.to(version.getJsonName() + ".json");
+
+        Vanilla.getVanilla().install(version);
+
         if (verJsonPath.exists() && !disableCache)
             return;
 
         var art = version.fArtifacts.stream().filter(x -> x.type == FArtifact.Type.INSTALLER).findFirst().orElse(null);
         if (art == null)
             return;
-
-        Vanilla.getVanilla().install(version);
 
         try{
             logState(".forge.state.download");

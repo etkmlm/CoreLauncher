@@ -10,6 +10,7 @@ import java.util.Locale;
 
 public class Config {
     private static final Path DEFAULT_GAME_PATH = Path.begin(OSUtil.getAppFolder());
+    //private static final int DEFAULT_COMM_PORT = 9875;
 
     private Account user;
     private Path gamePath;
@@ -31,6 +32,13 @@ public class Config {
     private boolean showHelloDialog;
     private boolean placeNewProfileToDock;
     private List<Integer> announces;
+
+    private double windowWidth;
+    private double windowHeight;
+
+    private boolean disableRPC;
+    //private int commPort;
+    private boolean enableInGameRPC;
 
     public Path getGamePath(){
         return (gamePath == null ? DEFAULT_GAME_PATH : gamePath).forceSetDir(true);
@@ -80,6 +88,41 @@ public class Config {
     public void setDefaultMaxRAM(int maxRAM){
         defaultMaxRAM = maxRAM;
     }
+
+    public boolean isDisabledRPC(){
+        return disableRPC;
+    }
+    public void setDisabledRPC(boolean v){
+        this.disableRPC = v;
+    }
+
+    public boolean isEnabledInGameRPC(){
+        return enableInGameRPC;
+    }
+    public void setEnabledInGameRPC(boolean v){
+        this.enableInGameRPC = v;
+    }
+
+    public double getWindowWidth(){
+        return windowWidth;
+    }
+
+    public double getWindowHeight(){
+        return windowHeight;
+    }
+
+    public void setWindowSize(double w, double h){
+        windowWidth = w;
+        windowHeight = h;
+    }
+
+    /*public int getCommPort(){
+        return commPort <= 0 ? DEFAULT_COMM_PORT : commPort;
+    }
+
+    public void setCommPort(int port){
+        this.commPort = port;
+    }*/
 
     public Path getBackgroundImage(){
         return backgroundImage != null ? (backgroundImage.exists() ? backgroundImage : null) : null;
@@ -140,6 +183,7 @@ public class Config {
     public void setLastSelectedProfile(Profile p){
         lastSelectedProfile = p;
     }
+
     public void setLogMode(boolean mode){
         logMode = mode;
     }
@@ -152,6 +196,7 @@ public class Config {
     public void setDebugLogMode(boolean mode){
         debugLogMode = mode;
     }
+
     public boolean hideAfter(){
         return hideAfter;
     }

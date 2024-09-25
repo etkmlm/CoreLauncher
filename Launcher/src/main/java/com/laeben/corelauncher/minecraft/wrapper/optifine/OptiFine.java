@@ -175,7 +175,10 @@ public class OptiFine extends Wrapper<OptiVersion> {
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
             var f = gson.fromJson(profileInfo.read(), JsonObject.class);
             if (f != null){
-                String args = f.get("profiles").getAsJsonObject().get("OptiFine").getAsJsonObject().get("javaArgs").getAsString();
+                var obj = f.get("profiles").getAsJsonObject().get("OptiFine").getAsJsonObject();
+                if (!obj.has("javaArgs"))
+                    return;
+                String args = obj.get("javaArgs").getAsString();
                 if (args != null){
                     String[] jvm = args.split(" ");
                     var g = gson.fromJson(jsonPath.read(), JsonObject.class);

@@ -3,6 +3,7 @@ package com.laeben.corelauncher.ui.control;
 import com.laeben.corelauncher.CoreLauncherFX;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Cursor;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -97,6 +98,7 @@ public class CCombo<T> extends Region {
         txtSearch.setEditable(isOpen);
 
         if (!isOpen){
+            txtSearch.setCursor(Cursor.DEFAULT);
             popup.hide();
             if (selectedItem != null)
                 txtSearch.setText(selectedItemString());
@@ -106,6 +108,7 @@ public class CCombo<T> extends Region {
             lvItems.setPrefWidth(txtSearch.getWidth());
             popup.setWidth(txtSearch.getWidth());
             popup.show(txtSearch, bounds.getMinX(), bounds.getMaxY() + 5);
+            txtSearch.setCursor(Cursor.TEXT);
         }
     }
 

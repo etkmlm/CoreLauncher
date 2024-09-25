@@ -31,6 +31,8 @@ public class ExecutionInfo{
     public Path dir;
     public String[] args;
 
+    public ServerInfo server;
+
     public ExecutionInfo(String executor, Version v, Account account, Java java, Path dir, String... args){
         this.executor = executor;
         this.version = v;
@@ -67,7 +69,28 @@ public class ExecutionInfo{
         return new ExecutionInfo(profile.getName(), profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion()), profile.getUser(), profile.getJava(), profile.getPath(), concat.generate().toArray(new String[0]));
     }
 
+    public ExecutionInfo includeServer(ServerInfo info){
+        this.server = info;
+
+        return this;
+    }
+
     public class LaunchInfo {
+
+        public List<String> libraries;
+        public Path clientPath;
+        public Path wrappedJsonPath;
+        public Path wrappedClientPath;
+        public Path jsonPath;
+        public Path versionDir;
+        public Path nativePath;
+        public Asset assets;
+
+        public Java java;
+        public String mainClass;
+        public List<String> agents;
+        private final ArgumentConcat jvmArguments;
+        private final ArgumentConcat gameArguments;
 
         public LaunchInfo() throws VersionNotFoundException {
             var gameDir = Configurator.getConfig().getGamePath();
@@ -76,9 +99,12 @@ public class ExecutionInfo{
             jsonPath = versionDir.to(version.id + ".json");
             clientPath = versionDir.to(version.id + ".jar");
 
-            wrappedJsonPath = gameDir.to("versions", version.getJsonName(), version.getJsonName() + ".json");
+            var wrappedPath = gameDir.to("versions", version.getJsonName());
+            wrappedJsonPath = wrappedPath.to(version.getJsonName() + ".json");
+            wrappedClientPath = wrappedPath.to(version.getClientName() + ".jar");
 
-            Logger.getLogger().logHyphBlock("EXECUTION", String.format("Game Dir: %s\nNative Path: %s\nJSON Path: %s\nClient Path: %s\nWrapped Json Path: %s", gameDir, nativePath, jsonPath, clientPath, wrappedJsonPath));
+
+            Logger.getLogger().logHyphBlock("EXECUTION", String.format("Game Dir: %s\nNative Path: %s\nJSON Path: %s\nClient Path: %s\nWrapped Json Path: %s\nWrapped Client Path: %s", gameDir, nativePath, jsonPath, clientPath, wrappedJsonPath, wrappedClientPath));
 
             //versionDir = gameDir.to("versions", version.id);
             //            nativePath = versionDir.to("natives");
@@ -102,8 +128,8 @@ public class ExecutionInfo{
             var libDir = gameDir.to("libraries");
 
             libraries = LibraryConcat.begin(libDir)
-                    .addLibraries(v.libraries)
                     .addLibraries(v0.libraries)
+                    .addLibraries(v.libraries)
                     .build()
                     .paths();
 
@@ -115,7 +141,8 @@ public class ExecutionInfo{
                     .distinct()
                     .toList();*/
 
-            agentPath = libDir.to(Arrays.stream(LauncherConfig.LAUNCHER_LIBRARIES).filter(x -> x.fileName.startsWith("clfixer")).findFirst().orElse(new Library()).calculatePath());
+            agents = Arrays.stream(LauncherConfig.LAUNCHER_LIBRARIES).filter(x -> x.isAgent).map(x -> "-javaagent:" + libDir.to(x.calculatePath())).toList();
+            //agentPath = libDir.to(Arrays.stream(LauncherConfig.LAUNCHER_AGENTS).filter(x -> x.fileName.startsWith("clfixer")).findFirst().orElse(new Library()).calculatePath());
         }
 
         private ArgumentConcat extractArguments(Version v, boolean isGame){
@@ -152,20 +179,6 @@ public class ExecutionInfo{
             }
         }
 
-        public List<String> libraries;
-        public Path clientPath;
-        public Path wrappedJsonPath;
-        public Path jsonPath;
-        public Path versionDir;
-        public Path nativePath;
-        public Asset assets;
-
-        public Java java;
-        public String mainClass;
-        public Path agentPath;
-        private final ArgumentConcat jvmArguments;
-        private final ArgumentConcat gameArguments;
-
         public String[] getGameArguments(){
             var gameDir = Configurator.getConfig().getGamePath();
 
@@ -196,6 +209,8 @@ public class ExecutionInfo{
                     //.register("${auth_xuid}", "null")
                     .disable("--xuid")
                     .register("${auth_session}", "X")
+                    .include("--quickPlayMultiplayer", server == null ? null : server.toString())
+                    .include("--server", server == null ? null : server.toString())
                     .build();
         }
 

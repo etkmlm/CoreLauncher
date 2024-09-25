@@ -1,11 +1,16 @@
 package com.laeben.corelauncher;
 
 import com.laeben.corelauncher.api.entity.ImageEntity;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.discord.Discord;
+import com.laeben.corelauncher.discord.DiscordIPC;
+import com.laeben.corelauncher.discord.entity.Activity;
+import com.laeben.corelauncher.discord.entity.NoDiscordException;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.api.util.NetUtil;
 import javafx.application.Application;

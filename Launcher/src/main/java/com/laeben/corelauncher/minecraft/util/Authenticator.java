@@ -4,6 +4,7 @@ import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.util.APIListener;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.Gson;
@@ -54,8 +55,7 @@ public class Authenticator {
     public String listen(String parameter) {
         String regex = ".*" + parameter + "=(.*) HTTP.*";
         Pattern p = Pattern.compile(regex, Pattern.DOTALL);
-        var resource = Authenticator.class.getResourceAsStream("/com/laeben/corelauncher/data/auth.html");
-        String r = resource == null ? null : NetUtil.inputStreamToString(resource).replace("$turnOff", Translator.translate("auth.ok"));
+        String r = APIListener.createClosePageRequest();
 
         String s = NetUtil.listenServer(LOCALHOST_PORT, r);
         if (s == null)

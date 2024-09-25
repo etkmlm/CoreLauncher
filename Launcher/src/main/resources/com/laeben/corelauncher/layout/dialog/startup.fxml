@@ -11,9 +11,6 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             prefHeight="400.0" prefWidth="600.0" fx:id="root" stylesheets="@../../style/controls/sconf.css">
-
-
-
     <Label fx:id="lblTitle" text="Welcome to the Core Launcher!" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="5"/>
     <GridPane AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="30" alignment="CENTER" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" vgap="10" hgap="10">
         <columnConstraints>
@@ -25,7 +22,7 @@
         <CCombo fx:id="cbLanguage" GridPane.columnIndex="1" maxWidth="Infinity"/>
 
         <Label fx:id="lblUsername" text="Username" GridPane.rowIndex="1"/>
-        <HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+        <HBox alignment="CENTER" spacing="10" GridPane.rowIndex="1" GridPane.columnIndex="1">
             <TextField fx:id="txtUsername" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             <CheckBox fx:id="chkOnline" maxWidth="Infinity" text="Online"/>
         </HBox>

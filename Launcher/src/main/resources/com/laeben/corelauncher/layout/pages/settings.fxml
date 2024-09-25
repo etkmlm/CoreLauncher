@@ -17,7 +17,7 @@
             <GridPane hgap="10" vgap="10" maxWidth="Infinity">
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
-                    <ColumnConstraints prefWidth="300" />
+                    <ColumnConstraints prefWidth="350" />
                     <ColumnConstraints minWidth="300" maxWidth="500" hgrow="ALWAYS" />
                     <ColumnConstraints prefWidth="300"/>
                 </columnConstraints>
@@ -51,7 +51,7 @@
             <GridPane hgap="10" vgap="10" maxWidth="Infinity">
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
-                    <ColumnConstraints prefWidth="300" />
+                    <ColumnConstraints prefWidth="350" />
                     <ColumnConstraints minWidth="300" maxWidth="500" hgrow="ALWAYS" />
                     <ColumnConstraints prefWidth="100"/>
                 </columnConstraints>
@@ -93,7 +93,7 @@
             <GridPane hgap="10" vgap="10" maxWidth="Infinity">
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
-                    <ColumnConstraints prefWidth="300" />
+                    <ColumnConstraints prefWidth="350" />
                     <ColumnConstraints minWidth="300" maxWidth="500" hgrow="ALWAYS" />
                     <ColumnConstraints prefWidth="100"/>
                 </columnConstraints>
@@ -118,6 +118,30 @@
                     <CButton fx:id="btnClearImages" text="%settings.images.clear"/>
                     <CWorker fx:id="workerImages"/>
                 </HBox>
+            </GridPane>
+        </VBox>
+        <Rectangle height="20"/>
+        <VBox maxWidth="Infinity">
+            <Label styleClass="title" text="%settings.title.discord" />
+            <Rectangle height="15" />
+            <GridPane hgap="10" vgap="10" maxWidth="Infinity">
+                <columnConstraints>
+                    <ColumnConstraints prefWidth="30" />
+                    <ColumnConstraints prefWidth="350" />
+                    <ColumnConstraints minWidth="300" maxWidth="500" hgrow="ALWAYS" />
+                    <ColumnConstraints prefWidth="100"/>
+                </columnConstraints>
+
+                <Label styleClass="property-key" text="%settings.enableRPC" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <CheckBox fx:id="chkDiscordEnable" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+
+                <Label styleClass="property-key" text="%settings.inGameRPC" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <CheckBox fx:id="chkInGameRPC" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+
+                <!--<Label styleClass="property-key" text="%settings.commPort" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Spinner fx:id="txtCommPort" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="2" />-->
+                <!--<Label styleClass="property-key" text="%settings.debugLogMode" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <CheckBox fx:id="chkDebugLogMode" GridPane.columnIndex="2" GridPane.rowIndex="2" />-->
             </GridPane>
         </VBox>
     </VBox>

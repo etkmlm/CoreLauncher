@@ -59,16 +59,17 @@ public class NeoForge extends Wrapper<NeoForgeVersion> {
         if (!cache.isEmpty() && !disableCache)
             return cache;
 
-        cache.clear();
+
 
         try {
             var all = gson.fromJson(NetUtil.urlToString(NEO_INDEX), JsonObject.class);
+            cache.clear();
             cache.addAll(all.get("versions").getAsJsonArray().asList().stream().map(a -> new NeoForgeVersion(a.getAsString())).toList());
             Collections.reverse(cache);
-        } catch (NoConnectionException e) {
-            throw new RuntimeException(e);
+        } catch (NoConnectionException ignored) {
+            return getOfflineVersions();
         } catch (HttpException e) {
-            throw new RuntimeException(e);
+            Logger.getLogger().log(e);
         }
 
         return cache;
@@ -90,10 +91,11 @@ public class NeoForge extends Wrapper<NeoForgeVersion> {
         var versionsPath = Configurator.getConfig().getGamePath().to("versions");
         var verPath = versionsPath.to(version.getJsonName());
         var verJsonPath = verPath.to(version.getJsonName() + ".json");
-        if (verJsonPath.exists() && !disableCache)
-            return;
 
         Vanilla.getVanilla().install(version);
+
+        if (verJsonPath.exists() && !disableCache)
+            return;
 
         String installerUrl = getNeoInstaller(version);
 

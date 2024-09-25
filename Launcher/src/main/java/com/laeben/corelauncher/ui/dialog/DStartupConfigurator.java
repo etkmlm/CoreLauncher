@@ -43,7 +43,6 @@ public class DStartupConfigurator extends CDialog<Boolean>{
             close();
         });
 
-        cbLanguage.setCursor(Cursor.DEFAULT);
         cbLanguage.getItems().setAll(Translator.getTranslator().getAllLanguages());
         cbLanguage.setValueFactory(a -> a.getDisplayLanguage(a));
         cbLanguage.setValue(selectedLanguage = Configurator.getConfig().getLanguage());
@@ -74,6 +73,7 @@ public class DStartupConfigurator extends CDialog<Boolean>{
         lblTitle.setText(Translator.translate("welcome"));
         lblLanguage.setText(Translator.translate("settings.language"));
         lblUsername.setText(Translator.translate("account"));
+        btnApply.setText(Translator.translate("option.apply"));
         chkOnline.setText(Translator.translate("online"));
     }
 

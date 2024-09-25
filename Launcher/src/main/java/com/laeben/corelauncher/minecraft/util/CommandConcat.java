@@ -18,8 +18,16 @@ public class CommandConcat {
         return this;
     }
 
+    public CommandConcat add(int index, List<String> commands){
+        if (commands != null && !commands.isEmpty() && commands.stream().noneMatch(String::isEmpty))
+            this.commands.addAll(index, commands);
+
+        return this;
+    }
+
     public CommandConcat add(String command){
-        this.commands.add(command);
+        if (command != null && !command.isBlank())
+            this.commands.add(command);
         return this;
     }
 

@@ -85,7 +85,10 @@ public class JavaManager {
         var os = CoreLauncher.SYSTEM_OS;
         String url = ADOPTIUM + j.majorVersion + "/hotspot?os=" + os.getName() + "&image_type=jdk&architecture=" + (is64Bit ? "x64" : "x86");
         try{
-            var object = GsonUtil.empty().fromJson(NetUtil.urlToString(url), JsonArray.class).get(0);
+            var arr = GsonUtil.empty().fromJson(NetUtil.urlToString(url), JsonArray.class);
+            if (arr == null || arr.isEmpty())
+                return null;
+            var object = arr.get(0);
             if (object == null)
                 return null;
             var obj = object.getAsJsonObject();

@@ -5,12 +5,18 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ValueEvent;
+import com.laeben.corelauncher.api.socket.CLCommunicator;
+import com.laeben.corelauncher.api.socket.entity.CLPacket;
+import com.laeben.corelauncher.api.socket.entity.CLStatusPacket;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.discord.Discord;
+import com.laeben.corelauncher.discord.entity.Activity;
 import com.laeben.corelauncher.minecraft.Launcher;
+import com.laeben.corelauncher.minecraft.entity.ServerInfo;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
@@ -20,6 +26,7 @@ import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CMsgBox;
+import com.laeben.corelauncher.util.APIListener;
 import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -34,6 +41,9 @@ import java.io.FileNotFoundException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class CoreLauncher {
 
@@ -87,7 +97,7 @@ public class CoreLauncher {
                 System.exit(0);
             }
             catch (Exception e){
-                e.printStackTrace();
+                Logger.getLogger().log(e);
             }
         }
         else if (listArgs.contains("--new")){
@@ -104,7 +114,7 @@ public class CoreLauncher {
                 System.exit(0);
             }
             catch (Exception e){
-                e.printStackTrace();
+                Logger.getLogger().log(e);
             }
         }
         else if (listArgs.contains("--delOld")){
@@ -113,7 +123,7 @@ public class CoreLauncher {
                 LAUNCHER_PATH.to("clold.jar").delete();
             }
             catch (Exception e){
-                e.printStackTrace();
+                Logger.getLogger().log(e);
             }
         }
 
@@ -147,9 +157,39 @@ public class CoreLauncher {
         new Modrinth().reload();
         new Modder();
         new Authenticator();
+        new Discord().startDiscordThread();
         OS_64 = OSUtil.is64BitOS(JavaManager.getDefault());
 
 
+        // Launcher Web API Listener
+        APIListener.start();
+
+        /*try{
+            new CLCommunicator(9845).start();
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }*/
+
+        Discord.getDiscord().setActivity(Activity.setForIdling());
+
+        /*CLCommunicator.getCommunicator().getHandler().addHandler("clauncher", a -> {
+            if (!a.getKey().equals(CLCommunicator.EVENT_RECEIVE))
+                return;
+            var packet = (CLPacket)a.getValue();
+            switch (packet.getType()){
+                case LAUNCH, HANDSHAKE -> {
+
+                }
+                case STATUS -> {
+                    var p = new CLStatusPacket(packet);
+                    Discord.getDiscord().setActivity(x -> {
+                        x.state = p.getType().name();
+                        x.details = p.getData();
+                    });
+                }
+            }
+        }, true);*/
         Configurator.getConfigurator().getHandler().addHandler("logger", (a) -> {
             if (!a.getKey().equals("gamePathChange"))
                 return;
@@ -194,7 +234,6 @@ public class CoreLauncher {
             }
             while (RESTART);
         }
-
 
         Configurator.getConfig().getTemporaryFolder().getFiles().forEach(Path::delete);
         if (Configurator.getConfig().delGameLogs()){

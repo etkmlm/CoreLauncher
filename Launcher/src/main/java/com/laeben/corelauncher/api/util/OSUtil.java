@@ -32,7 +32,7 @@ public class OSUtil {
 
     public static Path getJavaFile(String root){
         if (systemOS == OS.WINDOWS){
-            return Path.of(root, "bin", "java.exe");
+            return Path.of(root, "bin", "javaw.exe");
         }
         else
             return Path.of(root, "bin", "java");

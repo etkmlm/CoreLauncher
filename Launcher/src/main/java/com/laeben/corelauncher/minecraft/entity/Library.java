@@ -12,6 +12,7 @@ public class Library {
     public String name;
     public String url;
     public transient String fileName;
+    public transient boolean isAgent;
     public List<Rule> rules;
 
     public Extract extract;

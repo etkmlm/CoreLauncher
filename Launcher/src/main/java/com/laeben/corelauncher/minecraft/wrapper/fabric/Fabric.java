@@ -7,6 +7,7 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
+import com.laeben.corelauncher.minecraft.wrapper.fabric.entity.BaseFabricVersion;
 import com.laeben.corelauncher.minecraft.wrapper.fabric.entity.FabricVersion;
 import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -17,11 +18,11 @@ import com.google.gson.JsonArray;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Fabric extends Wrapper<FabricVersion> {
+public class Fabric<T extends BaseFabricVersion> extends Wrapper<T> {
 
     private static final String BASE_URL = "https://meta.fabricmc.net/v2/";
 
-    private static final List<FabricVersion> cache = new ArrayList<>();
+    private static final List<BaseFabricVersion> cache = new ArrayList<>();
 
     private final Gson gson;
     private String cacheInstaller;
@@ -39,8 +40,16 @@ public class Fabric extends Wrapper<FabricVersion> {
     }
 
     @Override
-    public FabricVersion getVersion(String id, String wrId) {
-        return getVersions(id).stream().filter(x -> x.getWrapperVersion().equals(wrId)).findFirst().orElse(null);
+    public T getVersion(String id, String wrId) {
+        return (T)getVersions(id).stream().filter(x -> x.getWrapperVersion().equals(wrId)).findFirst().orElse(null);
+    }
+
+    protected T getFabricVersion(){
+        return (T)new FabricVersion();
+    }
+
+    protected T getFabricVersion(String id, String wrId) {
+        return (T)new FabricVersion(id, wrId);
     }
 
     protected String getInstaller() throws NoConnectionException, HttpException {
@@ -51,24 +60,23 @@ public class Fabric extends Wrapper<FabricVersion> {
     }
 
     @Override
-    public FabricVersion getVersionFromIdentifier(String identifier, String inherits){
+    public T getVersionFromIdentifier(String identifier, String inherits){
         if (inherits == null)
             inherits = "*";
-        return identifier.startsWith(getType().getIdentifier()) ? new FabricVersion(inherits, identifier.split("-")[2]) : null;
+        return identifier.startsWith(getType().getIdentifier()) ? getFabricVersion(inherits, identifier.split("-")[2]) : null;
     }
 
     @Override
-    public List<FabricVersion> getAllVersions() {
+    public List<T> getAllVersions() {
         return null;
     }
 
     @Override
-    public List<FabricVersion> getVersions(String id) {
-
+    public List<T> getVersions(String id) {
         logState("acqVersionFabric - " + id);
 
         if (!cache.isEmpty() && !disableCache)
-            return cache;
+            return (List<T>) cache;
         cache.clear();
 
         try{
@@ -78,11 +86,11 @@ public class Fabric extends Wrapper<FabricVersion> {
                 return List.of();
 
             for(var i : json){
-                FabricVersion v = new FabricVersion()
+                var v = getFabricVersion()
                         .setWrapperVersion("." + getType() + ":" + i.getAsJsonObject().get("loader").getAsJsonObject().get("version").getAsString());
                 v.id = id;
 
-                cache.add(v);
+                cache.add((BaseFabricVersion) v);
             }
         }
         catch (NoConnectionException e){
@@ -92,11 +100,11 @@ public class Fabric extends Wrapper<FabricVersion> {
             Logger.getLogger().log(e);
         }
 
-        return cache;
+        return (List<T>) cache;
     }
 
     @Override
-    public void install(FabricVersion v) throws NoConnectionException, StopException {
+    public void install(T v) throws NoConnectionException, StopException {
         Vanilla.getVanilla().install(v);
 
         var gameDir = Configurator.getConfig().getGamePath();

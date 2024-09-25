@@ -26,6 +26,8 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.minecraft.wrapper.entity to com.google.gson;
     opens com.laeben.corelauncher.minecraft.modding.curseforge.entity to com.google.gson, com.laeben.core;
     opens com.laeben.corelauncher.minecraft.modding.modrinth.entity to com.google.gson, com.laeben.core;
+    opens com.laeben.corelauncher.discord.entity to com.google.gson;
+    opens com.laeben.corelauncher.discord.entity.response to com.google.gson;
 
     exports com.laeben.corelauncher;
     exports com.laeben.corelauncher.ui.controller;

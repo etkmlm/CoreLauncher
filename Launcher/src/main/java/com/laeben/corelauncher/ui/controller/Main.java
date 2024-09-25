@@ -8,7 +8,11 @@ import com.laeben.core.util.Cat;
 import com.laeben.core.util.events.*;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.LauncherConfig;
+import com.laeben.corelauncher.api.entity.Config;
 import com.laeben.corelauncher.api.exception.PerformException;
+import com.laeben.corelauncher.api.socket.entity.CLPacket;
+import com.laeben.corelauncher.api.socket.entity.CLPacketType;
+import com.laeben.corelauncher.api.socket.entity.CLStatusPacket;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.Controller;
@@ -18,11 +22,15 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.util.OSUtil;
+import com.laeben.corelauncher.discord.Discord;
+import com.laeben.corelauncher.discord.entity.Activity;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
+import com.laeben.corelauncher.minecraft.entity.ServerInfo;
 import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.modding.Modder;
+import com.laeben.corelauncher.minecraft.util.ServerHandshake;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.ui.controller.page.MainPage;
 import com.laeben.corelauncher.ui.controller.page.SettingsPage;
@@ -45,14 +53,17 @@ import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Main extends HandlerController {
@@ -93,6 +104,8 @@ public class Main extends HandlerController {
 
     private final BooleanProperty running;
 
+    private final Executor executor;
+
     @FXML
     private ProgressIndicator ind;
 
@@ -132,6 +145,16 @@ public class Main extends HandlerController {
             else if (a.getKey().equals("reload"))
                 selectProfile(null);
         }, true);
+        registerHandler(UI.getUI().getHandler(), a -> {
+            if (a instanceof KeyEvent ke && ke.getKey().equals("windowClose")){
+                var stage = (Stage)a.getSource();
+                if (stage.isMaximized())
+                    Configurator.getConfig().setWindowSize(-1, -1);
+                else
+                    Configurator.getConfig().setWindowSize(stage.getWidth(), stage.getHeight());
+                Configurator.save();
+            }
+        }, true);
         registerHandler(Launcher.getLauncher().getHandler(), this::onGeneralEvent, true);
         registerHandler(Vanilla.getVanilla().getHandler(), this::onGeneralEvent, true);
         registerHandler(Modder.getModder().getHandler(), this::onGeneralEvent, true);
@@ -160,6 +183,9 @@ public class Main extends HandlerController {
         status = new String[3];
 
         handler = new EventHandler<>();
+
+        executor = Executors.newSingleThreadExecutor();
+
         instance = this;
     }
 
@@ -201,6 +227,20 @@ public class Main extends HandlerController {
         else if (e instanceof ValueEvent v){
             if (v.getKey().startsWith("sessionEnd")){
                 announcer.announce(new Announcement(Translator.translate("announce.game.ended"), Translator.translateFormat("announce.misc.profile", v.getKey().substring(10)) + "\n" + Translator.translateFormat("announce.misc.ecode", v.getValue()), Announcement.AnnouncementType.GAME), Duration.seconds(3));
+                Discord.getDiscord().setActivity(Activity.setForIdling());
+            }
+            else if (v.getKey().equals("sessionReceive")){
+                var val = (CLPacket)v.getValue();
+                if (val.getType() != CLPacketType.STATUS || !Configurator.getConfig().isEnabledInGameRPC())
+                    return;
+                var status = new CLStatusPacket(val);
+                if (status.getType() == CLStatusPacket.InGameType.MULTIPLAYER)
+                    executor.execute(() -> {
+                        var a = ServerHandshake.shake(status.getData(), 25565);
+                        if (a != null)
+                            Discord.getDiscord().setActivity(Activity.setForParty("abc", a.players(), a.maxPlayers()));
+                    });
+                Discord.getDiscord().setActivity(Activity.setForInGame(status));
             }
         }
         else if (e instanceof KeyEvent k){
@@ -209,6 +249,7 @@ public class Main extends HandlerController {
             if (key.startsWith("sessionStart")){
                 announcer.announce(new Announcement(Translator.translate("announce.game.started"), Translator.translateFormat("announce.misc.profile", k.getKey().substring(12)), Announcement.AnnouncementType.GAME), Duration.seconds(3));
                 running.set(false);
+                Discord.getDiscord().setActivity(Activity.setForProfile(selectedProfile));
                 if (Configurator.getConfig().hideAfter())
                     UI.getUI().hideAll();
             }
@@ -231,6 +272,7 @@ public class Main extends HandlerController {
                 setStatus(1, Translator.translateFormat("launch.state.acquire", key.substring(10)));
             else if (key.startsWith("prepare")){
                 setStatus(1, Translator.translateFormat("launch.state.prepare", key.substring(7)));
+                Discord.getDiscord().setActivity(a -> a.state = Translator.translate("discord.state.prepare"));
             }
             else if (key.startsWith("."))
                 setStatus(1, dot(key.substring(1)));
@@ -334,12 +376,12 @@ public class Main extends HandlerController {
                     selectedProfile.getWrapper().setStopRequested(true);
                     Vanilla.getVanilla().setStopRequested(true);
                     NetUtil.stop();
+                    Discord.getDiscord().setActivity(Activity.setForIdling());
                 }
                 running.set(false);
             }
             else if (selectedProfile != null){
-                launch(selectedProfile, a.isShiftDown());
-                running.set(true);
+                launch(selectedProfile, a.isShiftDown(), null);
             }
         });
 
@@ -415,6 +457,16 @@ public class Main extends HandlerController {
                 Configurator.save();
             }
         }
+
+        double w = Configurator.getConfig().getWindowWidth();
+        double h = Configurator.getConfig().getWindowHeight();
+        if (w > 0 && h > 0){
+            getStage().setWidth(w);
+            getStage().setHeight(h);
+        }
+        else if (w == -1 && h == -1){
+            getStage().setMaximized(true);
+        }
     }
 
     private ScrollPane getScroll(){
@@ -422,6 +474,10 @@ public class Main extends HandlerController {
         pane.setFitToWidth(true);
         pane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         pane.setFitToHeight(true);
+        pane.addEventFilter(ScrollEvent.SCROLL, a -> {
+            double val = a.getDeltaY() * 0.01 * (pane.getHeight() * 1 / 800);
+            pane.setVvalue(pane.getVvalue() - val);
+        });
         return pane;
     }
     public void closeTab(int index){
@@ -540,6 +596,9 @@ public class Main extends HandlerController {
      * @param text Status text.
      */
     public void setStatus(int priority, String text){
+        if (!running.get())
+            return;
+
         if (priority < 0)
             priority = 0;
         else if (priority >= status.length)
@@ -569,11 +628,10 @@ public class Main extends HandlerController {
         return handler;
     }
 
-    private void launch(Profile p, boolean cache){
+    public void launch(Profile p, boolean cache, ServerInfo server){
         var wr = (Wrapper<?>)p.getWrapper();
         Vanilla.getVanilla().setDisableCache(cache);
         wr.setDisableCache(cache).getHandler().addHandler("main", this::onGeneralEvent, true);
-        running.set(true);
 
         var task = new Task<>() {
             @Override
@@ -590,7 +648,7 @@ public class Main extends HandlerController {
 
                 Platform.runLater(() -> clearStatus());
 
-                Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p));
+                Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p).includeServer(server));
 
                 Cat.sleep(200);
                 if (Configurator.getConfig().hideAfter())
@@ -614,25 +672,27 @@ public class Main extends HandlerController {
             });
 
             if (f instanceof NoConnectionException){
-                Platform.runLater(() -> setPrimaryStatus(Translator.translate("error.connection")));
+                announceLater(Translator.translate("error.oops"),Translator.translate("error.connection"), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
+                //Platform.runLater(() -> setPrimaryStatus());
             }
             else if (f instanceof VersionNotFoundException e){
-                Platform.runLater(() -> setPrimaryStatus(Translator.translateFormat("error.noVersion", e.getMessage())));
+                announceLater(Translator.translate("error.oops"), Translator.translateFormat("error.noVersion", e.getMessage()), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
+                //Platform.runLater(() -> setPrimaryStatus());
             }
             else if (f instanceof StopException){
                 //
             }
             else if (f instanceof PerformException pe){
-                Platform.runLater(() -> setPrimaryStatus(pe.getMessage()));
+                announceLater(Translator.translate("error.oops"), pe.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
+                //Platform.runLater(() -> setPrimaryStatus(pe.getMessage()));
             }
             else if (f instanceof Exception e){
                 Logger.getLogger().log(e);
-                Platform.runLater(() -> {
-                    setPrimaryStatus(Translator.translate("error.unknown"));
-                    setStatus(1, e.getMessage());
-                });
+                announceLater(Translator.translate("error.unknown"),e.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(4000));
             }
         });
+
+        running.set(true);
 
         new Thread(task).start();
     }

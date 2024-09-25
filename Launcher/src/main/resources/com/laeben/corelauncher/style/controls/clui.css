@@ -42,6 +42,12 @@
 .scroll-bar{
     -fx-background-color: transparent;
     -fx-pref-width: 8px;
+
+}
+
+.scroll-bar:vertical{
+    -fx-block-increment: 100!important;
+    -fx-unit-increment: 100!important;
 }
 
 .scroll-bar .thumb{

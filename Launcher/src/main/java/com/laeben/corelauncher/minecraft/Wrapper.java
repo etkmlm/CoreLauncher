@@ -105,9 +105,9 @@ public abstract class Wrapper<H extends Version> {
         for (Library l : LauncherConfig.LAUNCHER_LIBRARIES){
             Path p = libDir.to(l.calculatePath());
             if (!p.exists()){
-                try(var fixer = CoreLauncherFX.class.getResourceAsStream("libraries/" + l.fileName)){
-                    assert fixer != null;
-                    fixer.transferTo(new FileOutputStream(p.prepare().toFile()));
+                try(var libStr = CoreLauncherFX.class.getResourceAsStream("libraries/" + l.fileName)){
+                    assert libStr != null;
+                    libStr.transferTo(new FileOutputStream(p.prepare().toFile()));
                 }
                 catch (Exception e){
                     Logger.getLogger().log(e);
@@ -222,11 +222,13 @@ public abstract class Wrapper<H extends Version> {
 
                 if (vIndex.isLegacy()){
                     var f = legacyDir.to(asset.path);
-                    path.copy(f);
+                    if (!f.exists())
+                        path.copy(f);
                 }
                 else if (vIndex.isVeryLegacy()){
                     var f = veryLegacyDir.to(asset.path);
-                    path.copy(f);
+                    if (!f.exists())
+                        path.copy(f);
                 }
 
                 Logger.getLogger().logDebug((i++) + " / " + count);

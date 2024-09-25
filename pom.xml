@@ -12,6 +12,7 @@
     <modules>
         <module>CLFixer</module>
         <module>Launcher</module>
+        <module>CLPatcher</module>
     </modules>
 
 

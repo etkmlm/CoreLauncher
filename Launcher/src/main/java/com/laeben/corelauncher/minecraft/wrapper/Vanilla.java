@@ -3,6 +3,7 @@ package com.laeben.corelauncher.minecraft.wrapper;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entity.MainInfo;
 import com.laeben.corelauncher.minecraft.entity.Version;
@@ -84,8 +85,6 @@ public class Vanilla extends Wrapper<Version> {
         return null;
     }
 
-
-
     @Override
     public void install(Version v) throws NoConnectionException, StopException {
         if (v.id == null)
@@ -94,6 +93,7 @@ public class Vanilla extends Wrapper<Version> {
         Path verDir = getGameDir().to("versions", v.id);
         Path jsonPath = verDir.to(v.id + ".json");
         Path clientPath = verDir.to(v.id + ".jar");
+        Path mappingPath = verDir.to("client.txt");
 
         setupLauncherLibraries();
 
@@ -116,6 +116,15 @@ public class Vanilla extends Wrapper<Version> {
                 logState("clientDownload");
                 Logger.getLogger().logDebug("Downloading client " + v.id + "...");
                 NetUtil.download(info.downloads.client.url, clientPath, false, true);
+            }
+
+            try{
+                if ((!mappingPath.exists() || disableCache) && info.downloads.client_mappings != null){
+                    NetUtil.download(info.downloads.client_mappings.url, mappingPath, false, false);
+                }
+            }
+            catch (Exception ignored){
+
             }
 
             Logger.getLogger().logDebug("Vanilla Version " + v.id + " up to date!");

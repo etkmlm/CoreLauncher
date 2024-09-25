@@ -10,6 +10,7 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
 import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
+import com.laeben.corelauncher.minecraft.mapping.PGMapper;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.util.CommandConcat;
 import com.laeben.corelauncher.util.EventHandler;
@@ -21,6 +22,8 @@ import com.laeben.core.util.events.KeyEvent;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class Launcher {
     public static Launcher instance;
@@ -58,10 +61,13 @@ public class Launcher {
      * Prepares the profile to launch.
      * @param profile target profile
      */
-    public void prepare(Profile profile) throws NoConnectionException, StopException, PerformException, HttpException, FileNotFoundException {
+    public void prepare(Profile profile) throws NoConnectionException, StopException, PerformException, HttpException, FileNotFoundException, VersionNotFoundException {
         handleState("prepare" + profile.getName());
 
-        profile.getWrapper().install(profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion()));
+        var version = profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion());
+        if (version == null)
+            throw new VersionNotFoundException(profile.getWrapperVersion());
+        profile.getWrapper().install(version);
 
         if (!profile.getWrapper().getType().isNative()){
             Modder.getModder().installModpacks(profile, profile.getModpacks());
@@ -135,13 +141,17 @@ public class Launcher {
 
             String libPath = "-Djava.library.path=" + linfo.nativePath;
             String c = String.valueOf(File.pathSeparatorChar);
-            String cp = linfo.clientPath + c + String.join(c, linfo.libraries);
+
+            var client = linfo.wrappedClientPath.exists() && linfo.wrappedClientPath.getSize() > 0 ? linfo.wrappedClientPath : linfo.clientPath;
+
+            //String cp = String.join(c, linfo.libraries) + c + linfo.clientPath;
+            String cp = String.join(c, linfo.libraries) + c + client;
 
             // Static commands
             String[] rootCmds = {
                     info.java.getExecutable().toString(),
                     libPath,
-                    "-javaagent:" + linfo.agentPath, // Don't worry (yup), this contains launcher's patches to mc like 1.16.4 multiplayer bug
+                    //"-javaagent:" + linfo.agentPath, // Don't worry (yup), this contains launcher's patches to mc like 1.16.4 multiplayer bug
                     "-Dorg.lwjgl.util.Debug=true",
                     "-Dfml.ignoreInvalidMinecraftCertificates=true"
             };
@@ -154,21 +164,32 @@ public class Launcher {
 
             String[] gameCmds = linfo.getGameArguments();
 
+            String argsss = null;
+            var mptxt = linfo.clientPath.parent().to("client.txt");
+            if (mptxt.exists() && Configurator.getConfig().isEnabledInGameRPC()){
+                String txt = getMappingArgs(mptxt.read());
+                argsss = "-Dcom.laeben.clpatcher.args=" + txt;
+            }
+
             // Final commands
             var finalCmds = new CommandConcat()
                     .add(rootCmds)
+                    .add(2, linfo.agents)
                     .add(linfo.getJvmArguments())
                     .add(info.args)
+                    .add(argsss)
                     .add("-cp", cp)
                     .add(linfo.mainClass)
                     .add(gameCmds)
                     .generate();
+
 
             // Due to some reasons, authentication process does not complete without requesting to the certificate URL, so we are requesting here.
             info.account.validate();
 
             // Start a new session
             var session = new Session(info.dir, finalCmds);
+            session.setOnPacketReceived(a -> handler.execute(new ValueEvent("sessionReceive", a)));
 
             handleState("sessionStart" + info.executor);
             session.start();
@@ -181,6 +202,36 @@ public class Launcher {
         catch (Exception e){
             Logger.getLogger().log(e);
         }
+    }
+
+    private String getMappingArgs(String txt){
+        var mapper = new PGMapper(txt);
+
+        String handle = "net.minecraft.client.multiplayer.ClientPacketListener";
+        String title = "net.minecraft.client.gui.screens.TitleScreen";
+        String mc = "net.minecraft.client.Minecraft";
+        String multi = "net.minecraft.client.multiplayer.ServerData";
+        String single = "net.minecraft.server.MinecraftServer";
+
+        var hCls = mapper.getClass(handle);
+        var handleLogin = hCls.getMethod("handleLogin");
+
+        var mcCls = mapper.getClass(mc);
+        var getInstance = mcCls.getMethod("getInstance");
+        var getSingleplayerServer = mcCls.getMethod("getSingleplayerServer");
+
+        var msCls = mapper.getClass(single);
+        var getMotd = msCls.getMethod("getMotd");
+
+        var getCurrentServer = mcCls.getMethod("getCurrentServer");
+
+        var sdCls = mapper.getClass(multi);
+        var ipField = sdCls.getField("ip");
+
+        var tCls = mapper.getClass(title);
+        var init = tCls.getMethod("init");
+
+        return String.join(",", Stream.of(hCls, mcCls, getInstance, getSingleplayerServer, getMotd, getCurrentServer, ipField, tCls, init, handleLogin).map(Object::toString).toList());
     }
 
 }

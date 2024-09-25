@@ -3,12 +3,14 @@ package com.laeben.corelauncher.minecraft;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.entity.Path;
+import com.laeben.corelauncher.api.socket.entity.CLPacket;
 
 import java.io.BufferedReader;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class Session {
     private final Thread inputThread;
@@ -22,6 +24,8 @@ public class Session {
     private final Path logFile;
     private static int lastSessionId = 0;
     private final int sessionId;
+
+    private Consumer<CLPacket> onPacketReceived;
 
     private int exitCode;
 
@@ -37,6 +41,10 @@ public class Session {
         var formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH.mm");
         String dt = formatter.format(dtt);
         logFile = Configurator.getConfig().getLauncherPath().to("gamelog", dt + " - S" + sessionId + ".log");
+    }
+
+    public void setOnPacketReceived(Consumer<CLPacket> onPacketReceived){
+        this.onPacketReceived = onPacketReceived;
     }
 
     public int getSessionId(){
@@ -94,6 +102,12 @@ public class Session {
             try{
                 if (stopRequested || (read = reader.readLine()) == null)
                     break;
+                if (read.startsWith("clstatus")){
+                    var packet = CLPacket.fromArrayBuffer(read.substring(8).getBytes());
+                    if (onPacketReceived != null)
+                        onPacketReceived.accept(packet);
+                    continue;
+                }
                 log(prefix, read);
             }
             catch (Exception e){

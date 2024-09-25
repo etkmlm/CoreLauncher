@@ -6,13 +6,14 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.minecraft.wrapper.fabric.Fabric;
+import com.laeben.corelauncher.minecraft.wrapper.fabric.entity.BaseFabricVersion;
 import com.laeben.corelauncher.minecraft.wrapper.fabric.entity.FabricVersion;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
 
-public class Quilt extends Fabric {
+public class Quilt extends Fabric<QuiltVersion> {
 
     private static final String BASE_URL = "https://meta.quiltmc.org/v3/";
 
@@ -27,7 +28,17 @@ public class Quilt extends Fabric {
     }
 
     @Override
-    public void install(FabricVersion v) throws NoConnectionException, StopException {
+    protected QuiltVersion getFabricVersion(){
+        return new QuiltVersion();
+    }
+
+    @Override
+    protected QuiltVersion getFabricVersion(String id, String wrId){
+        return new QuiltVersion(id, wrId);
+    }
+
+    @Override
+    public void install(QuiltVersion v) throws NoConnectionException, StopException {
         Vanilla.getVanilla().install(v);
 
         var gameDir = Configurator.getConfig().getGamePath();
