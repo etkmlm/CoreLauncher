@@ -4,7 +4,6 @@ import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.entity.OS;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class Library {
 

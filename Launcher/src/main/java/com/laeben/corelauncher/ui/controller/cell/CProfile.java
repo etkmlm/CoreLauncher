@@ -44,7 +44,7 @@ public class CProfile extends CDockObject{
         hover.setDuration(animationDuration);
 
         trns = new TranslateTransition();
-        trns.setFromY(80);
+        trns.setFromY(90);
         trns.setToY(0);
         trns.setDuration(animationDuration);
     }
@@ -74,7 +74,7 @@ public class CProfile extends CDockObject{
         else
             FloatDock.getDock().remove(object);
 
-        listener.accept(new KeyEvent("remove"));
+        listener.accept(new KeyEvent(FloatDock.REMOVE));
     }
 
     @Override
@@ -106,7 +106,7 @@ public class CProfile extends CDockObject{
         ghostButton.setManaged(false);
 
         generateProfileMenu(menu, profile, ghostButton, a -> {
-            if (a.equals("delete"))
+            if (a.equals(CDockObject.DELETE))
                 vanish();
 
             return true;

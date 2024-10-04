@@ -3,7 +3,7 @@ package com.laeben.corelauncher.ui.control;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.controller.cell.CCell;
 import com.laeben.corelauncher.ui.entity.CLSelectable;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -179,7 +179,7 @@ public class CList<T> extends VBox {
     }
     public void reload(boolean considerLimit){
         list.getChildren().clear();
-        Platform.runLater(() -> {
+        UI.runAsync(() -> {
             int lls = list.getChildren().size();
             int size = items.size();
             list.getChildren().clear();
@@ -189,6 +189,7 @@ public class CList<T> extends VBox {
             }
             for (int i = 0; (!considerLimit || i < lls) && i < size; i++)
                 list.getChildren().add(getCell(items.get(i)));
+            nullMode(false);
         });
     }
     public void setLoadLimit(int limit){
@@ -216,7 +217,7 @@ public class CList<T> extends VBox {
 
         lastLoadedIndex = i - 1;
 
-        Platform.runLater(() ->{
+        UI.runAsync(() ->{
             list.getChildren().addAll(it);
             nullMode(list.getChildren().isEmpty());
         });
@@ -240,7 +241,7 @@ public class CList<T> extends VBox {
             return;
         }
 
-        Platform.runLater(() -> {
+        UI.runAsync(() -> {
             list.getChildren().setAll(items.stream().filter(a -> filterFactory.test(new Filter<>(a, text))).map(this::getCell).toList());
             nullMode(list.getChildren().isEmpty());
         });

@@ -12,7 +12,7 @@ import com.laeben.corelauncher.minecraft.modding.entity.World;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.*;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -35,17 +35,18 @@ import java.util.List;
 import java.util.Locale;
 
 public class WorldsPage extends HandlerController {
+    public static final String KEY = "pgworlds";
 
     private Profile profile;
     private final ObservableList<String> worlds;
     private List<World> local;
 
     public WorldsPage(){
-        super("pgworlds");
+        super(KEY);
         worlds = FXCollections.observableArrayList();
 
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
-            if (a.getKey().equals("profileUpdate"))
+            if (a.getKey().equals(Profiler.PROFILE_UPDATE))
                 reload();
         }, true);
     }
@@ -160,7 +161,7 @@ public class WorldsPage extends HandlerController {
 
             profile.getPath().to("saves").to(selectedWorld.dirName).delete();
 
-            Platform.runLater(this::reload);
+            UI.runAsync(this::reload);
         });
 
         btnBackup.setTooltip(new Tooltip(Translator.translate("profile.menu.backup")));
@@ -235,7 +236,7 @@ public class WorldsPage extends HandlerController {
                     temp.move(saves.to(StrUtil.pure(name)));
                 }
 
-                Platform.runLater(this::reload);
+                UI.runAsync(this::reload);
                 //Profiler.getProfiler().setProfile(profile.getName(), null);
                 if (!arr.isEmpty())
                     Main.getMain().announceLater(Translator.translate("world.title"), Translator.translateFormat("world.import.end", String.join(",", arr)), Announcement.AnnouncementType.INFO, Duration.seconds(2));

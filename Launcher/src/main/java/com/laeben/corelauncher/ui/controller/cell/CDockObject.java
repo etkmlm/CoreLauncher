@@ -34,6 +34,16 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public abstract class CDockObject extends GridCell {
+    public static final String RELEASE = "release";
+    public static final String MOVE = "move";
+    public static final String EDIT = "edit";
+    public static final String DELETE = "delete";
+    public static final String BACKUP = "backup";
+    public static final String EXPORT = "export";
+    public static final String OPEN = "open";
+    public static final String COPY = "copy";
+    public static final String SELECT = "select";
+
     public static final DataFormat dataFormat = new DataFormat("profile");
     public static final Duration animationDuration = Duration.seconds(0.8);
 
@@ -158,7 +168,7 @@ public abstract class CDockObject extends GridCell {
         root.setScaleX(1);
         root.setScaleY(1);
 
-        grabListener.accept(new KeyEvent("release").setSource(this));
+        grabListener.accept(new KeyEvent(RELEASE).setSource(this));
     }
 
     private void onPressed(MouseEvent a){
@@ -171,7 +181,7 @@ public abstract class CDockObject extends GridCell {
         a.setDragDetect(false);
         if (!pressed){
             if (moving){
-                grabListener.accept(new ValueEvent("move", new GrabVector(a.getSceneX(), a.getSceneY(), padX, padY)).setSource(this));
+                grabListener.accept(new ValueEvent(MOVE, new GrabVector(a.getSceneX(), a.getSceneY(), padX, padY)).setSource(this));
             }
             return;
         }
@@ -193,13 +203,13 @@ public abstract class CDockObject extends GridCell {
         menu.setButton(menuButton);
 
         menu.addItem(ImageCacheManager.getImage("edit.png", 32), Translator.translate("option.edit"), a -> {
-            if (onAction != null && !onAction.test("edit"))
+            if (onAction != null && !onAction.test(EDIT))
                 return;
 
             Main.getMain().addTab("pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
         });
         menu.addItem(ImageCacheManager.getImage("export.png", 32), Translator.translate("profile.menu.export"), a -> {
-            if (onAction != null && !onAction.test("export"))
+            if (onAction != null && !onAction.test(EXPORT))
                 return;
             ProfileUtil.export(profile, menuButton.getScene().getWindow());
         });
@@ -209,22 +219,22 @@ public abstract class CDockObject extends GridCell {
             Profiler.getProfiler().deleteProfile(profile);
         });*/
         menu.addItem(ImageCacheManager.getImage("delete.png", 32), Translator.translate("option.delete"), a -> {
-            if (onAction != null && !onAction.test("delete"))
+            if (onAction != null && !onAction.test(DELETE))
                 return;
             Profiler.getProfiler().deleteProfile(profile);
         });
         menu.addItem(ImageCacheManager.getImage("folder.png", 32), Translator.translate("profile.menu.open"), a -> {
-            if (onAction != null && !onAction.test("open"))
+            if (onAction != null && !onAction.test(OPEN))
                 return;
             OSUtil.openFolder(profile.getPath().toFile().toPath());
         });
         menu.addItem(ImageCacheManager.getImage("backup.png", 48), Translator.translate("profile.menu.backup"), a -> {
-            if (onAction != null && !onAction.test("backup"))
+            if (onAction != null && !onAction.test(BACKUP))
                 return;
             ProfileUtil.backup(profile, menuButton.getScene().getWindow());
         });
         menu.addItem(ImageCacheManager.getImage("copy.png", 32), Translator.translate("profile.menu.copy"), a -> {
-            if (onAction != null && !onAction.test("copy"))
+            if (onAction != null && !onAction.test(COPY))
                 return;
             var p = Profiler.getProfiler().copyProfile(profile);
             Main.getMain().addTab("pages/profile", p.getName(), true, ProfilePage.class).setProfile(p);
@@ -241,7 +251,7 @@ public abstract class CDockObject extends GridCell {
     public void selectPrimary(){
         if (moving)
             return;
-        listener.accept((KeyEvent) new KeyEvent("profileSelect").setSource(getPrimaryProfile()));
+        listener.accept((KeyEvent) new KeyEvent(SELECT).setSource(getPrimaryProfile()));
     }
 
     public CDockObject setListener(Consumer<KeyEvent> listener){

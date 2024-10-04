@@ -1,20 +1,15 @@
 package com.laeben.corelauncher;
 
 import com.laeben.corelauncher.api.entity.ImageEntity;
-import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.entity.Profile;
-import com.laeben.corelauncher.discord.Discord;
-import com.laeben.corelauncher.discord.DiscordIPC;
-import com.laeben.corelauncher.discord.entity.Activity;
-import com.laeben.corelauncher.discord.entity.NoDiscordException;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.api.util.NetUtil;
+import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.application.Application;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelBuffer;
 import javafx.scene.image.WritableImage;
@@ -42,7 +37,7 @@ public class CoreLauncherFX extends Application {
         stage.close();
         new UI();
         new FloatDock().reload();
-        Platform.setImplicitExit(false);
+        UI.setImplicitShutdown(false);
 
         Font.loadFont(Objects.requireNonNull(CoreLauncherFX.class.getResource("/com/laeben/corelauncher/font/Minecraft.ttf")).toExternalForm(), 16);
 
@@ -50,10 +45,12 @@ public class CoreLauncherFX extends Application {
 
         if (Debug.DEBUG_UI){
             Debug.runUI();
-            Platform.exit();
+            UI.shutdown();
         }
         else
             UI.getUI().create("main").show();
+
+        ExtensionWrapper.getWrapper().fireEvent("onUILoad");
 
         // Version check
         CoreLauncher.updateCheck();

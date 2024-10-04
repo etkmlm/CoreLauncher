@@ -7,7 +7,6 @@ import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CCombo;
 import javafx.fxml.FXML;
-import javafx.scene.Cursor;
 import javafx.scene.control.*;
 
 import java.util.Locale;

@@ -2,8 +2,6 @@ package com.laeben.corelauncher.ui.control;
 
 import com.laeben.corelauncher.api.ui.Controller;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
 
 public class CTab extends Tab {
     private Controller controller;

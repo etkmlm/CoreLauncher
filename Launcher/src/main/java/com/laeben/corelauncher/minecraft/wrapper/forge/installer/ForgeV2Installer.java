@@ -1,6 +1,5 @@
 package com.laeben.corelauncher.minecraft.wrapper.forge.installer;
 
-import javax.swing.*;
 import java.io.File;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;

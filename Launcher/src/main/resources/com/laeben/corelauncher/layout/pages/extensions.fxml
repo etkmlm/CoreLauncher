@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CField?>
+<?import com.laeben.corelauncher.ui.control.CList?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.laeben.corelauncher.ui.controller.page.ExtensionsPage"
+            prefHeight="400.0" prefWidth="600.0" stylesheets="@../../style/controls/clui.css,@../../style/pages/extensions.css">
+    <VBox style="-fx-padding: 10px" maxWidth="Infinity" maxHeight="Infinity" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0">
+        <CField fx:id="txtSearch" promptText="%search" style="-fx-background-color: #232323aa"/>
+        <Rectangle height="15"/>
+        <ScrollPane VBox.vgrow="ALWAYS" styleClass="w-scroll-pane" fitToWidth="true" hbarPolicy="NEVER">
+            <CList fx:id="pList"/>
+        </ScrollPane>
+    </VBox>
+    <CButton fx:id="btnOpenFolder" AnchorPane.bottomAnchor="15" AnchorPane.rightAnchor="15" styleClass="circle-button" prefHeight="64" prefWidth="64"/>
+</AnchorPane>

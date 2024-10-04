@@ -5,10 +5,12 @@ import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.entity.Frame;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.entity.LScene;
 import com.laeben.corelauncher.ui.entity.LStage;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -27,6 +29,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class UI {
+    public static final String WINDOW_OPEN = "wndOpen";
+    public static final String WINDOW_CLOSE = "wndClose";
+
+    public static final String API_WINDOW_CREATE = "onWindowCreate";
+
+
     private final List<LStage> windows;
     private final EventHandler<BaseEvent> handler;
     private boolean implicit = true;
@@ -119,7 +127,9 @@ public class UI {
             c.setStage(stage).setNode(root);
 
         windows.add(stage);
-        handler.execute(new KeyEvent("windowOpen").setSource(stage));
+        handler.execute(new KeyEvent(WINDOW_OPEN).setSource(stage));
+
+        ExtensionWrapper.getWrapper().fireEvent(API_WINDOW_CREATE, loader.getController(), Object.class);
 
         return stage;
     }
@@ -146,18 +156,18 @@ public class UI {
     public static FXMLLoader getDefaultLoader(URL url, ResourceBundle resources){
         var loader = new FXMLLoader(url);
 
-        loader.setResources(resources == null ? Translator.getTranslator().getBundle() : resources);
+        loader.setResources(resources == null ? Translator.getTranslator().getBundle().get(0) : resources);
 
         return loader;
     }
 
     public void reset(){
-        Platform.runLater(() -> {
+        UI.runAsync(() -> {
             var i = implicit;
             implicit = false;
             windows.stream().toList().forEach(this::close);
             implicit = i;
-            create("main").show();
+            create(Main.KEY).show();
         });
     }
 
@@ -171,11 +181,11 @@ public class UI {
     }
 
     public void hideAll(){
-        Platform.runLater(() -> windows.stream().toList().forEach(LStage::hide));
+        UI.runAsync(() -> windows.stream().toList().forEach(LStage::hide));
     }
 
     public void showAll(){
-        Platform.runLater(() -> windows.stream().toList().forEach(LStage::show));
+        UI.runAsync(() -> windows.stream().toList().forEach(LStage::show));
     }
 
     public static FXMLLoader getDefaultLoader(URL url){
@@ -202,9 +212,21 @@ public class UI {
 
         if (st instanceof LStage stage){
             windows.remove(stage);
-            handler.execute(new KeyEvent("windowClose").setSource(stage));
+            handler.execute(new KeyEvent(WINDOW_CLOSE).setSource(stage));
             if (windows.isEmpty() && implicit)
-                Platform.exit();
+                shutdown();
         }
+    }
+
+    public static void setImplicitShutdown(boolean val){
+        Platform.setImplicitExit(val);
+    }
+
+    public static void shutdown(){
+        Platform.exit();
+    }
+
+    public static void runAsync(Runnable runnable){
+        Platform.runLater(runnable);
     }
 }

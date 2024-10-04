@@ -19,6 +19,10 @@ import java.util.stream.Collectors;
 
 
 public class Profiler {
+    public static final String PROFILE_CREATE = "profileCreate";
+    public static final String PROFILE_UPDATE = "profileUpdate";
+    public static final String PROFILE_DELETE = "profileDelete";
+
     private static Profiler instance;
     private Path profilesDir;
     private List<Profile> profiles;
@@ -30,7 +34,7 @@ public class Profiler {
         handler = new EventHandler<>();
 
         Configurator.getConfigurator().getHandler().addHandler("profiler", (a) -> {
-            if (!a.getKey().equals("gamePathChange"))
+            if (!a.getKey().equals(Configurator.GAME_PATH_CHANGE))
                 return;
             profilesDir = profilesDir();
 
@@ -131,7 +135,7 @@ public class Profiler {
 
             //profiles.addAll(list);
 
-            handler.execute(new ChangeEvent("profileCreate", null, list));
+            handler.execute(new ChangeEvent(PROFILE_CREATE, null, list));
             return list;
         }
 
@@ -161,7 +165,7 @@ public class Profiler {
 
         profiles.add(p);
         var l = List.of(p);
-        handler.execute(new ChangeEvent("profileCreate", null, l));
+        handler.execute(new ChangeEvent(PROFILE_CREATE, null, l));
         return l;
     }
 
@@ -178,7 +182,7 @@ public class Profiler {
 
             profiles.add(p);
         });
-        handler.execute(new ChangeEvent("profileCreate", null, ps));
+        handler.execute(new ChangeEvent(PROFILE_CREATE, null, ps));
     }
 
     public static boolean verifyProfileIcon(Profile p){
@@ -259,7 +263,7 @@ public class Profiler {
                 profilesDir.to(n).move(profile.getPath());
             }
 
-            handler.execute(new ChangeEvent("profileUpdate", Profile.fromName(n), profile));
+            handler.execute(new ChangeEvent(PROFILE_UPDATE, Profile.fromName(n), profile));
         }
         catch (Exception e){
             Logger.getLogger().log(e);
@@ -270,7 +274,7 @@ public class Profiler {
         try{
             profiles = profilesDir.getFiles().stream().map(Profile::get).collect(Collectors.toList());
             profiles.removeIf(a -> a == null || a.isEmpty());
-            handler.execute(new ChangeEvent("reload", null, null));
+            handler.execute(new ChangeEvent(EventHandler.RELOAD, null, null));
         }
         catch (Exception e){
             Logger.getLogger().log(e);
@@ -281,7 +285,7 @@ public class Profiler {
         var p2 = Profile.empty().cloneFrom(p);
         p2.setName(generateName(p2.getName())).save();
         profiles.add(p2);
-        handler.execute(new ChangeEvent("profileCreate", null, List.of(p2)));
+        handler.execute(new ChangeEvent(PROFILE_CREATE, null, List.of(p2)));
         return p2;
     }
 
@@ -292,7 +296,7 @@ public class Profiler {
 
             var profile = Profile.get(profilesDir.to(StrUtil.pure(name)));
             profiles.add(profile);
-            handler.execute(new ChangeEvent("profileCreate", null, List.of(profile)));
+            handler.execute(new ChangeEvent(PROFILE_CREATE, null, List.of(profile)));
             return profile;
         }
         catch (Exception e){
@@ -313,7 +317,7 @@ public class Profiler {
         profilesDir.to(p.getName()).delete();
         profiles.remove(p);
 
-        handler.execute(new ChangeEvent("profileDelete", p, null));
+        handler.execute(new ChangeEvent(PROFILE_DELETE, p, null));
     }
 
 

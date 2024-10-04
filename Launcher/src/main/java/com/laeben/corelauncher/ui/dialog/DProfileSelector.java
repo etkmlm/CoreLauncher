@@ -4,6 +4,7 @@ import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.ui.controller.cell.CDockObject;
 import com.laeben.corelauncher.ui.controller.cell.CPLCell;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
@@ -131,12 +132,12 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
                 .setOnClick(a -> {
                     var cell = (CPLCell)a.getSource();
                     switch (a.getKey()){
-                        case "root":
+                        case CPLCell.EXECUTOR_ROOT:
                             if (f == Functionality.DOCK_SELECTOR || f == Functionality.SINGLE_PROFILE_SELECTOR)
                                 close(new Result(List.of(cell.getItem())));
                             break;
-                        case "menu":
-                            if (a.getValue().equals("delete")){
+                        case CPLCell.EXECUTOR_MENU:
+                            if (a.getValue().equals(CDockObject.DELETE)){
                                 if (cell.isSelected()){
                                     deleteSelectedProfiles();
                                     return false;
@@ -144,19 +145,19 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
                                 else
                                     pList.getItems().remove(cell.getItem());
                             }
-                            else if (a.getValue().equals("export")){
+                            else if (a.getValue().equals(CDockObject.EXPORT)){
                                 if (cell.isSelected()){
                                     exportSelectedProfiles();
                                     return false;
                                 }
                             }
-                            else if (a.getValue().equals("backup")){
+                            else if (a.getValue().equals(CDockObject.BACKUP)){
                                 if (cell.isSelected()){
                                     backupSelectedProfiles();
                                     return false;
                                 }
                             }
-                            else if (a.getValue().equals("edit") || a.getValue().equals("copy"))
+                            else if (a.getValue().equals(CDockObject.EDIT) || a.getValue().equals(CDockObject.COPY))
                                 close(null);
                             break;
                         default:

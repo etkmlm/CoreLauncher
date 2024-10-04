@@ -13,6 +13,14 @@ import java.util.List;
 import java.util.Optional;
 
 public class FloatDock {
+    public static final String KEY = "fdock";
+
+    public static final String PLACE = "place";
+    public static final String REPLACE = "replace";
+    public static final String REMOVE = "remove";
+    public static final String UPDATE = "update";
+    public static final String MOVEMENT = "movement";
+
     public static class FDConfig{
         private List<FDObject> objects;
 
@@ -35,28 +43,28 @@ public class FloatDock {
 
         handler = new EventHandler<>();
 
-        Configurator.getConfigurator().getHandler().addHandler("fdock", (a) -> {
-            if (!a.getKey().equals("gamePathChange"))
+        Configurator.getConfigurator().getHandler().addHandler(KEY, (a) -> {
+            if (!a.getKey().equals(Configurator.GAME_PATH_CHANGE))
                 return;
             dockFile = dockFile();
 
             reload();
         }, false);
 
-        Profiler.getProfiler().getHandler().addHandler("fdock", a -> {
+        Profiler.getProfiler().getHandler().addHandler(KEY, a -> {
             var po = (Profile)a.getOldValue();
-            if (a.getKey().equals("profileUpdate")){
+            if (a.getKey().equals(Profiler.PROFILE_UPDATE)){
                 var p = (Profile)a.getNewValue();
                 for (var i : getObjects()){
                     if (i.contains(p)){
                         if (po != null && !po.getName().equals(p.getName()) && i.isSingle())
                             i.name = p.getName();
                         save();
-                        handler.execute(new KeyEvent("update").setSource(i));
+                        handler.execute(new KeyEvent(UPDATE).setSource(i));
                     }
                 }
             }
-            else if (a.getKey().equals("profileDelete")){
+            else if (a.getKey().equals(Profiler.PROFILE_DELETE)){
                 for (var i : getObjects().stream().toList()){
                     if (i.contains(po)){
                         if (i.isSingle())
@@ -66,7 +74,7 @@ public class FloatDock {
                     }
                 }
             }
-            else if (a.getKey().equals("reload"))
+            else if (a.getKey().equals(EventHandler.RELOAD))
                 reload();
 
         }, false);
@@ -81,7 +89,7 @@ public class FloatDock {
             if (config == null)
                 config = new FDConfig();
 
-            handler.execute(new KeyEvent("reload"));
+            handler.execute(new KeyEvent(EventHandler.RELOAD));
         }
         catch (Exception e){
             Logger.getLogger().log(e);
@@ -91,14 +99,14 @@ public class FloatDock {
     public void removeFromGroup(FDObject group, Profile profile){
         group.remove(profile);
         save();
-        handler.execute(new KeyEvent("update").setSource(group));
+        handler.execute(new KeyEvent(UPDATE).setSource(group));
     }
 
     public void reorderGroup(FDObject group, Profile p1, int index) {
         group.getProfiles().removeIf(a -> a.getName().equals(p1.getName()));
         group.getProfiles().add(index, p1);
         save();
-        handler.execute(new KeyEvent("update").setSource(group));
+        handler.execute(new KeyEvent(UPDATE).setSource(group));
     }
 
     public void renameGroup(FDObject group, String name){
@@ -106,7 +114,7 @@ public class FloatDock {
             return;
         group.name = name;
         save();
-        handler.execute(new KeyEvent("update").setSource(group));
+        handler.execute(new KeyEvent(UPDATE).setSource(group));
     }
 
     public void moveToGroup(FDObject group, List<FDObject> profiles){
@@ -115,7 +123,7 @@ public class FloatDock {
             remove(p);
         }
         save();
-        handler.execute(new KeyEvent("update").setSource(group));
+        handler.execute(new KeyEvent(UPDATE).setSource(group));
         //remove(profile);
     }
 
@@ -124,7 +132,7 @@ public class FloatDock {
             group.add(p);
         }
         save();
-        handler.execute(new KeyEvent("update").setSource(group));
+        handler.execute(new KeyEvent(UPDATE).setSource(group));
     }
 
     public EventHandler<BaseEvent> getHandler(){
@@ -188,13 +196,13 @@ public class FloatDock {
         }
 
         save();
-        handler.execute(new KeyEvent(c != null ? (!movement ? "replace" : "movement") : "place").setSource(obj));
+        handler.execute(new KeyEvent(c != null ? (!movement ? REPLACE : MOVEMENT) : PLACE).setSource(obj));
     }
 
     public void remove(FDObject obj){
         getObjects().remove(obj);
         save();
-        handler.execute(new KeyEvent("remove").setSource(obj));
+        handler.execute(new KeyEvent(REMOVE).setSource(obj));
     }
 
 }

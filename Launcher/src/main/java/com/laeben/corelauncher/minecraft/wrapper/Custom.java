@@ -3,6 +3,7 @@ package com.laeben.corelauncher.minecraft.wrapper;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
@@ -46,7 +47,7 @@ public class Custom extends Wrapper<Version> {
 
     @Override
     public void install(Version v) throws NoConnectionException, StopException {
-        logState("prepare" + v.id);
+        logState(Launcher.PREPARE + v.id);
 
         downloadLibraries(v);
         downloadAssets(v);

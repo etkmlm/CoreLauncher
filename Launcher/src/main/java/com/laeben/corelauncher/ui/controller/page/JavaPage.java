@@ -23,16 +23,19 @@ import javafx.util.Duration;
 import java.util.Locale;
 
 public class JavaPage extends HandlerController {
+    public static final String KEY = "pgjava";
+
+
     public JavaPage() {
-        super("pgjava");
+        super(KEY);
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
             switch (a.getKey()){
-                case "add" -> {
+                case JavaManager.ADD -> {
                     var f = (Java) a.getNewValue();
                     pList.getItems().add(f);
                 }
-                case "delete" -> pList.getItems().remove((Java) a.getOldValue());
+                case JavaManager.DELETE -> pList.getItems().remove((Java) a.getOldValue());
                 //case "update" -> pList.reload(false);
             }
         }, true);

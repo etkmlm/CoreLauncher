@@ -26,7 +26,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.skin.ScrollPaneSkin;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -287,11 +286,11 @@ public class CGroup extends CDockObject {
     }
 
     private void onProfileEvent(KeyEvent e){
-        if (e.getKey().equals("profileSelect")){
+        if (e.getKey().equals(CDockObject.SELECT)){
             Main.getMain().selectProfile((Profile) e.getSource());
             hide();
         }
-        else if (e.getKey().equals("remove")){
+        else if (e.getKey().equals(FloatDock.REMOVE)){
             reloadItems();
         }
     }
@@ -309,7 +308,7 @@ public class CGroup extends CDockObject {
         var cdo = (CDockObject)e.getSource();
         if (!(e instanceof KeyEvent ke))
             return;
-        if (ke.getKey().equals("release")){
+        if (ke.getKey().equals(CDockObject.RELEASE)){
             setMiniatureImage(null);
 
             if (isOut && System.currentTimeMillis() > outSince + 1000){
@@ -339,7 +338,7 @@ public class CGroup extends CDockObject {
 
             FloatDock.getDock().reorderGroup(object, cdo.getPrimaryProfile(), index);
         }
-        else if (ke.getKey().equals("move") && ke instanceof ValueEvent ve){
+        else if (ke.getKey().equals(CDockObject.MOVE) && ke instanceof ValueEvent ve){
             var vec = (GrabVector)ve.getValue();
             if (miniatureIn.getImage() == null){
                 setMiniatureImage(ImageCacheManager.getImage(cdo.getPrimaryProfile(), 48));

@@ -1,14 +1,16 @@
 package com.laeben.corelauncher.api;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Translator {
 
     private static Translator instance;
+    private static final List<Function<Locale, ResourceBundle>> factories = new ArrayList<>();
 
     private List<ResourceBundle> bundles;
-    private ResourceBundle bundle;
+    private List<ResourceBundle> bundle;
 
     public Translator(){
         instance = this;
@@ -19,7 +21,7 @@ public class Translator {
     }
 
     public void setLanguage(Locale selectedLanguage){
-        bundle = bundles.stream().filter(x -> x.getLocale().toLanguageTag().equals(selectedLanguage.toLanguageTag())).findFirst().orElse(null);
+        bundle = bundles.stream().filter(x -> x.getLocale().toLanguageTag().equals(selectedLanguage.toLanguageTag())).toList();
     }
 
     public static String translate(String key){
@@ -31,7 +33,11 @@ public class Translator {
     }
 
     public String getTranslate(String key){
-        return bundle.containsKey(key) ? bundle.getString(key) : null;
+        for (var b : bundle){
+            if (b.containsKey(key))
+                return b.getString(key);
+        }
+        return null;
     }
 
     public String getTranslateFormat(String key, List<Object> args){
@@ -57,6 +63,11 @@ public class Translator {
         return translate;
     }
 
+    public static void registerSource(Function<Locale, ResourceBundle> func){
+        factories.add(func);
+        generateTranslator();
+    }
+
     public static void generateTranslator(){
         Translator t = new Translator().reload();
         t.setLanguage(Configurator.getConfig().getLanguage());
@@ -65,10 +76,15 @@ public class Translator {
     public Translator reload(){
         bundles = new ArrayList<>();
 
-        for (var l : Locale.getAvailableLocales()){
+        for (var l : Locale.getAvailableLocales())
+        {
             try{
                 var x = ResourceBundle.getBundle("com.laeben.corelauncher.data.Translate", l);
                 bundles.add(x);
+
+                for (var f : factories){
+                    bundles.add(f.apply(l));
+                }
             }
             catch (MissingResourceException ignored){
 
@@ -80,7 +96,7 @@ public class Translator {
         return this;
     }
 
-    public ResourceBundle getBundle(){
+    public List<ResourceBundle> getBundle(){
         return bundle;
     }
 

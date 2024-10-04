@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CLCommunicator {
-    public static final String EVENT_RECEIVE = "receive";
+    public static final String RECEIVE = "receive";
 
     private static CLCommunicator instance;
 
@@ -76,7 +76,7 @@ public class CLCommunicator {
                         int size = intBuffer.put(0, s).getInt();
                         intBuffer.clear();
                         var pack = CLPacket.fromArrayBuffer(sock.getInputStream().readNBytes(size));
-                        handler.execute(new ValueEvent(EVENT_RECEIVE, pack));
+                        handler.execute(new ValueEvent(RECEIVE, pack));
                     }
                     catch (SocketTimeoutException ignored){
 

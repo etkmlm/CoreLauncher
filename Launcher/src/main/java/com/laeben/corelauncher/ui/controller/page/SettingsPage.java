@@ -17,8 +17,8 @@ import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.control.CTab;
 import com.laeben.corelauncher.ui.control.CWorker;
-import com.laeben.corelauncher.ui.util.ControlUtil;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -31,14 +31,13 @@ import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
-import javafx.util.StringConverter;
 
 public class SettingsPage extends HandlerController {
+    public static final String KEY = "pgsettings";
 
     @FXML
     private TextField txtCustomBackground;
@@ -103,11 +102,11 @@ public class SettingsPage extends HandlerController {
 
     private CButton btnSave;
 
-    private final SpinnerValueFactory.IntegerSpinnerValueFactory fMinRAM;
-    private final SpinnerValueFactory.IntegerSpinnerValueFactory fMaxRAM;
     //private final SpinnerValueFactory.IntegerSpinnerValueFactory fCommPort;
     private final ObservableList<String> languages;
     private final ObservableList<String> javas;
+
+    private final RAMManager ram;
 
     private boolean changeAccount;
 
@@ -117,16 +116,17 @@ public class SettingsPage extends HandlerController {
     }
 
     public SettingsPage(){
-        super("settings");
-        fMinRAM = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
-        fMaxRAM = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
+        super(KEY);
+
+        ram = new RAMManager() {
+            @Override
+            public void needsToSave() {
+                tryToEnableSave();
+            }
+        };
         //fCommPort = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
-        fMinRAM.setAmountToStepBy(512);
-        fMaxRAM.setAmountToStepBy(512);
         //fCommPort.setAmountToStepBy(1);
 
-        fMinRAM.valueProperty().addListener(a -> tryToEnableSave());
-        fMaxRAM.valueProperty().addListener(a -> tryToEnableSave());
         /*fCommPort.valueProperty().addListener(a -> {
             Configurator.getConfig().setCommPort(fCommPort.getValue());
             Configurator.save();
@@ -137,15 +137,15 @@ public class SettingsPage extends HandlerController {
         reloadJava();
 
         registerHandler(Configurator.getConfigurator().getHandler(), x -> {
-            if (x.getKey().equals("gamePathChange")){
+            if (x.getKey().equals(Configurator.GAME_PATH_CHANGE)){
                 var path = (Path)x.getNewValue();
                 txtGamePath.setText(path.toString());
             }
-            else if (x.getKey().equals("bgChange")){
+            else if (x.getKey().equals(Configurator.BACKGROUND_CHANGE)){
                 var path = (Path)x.getNewValue();
                 txtCustomBackground.setText(path == null ? null : path.toString());
             }
-            else if (x.getKey().equals("languageChange")){
+            else if (x.getKey().equals(Configurator.LANGUAGE_CHANGE)){
                 Discord.getDiscord().setActivity(Activity.setForIdling());
                 UI.getUI().reset();
             }
@@ -153,12 +153,12 @@ public class SettingsPage extends HandlerController {
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
             switch (a.getKey()){
-                case "add" -> {
+                case JavaManager.ADD -> {
                     var java = (Java)a.getNewValue();
                     javas.add(java.toIdentifier());
                 }
-                case "update" -> reloadJava();
-                case "delete" -> {
+                case JavaManager.UPDATE -> reloadJava();
+                case JavaManager.DELETE -> {
                     var java = (Java)a.getOldValue();
                     javas.remove(java.toIdentifier());
                     if (java.toIdentifier().equals(cbJava.getValue()))
@@ -193,25 +193,8 @@ public class SettingsPage extends HandlerController {
     public void preInit(){
         txtAccount.textProperty().addListener(a -> tryToEnableSave());
 
-        sldRAM.setLabelFormatter(new StringConverter<>() {
-            @Override
-            public String toString(Double aDouble) {
-                return (aDouble / 1024) + "GB";
-            }
-
-            @Override
-            public Double fromString(String s) {
-                String[] f = s.split(" ");
-                return Double.parseDouble(f[0]) * 1024;
-            }
-        });
-        sldRAM.valueProperty().addListener(x -> {
-            var v = Math.floor(sldRAM.getValue() / 512.0) * 512;
-
-            sldRAM.valueProperty().set(v);
-
-            fMaxRAM.setValue((int) sldRAM.getValue());
-        });
+        ram.setControls(txtMinRAM, txtMaxRAM, sldRAM);
+        ram.setup();
 
         cbLanguage.valueProperty().addListener(x -> {
             try{
@@ -363,22 +346,11 @@ public class SettingsPage extends HandlerController {
         txtGamePath.setCursor(Cursor.HAND);
         txtGamePath.setOnMouseClicked(a -> OSUtil.openFolder(Configurator.getConfig().getGamePath().toFile().toPath()));
 
-        txtMaxRAM.setValueFactory(fMaxRAM);
-        txtMinRAM.setValueFactory(fMinRAM);
         //txtCommPort.setValueFactory(fCommPort);
-
-        txtMaxRAM.valueProperty().addListener(a -> {
-            if (fMaxRAM.getValue() > 32 * 1024)
-                return;
-            sldRAM.setValue(fMaxRAM.getValue());
-        });
 
         txtAccount.setOnKeyPressed(a -> changeAccount = true);
 
         chkOnline.selectedProperty().addListener(a -> Configurator.getConfigurator().setDefaultAccount(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected())));
-
-        txtMaxRAM.addEventFilter(ScrollEvent.ANY, ControlUtil::scroller);
-        txtMinRAM.addEventFilter(ScrollEvent.ANY, ControlUtil::scroller);
 
         cbJava.setItems(javas);
         cbLanguage.setItems(languages);
@@ -425,8 +397,8 @@ public class SettingsPage extends HandlerController {
                 Configurator.getConfigurator().setDefaultAccount(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
             }
 
-            Configurator.getConfig().setDefaultMinRAM(fMinRAM.getValue());
-            Configurator.getConfig().setDefaultMaxRAM(fMaxRAM.getValue());
+            Configurator.getConfig().setDefaultMinRAM(ram.getMin());
+            Configurator.getConfig().setDefaultMaxRAM(ram.getMax());
             Configurator.save();
 
             btnSave.setVisible(false);
@@ -458,10 +430,10 @@ public class SettingsPage extends HandlerController {
                 chkOnline.setSelected(false);
             }
 
-            fMinRAM.setValue(c.getDefaultMinRAM());
-            fMaxRAM.setValue(c.getDefaultMaxRAM());
+            ram.setMin(c.getDefaultMinRAM());
+            ram.setMax(c.getDefaultMaxRAM());
             //fCommPort.setValue(c.getCommPort());
-            sldRAM.setValue(c.getDefaultMaxRAM());
+            //sldRAM.setValue(c.getDefaultMaxRAM());
             chkOldReleases.setSelected(c.isShowOldReleases());
             chkShowSnaps.setSelected(c.isShowSnapshots());
             chkPlaceDock.setSelected(c.shouldPlaceNewProfileToDock());

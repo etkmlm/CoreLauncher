@@ -4,7 +4,6 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.CoreLauncherFX;
-import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.util.DateUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
@@ -15,7 +14,7 @@ import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.dialog.DModSelector;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -42,7 +41,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
         exists = new SimpleObjectProperty<>();
 
-        exists.addListener(a -> Platform.runLater(() -> btnInstall.setText(exists.get() == null ? "⭳" : "—")));
+        exists.addListener(a -> UI.runAsync(() -> btnInstall.setText(exists.get() == null ? "⭳" : "—")));
     }
 
     @FXML

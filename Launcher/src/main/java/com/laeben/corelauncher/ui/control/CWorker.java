@@ -1,6 +1,6 @@
 package com.laeben.corelauncher.ui.control;
 
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
@@ -101,13 +101,13 @@ public class CWorker<T, H> extends Pane {
         var task = taskFactory.apply(this);
         task.setOnFailed(a -> {
             e = a.getSource().getException();
-            Platform.runLater(() -> ind(false));
+            UI.runAsync(() -> ind(false));
             if (onFailed != null)
                 onFailed.accept(this);
         });
         task.setOnSucceeded(a -> {
             value = (T)a.getSource().getValue();
-            Platform.runLater(() -> ind(false));
+            UI.runAsync(() -> ind(false));
             if (onDone != null)
                 onDone.accept(this);
         });
@@ -125,7 +125,7 @@ public class CWorker<T, H> extends Pane {
     public void run(){
         if (!reloadTask())
             return;
-        Platform.runLater(() -> ind(true));
+        UI.runAsync(() -> ind(true));
         if (executor == null)
             executor = Executors.newSingleThreadExecutor();
         executor.execute(task);

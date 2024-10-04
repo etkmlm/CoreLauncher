@@ -21,8 +21,9 @@ import com.laeben.corelauncher.ui.controller.cell.CProfile;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
+import com.laeben.corelauncher.util.EventHandler;
 import javafx.animation.ScaleTransition;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.input.*;
@@ -33,6 +34,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class MainPage extends HandlerController {
+    public static final String KEY = "pgmain";
 
     @FXML
     public SelectionPane<CDockObject> root;
@@ -52,7 +54,7 @@ public class MainPage extends HandlerController {
     private boolean transferMode = false;
 
     public MainPage(){
-        super("pgmain");
+        super(KEY);
         showUpTransition = new ScaleTransition();
         showUpTransition.setDuration(Duration.millis(300));
         showUpTransition.setFromX(0);
@@ -109,26 +111,26 @@ public class MainPage extends HandlerController {
         registerHandler(FloatDock.getDock().getHandler(), a -> {
             var obj = (FDObject)a.getSource();
             if (a instanceof KeyEvent e){
-                if (e.getKey().equals("place")){
+                if (e.getKey().equals(FloatDock.PLACE)){
                     var c = placeObj(obj);
                     if (!transferMode){
                         showUpTransition.setNode(c);
                         showUpTransition.playFromStart();
                     }
                 }
-                else if (e.getKey().equals("replace")){
+                else if (e.getKey().equals(FloatDock.REPLACE)){
                     removeObj(obj);
                     var c = placeObj(obj);
                     showUpTransition.setNode(c);
                     showUpTransition.playFromStart();
                 }
-                else if (e.getKey().equals("remove")){
+                else if (e.getKey().equals(FloatDock.REMOVE)){
                     root.getChildren().stream()
                             .filter(x -> (x instanceof CDockObject cd) && cd.getObject().equals(obj) && cd.getSelected())
                             .findFirst().ifPresent(x -> ((CDockObject)x).setSelected(false));
                     removeObj(obj);
                 }
-                else if (e.getKey().equals("update")){
+                else if (e.getKey().equals(FloatDock.UPDATE)){
                     if (obj.type == FDObject.FDType.GROUP)
                         root.getChildren().stream().filter(x -> x instanceof CGroup cg && cg.getObject().equals(obj)).findFirst().ifPresent(n -> {
                             var f = (CGroup)n;
@@ -140,7 +142,7 @@ public class MainPage extends HandlerController {
                         placeObj(obj);
                     }
                 }
-                else if (e.getKey().equals("reload")){
+                else if (e.getKey().equals(EventHandler.RELOAD)){
                     root.clearSelection();
                     root.getChildren().removeIf(x -> x instanceof CDockObject);
                     reloadDock();
@@ -148,18 +150,18 @@ public class MainPage extends HandlerController {
             }
         }, true);
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
-            if (!a.getKey().equals("profileCreate") || !Configurator.getConfig().shouldPlaceNewProfileToDock())
+            if (!a.getKey().equals(Profiler.PROFILE_CREATE) || !Configurator.getConfig().shouldPlaceNewProfileToDock())
                 return;
             var p = ((List<Profile>)a.getNewValue()).get(0);
 
             FloatDock.getDock().place(FDObject.createSingle(p, lX, lY), false);
         }, true);
         registerHandler(Main.getMain().getHandler(), a -> {
-            if (a.getKey().equals("key")){
+            if (a.getKey().equals(Main.TAB_KEY_PRESS)){
                 onKeyPressed((javafx.scene.input.KeyEvent) a.getSource());
                 return;
             }
-            if (!a.getKey().equals("tabFocusChange"))
+            if (!a.getKey().equals(Main.TAB_FOCUS_CHANGE))
                 return;
             if (a.getSource() instanceof CTab ct && ct.getController().equals(this)){
                 root.getChildren().stream().filter(x -> x instanceof CGroup).forEach(x -> ((CGroup) x).hide());
@@ -175,7 +177,7 @@ public class MainPage extends HandlerController {
         pr.setListener(this::onProfileSelectEvent).setGrabListener(a -> {
             if (!(a instanceof KeyEvent ke))
                 return;
-            if (ke.getKey().equals("release")){
+            if (ke.getKey().equals(CDockObject.RELEASE)){
                 obj.layoutX = pr.getLayoutX();
                 obj.layoutY = pr.getLayoutY();
 
@@ -208,7 +210,7 @@ public class MainPage extends HandlerController {
                 root.cancelSelection();
                 agreedMove = false;
             }
-            else if (ke.getKey().equals("move") && ke instanceof ValueEvent ve){
+            else if (ke.getKey().equals(CDockObject.MOVE) && ke instanceof ValueEvent ve){
                 var pos = root.localToScene(root.getBoundsInLocal());
                 var vec = (GrabVector)ve.getValue();
 
@@ -325,7 +327,7 @@ public class MainPage extends HandlerController {
             var list = (List<File>) content;
 
             new Thread(() -> {
-                Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.started"), Translator.translateFormat("announce.info.import.importing", list.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.started"), Translator.translateFormat("announce.info.import.importing", list.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
                 int c = 0;
                 for (var f : list){
                     var path = Path.begin(f.toPath());
@@ -339,7 +341,7 @@ public class MainPage extends HandlerController {
                     }
                 }
                 int fC = c;
-                Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.completed"), Translator.translateFormat("announce.info.import.imported", fC), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.completed"), Translator.translateFormat("announce.info.import.imported", fC), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
             }).start();
         });
 
@@ -432,7 +434,7 @@ public class MainPage extends HandlerController {
         });
     }
     public void onProfileSelectEvent(KeyEvent e) {
-        if (!e.getKey().equals("profileSelect"))
+        if (!e.getKey().equals(CDockObject.SELECT))
             return;
 
         Main.getMain().selectProfile((Profile) e.getSource());

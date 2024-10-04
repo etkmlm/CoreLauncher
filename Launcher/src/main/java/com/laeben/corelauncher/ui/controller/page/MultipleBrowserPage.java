@@ -21,7 +21,7 @@ import com.laeben.corelauncher.ui.controller.browser.CResourceCell;
 import com.laeben.corelauncher.ui.controller.browser.Search;
 import com.laeben.corelauncher.ui.controller.browser.SearchManager;
 import com.laeben.corelauncher.ui.control.*;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -37,6 +37,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MultipleBrowserPage extends HandlerController {
+    public static final String KEY = "pgmbrowser";
+
     private record Result(List<CResource> found, List<String> unfound){}
     public record LocalResult(List<Modder.ModInfo> found, List<Path> unfound, List<Modder.ModInfo> invalid){}
 
@@ -45,12 +47,12 @@ public class MultipleBrowserPage extends HandlerController {
     private final SearchManager manager;
 
     public MultipleBrowserPage() {
-        super("pgmbrowser");
+        super(KEY);
 
         resources = FXCollections.observableArrayList();
 
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
-            if (a.getKey().equals("profileUpdate"))
+            if (a.getKey().equals(Profiler.PROFILE_UPDATE))
                 reload();
         }, true);
 
@@ -201,8 +203,8 @@ public class MultipleBrowserPage extends HandlerController {
                 return new Result(list, secondary);
             }
         })
-        .onStatus(a -> Platform.runLater(() -> lblStatus.setText(a.getStatus())))
-        .onDone(a -> Platform.runLater(() -> {
+        .onStatus(a -> UI.runAsync(() -> lblStatus.setText(a.getStatus())))
+        .onDone(a -> UI.runAsync(() -> {
             txtQuery.setText(null);
             resources.addAll(a.getValue().found().stream().distinct().toList());
             a.getValue().unfound().forEach(this::println);

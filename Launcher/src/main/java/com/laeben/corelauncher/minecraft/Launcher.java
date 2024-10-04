@@ -17,30 +17,25 @@ import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.util.entity.LogType;
-import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.KeyEvent;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
 import java.util.stream.Stream;
 
 public class Launcher {
+    public static final String SESSION_START = "sessionStart";
+    public static final String SESSION_END = "sessionEnd";
+    public static final String SESSION_RECEIVE = "sessionReceive";
+    public static final String PREPARE = "prepare";
+    public static final String JAVA = "java";
+
+
     public static Launcher instance;
-    private Path gameDir;
     private final EventHandler<BaseEvent> handler;
 
-
     public Launcher(){
-        this.gameDir = Configurator.getConfig().getGamePath();
         handler = new EventHandler<>();
-
-        Configurator.getConfigurator().getHandler().addHandler("launcher", (a) -> {
-            if (!a.getKey().equals("gamePathChange"))
-                return;
-
-            gameDir = (Path) a.getNewValue();
-        }, false);
 
         instance = this;
     }
@@ -62,7 +57,7 @@ public class Launcher {
      * @param profile target profile
      */
     public void prepare(Profile profile) throws NoConnectionException, StopException, PerformException, HttpException, FileNotFoundException, VersionNotFoundException {
-        handleState("prepare" + profile.getName());
+        handleState(PREPARE + profile.getName());
 
         var version = profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion());
         if (version == null)
@@ -88,7 +83,7 @@ public class Launcher {
             return;
 
         if (info.dir == null)
-            info.dir = gameDir;
+            info.dir = Configurator.getConfig().getGamePath();
 
         if (info.args == null)
             info.args = new String[0];
@@ -113,7 +108,7 @@ public class Launcher {
                             // Last solution, download new Java and relaunch (if there is internet here of course...)
                             info.java = null;
 
-                            handleState("java" + linfo.java.majorVersion);
+                            handleState(JAVA + linfo.java.majorVersion);
                             Logger.getLogger().log(LogType.INFO, "Downloading Java " + linfo.java.majorVersion);
                             try{
                                 JavaManager.getManager().downloadAndInclude(linfo.java);
@@ -159,7 +154,7 @@ public class Launcher {
             // If the version lower than 1.7.2 (very legacy) then copy all textures to resources folder in profile folder
             if (linfo.assets.isVeryLegacy()){
                 var resources = info.dir.to("resources");
-                gameDir.to("assets", "virtual", "verylegacy").copy(resources);
+                Configurator.getConfig().getGamePath().to("assets", "virtual", "verylegacy").copy(resources);
             }
 
             String[] gameCmds = linfo.getGameArguments();
@@ -189,12 +184,12 @@ public class Launcher {
 
             // Start a new session
             var session = new Session(info.dir, finalCmds);
-            session.setOnPacketReceived(a -> handler.execute(new ValueEvent("sessionReceive", a)));
+            session.setOnPacketReceived(a -> handler.execute(new ValueEvent(SESSION_RECEIVE, a)));
 
-            handleState("sessionStart" + info.executor);
+            handleState(SESSION_START + info.executor);
             session.start();
 
-            handler.execute(new ValueEvent("sessionEnd" + info.executor, session.getExitCode()));
+            handler.execute(new ValueEvent(SESSION_END + info.executor, session.getExitCode()));
         }
         catch (StopException | VersionNotFoundException e){
             throw e;

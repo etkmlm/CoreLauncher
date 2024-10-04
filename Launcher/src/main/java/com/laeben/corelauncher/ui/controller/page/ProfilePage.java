@@ -21,7 +21,7 @@ import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.dialog.DResourceSelector;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -37,6 +37,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class ProfilePage extends HandlerController {
+    public static final String KEY = "pgprofile";
 
     public GridPane grid;
 
@@ -45,7 +46,7 @@ public class ProfilePage extends HandlerController {
     private final DProfileSelector selector;
 
     public ProfilePage(){
-        super("pgprofile");
+        super(KEY);
         lvMods = new CList<>();
         lvModpacks = new CList<>();
         lvResources = new CList<>();
@@ -60,14 +61,14 @@ public class ProfilePage extends HandlerController {
             if (oldp == null || !profile.getName().equals(oldp.getName()))
                 return;
 
-            if (a.getKey().equals("profileDelete"))
+            if (a.getKey().equals(Profiler.PROFILE_DELETE))
                 Main.getMain().getTab().getTabs().remove((Tab) this.parentObj);
-            else if (a.getKey().equals("profileUpdate"))
+            else if (a.getKey().equals(Profiler.PROFILE_UPDATE))
                 setProfile((Profile)a.getNewValue());
         }, true);
 
         registerHandler(Configurator.getConfigurator().getHandler(), a -> {
-            if (a.getKey().equals("userChange")){
+            if (a.getKey().equals(Configurator.USER_CHANGE)){
                 setUser();
             }
         }, true);
@@ -205,7 +206,7 @@ public class ProfilePage extends HandlerController {
         btnOpenFolder.setOnMouseClicked(a -> OSUtil.openFolder(profile.getPath().toFile().toPath()));
         btnUpdate.setOnMouseClicked(a -> new Thread(() -> {
             try {
-                Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.multiple", profile.getName()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.multiple", profile.getName()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
                 var all = new ArrayList<CResource>(Modder.getModder().getModpackUpdates(p, p.getModpacks()));
 
                 var allStream = Stream.of(p.getMods().stream(), p.getResources().stream(), p.getShaders().stream()).flatMap(n -> n).map(x -> (CResource)x).toList();
@@ -250,10 +251,10 @@ public class ProfilePage extends HandlerController {
 
                     Modder.getModder().includeAll(p, all);
 
-                    Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.multiple", profile.getName(), all.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                    UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.multiple", profile.getName(), all.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
                 }
                 else
-                    Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.multiple", profile.getName(), all.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                    UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.multiple", profile.getName(), all.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
 
             } catch (NoConnectionException | HttpException | StopException ignored) {
 

@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JavaManager {
+    public static final String KEY = "jvman";
+
+    public static final String ADD = "add";
+    public static final String DELETE = "delete";
+    public static final String UPDATE = "update";
+
     public record JavaDownloadInfo(String name, String url, int major){
 
     }
@@ -33,8 +39,8 @@ public class JavaManager {
     public JavaManager(){
         javaDir = javaDir();
 
-        Configurator.getConfigurator().getHandler().addHandler("jvman", (a) -> {
-            if (!a.getKey().equals("gamePathChange"))
+        Configurator.getConfigurator().getHandler().addHandler(KEY, (a) -> {
+            if (!a.getKey().equals(Configurator.GAME_PATH_CHANGE))
                 return;
 
             javaDir = javaDir();
@@ -113,7 +119,7 @@ public class JavaManager {
         if (j == null)
             return;
         javaVersions.add(j);
-        handler.execute(new ChangeEvent("add", null, j));
+        handler.execute(new ChangeEvent(ADD, null, j));
     }
 
     public Java download(JavaDownloadInfo info) throws NoConnectionException, StopException {
@@ -159,7 +165,7 @@ public class JavaManager {
                 Configurator.save();
             }
 
-            handler.execute(new ChangeEvent("delete", j, null));
+            handler.execute(new ChangeEvent(DELETE, j, null));
         }catch (Exception e){
             Logger.getLogger().log(e);
         }
@@ -172,7 +178,7 @@ public class JavaManager {
         j.setName(name);
         Configurator.save();
 
-        handler.execute(new ChangeEvent("update", null, j));
+        handler.execute(new ChangeEvent(UPDATE, null, j));
         return true;
     }
 
@@ -185,7 +191,7 @@ public class JavaManager {
         Configurator.getConfig().getCustomJavaVersions().add(j);
         Configurator.save();
 
-        handler.execute(new ChangeEvent("add", null, j));
+        handler.execute(new ChangeEvent(ADD, null, j));
         return true;
     }
 }

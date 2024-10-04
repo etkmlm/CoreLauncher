@@ -29,6 +29,7 @@ import javafx.util.Duration;
 import java.util.List;
 
 public class BrowserPage extends HandlerController {
+    public static final String KEY = "pgbrowser";
 
     private Search search;
 
@@ -41,7 +42,7 @@ public class BrowserPage extends HandlerController {
     private final ObservableList<ResourceCell.Link> resources;
 
     public BrowserPage(){
-        super("pgbrowser");
+        super(KEY);
         resources = FXCollections.observableArrayList();
     }
 
@@ -53,7 +54,7 @@ public class BrowserPage extends HandlerController {
         this.profile = profile;
 
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
-            if (a.getKey().equals("profileUpdate")){
+            if (a.getKey().equals(Profiler.PROFILE_UPDATE)){
                 icon.setImage(CoreLauncherFX.getImageFromProfile(profile, 32, 32));
                 lblProfileName.setText(profile.getName());
                 reloadTitle(profile);

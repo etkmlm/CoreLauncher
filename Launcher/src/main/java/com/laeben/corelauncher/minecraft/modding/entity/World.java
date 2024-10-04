@@ -1,11 +1,8 @@
 package com.laeben.corelauncher.minecraft.modding.entity;
 
 import com.laeben.corelauncher.api.nbt.NBTFile;
-import com.laeben.corelauncher.api.nbt.entity.NBTCompound;
-import com.laeben.corelauncher.api.nbt.entity.NBTTag;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ResourceForge;
 import com.laeben.core.entity.Path;
-import org.apache.commons.lang3.builder.Diff;
 
 import java.io.IOException;
 

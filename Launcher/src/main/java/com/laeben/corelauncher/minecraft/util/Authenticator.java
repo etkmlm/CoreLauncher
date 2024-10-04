@@ -3,7 +3,6 @@ package com.laeben.corelauncher.minecraft.util;
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.api.util.OSUtil;
-import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.util.APIListener;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.util.NetUtil;

@@ -3,7 +3,6 @@ package com.laeben.clpatcher;
 import javassist.*;
 
 import java.lang.instrument.ClassFileTransformer;
-import java.net.JarURLConnection;
 import java.security.ProtectionDomain;
 
 public class Transformer implements ClassFileTransformer {

@@ -15,7 +15,7 @@ import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -105,9 +105,9 @@ public class ProfileUtil {
             return;
         new Thread(() -> {
             try{
-                Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.misc.profile", profile.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
+                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.misc.profile", profile.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
                 Profiler.backup(profile, Path.begin(file.toPath()));
-                Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.misc.profile", profile.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500) ));
+                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.misc.profile", profile.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500) ));
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
@@ -122,9 +122,9 @@ public class ProfileUtil {
             return;
         new Thread(() -> {
             try{
-                Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.info.backup.profiles.begin", profiles.size()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
+                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.info.backup.profiles.begin", profiles.size()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
                 profiles.forEach(a -> Profiler.backup(a, Path.begin(file.toPath()).to(a.getName() + ".zip")));
-                Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.info.backup.profiles.end", profiles.size()), Announcement.AnnouncementType.INFO), Duration.millis(1500) ));
+                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.info.backup.profiles.end", profiles.size()), Announcement.AnnouncementType.INFO), Duration.millis(1500) ));
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
@@ -148,7 +148,7 @@ public class ProfileUtil {
 
 
         new Thread(() -> {
-            Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.misc.object", obj.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
+            UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.misc.object", obj.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
             var path = Path.begin(file.toPath());
             var tempFolder = path.parent().to(name);
             for (var p : obj.getProfiles()){
@@ -158,7 +158,7 @@ public class ProfileUtil {
             }
             tempFolder.zip(path);
             tempFolder.delete();
-            Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.misc.object", obj.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
+            UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.misc.object", obj.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
         }).start();
     }
 

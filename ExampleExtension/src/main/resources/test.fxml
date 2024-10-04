@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<CButton minWidth="100" minHeight="100" style="-fx-background-color: red" text="hello!"/>

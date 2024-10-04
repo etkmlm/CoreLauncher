@@ -68,8 +68,8 @@
                         <RowConstraints prefHeight="10" />
                         <RowConstraints prefHeight="60" />
                     </rowConstraints>
-                    <Spinner fx:id="txtMinRAM" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                    <Spinner fx:id="txtMaxRAM" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                    <Spinner fx:id="txtMinRAM" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                    <Spinner fx:id="txtMaxRAM" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="0" />
                     <Slider fx:id="sldRAM" majorTickUnit="2048" max="32768" minorTickCount="0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2" />
                 </GridPane>
 

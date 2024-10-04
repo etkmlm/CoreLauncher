@@ -10,7 +10,7 @@ import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.ui.controller.cell.CMCell;
 import com.laeben.corelauncher.ui.control.*;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -129,7 +129,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
                 var mods = String.join("\n", mps.stream().filter(a -> a instanceof Mod).map(a -> a.name).toList());
                 var ress = String.join("\n", mps.stream().filter(a -> a instanceof Resourcepack).map(a -> a.name).toList());
                 var shaders = String.join("\n", mps.stream().filter(a -> a instanceof Shader).map(a -> a.name).toList());
-                Platform.runLater(() ->{
+                UI.runAsync(() ->{
                     txtModpackContent.setText(Translator.translateFormat("mods.all.content", mods, ress, shaders));
                     mpContentContainer.setVisible(true);
                     mpContentContainer.setManaged(true);

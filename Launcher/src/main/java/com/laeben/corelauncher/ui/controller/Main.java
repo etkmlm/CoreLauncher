@@ -5,10 +5,10 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.Cat;
+import com.laeben.core.util.NetUtils;
 import com.laeben.core.util.events.*;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.LauncherConfig;
-import com.laeben.corelauncher.api.entity.Config;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.socket.entity.CLPacket;
 import com.laeben.corelauncher.api.socket.entity.CLPacketType;
@@ -32,6 +32,7 @@ import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.util.ServerHandshake;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
+import com.laeben.corelauncher.ui.controller.page.ExtensionsPage;
 import com.laeben.corelauncher.ui.controller.page.MainPage;
 import com.laeben.corelauncher.ui.controller.page.SettingsPage;
 import com.laeben.corelauncher.ui.control.*;
@@ -42,9 +43,9 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
+import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
@@ -67,6 +68,11 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class Main extends HandlerController {
+    public static final String KEY = "main";
+
+    public static final String API_TAB_LOAD = "onTabLoad";
+    public static final String TAB_FOCUS_CHANGE = "tabFocusChange";
+    public static final String TAB_KEY_PRESS = "tabKeyPress";
 
     private static Main instance;
 
@@ -115,11 +121,11 @@ public class Main extends HandlerController {
     private final EventHandler<KeyEvent> handler;
 
     public Main(){
-        super("main");
+        super(KEY);
         df = new DecimalFormat("0.#");
         running = new SimpleBooleanProperty(false);
         running.addListener(a -> {
-            Platform.runLater(() -> {
+            UI.runAsync(() -> {
                 btnPlay.setText(running.get() ? "⏸" : "⯈");
                 if (!running.get()){
                     setProgress(-1);
@@ -132,21 +138,21 @@ public class Main extends HandlerController {
             var oldProfile = (Profile)a.getOldValue();
             //var oldProfile = (Profile)a.getOldValue();
 
-            if (a.getKey().equals("profileUpdate")){
+            if (a.getKey().equals(Profiler.PROFILE_UPDATE)){
                 if (selectedProfile == a.getNewValue())
                     selectProfile(selectedProfile);
             }
-            else if (a.getKey().equals("profileDelete")){
+            else if (a.getKey().equals(Profiler.PROFILE_DELETE)){
                 if (selectedProfile == oldProfile)
                     selectProfile(null);
 
                 ImageCacheManager.remove(oldProfile);
             }
-            else if (a.getKey().equals("reload"))
+            else if (a.getKey().equals(EventHandler.RELOAD))
                 selectProfile(null);
         }, true);
         registerHandler(UI.getUI().getHandler(), a -> {
-            if (a instanceof KeyEvent ke && ke.getKey().equals("windowClose")){
+            if (a instanceof KeyEvent ke && ke.getKey().equals(UI.WINDOW_CLOSE)){
                 var stage = (Stage)a.getSource();
                 if (stage.isMaximized())
                     Configurator.getConfig().setWindowSize(-1, -1);
@@ -160,9 +166,9 @@ public class Main extends HandlerController {
         registerHandler(Modder.getModder().getHandler(), this::onGeneralEvent, true);
         registerHandler(NetUtil.getHandler(), this::onProgress, true);
         registerHandler(Configurator.getConfigurator().getHandler(), a -> {
-            if (a.getKey().equals("bgChange"))
+            if (a.getKey().equals(Configurator.BACKGROUND_CHANGE))
                 setBackground(Configurator.getConfig().getBackgroundImage());
-            else if (a.getKey().equals("userChange")){
+            else if (a.getKey().equals(Configurator.USER_CHANGE)){
                 if (selectedProfile != null && selectedProfile.isValid())
                     setUser(selectedProfile.getUser() == null ? Configurator.getConfig().getUser().reload() : selectedProfile.getUser().reload());
                 else
@@ -203,7 +209,7 @@ public class Main extends HandlerController {
     }
 
     public void announceLater(String title, String content, Announcement.AnnouncementType type, Duration d){
-        Platform.runLater(() -> announcer.announce(new Announcement(title, content, type), d));
+        UI.runAsync(() -> announcer.announce(new Announcement(title, content, type), d));
     }
 
     public boolean announceLater(Throwable ex, Duration d){
@@ -217,7 +223,7 @@ public class Main extends HandlerController {
             msg = Translator.translate("error.connection");
         else
             msg = Translator.translate("error.unknown");
-        Platform.runLater(() -> announcer.announce(new Announcement(Translator.translate("error.oops"), msg, Announcement.AnnouncementType.ERROR), d));
+        UI.runAsync(() -> announcer.announce(new Announcement(Translator.translate("error.oops"), msg, Announcement.AnnouncementType.ERROR), d));
         return state;
     }
 
@@ -225,11 +231,11 @@ public class Main extends HandlerController {
         if (e instanceof ProgressEvent p)
             onProgress(p);
         else if (e instanceof ValueEvent v){
-            if (v.getKey().startsWith("sessionEnd")){
+            if (v.getKey().startsWith(Launcher.SESSION_END)){
                 announcer.announce(new Announcement(Translator.translate("announce.game.ended"), Translator.translateFormat("announce.misc.profile", v.getKey().substring(10)) + "\n" + Translator.translateFormat("announce.misc.ecode", v.getValue()), Announcement.AnnouncementType.GAME), Duration.seconds(3));
                 Discord.getDiscord().setActivity(Activity.setForIdling());
             }
-            else if (v.getKey().equals("sessionReceive")){
+            else if (v.getKey().equals(Launcher.SESSION_RECEIVE)){
                 var val = (CLPacket)v.getValue();
                 if (val.getType() != CLPacketType.STATUS || !Configurator.getConfig().isEnabledInGameRPC())
                     return;
@@ -246,31 +252,31 @@ public class Main extends HandlerController {
         else if (e instanceof KeyEvent k){
             var key = k.getKey();
 
-            if (key.startsWith("sessionStart")){
+            if (key.startsWith(Launcher.SESSION_START)){
                 announcer.announce(new Announcement(Translator.translate("announce.game.started"), Translator.translateFormat("announce.misc.profile", k.getKey().substring(12)), Announcement.AnnouncementType.GAME), Duration.seconds(3));
                 running.set(false);
                 Discord.getDiscord().setActivity(Activity.setForProfile(selectedProfile));
                 if (Configurator.getConfig().hideAfter())
                     UI.getUI().hideAll();
             }
-            else if (key.startsWith("java")){
+            else if (key.startsWith(Launcher.JAVA)){
                 String major = k.getKey().substring(4);
                 setStatus(1, Translator.translateFormat("launch.state.download.java", major));
             }
-            else if (key.equals("stop")){
+            else if (key.equals(EventHandler.STOP)){
                 running.set(false);
             }
-            else if (key.equals("clientDownload"))
+            else if (key.equals(Wrapper.CLIENT_DOWNLOAD))
                 setStatus(1, Translator.translate("launch.state.download.client"));
-            else if (key.startsWith("lib")){
+            else if (key.startsWith(Wrapper.LIBRARY)){
                 setStatus(1, key.substring(3));
             }
-            else if (key.startsWith("asset")){
+            else if (key.startsWith(Wrapper.ASSET)){
                 setStatus(1, Translator.translate("launch.state.download.assets") + " " + key.substring(5));
             }
-            else if (key.startsWith("acqVersion"))
+            else if (key.startsWith(Wrapper.ACQUIRE_VERSION))
                 setStatus(1, Translator.translateFormat("launch.state.acquire", key.substring(10)));
-            else if (key.startsWith("prepare")){
+            else if (key.startsWith(Launcher.PREPARE)){
                 setStatus(1, Translator.translateFormat("launch.state.prepare", key.substring(7)));
                 Discord.getDiscord().setActivity(a -> a.state = Translator.translate("discord.state.prepare"));
             }
@@ -296,7 +302,7 @@ public class Main extends HandlerController {
     public void selectProfile(Profile p){
         selectedProfile = p;
 
-        Platform.runLater(() -> {
+        UI.runAsync(() -> {
             try{
                 if (p != null && p.isValid()){
                     lblProfileName.setText(p.getName());
@@ -353,6 +359,7 @@ public class Main extends HandlerController {
 
             }
         });
+        cMenu.addItem(null, Translator.translate("extensions"), a -> addTab("pages/extensions", Translator.translate("extensions"), true, ExtensionsPage.class));
 
         try{
             setUser(Configurator.getConfig().getUser().reload());
@@ -368,7 +375,7 @@ public class Main extends HandlerController {
             Logger.getLogger().log(e);
         }
 
-        tab.setOnKeyPressed(a -> handler.execute((KeyEvent) new KeyEvent("key").setSource(a)));
+        tab.setOnKeyPressed(a -> handler.execute((KeyEvent) new KeyEvent(TAB_KEY_PRESS).setSource(a)));
 
         btnPlay.setOnMouseClicked(a -> {
             if (running.get()){
@@ -504,7 +511,9 @@ public class Main extends HandlerController {
         tab.getTabs().add(index, t1);
         tab.getSelectionModel().select(t1);
 
-        handler.execute((KeyEvent) new KeyEvent("tabFocusChange").setSource(t));
+        handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t));
+
+        ExtensionWrapper.getWrapper().fireEvent(API_TAB_LOAD, t1);
 
         return (T)t1.getController();
     }
@@ -521,10 +530,12 @@ public class Main extends HandlerController {
 
         tab.getTabs().add(t1);
 
-        handler.execute((KeyEvent) new KeyEvent("tabFocusChange").setSource(tab.getSelectionModel().getSelectedItem()));
-
         tab.getSelectionModel().select(t1);
         t1.getController().onShown();
+
+        handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t1));
+
+        ExtensionWrapper.getWrapper().fireEvent(API_TAB_LOAD, t1);
 
         return (T)t1.getController();
     }
@@ -548,7 +559,7 @@ public class Main extends HandlerController {
     private void onProgress(ProgressEvent e){
         if (!running.get())
             running.set(true);
-        String id = e.getKey().equals("download") ? "mb" : e.getKey();
+        String id = e.getKey().equals(NetUtils.DOWNLOAD) ? "mb" : e.getKey();
         setStatus(0, df.format(e.getRemain()) + id + " / " + df.format(e.getTotal()) + id);
 
         setProgress(e.getProgress());
@@ -631,7 +642,7 @@ public class Main extends HandlerController {
     public void launch(Profile p, boolean cache, ServerInfo server){
         var wr = (Wrapper<?>)p.getWrapper();
         Vanilla.getVanilla().setDisableCache(cache);
-        wr.setDisableCache(cache).getHandler().addHandler("main", this::onGeneralEvent, true);
+        wr.setDisableCache(cache).getHandler().addHandler(KEY, this::onGeneralEvent, true);
 
         var task = new Task<>() {
             @Override
@@ -646,7 +657,7 @@ public class Main extends HandlerController {
                     throw new StopException();
                 }
 
-                Platform.runLater(() -> clearStatus());
+                UI.runAsync(() -> clearStatus());
 
                 Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p).includeServer(server));
 
@@ -655,6 +666,7 @@ public class Main extends HandlerController {
                     UI.getUI().showAll();
 
                 wr.setDisableCache(false);
+                wr.getHandler().removeHandler(KEY);
                 Vanilla.getVanilla().setDisableCache(false);
 
                 return null;
@@ -665,7 +677,7 @@ public class Main extends HandlerController {
             var f = a.getSource().getException();
 
             Cat.sleep(500);
-            Platform.runLater(() -> {
+            UI.runAsync(() -> {
                 running.set(false);
                 wr.setStopRequested(false);
                 Vanilla.getVanilla().setStopRequested(false);
@@ -673,18 +685,18 @@ public class Main extends HandlerController {
 
             if (f instanceof NoConnectionException){
                 announceLater(Translator.translate("error.oops"),Translator.translate("error.connection"), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
-                //Platform.runLater(() -> setPrimaryStatus());
+                //UI.runAsync(() -> setPrimaryStatus());
             }
             else if (f instanceof VersionNotFoundException e){
                 announceLater(Translator.translate("error.oops"), Translator.translateFormat("error.noVersion", e.getMessage()), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
-                //Platform.runLater(() -> setPrimaryStatus());
+                //UI.runAsync(() -> setPrimaryStatus());
             }
             else if (f instanceof StopException){
                 //
             }
             else if (f instanceof PerformException pe){
                 announceLater(Translator.translate("error.oops"), pe.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
-                //Platform.runLater(() -> setPrimaryStatus(pe.getMessage()));
+                //UI.runAsync(() -> setPrimaryStatus(pe.getMessage()));
             }
             else if (f instanceof Exception e){
                 Logger.getLogger().log(e);

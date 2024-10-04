@@ -5,9 +5,6 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ValueEvent;
-import com.laeben.corelauncher.api.socket.CLCommunicator;
-import com.laeben.corelauncher.api.socket.entity.CLPacket;
-import com.laeben.corelauncher.api.socket.entity.CLStatusPacket;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -16,7 +13,6 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
 import com.laeben.corelauncher.minecraft.Launcher;
-import com.laeben.corelauncher.minecraft.entity.ServerInfo;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
@@ -33,7 +29,8 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.core.entity.Path;
-import javafx.application.Platform;
+import com.laeben.corelauncher.wrap.ExtensionWrapper;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.scene.control.Alert;
 import javafx.util.Duration;
 
@@ -41,11 +38,9 @@ import java.io.FileNotFoundException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
 
 public class CoreLauncher {
+    public static final String KEY = "clauncher";
 
     public static final OS SYSTEM_OS = OS.getSystemOS();
     public static final Path LAUNCHER_PATH = Path.begin(java.nio.file.Path.of(System.getProperty("user.dir")));
@@ -66,7 +61,7 @@ public class CoreLauncher {
                 p = null;
         }
         catch (Exception e){
-            e.printStackTrace();
+            e.printStackTrace(System.out);
             p = null;
         }
 
@@ -139,7 +134,7 @@ public class CoreLauncher {
 
         if (!cfg.reloadConfig()){
             Logger.getLogger().log(LogType.ERROR,"FATAL: Couldn't load configuration file, launcher will close...");
-            Platform.exit();
+            UI.shutdown();
             return;
         }
 
@@ -158,6 +153,7 @@ public class CoreLauncher {
         new Modder();
         new Authenticator();
         new Discord().startDiscordThread();
+        new ExtensionWrapper().reload();
         OS_64 = OSUtil.is64BitOS(JavaManager.getDefault());
 
 
@@ -191,17 +187,16 @@ public class CoreLauncher {
             }
         }, true);*/
         Configurator.getConfigurator().getHandler().addHandler("logger", (a) -> {
-            if (!a.getKey().equals("gamePathChange"))
+            if (!a.getKey().equals(Configurator.GAME_PATH_CHANGE))
                 return;
 
             Logger.getLogger().setLogDir(getLogDir());
-
         }, false);
-        LaebenApp.getHandler().addHandler("clauncher", a -> {
+        LaebenApp.getHandler().addHandler(KEY, a -> {
             if (a instanceof ValueEvent oe){
-                if (oe.getKey().equals("exception"))
+                if (oe.getKey().equals(LaebenApp.EXCEPTION))
                     Logger.getLogger().log((Exception) oe.getValue());
-                else if (oe.getKey().equals("netException")){
+                else if (oe.getKey().equals(LaebenApp.NET_EXCEPTION)){
                     String[] spl = oe.getValue().toString().split("\\$\\$\\$");
                     Logger.getLogger().logDebug(LogType.ERROR, "Error on request to " + spl[0] + ": " + spl[1]);
                 }

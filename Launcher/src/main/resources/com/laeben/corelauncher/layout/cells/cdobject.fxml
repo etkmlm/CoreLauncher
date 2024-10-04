@@ -23,7 +23,7 @@
 
             <!--<CButton fx:id="btnMenu" text="…" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"/>-->
             <CMenu fx:id="menu" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0"/>
-            <CButton fx:id="btnSelect" text="⯈" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" translateY="80" AnchorPane.leftAnchor="0" alignment="CENTER" AnchorPane.rightAnchor="0"/>
+            <CButton fx:id="btnSelect" text="⯈" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" translateY="90" AnchorPane.leftAnchor="0" alignment="CENTER" AnchorPane.rightAnchor="0"/>
         </AnchorPane>
     </Pane>
     <Rectangle height="8"/>

@@ -16,6 +16,11 @@ import java.io.InputStreamReader;
 import java.util.Locale;
 
 public class Configurator {
+    public static final String BACKGROUND_CHANGE = "bgChange";
+    public static final String LANGUAGE_CHANGE = "langChange";
+    public static final String USER_CHANGE = "userChange";
+    public static final String GAME_PATH_CHANGE = "gamePathChange";
+
     private static Configurator instance;
     private final EventHandler<ChangeEvent> handler;
 
@@ -83,21 +88,21 @@ public class Configurator {
         config.setGamePath(path);
         save();
 
-        handler.execute(new ChangeEvent("gamePathChange", oldPath, path));
+        handler.execute(new ChangeEvent(GAME_PATH_CHANGE, oldPath, path));
     }
 
     public void setDefaultAccount(Account account){
         config.setUser(account);
         save();
 
-        handler.execute(new ChangeEvent("userChange", null, account));
+        handler.execute(new ChangeEvent(USER_CHANGE, null, account));
     }
 
     public void setCustomBackground(Path path){
         config.setBackgroundImage(path);
         save();
 
-        handler.execute(new ChangeEvent("bgChange", null, path));
+        handler.execute(new ChangeEvent(BACKGROUND_CHANGE, null, path));
     }
 
     public void setLanguage(Locale l){
@@ -106,7 +111,7 @@ public class Configurator {
         Translator.getTranslator().setLanguage(l);
         save();
 
-        handler.execute(new ChangeEvent("languageChange", oldLang, l));
+        handler.execute(new ChangeEvent(LANGUAGE_CHANGE, oldLang, l));
     }
 
     public static Configurator getConfigurator(){
@@ -124,9 +129,9 @@ public class Configurator {
         config.setGamePath(path);
         save();
 
-        handler.execute(new ChangeEvent("languageChange", null, config.getLanguage()));
-        handler.execute(new ChangeEvent("bgChange", null, config.getBackgroundImage()));
-        handler.execute(new ChangeEvent("userChange", null, config.getUser()));
+        handler.execute(new ChangeEvent(LANGUAGE_CHANGE, null, config.getLanguage()));
+        handler.execute(new ChangeEvent(BACKGROUND_CHANGE, null, config.getBackgroundImage()));
+        handler.execute(new ChangeEvent(USER_CHANGE, null, config.getUser()));
     }
 
     private boolean save(Config c){

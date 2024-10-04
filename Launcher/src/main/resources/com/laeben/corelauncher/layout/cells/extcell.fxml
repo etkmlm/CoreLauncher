@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox alignment="CENTER" prefHeight="130" prefWidth="600.0" spacing="15" style="-fx-background-color: #202222;-fx-padding:8px;-fx-background-radius: 10px;" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+    <CView fx:id="icon" fitHeight="128" fitWidth="128" />
+    <VBox alignment="CENTER_LEFT" spacing="2" HBox.hgrow="ALWAYS">
+        <Label fx:id="lblName" style="-fx-font-size: 14pt; -fx-font-weight: bold" />
+        <Label fx:id="lblDescription" />
+        <Label fx:id="lblAuthor" />
+        <Label fx:id="lblVersion" />
+    </VBox>
+    <ImageView fx:id="warning" fitHeight="32" fitWidth="32" visible="false">
+        <Image url="@../../images/dialog/dialog-warning.png" />
+    </ImageView>
+    <CButton fx:id="btnRemove" styleClass="transparent" text="—" />
+</HBox>

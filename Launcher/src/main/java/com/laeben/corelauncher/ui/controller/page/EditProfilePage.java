@@ -18,7 +18,7 @@ import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CTab;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.dialog.DImageSelector;
-import com.laeben.corelauncher.ui.util.ControlUtil;
+import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.core.util.StrUtil;
@@ -31,12 +31,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
-import javafx.util.StringConverter;
 import org.controlsfx.control.SearchableComboBox;
 
 import java.util.regex.Pattern;
 
 public class EditProfilePage extends HandlerController {
+    public static final String KEY = "pgedit";
 
     @FXML
     private TextField txtName;
@@ -110,8 +110,8 @@ public class EditProfilePage extends HandlerController {
     private final ObservableList<String> versions;
     private final ObservableList<String> javaVersions;
     private final ObservableList<String> wrapperVersions;
-    private final SpinnerValueFactory.IntegerSpinnerValueFactory fMinRAM;
-    private final SpinnerValueFactory.IntegerSpinnerValueFactory fMaxRAM;
+    private final RAMManager ram;
+
     private Profile profile;
     private Profile tempProfile;
 
@@ -122,12 +122,15 @@ public class EditProfilePage extends HandlerController {
     }
 
     public EditProfilePage(){
-        super("pedit");
+        super(KEY);
         wrapperGroup = new ToggleGroup();
-        fMinRAM = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
-        fMaxRAM = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
-        fMinRAM.setAmountToStepBy(512);
-        fMaxRAM.setAmountToStepBy(512);
+
+        ram = new RAMManager() {
+            @Override
+            public void needsToSave() {
+                //
+            }
+        };
 
         var showOld = Configurator.getConfig().isShowOldReleases();
         var showSnap = Configurator.getConfig().isShowSnapshots();
@@ -140,12 +143,12 @@ public class EditProfilePage extends HandlerController {
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
             switch (a.getKey()){
-                case "add" -> {
+                case JavaManager.ADD -> {
                     var java = (Java)a.getNewValue();
                     javaVersions.add(java.toIdentifier());
                 }
-                case "update" -> reloadJava();
-                case "delete" -> {
+                case JavaManager.UPDATE -> reloadJava();
+                case JavaManager.DELETE -> {
                     var java = (Java)a.getOldValue();
                     javaVersions.remove(java.toIdentifier());
                     if (java.toIdentifier().equals(cbJavaVersion.getValue()))
@@ -184,10 +187,12 @@ public class EditProfilePage extends HandlerController {
 
     @Override
     public void preInit(){
-
         btnBack.enableTransparentAnimation();
         btnBack.setText("⤶ " + Translator.translate("option.back"));
         btnBack.setOnMouseClicked(a -> Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile));
+
+        ram.setControls(txtMinRAM, txtMaxRAM, sldRAM);
+        ram.setup();
 
         icon.setCornerRadius(icon.getFitWidth(), icon.getFitHeight(), 16);
         icon.setOnMouseClicked(a -> {
@@ -220,27 +225,6 @@ public class EditProfilePage extends HandlerController {
             tempProfile.setJava(java);
         });
         cbJavaVersion.setItems(javaVersions);
-
-        sldRAM.setLabelFormatter(new StringConverter<>() {
-            @Override
-            public String toString(Double aDouble) {
-                return (aDouble / 1024) + "GB";
-            }
-
-            @Override
-            public Double fromString(String s) {
-                String[] f = s.split(" ");
-                return Double.parseDouble(f[0]) * 1024;
-            }
-        });
-        sldRAM.valueProperty().addListener(x -> {
-            var v = Math.floor(sldRAM.getValue() / 512.0) * 512;
-
-            sldRAM.valueProperty().set(v);
-
-            //fMinRAM.setValue((int) sldRAM.getValue());
-            fMaxRAM.setValue((int) sldRAM.getValue());
-        });
 
         btnJavaManager.setOnMouseClicked((a) -> Main.getMain().addTab("pages/java", Translator.translate("frame.title.javaman"), true, JavaPage.class));
 
@@ -308,18 +292,6 @@ public class EditProfilePage extends HandlerController {
                 OSUtil.openFolder(path.toFile().toPath());
         });
 
-        txtMaxRAM.setValueFactory(fMaxRAM);
-        txtMinRAM.setValueFactory(fMinRAM);
-
-        txtMaxRAM.valueProperty().addListener(a -> {
-            if (fMaxRAM.getValue() > 32 * 1024)
-                return;
-            sldRAM.setValue(fMaxRAM.getValue());
-        });
-
-        txtMaxRAM.setOnScroll(ControlUtil::scroller);
-        txtMinRAM.setOnScroll(ControlUtil::scroller);
-
         btnSave.setOnMouseClicked(a -> {
             String name = txtName.getText();
             if (!isValidName(name)){
@@ -344,8 +316,8 @@ public class EditProfilePage extends HandlerController {
             tempProfile
                     .setName(name)
                     .setJvmArgs(txtArgs.getText().split(" "))
-                    .setMinRAM(fMinRAM.getValue())
-                    .setMaxRAM(fMaxRAM.getValue());
+                    .setMinRAM(ram.getMin())
+                    .setMaxRAM(ram.getMax());
             if (txtAccount.getText() == null || txtAccount.getText().isBlank())
                 tempProfile.setCustomUser(null);
             else
@@ -468,8 +440,8 @@ public class EditProfilePage extends HandlerController {
             else if (!(wr instanceof Vanilla) && tempProfile.getWrapperVersion() != null){
                 cbWrapperVersion.setValue(tempProfile.getWrapperVersion());
             }
-            fMinRAM.setValue(tempProfile.getMinRAM());
-            fMaxRAM.setValue(tempProfile.getMaxRAM());
+            ram.setMin(tempProfile.getMinRAM());
+            ram.setMax(tempProfile.getMaxRAM());
             sldRAM.setValue(tempProfile.getMaxRAM());
         }
         catch (Exception e){

@@ -4,6 +4,7 @@ import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.entity.LStage;
+import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.TranslateTransition;
 import javafx.event.EventType;
 import javafx.geometry.Insets;
@@ -19,6 +20,7 @@ import javafx.util.Duration;
 import java.util.Optional;
 
 public class CDialog<T> extends Dialog<T> {
+    public static final String API_DIALOG_CREATE = "onDialogCreate";
 
     protected Node node;
 
@@ -60,6 +62,8 @@ public class CDialog<T> extends Dialog<T> {
         trns.setFromY(1000);
         trns.setToY(0);
         trns.setDuration(Duration.millis(500));
+
+        ExtensionWrapper.getWrapper().fireEvent(API_DIALOG_CREATE, this, CDialog.class);
     }
 
     protected Optional<T> action(){
@@ -70,6 +74,7 @@ public class CDialog<T> extends Dialog<T> {
         }
         var res = super.showAndWait();
         Main.getMain().setDialogLayer(false);
+
         return res;
     }
 }

@@ -3,7 +3,6 @@ package com.laeben.corelauncher.minecraft.wrapper;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
-import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entity.MainInfo;
 import com.laeben.corelauncher.minecraft.entity.Version;
@@ -36,7 +35,7 @@ public class Vanilla extends Wrapper<Version> {
 
     @Override
     public Version getVersion(String id, String wrId){
-        logState("acqVersion" + id);
+        logState(Wrapper.ACQUIRE_VERSION + id);
         return getAllVersions().stream().filter(x -> x.checkId(id)).findFirst().orElse(new Version());
     }
 
@@ -113,7 +112,7 @@ public class Vanilla extends Wrapper<Version> {
                 info = GsonUtil.empty().fromJson(jsonPath.read(), Version.class);
 
             if (!clientPath.exists() || disableCache || !checkLen(info.downloads.client.url, clientPath)){
-                logState("clientDownload");
+                logState(Wrapper.CLIENT_DOWNLOAD);
                 Logger.getLogger().logDebug("Downloading client " + v.id + "...");
                 NetUtil.download(info.downloads.client.url, clientPath, false, true);
             }

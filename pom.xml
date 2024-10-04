@@ -13,6 +13,7 @@
         <module>CLFixer</module>
         <module>Launcher</module>
         <module>CLPatcher</module>
+        <module>ExampleExtension</module>
     </modules>
 
 

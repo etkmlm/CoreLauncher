@@ -15,36 +15,66 @@ module com.laeben.corelauncher {
     requires java.sql;
     requires org.apache.commons.lang3;
 
-    opens com.laeben.corelauncher.ui.controller.page to javafx.fxml;
     opens com.laeben.corelauncher to javafx.fxml, com.laeben.core;
-    opens com.laeben.corelauncher.minecraft.entity to com.google.gson;
-    opens com.laeben.corelauncher.util.entity to com.google.gson;
-    opens com.laeben.corelauncher.minecraft.wrapper.forge.entity to com.google.gson;
-    opens com.laeben.corelauncher.minecraft.wrapper.neoforge.entity to com.google.gson;
-    opens com.laeben.corelauncher.minecraft.wrapper.optifine.entity to com.google.gson;
-    opens com.laeben.corelauncher.minecraft.wrapper.fabric.entity to com.google.gson;
-    opens com.laeben.corelauncher.minecraft.wrapper.entity to com.google.gson;
-    opens com.laeben.corelauncher.minecraft.modding.curseforge.entity to com.google.gson, com.laeben.core;
-    opens com.laeben.corelauncher.minecraft.modding.modrinth.entity to com.google.gson, com.laeben.core;
     opens com.laeben.corelauncher.discord.entity to com.google.gson;
     opens com.laeben.corelauncher.discord.entity.response to com.google.gson;
+
+    opens com.laeben.corelauncher.util;
+    opens com.laeben.corelauncher.util.entity;
+
+    opens com.laeben.corelauncher.minecraft;
+    opens com.laeben.corelauncher.minecraft.entity;
+    opens com.laeben.corelauncher.minecraft.wrapper;
+    opens com.laeben.corelauncher.minecraft.wrapper.entity;
+    opens com.laeben.corelauncher.minecraft.wrapper.neoforge;
+    opens com.laeben.corelauncher.minecraft.wrapper.neoforge.entity;
+    opens com.laeben.corelauncher.minecraft.wrapper.fabric;
+    opens com.laeben.corelauncher.minecraft.wrapper.fabric.entity;
+    opens com.laeben.corelauncher.minecraft.wrapper.forge;
+    opens com.laeben.corelauncher.minecraft.wrapper.forge.entity;
+    opens com.laeben.corelauncher.minecraft.wrapper.forge.installer;
+    opens com.laeben.corelauncher.minecraft.wrapper.optifine;
+    opens com.laeben.corelauncher.minecraft.wrapper.optifine.entity;
+    opens com.laeben.corelauncher.minecraft.wrapper.quilt;
+
+    opens com.laeben.corelauncher.minecraft.util;
+    opens com.laeben.corelauncher.minecraft.modding;
+    opens com.laeben.corelauncher.minecraft.modding.entity;
+    opens com.laeben.corelauncher.minecraft.modding.curseforge;
+    opens com.laeben.corelauncher.minecraft.modding.curseforge.entity;
+    opens com.laeben.corelauncher.minecraft.modding.modrinth;
+    opens com.laeben.corelauncher.minecraft.modding.modrinth.entity;
+    opens com.laeben.corelauncher.minecraft.mapping;
+    opens com.laeben.corelauncher.minecraft.mapping.entity;
+
+
 
     exports com.laeben.corelauncher;
     exports com.laeben.corelauncher.ui.controller;
     exports com.laeben.corelauncher.ui.controller.page;
     exports com.laeben.corelauncher.ui.controller.cell;
-    opens com.laeben.corelauncher.ui.controller to javafx.fxml;
-    opens com.laeben.corelauncher.ui.control to javafx.fxml;
-    opens com.laeben.corelauncher.api.ui.entity to javafx.fxml;
-    opens com.laeben.corelauncher.minecraft.modding.entity to com.google.gson;
     exports com.laeben.corelauncher.ui.controller.browser;
-    opens com.laeben.corelauncher.ui.entity to javafx.fxml;
-    opens com.laeben.corelauncher.ui.controller.browser to com.google.gson, com.laeben.core, javafx.fxml;
-    opens com.laeben.corelauncher.ui.controller.cell to javafx.fxml,javafx.base;
-    opens com.laeben.corelauncher.api.ui to javafx.fxml;
-    opens com.laeben.corelauncher.api.entity to com.google.gson;
-    opens com.laeben.corelauncher.ui.dialog to javafx.fxml;
-    opens com.laeben.corelauncher.api to com.google.gson;
+
+    opens com.laeben.corelauncher.api;
+    opens com.laeben.corelauncher.api.util;
+    opens com.laeben.corelauncher.api.ui;
+    opens com.laeben.corelauncher.api.ui.entity;
+    opens com.laeben.corelauncher.api.entity;
+    opens com.laeben.corelauncher.api.exception;
+    opens com.laeben.corelauncher.api.nbt;
+    opens com.laeben.corelauncher.api.nbt.util;
+    opens com.laeben.corelauncher.api.nbt.entity;
+    opens com.laeben.corelauncher.wrap;
+    opens com.laeben.corelauncher.wrap.exception;
+    opens com.laeben.corelauncher.wrap.entity;
+    opens com.laeben.corelauncher.ui.controller;
+    opens com.laeben.corelauncher.ui.control;
+    opens com.laeben.corelauncher.ui.entity;
+    opens com.laeben.corelauncher.ui.controller.page;
+    opens com.laeben.corelauncher.ui.controller.browser;
+    opens com.laeben.corelauncher.ui.controller.cell;
+    opens com.laeben.corelauncher.ui.dialog;
+
 
 
 }

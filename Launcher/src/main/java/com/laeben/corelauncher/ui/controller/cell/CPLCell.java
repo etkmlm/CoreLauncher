@@ -21,6 +21,10 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class CPLCell extends CCell<Profile> implements CLSelectable {
+    public static final String EXECUTOR_ROOT = "root";
+    public static final String EXECUTOR_MENU = "menu";
+    public static final String PLAY = "play";
+
 
     private final CMenu menu;
     private CList list;
@@ -71,7 +75,7 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
                 return;
             }
             if (onClick !=null)
-                onClick.test((ValueEvent) new ValueEvent("root", null).setSource(this));
+                onClick.test((ValueEvent) new ValueEvent(EXECUTOR_ROOT, null).setSource(this));
         });
 
         root.setOnMouseEntered(a -> {
@@ -144,9 +148,9 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
         btnPlay.setOnMouseClicked(a -> {
             Main.getMain().selectProfile(item);
             if (onClick != null)
-                onClick.test((ValueEvent) new ValueEvent("play", null).setSource(this));
+                onClick.test((ValueEvent) new ValueEvent(PLAY, null).setSource(this));
         });
-        CDockObject.generateProfileMenu(menu, item, btnMenu, a -> onClick == null || onClick.test((ValueEvent) new ValueEvent("menu", a).setSource(this)));
+        CDockObject.generateProfileMenu(menu, item, btnMenu, a -> onClick == null || onClick.test((ValueEvent) new ValueEvent(EXECUTOR_MENU, a).setSource(this)));
 
         if (!selectionDisabled){
             var btnSelect = menu.addItem(null, Translator.translate("option.select"), a -> {

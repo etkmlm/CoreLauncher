@@ -31,6 +31,12 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 public abstract class Wrapper<H extends Version> {
+    public static final String CLIENT_DOWNLOAD = "clientDown";
+    public static final String SERVER_DOWNLOAD = "serverDown";
+    public static final String ACQUIRE_VERSION = "acqVersion";
+    public static final String LIBRARY = "lib";
+    public static final String ASSET = "asset";
+
     private static final String ASSET_URL = "https://resources.download.minecraft.net/";
 
     protected EventHandler<BaseEvent> handler;
@@ -133,7 +139,7 @@ public abstract class Wrapper<H extends Version> {
                 throw new StopException();
             try{
                 Logger.getLogger().logDebug("LIB: " + lib.name);
-                logState("lib" + lib.name);
+                logState(LIBRARY + lib.name);
                 if (!lib.checkAvailability(CoreLauncher.SYSTEM_OS))
                 {
                     Logger.getLogger().logDebug("PASS\n");
@@ -232,7 +238,7 @@ public abstract class Wrapper<H extends Version> {
                 }
 
                 Logger.getLogger().logDebug((i++) + " / " + count);
-                logState("asset" + i + "/" + count);
+                logState(ASSET + i + "/" + count);
                 //logProgress(i, count);
             }
             catch (NoConnectionException | StopException e){

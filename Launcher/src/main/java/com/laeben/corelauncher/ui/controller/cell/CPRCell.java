@@ -12,7 +12,7 @@ import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -82,14 +82,14 @@ public class CPRCell<T extends CResource> extends CCell<T> {
 
         btnUpdate.setOnMouseClicked(a -> new Thread(() -> {
             try {
-                Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.single", item.name), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.single", item.name), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
                 var upResources = Modder.getModder().getUpdate(profile, item);
                 if (upResources != null){
                     Modder.getModder().includeAll(profile, upResources);
-                    Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.single", item.name, item.fileName), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                    UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.single", item.name, item.fileName), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
                 }
                 else{
-                    Platform.runLater(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.mpcontent", item.name), Announcement.AnnouncementType.ERROR), Duration.seconds(4)));
+                    UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.mpcontent", item.name), Announcement.AnnouncementType.ERROR), Duration.seconds(4)));
                 }
 
             } catch (NoConnectionException | HttpException | StopException ignored) {

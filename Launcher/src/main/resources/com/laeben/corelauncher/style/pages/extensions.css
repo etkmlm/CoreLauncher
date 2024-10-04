@@ -1,0 +1,5 @@
+#btnOpenFolder{
+    -fx-background-image: url(../../images/folder.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}

@@ -1,6 +1,5 @@
 package com.laeben.corelauncher.minecraft.modding;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.laeben.core.entity.Path;
@@ -24,7 +23,7 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.entity.LogType;
-import javafx.application.Platform;
+import com.laeben.corelauncher.api.ui.UI;
 
 import java.io.FileNotFoundException;
 import java.net.URLDecoder;
@@ -150,7 +149,7 @@ public class Modder {
             if (url.equals(up.fileUrl))
                 continue;
 
-            Platform.runLater(() -> {
+            UI.runAsync(() -> {
                 remove(p, a);
                 try {
                     include(p, up);
@@ -386,7 +385,7 @@ public class Modder {
 
         EventHandler.enable();
 
-        handler.execute(new KeyEvent("stop"));
+        handler.execute(new KeyEvent(EventHandler.STOP));
 
         Profiler.getProfiler().setProfile(p.getName(), pxt -> {
             if (mp.logoUrl != null && !mp.logoUrl.isEmpty() && pxt.getIcon() == null){

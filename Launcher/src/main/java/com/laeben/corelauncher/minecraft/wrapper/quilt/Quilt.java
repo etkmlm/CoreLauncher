@@ -6,7 +6,6 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.minecraft.wrapper.fabric.Fabric;
-import com.laeben.corelauncher.minecraft.wrapper.fabric.entity.BaseFabricVersion;
 import com.laeben.corelauncher.minecraft.wrapper.fabric.entity.FabricVersion;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.JavaManager;
