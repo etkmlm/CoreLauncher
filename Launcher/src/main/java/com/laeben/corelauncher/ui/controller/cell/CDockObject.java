@@ -3,7 +3,9 @@ package com.laeben.corelauncher.ui.controller.cell;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
+import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.GrabVector;
 import com.laeben.corelauncher.api.util.OSUtil;
@@ -43,6 +45,7 @@ public abstract class CDockObject extends GridCell {
     public static final String OPEN = "open";
     public static final String COPY = "copy";
     public static final String SELECT = "select";
+    public static final String SHORTCUT = "shortcut";
 
     public static final DataFormat dataFormat = new DataFormat("profile");
     public static final Duration animationDuration = Duration.seconds(0.8);
@@ -239,6 +242,12 @@ public abstract class CDockObject extends GridCell {
             var p = Profiler.getProfiler().copyProfile(profile);
             Main.getMain().addTab("pages/profile", p.getName(), true, ProfilePage.class).setProfile(p);
         });
+        if (CoreLauncher.SYSTEM_OS == OS.WINDOWS || CoreLauncher.SYSTEM_OS == OS.LINUX)
+            menu.addItem(ImageCacheManager.getImage("shortcut.png", 32), Translator.translate("profile.menu.shortcut"), a -> {
+                if (onAction != null && !onAction.test(SHORTCUT))
+                    return;
+                ProfileUtil.createShortcut(profile, menuButton.getScene().getWindow());
+            });
     }
 
     public FDObject getObject(){

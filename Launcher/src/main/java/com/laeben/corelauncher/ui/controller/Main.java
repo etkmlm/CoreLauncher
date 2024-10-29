@@ -43,6 +43,7 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
+import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
@@ -124,15 +125,13 @@ public class Main extends HandlerController {
         super(KEY);
         df = new DecimalFormat("0.#");
         running = new SimpleBooleanProperty(false);
-        running.addListener(a -> {
-            UI.runAsync(() -> {
-                btnPlay.setText(running.get() ? "⏸" : "⯈");
-                if (!running.get()){
-                    setProgress(-1);
-                    clearStatus();
-                }
-            });
-        });
+        running.addListener(a -> UI.runAsync(() -> {
+            btnPlay.setText(running.get() ? "⏸" : "⯈");
+            if (!running.get()){
+                setProgress(-1);
+                clearStatus();
+            }
+        }));
 
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
             var oldProfile = (Profile)a.getOldValue();
@@ -160,6 +159,12 @@ public class Main extends HandlerController {
                     Configurator.getConfig().setWindowSize(stage.getWidth(), stage.getHeight());
                 Configurator.save();
             }
+        }, true);
+        registerHandler(JavaManager.getManager().getHandler(), a -> {
+            if (!a.getKey().equals(JavaManager.DOWNLOAD_COMPLETE))
+                return;
+
+            running.set(false);
         }, true);
         registerHandler(Launcher.getLauncher().getHandler(), this::onGeneralEvent, true);
         registerHandler(Vanilla.getVanilla().getHandler(), this::onGeneralEvent, true);

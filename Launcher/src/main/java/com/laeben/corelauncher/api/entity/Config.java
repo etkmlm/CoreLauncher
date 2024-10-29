@@ -39,6 +39,7 @@ public class Config {
     private boolean disableRPC;
     //private int commPort;
     private boolean enableInGameRPC;
+    private boolean useNonGuiShortcut;
 
     public Path getGamePath(){
         return (gamePath == null ? DEFAULT_GAME_PATH : gamePath).forceSetDir(true);
@@ -87,6 +88,13 @@ public class Config {
     }
     public void setDefaultMaxRAM(int maxRAM){
         defaultMaxRAM = maxRAM;
+    }
+
+    public boolean useNonGUIShortcut(){
+        return useNonGuiShortcut;
+    }
+    public void setUseNonGuiShortcut(boolean val){
+        useNonGuiShortcut = val;
     }
 
     public boolean isDisabledRPC(){

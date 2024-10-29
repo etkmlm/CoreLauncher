@@ -51,6 +51,8 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
     @FXML
     private Pane pnNetwork;
     @FXML
+    private Label lblName;
+    @FXML
     private CField txtName;
     @FXML
     private Spinner<Integer> spnMajor;
@@ -114,6 +116,10 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
 
         group.selectedToggleProperty().addListener(a -> {
             boolean local = rbLocal.isSelected();
+
+            lblName.setVisible(local);
+            txtName.setVisible(local);
+            
             node.lookupAll(".group-local").forEach(x -> {
                 x.setVisible(local);
                 x.setManaged(local);

@@ -35,6 +35,7 @@ import javafx.scene.control.Alert;
 import javafx.util.Duration;
 
 import java.io.FileNotFoundException;
+import java.net.BindException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -194,8 +195,11 @@ public class CoreLauncher {
         }, false);
         LaebenApp.getHandler().addHandler(KEY, a -> {
             if (a instanceof ValueEvent oe){
-                if (oe.getKey().equals(LaebenApp.EXCEPTION))
+                if (oe.getKey().equals(LaebenApp.EXCEPTION)){
+                    if (oe.getValue() instanceof BindException) // it is not necessary
+                        return;
                     Logger.getLogger().log((Exception) oe.getValue());
+                }
                 else if (oe.getKey().equals(LaebenApp.NET_EXCEPTION)){
                     String[] spl = oe.getValue().toString().split("\\$\\$\\$");
                     Logger.getLogger().logDebug(LogType.ERROR, "Error on request to " + spl[0] + ": " + spl[1]);
@@ -204,9 +208,29 @@ public class CoreLauncher {
         }, false);
         //
 
-        int index = listArgs.indexOf("--profile");
-        if (index != -1 && listArgs.size() > index + 1){
-            String profileName = listArgs.get(index + 1);
+        boolean profileLaunch;
+
+        int indexProfile = listArgs.indexOf("--profile");
+        boolean confProfile = indexProfile != -1 && listArgs.size() > indexProfile + 1;
+        int indexLaunch = listArgs.indexOf("--launch");
+        boolean confLaunch = indexLaunch != -1 && listArgs.size() > indexLaunch + 1;
+        String profileName= null;
+
+        if (confLaunch){
+            profileName = listArgs.get(indexLaunch + 1);
+            if (!Configurator.getConfig().useNonGUIShortcut()){
+                var profile = Profiler.getProfiler().getProfile(profileName);
+                if (!profile.isEmpty())
+                    CoreLauncherFX.fromArgs = profile;
+                confProfile = false;
+            }
+            else
+                confProfile = true;
+        }
+
+        if (confProfile){
+            if (profileName == null)
+                profileName = listArgs.get(indexProfile + 1);
             var profile = Profiler.getProfiler().getProfile(profileName);
 
             try{

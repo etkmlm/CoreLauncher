@@ -1,10 +1,12 @@
 package com.laeben.corelauncher;
 
+import com.laeben.core.entity.Path;
 import com.laeben.corelauncher.api.entity.ImageEntity;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
@@ -31,6 +33,7 @@ public class CoreLauncherFX extends Application {
     public static final Image DEFAULT_IMAGE_48 = CoreLauncherFX.getLocalImage("creeper.png", 48, 48);
     public static final Image DEFAULT_IMAGE_32 = CoreLauncherFX.getLocalImage("creeper.png", 32, 32);
 
+    static Profile fromArgs;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -47,8 +50,13 @@ public class CoreLauncherFX extends Application {
             Debug.runUI();
             UI.shutdown();
         }
-        else
+        else{
             UI.getUI().create("main").show();
+            if (fromArgs != null){
+                Main.getMain().launch(fromArgs, false, null);
+                fromArgs = null;
+            }
+        }
 
         ExtensionWrapper.getWrapper().fireEvent("onUILoad");
 
@@ -176,6 +184,20 @@ public class CoreLauncherFX extends Application {
         } catch (IOException e) {
             return null;
         }
+    }
+    public static boolean extractLocalImage(String name, Path to){
+        var x = CoreLauncherFX.class.getResource("images/" + name);
+        if (x == null)
+            return false;
+
+        try (var str = x.openStream();
+            var file = new FileOutputStream(to.toFile())) {
+            file.write(str.readAllBytes());
+        } catch (IOException e) {
+            return false;
+        }
+
+        return true;
     }
 
     public static boolean isAnyPopupOpen(){

@@ -111,7 +111,7 @@ public class Launcher {
                             handleState(JAVA + linfo.java.majorVersion);
                             Logger.getLogger().log(LogType.INFO, "Downloading Java " + linfo.java.majorVersion);
                             try{
-                                JavaManager.getManager().downloadAndInclude(linfo.java);
+                                JavaManager.getManager().downloadAndInclude(linfo.java, null);
                                 //handler.execute(new KeyEvent("jvdown"));
                             } catch (NoConnectionException e){
                                 handleState(".error.launch.java");

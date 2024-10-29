@@ -1,7 +1,5 @@
 package com.laeben.corelauncher;
 
-import com.laeben.corelauncher.wrap.ExtensionWrapper;
-
 public class Debug {
 
     public static final boolean DEBUG = false;
@@ -9,15 +7,12 @@ public class Debug {
 
     public static void run(){
         //var profile = Profiler.getProfiler().getProfile("Valhelsia 60");
-        var wrapper = new ExtensionWrapper();
-        wrapper.reload();
-
+        //var shortcutPath = Path.begin(java.nio.file.Path.of("C:/Users/furka/OneDrive/Masaüstü/Launcher.lnk"));
 
         int x = 0;
     }
 
     public static void runUI(){
-
 
     }
 }

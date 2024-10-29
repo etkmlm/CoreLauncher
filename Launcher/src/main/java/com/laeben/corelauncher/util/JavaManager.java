@@ -2,6 +2,8 @@ package com.laeben.corelauncher.util;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.util.events.BaseEvent;
+import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -23,6 +25,7 @@ public class JavaManager {
     public static final String ADD = "add";
     public static final String DELETE = "delete";
     public static final String UPDATE = "update";
+    public static final String DOWNLOAD_COMPLETE = "down";
 
     public record JavaDownloadInfo(String name, String url, int major){
 
@@ -31,7 +34,7 @@ public class JavaManager {
 
     private static JavaManager instance;
 
-    private final EventHandler<ChangeEvent> handler;
+    private final EventHandler<KeyEvent> handler;
     private List<Java> javaVersions;
 
     private Path javaDir;
@@ -59,7 +62,7 @@ public class JavaManager {
     public static Path javaDir(){
         return Configurator.getConfig().getLauncherPath().to("java");
     }
-    public EventHandler<ChangeEvent> getHandler(){
+    public EventHandler<KeyEvent> getHandler(){
         return handler;
     }
 
@@ -113,8 +116,16 @@ public class JavaManager {
         return javaVersions.stream().filter(x -> x.getName().equals(j.getName()) || x.majorVersion == j.majorVersion).findFirst().orElse(null);
     }
 
-    public void downloadAndInclude(Java java) throws NoConnectionException, StopException {
-        var info = getJavaInfo(java, CoreLauncher.OS_64);
+
+    /**
+     * Download and include the Java from the network.
+     * One of {@link Java} or {@link JavaDownloadInfo} needs to be null.
+     * @param java version info
+     * @param info download info
+     */
+    public void downloadAndInclude(Java java, JavaDownloadInfo info) throws NoConnectionException, StopException {
+        if (info == null)
+            info = getJavaInfo(java, CoreLauncher.OS_64);
         var j = download(info);
         if (j == null)
             return;
@@ -130,6 +141,8 @@ public class JavaManager {
             var file = NetUtil.download(info.url, javaDir, true, true);
             file.extract(null, null);
             file.delete();
+
+            handler.execute(new KeyEvent(DOWNLOAD_COMPLETE));
 
             return new Java(javaDir.to(info.name));
         }

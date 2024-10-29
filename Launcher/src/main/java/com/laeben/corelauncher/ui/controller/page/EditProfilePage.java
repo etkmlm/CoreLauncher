@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -142,14 +143,17 @@ public class EditProfilePage extends HandlerController {
 
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
+            if (!(a instanceof ChangeEvent ce))
+                return;
+
             switch (a.getKey()){
                 case JavaManager.ADD -> {
-                    var java = (Java)a.getNewValue();
+                    var java = (Java)ce.getNewValue();
                     javaVersions.add(java.toIdentifier());
                 }
                 case JavaManager.UPDATE -> reloadJava();
                 case JavaManager.DELETE -> {
-                    var java = (Java)a.getOldValue();
+                    var java = (Java)ce.getOldValue();
                     javaVersions.remove(java.toIdentifier());
                     if (java.toIdentifier().equals(cbJavaVersion.getValue()))
                         cbJavaVersion.setValue("...");

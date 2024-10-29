@@ -2,6 +2,7 @@ package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.controller.HandlerController;
@@ -30,12 +31,14 @@ public class JavaPage extends HandlerController {
         super(KEY);
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
+            if (!(a instanceof ChangeEvent ce))
+                return;
             switch (a.getKey()){
                 case JavaManager.ADD -> {
-                    var f = (Java) a.getNewValue();
+                    var f = (Java) ce.getNewValue();
                     pList.getItems().add(f);
                 }
-                case JavaManager.DELETE -> pList.getItems().remove((Java) a.getOldValue());
+                case JavaManager.DELETE -> pList.getItems().remove((Java) ce.getOldValue());
                 //case "update" -> pList.reload(false);
             }
         }, true);
@@ -68,7 +71,7 @@ public class JavaPage extends HandlerController {
             else {
                 new Thread(() -> {
                     try {
-                        JavaManager.getManager().download(j.info());
+                        JavaManager.getManager().downloadAndInclude(null, j.info());
                     }
                     catch (NoConnectionException | StopException e){
                         Main.getMain().announceLater(e, Duration.seconds(2));

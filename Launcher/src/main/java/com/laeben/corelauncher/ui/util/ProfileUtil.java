@@ -2,25 +2,25 @@ package com.laeben.corelauncher.ui.util;
 
 import com.google.gson.*;
 import com.laeben.core.entity.Path;
-import com.laeben.corelauncher.api.entity.ImageEntity;
+import com.laeben.corelauncher.api.entity.*;
+import com.laeben.corelauncher.api.shortcut.Shortcut;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
-import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
-import com.laeben.corelauncher.api.entity.FDObject;
-import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.util.entity.LogType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import java.net.URISyntaxException;
 import java.util.List;
 
 public class ProfileUtil {
@@ -200,5 +200,22 @@ public class ProfileUtil {
         }
 
         Profiler.getProfiler().importFromPath(p);
+    }
+
+    public static void createShortcut(Profile p, Window w){
+        var chooser = new FileChooser();
+        String extension = Shortcut.getExtension(OS.getSystemOS());
+        chooser.setInitialFileName(p.getName() + extension);
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extension, "*" + extension));
+        var file = chooser.showSaveDialog(w);
+        if (file == null)
+            return;
+
+        try {
+            Profiler.createShortcut(p, Path.begin(file.toPath()));
+        } catch (URISyntaxException e) {
+            Logger.getLogger().log(LogType.ERROR, "Cannot create a shortcut: The launcher does not running from a JAR file!");
+            //Logger.getLogger().log(e);
+        }
     }
 }

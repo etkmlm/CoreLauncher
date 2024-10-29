@@ -2,8 +2,13 @@ package com.laeben.corelauncher.api;
 
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
+import com.laeben.corelauncher.CoreLauncher;
+import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.entity.ImageEntity;
+import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.shortcut.Shortcut;
+import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -11,6 +16,7 @@ import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -67,6 +73,42 @@ public class Profiler {
         catch (Exception e){
             Logger.getLogger().log(e);
         }
+    }
+
+
+    /**
+     * Create a shortcut of your profile to desired destination. Apply the profile image if it is possible.
+     * @param destination shortcut path
+     */
+    public static void createShortcut(Profile p, Path destination) throws URISyntaxException {
+        var javaPath = Path.begin(OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString()));
+
+        Path iconPath;
+
+        if (OS.getSystemOS() != OS.WINDOWS && p.getIcon() != null && !p.getIcon().isEmpty() && !p.getIcon().isNetwork() && !p.getIcon().isEmbedded() && !p.getIcon().isBase64()){
+            iconPath = p.getIcon().getPath(Configurator.getConfig().getImagePath());
+        }
+        else {
+            String icon = OS.getSystemOS() == OS.WINDOWS ? "shortcut.ico" : "shortcut.png";
+            iconPath = Configurator.getConfig().getLauncherPath().to(icon);
+
+            boolean t = iconPath.exists();
+
+            if (!iconPath.exists())
+                t = CoreLauncherFX.extractLocalImage("shortcut/" + icon, iconPath);
+
+            if (!t)
+                iconPath = null;
+        }
+
+        if (destination.exists())
+            destination.delete();
+
+        var targetPath = Path.begin(new File(Profiler.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toPath());
+
+        var args = String.format("-jar \"%s\" --launch %s", targetPath, p.getName());
+
+        Shortcut.create(destination, javaPath, targetPath.parent(), iconPath, args, OS.getSystemOS());
     }
 
     public List<Profile> getAllProfiles(){

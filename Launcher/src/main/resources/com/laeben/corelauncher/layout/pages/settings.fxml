@@ -84,6 +84,9 @@
 
                 <Label styleClass="property-key" text="%settings.gameLog" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                 <CheckBox fx:id="chkGamelog" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+
+                <Label styleClass="property-key" text="%settings.guiShortcut" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <CheckBox fx:id="chkGuiShortcut" GridPane.columnIndex="2" GridPane.rowIndex="5" />
             </GridPane>
         </VBox>
         <Rectangle height="20"/>

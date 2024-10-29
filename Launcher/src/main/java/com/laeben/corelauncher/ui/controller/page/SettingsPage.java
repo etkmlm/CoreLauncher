@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller.page;
 
+import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -96,6 +97,8 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkDiscordEnable;
     @FXML
     private CheckBox chkInGameRPC;
+    @FXML
+    private CheckBox chkGuiShortcut;
     /*@FXML
     private Spinner txtCommPort;*/
 
@@ -152,14 +155,17 @@ public class SettingsPage extends HandlerController {
         }, true);
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
+            if (!(a instanceof ChangeEvent ce))
+                return;
+
             switch (a.getKey()){
                 case JavaManager.ADD -> {
-                    var java = (Java)a.getNewValue();
+                    var java = (Java)ce.getNewValue();
                     javas.add(java.toIdentifier());
                 }
                 case JavaManager.UPDATE -> reloadJava();
                 case JavaManager.DELETE -> {
-                    var java = (Java)a.getOldValue();
+                    var java = (Java)ce.getOldValue();
                     javas.remove(java.toIdentifier());
                     if (java.toIdentifier().equals(cbJava.getValue()))
                         cbJava.setValue("...");
@@ -294,6 +300,10 @@ public class SettingsPage extends HandlerController {
         });
         chkAutoUpdate.selectedProperty().addListener(x -> {
             Configurator.getConfig().setAutoUpdate(chkAutoUpdate.isSelected());
+            Configurator.save();
+        });
+        chkGuiShortcut.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setUseNonGuiShortcut(chkGuiShortcut.isSelected());
             Configurator.save();
         });
 
@@ -444,6 +454,7 @@ public class SettingsPage extends HandlerController {
             chkAutoUpdate.setSelected(c.isEnabledAutoUpdate());
             chkDebugLogMode.setSelected(c.getDebugLogMode());
             chkGamelog.setSelected(c.delGameLogs());
+            chkGuiShortcut.setSelected(c.useNonGUIShortcut());
 
             chkInGameRPC.setDisable(c.isDisabledRPC());
             //txtCommPort.setDisable(c.isDisabledRPC());

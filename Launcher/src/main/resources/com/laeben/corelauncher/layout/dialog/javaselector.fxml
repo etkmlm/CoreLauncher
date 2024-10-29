@@ -14,7 +14,7 @@
             <ColumnConstraints/>
         </columnConstraints>
 
-        <Label GridPane.columnIndex="0" GridPane.rowIndex="0" text="Custom Name:"/>
+        <Label fx:id="lblName" GridPane.columnIndex="0" GridPane.rowIndex="0" text="Custom Name:"/>
         <CField fx:id="txtName" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
         <Label GridPane.columnIndex="0" GridPane.rowIndex="1" text="Source:"/>
@@ -24,7 +24,7 @@
         </HBox>
 
         <Label styleClass="group-network" GridPane.columnIndex="0" GridPane.rowIndex="2" text="Major Version:"/>
-        <Spinner styleClass="group-network" fx:id="spnMajor" prefWidth="80" maxWidth="80" min="8" max="30" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        <Spinner styleClass="group-network" editable="true" fx:id="spnMajor" prefWidth="80" maxWidth="80" min="8" max="30" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
         <Label styleClass="group-local" text="Path:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
         <HBox alignment="CENTER" styleClass="group-local" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="2">
