@@ -4,6 +4,7 @@ import com.laeben.core.entity.Path;
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
 import com.laeben.corelauncher.api.util.OSUtil;
+import com.laeben.corelauncher.util.entity.LogType;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -85,15 +86,18 @@ public class Java {
      * Identifies the Java from the path.
      * @return is process successfull
      */
-    public boolean identify(){
+    public boolean identify() {
         if (path == null)
             return loaded = false;
 
-        try{
-            var process = new ProcessBuilder().command(getExecutable().toString(), "-version").start();
+        String version = null;
+        String arch;
 
-            String version;
-            String arch;
+        try{
+            var process = new ProcessBuilder()
+                    .command(getExecutable().toString(), "-version")
+                    .start();
+
             try(var reader = process.errorReader()){
                 version = reader.readLine();
                 reader.readLine();
@@ -107,6 +111,10 @@ public class Java {
             this.arch = arch.contains("64-Bit") ? 64 : 32;
 
             return loaded = true;
+        }
+        catch (NumberFormatException e){
+            Logger.getLogger().log(LogType.ERROR, "Error while trying to identify Java version: " + version + "\nPath: " + path);
+            return loaded = false;
         }
         catch (IOException e){
             return loaded = false;
@@ -179,8 +187,12 @@ public class Java {
         return getName() + " - " + majorVersion;
     }
 
+    public Path getWindowExecutable(){
+        return Path.begin(OSUtil.getJavaFile(path.toString(), true));
+    }
+
     public Path getExecutable(){
-        return Path.begin(OSUtil.getJavaFile(path.toString()));
+        return Path.begin(OSUtil.getJavaFile(path.toString(), false));
     }
 
     @Override

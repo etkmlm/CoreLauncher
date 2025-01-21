@@ -2,7 +2,6 @@ package com.laeben.corelauncher.util;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
-import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -15,9 +14,8 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
 import com.google.gson.JsonArray;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class JavaManager {
     public static final String KEY = "jvman";
@@ -67,16 +65,27 @@ public class JavaManager {
     }
 
     private List<Java> getAll(){
-        try{
-            var files = javaDir.getFiles();
-            var own = files.stream().filter(Path::isDirectory).map(Java::new);
-            var cst = Configurator.getConfig().getCustomJavaVersions();
-            return (cst != null ? Stream.concat(own, cst.stream()) : own).collect(Collectors.toList());
+        var files = javaDir.getFiles();
+        var lst = new ArrayList<Java>();
+        for (var file : files){
+            if (!file.isDirectory())
+                continue;
+
+            try {
+                var j = new Java(file);
+                if (j.isLoaded())
+                    lst.add(j);
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
         }
-        catch (Exception e){
-            Logger.getLogger().log(e);
-            return List.of();
-        }
+
+        var cst = Configurator.getConfig().getCustomJavaVersions();
+        if (cst != null)
+            lst.addAll(cst);
+
+        return lst;
     }
 
     public List<Java> getAllJavaVersions(){

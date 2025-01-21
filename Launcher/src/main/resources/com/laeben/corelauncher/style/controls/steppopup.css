@@ -1,0 +1,22 @@
+#root{
+    -fx-background-radius: 10px;
+    -fx-background-color: #282828da;
+    -fx-padding: 8px;
+}
+
+.cbutton{
+    -fx-font-size: 15pt;
+    -fx-font-weight: bold;
+}
+
+#btnNext{
+    /*-fx-text-fill: #05c5c5;*/
+    -fx-font-weight: bold;
+}
+
+.text-area{
+    -fx-font-size: 14pt;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+    -fx-alignment: center;
+}

@@ -96,12 +96,21 @@ public class Logger {
     }
 
     public void log(Throwable e){
+        var builder = new StringBuilder("Calling Stack Trace: \n\n");
+        for (var t : Thread.currentThread().getStackTrace()){
+            builder.append(t).append("\n");
+        }
+
+        builder.append("\n----////----////----\n\n").append("Exception Stack Trace: ").append("\n\n");
+
         try(var w = new StringWriter();
             var p = new PrintWriter(w)) {
             e.printStackTrace(p);
-            log(LogType.ERROR, w.toString());
-        } catch (IOException ignored) {
-
+            builder.append(w);
+        } catch (IOException ex) {
+            builder.append("main exception: ").append(e).append(" but error while printing: ").append(ex.getMessage());
         }
+
+        log(LogType.ERROR, builder.toString());
     }
 }

@@ -3,6 +3,7 @@ package com.laeben.corelauncher.ui.control;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
+import com.laeben.corelauncher.util.ImageUtil;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -48,10 +49,10 @@ public class CAnnouncer extends Parent {
         lblTitle.setText(a.title());
         txtContent.setText(a.content());
         icon.setImage(switch (a.type()){
-            case GAME -> CoreLauncherFX.getLocalImage("vanilla.png");
-            case INFO -> CoreLauncherFX.getLocalImage("announcer/info.png");
-            case ERROR -> CoreLauncherFX.getLocalImage("announcer/error.png");
-            default -> CoreLauncherFX.getLocalImage("announcer/broadcast.png");
+            case GAME -> ImageUtil.getLocalImage("vanilla.png");
+            case INFO -> ImageUtil.getLocalImage("announcer/info.png");
+            case ERROR -> ImageUtil.getLocalImage("announcer/error.png");
+            default -> ImageUtil.getLocalImage("announcer/broadcast.png");
         });
         var d1 = duration + d.toMillis();
         line.getKeyFrames().set(1, new KeyFrame(Duration.millis(d1), new KeyValue(translateXProperty(), 0)));

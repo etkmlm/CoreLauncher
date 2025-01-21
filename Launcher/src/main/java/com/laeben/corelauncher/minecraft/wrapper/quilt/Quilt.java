@@ -59,7 +59,7 @@ public class Quilt extends Fabric<QuiltVersion> {
             logState(".quilt.state.install");
             try{
                 var process = new ProcessBuilder()
-                        .command(JavaManager.getDefault().getExecutable().toString(),
+                        .command(JavaManager.getDefault().getWindowExecutable().toString(),
                                 "-jar", path.toString(),
                                 "install", "client", v.id, v.getWrapperVersion(),
                                 "--install-dir=" + gameDir,

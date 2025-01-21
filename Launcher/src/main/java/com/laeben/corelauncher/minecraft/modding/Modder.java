@@ -124,12 +124,19 @@ public class Modder {
         for (var a : mods.stream().toList()){
             handler.execute(new KeyEvent("," + a.name + ":.resource.progress;" + (++i) + ";" + size));
 
-            if (a.fileUrl == null)
+            if (a.fileName == null){
+                Logger.getLogger().log(LogType.ERROR, "Cannot install mod '" + a.name + "' because it has no file name.");
                 continue;
+            }
 
             var pxx = path.to(a.fileName);
             if (pxx.exists())
                 continue;
+
+            if (a.fileUrl == null){
+                Logger.getLogger().log(LogType.ERROR, "Cannot install mod '" + a.name + "' because it has no file url.");
+                continue;
+            }
 
             String url = a.fileUrl;
             if (url.startsWith("OptiFine")){
@@ -294,11 +301,20 @@ public class Modder {
         int i = 0;
         int size = rs.size();
         for (var pack : rs){
+            handler.execute(new KeyEvent("," + pack.name + ":.resource.progress;" + (++i) + ";" + size));
+
+            if (pack.fileName == null){
+                Logger.getLogger().log(LogType.ERROR, "Cannot install resourcepack '" + pack.name + "' because it has no file name.");
+                continue;
+            }
             var px = path.to(pack.fileName);
             if (px.exists())
                 continue;
 
-            handler.execute(new KeyEvent("," + pack.name + ":.resource.progress;" + (++i) + ";" + size));
+            if (pack.fileUrl == null){
+                Logger.getLogger().log(LogType.ERROR, "Cannot install resourcepack '" + pack.name + "' because it has no file url.");
+                continue;
+            }
 
             try{
                 NetUtil.download(pack.fileUrl, px, false);
@@ -309,20 +325,26 @@ public class Modder {
         }
     }
 
-    public void installWorlds(Profile p, List<World> ws) throws NoConnectionException, HttpException, StopException {
+    public void installWorlds(Profile p, List<World> ws) throws NoConnectionException, StopException {
         var worlds = p.getPath().to("saves");
 
         int i = 0;
         int size = ws.size();
 
         for (var w : ws){
+            handler.execute(new KeyEvent("," + w.name + ":.resource.progress;" + (++i) + ";" + size));
+
+            if (w.fileName == null){
+                Logger.getLogger().log(LogType.ERROR, "Cannot install world '" + w.name + "' because it has no file name.");
+                continue;
+            }
             if (worlds.to(w.name).exists())
                 continue;
 
-            if (w.fileUrl == null)
+            if (w.fileUrl == null){
+                Logger.getLogger().log(LogType.ERROR, "Cannot install world '" + w.name + "' because it has no file url.");
                 continue;
-
-            handler.execute(new KeyEvent("," + w.name + ":.resource.progress;" + (++i) + ";" + size));
+            }
 
             Path zip = null;
             try{
@@ -382,6 +404,7 @@ public class Modder {
 
         includeMods(p, mp.mods);
         includeResourcepacks(p, mp.resources);
+        includeShaders(p, mp.shaders);
 
         EventHandler.enable();
 
@@ -403,13 +426,20 @@ public class Modder {
         int i = 0;
         int size = shs.size();
         for (var shader : shs){
-            if (shader.fileUrl == null)
+            handler.execute(new KeyEvent("," + shader.name + ":.resource.progress;" + (++i) + ";" + size));
+
+            if (shader.fileName == null){
+                Logger.getLogger().log(LogType.ERROR, "Cannot install shader '" + shader.name + "' because it has no file name.");
                 continue;
+            }
             var pxx = path.to(shader.fileName);
             if (pxx.exists())
                 continue;
 
-            handler.execute(new KeyEvent("," + shader.name + ":.resource.progress;" + (++i) + ";" + size));
+            if (shader.fileUrl == null){
+                Logger.getLogger().log(LogType.ERROR, "Cannot install shader '" + shader.name + "' because it has no file url.");
+                continue;
+            }
 
             try{
                 NetUtil.download(shader.fileUrl, pxx, false, true);
@@ -420,9 +450,13 @@ public class Modder {
 
         }
     }
-    public void includeShader(Profile p, Shader s){
-        remove(p, s, true, false);
-        Profiler.getProfiler().setProfile(p.getName(), a -> a.getShaders().add(s));
+    public void includeShaders(Profile p, List<Shader> s){
+        for (var pack : s){
+            remove(p, pack, true, false);
+            p.getShaders().add(pack);
+        }
+
+        Profiler.getProfiler().setProfile(p.getName(), null);
     }
 
     public void include(Profile p, CResource r) throws NoConnectionException, HttpException, StopException {
@@ -438,7 +472,7 @@ public class Modder {
         else if (r instanceof World w)
             includeWorld(p, w);
         else if (r instanceof Shader s)
-            includeShader(p, s);
+            includeShaders(p, List.of(s));
     }
     public void includeAll(Profile p, List<CResource> rs) throws NoConnectionException, HttpException, StopException {
         for (var r : rs)

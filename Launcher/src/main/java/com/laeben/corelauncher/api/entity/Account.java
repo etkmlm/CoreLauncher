@@ -3,12 +3,13 @@ package com.laeben.corelauncher.api.entity;
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
-import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.minecraft.util.Authenticator;
 import com.laeben.corelauncher.minecraft.util.Tokener;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.*;
+import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import javafx.scene.image.Image;
 
@@ -49,6 +50,8 @@ public class Account{
     private boolean isReloaded;
     private boolean isOnline;
 
+    private transient String _token;
+
     private Account(String username){
         this.username = username;
     }
@@ -57,12 +60,20 @@ public class Account{
      * Authenticate the account with Mojang.
      * @return the account
      */
-    public Account authenticate(){
+    public Account authenticate() throws PerformException {
         if (!isOnline || !NetUtil.check())
             return this;
         if (tokener == null)
             tokener = Authenticator.getAuthenticator().authenticate(username);
         return this;
+    }
+
+    public void cacheToken() throws PerformException {
+        _token = isOnline() ? authenticate().getTokener().getAccessToken() : "null";
+    }
+
+    public String getCachedToken(){
+        return _token == null ? "null" : _token;
     }
 
     public Tokener getTokener(){
@@ -93,7 +104,7 @@ public class Account{
             String str = NetUtil.urlToString(VERIFY_URL, List.of(RequestParameter.bearer(tokener.getAccessToken())));
 
             obj = GsonUtil.DEFAULT_GSON.fromJson(str, JsonObject.class);
-        } catch (NoConnectionException | HttpException ignored) {
+        } catch (NoConnectionException | HttpException | PerformException ignored) {
             return false;
         }
 
@@ -115,7 +126,6 @@ public class Account{
      * @return the account
      */
     public Account reload(){
-
         if (isReloaded)
             return this;
 
@@ -192,7 +202,7 @@ public class Account{
         try{
             Image img = new Image(skin);
 
-            head = CoreLauncherFX.resizeImage(img, 8, 8, 8, 8, 32);
+            head = ImageUtil.resizeImage(img, 8, 8, 8, 8, 32);
         }
         catch (Exception e){
             head = null;

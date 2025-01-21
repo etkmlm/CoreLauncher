@@ -9,6 +9,8 @@ import com.laeben.core.util.NetUtils;
 import com.laeben.core.util.events.*;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.LauncherConfig;
+import com.laeben.corelauncher.api.*;
+import com.laeben.corelauncher.api.entity.FDObject;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.socket.entity.CLPacket;
 import com.laeben.corelauncher.api.socket.entity.CLPacketType;
@@ -16,11 +18,9 @@ import com.laeben.corelauncher.api.socket.entity.CLStatusPacket;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.Controller;
-import com.laeben.corelauncher.api.Configurator;
-import com.laeben.corelauncher.api.Profiler;
-import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.ui.entity.FocusLimiter;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
@@ -36,7 +36,11 @@ import com.laeben.corelauncher.ui.controller.page.ExtensionsPage;
 import com.laeben.corelauncher.ui.controller.page.MainPage;
 import com.laeben.corelauncher.ui.controller.page.SettingsPage;
 import com.laeben.corelauncher.ui.control.*;
+import com.laeben.corelauncher.ui.controller.page.TutorialsPage;
 import com.laeben.corelauncher.ui.dialog.DStartupConfigurator;
+import com.laeben.corelauncher.ui.entity.EventFilter;
+import com.laeben.corelauncher.ui.tutorial.Instructor;
+import com.laeben.corelauncher.ui.tutorial.StepPopup;
 import com.laeben.corelauncher.ui.util.ControlUtil;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -47,14 +51,17 @@ import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -64,9 +71,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+import java.util.concurrent.*;
 
 public class Main extends HandlerController {
     public static final String KEY = "main";
@@ -101,17 +106,28 @@ public class Main extends HandlerController {
     private Region dialogLayer;
     @FXML
     private AnchorPane root;
+    @FXML
+    private StepPopup stepPopup;
 
     private Profile selectedProfile;
+
+    private boolean statusNeedsUpdate;
+    private double percentage;
+    private final ScheduledThreadPoolExecutor statusExecutor;
     private final String[] status;
 
     private final TranslateTransition menuTranslate;
     private final ScaleTransition prgTranslate;
     private boolean showingProgress;
+    private boolean createDefaultProfile;
 
     private final BooleanProperty running;
 
     private final Executor executor;
+
+    private FocusLimiter focusLimiter;
+
+    private final Instructor instructor;
 
     @FXML
     private ProgressIndicator ind;
@@ -164,12 +180,12 @@ public class Main extends HandlerController {
             if (!a.getKey().equals(JavaManager.DOWNLOAD_COMPLETE))
                 return;
 
-            running.set(false);
+            clearAllStates();
         }, true);
         registerHandler(Launcher.getLauncher().getHandler(), this::onGeneralEvent, true);
         registerHandler(Vanilla.getVanilla().getHandler(), this::onGeneralEvent, true);
         registerHandler(Modder.getModder().getHandler(), this::onGeneralEvent, true);
-        registerHandler(NetUtil.getHandler(), this::onProgress, true);
+        registerHandler(NetUtil.getHandler(), this::onProgress, false);
         registerHandler(Configurator.getConfigurator().getHandler(), a -> {
             if (a.getKey().equals(Configurator.BACKGROUND_CHANGE))
                 setBackground(Configurator.getConfig().getBackgroundImage());
@@ -180,6 +196,23 @@ public class Main extends HandlerController {
                     setUser(Configurator.getConfig().getUser().reload());
             }
         }, true);
+        Launcher.getLauncher().setOnAuthFail(v -> {
+            var task = new Task<Boolean>() {
+                @Override
+                protected Boolean call() throws Exception {
+                    var msg = CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth", v.getValue()))
+                            .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                            .executeForResult();
+                    return msg.isPresent() && msg.get().result() != CMsgBox.ResultType.NO;
+                }
+            };
+            Platform.runLater(task);
+            try {
+                return task.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                return false;
+            }
+        });
 
         menuTranslate = new TranslateTransition();
         prgTranslate = new ScaleTransition();
@@ -191,13 +224,30 @@ public class Main extends HandlerController {
         menuTranslate.setDuration(d);
         prgTranslate.setDuration(d);
 
-        status = new String[3];
+        status = new String[2];
+        //status = new String[3];
 
         handler = new EventHandler<>();
 
         executor = Executors.newSingleThreadExecutor();
+        statusExecutor = new ScheduledThreadPoolExecutor(1);
+        statusExecutor.scheduleAtFixedRate(() -> {
+            if (statusNeedsUpdate){
+                UI.runAsync(this::updateStatus);
+                statusNeedsUpdate = false;
+            }
+        },0, 50, TimeUnit.MILLISECONDS);
+
+        instructor = new Instructor();
 
         instance = this;
+    }
+
+    public void clearAllStates(){
+        running.set(false);
+        if (selectedProfile != null)
+            selectedProfile.getWrapper().setStopRequested(false);
+        Vanilla.getVanilla().setStopRequested(false);
     }
 
     private String dot(String f){
@@ -207,6 +257,10 @@ public class Main extends HandlerController {
 
     public TabPane getTab(){
         return tab;
+    }
+
+    public Instructor getInstructor(){
+        return instructor;
     }
 
     public CAnnouncer getAnnouncer(){
@@ -259,44 +313,47 @@ public class Main extends HandlerController {
 
             if (key.startsWith(Launcher.SESSION_START)){
                 announcer.announce(new Announcement(Translator.translate("announce.game.started"), Translator.translateFormat("announce.misc.profile", k.getKey().substring(12)), Announcement.AnnouncementType.GAME), Duration.seconds(3));
-                running.set(false);
+                clearAllStates();
                 Discord.getDiscord().setActivity(Activity.setForProfile(selectedProfile));
                 if (Configurator.getConfig().hideAfter())
                     UI.getUI().hideAll();
             }
             else if (key.startsWith(Launcher.JAVA)){
                 String major = k.getKey().substring(4);
-                setStatus(1, Translator.translateFormat("launch.state.download.java", major));
+                setPrimaryStatus(Translator.translateFormat("launch.state.download.java", major));
             }
             else if (key.equals(EventHandler.STOP)){
-                running.set(false);
+                clearAllStates();
             }
             else if (key.equals(Wrapper.CLIENT_DOWNLOAD))
-                setStatus(1, Translator.translate("launch.state.download.client"));
+                setPrimaryStatus(Translator.translate("launch.state.download.client"));
             else if (key.startsWith(Wrapper.LIBRARY)){
-                setStatus(1, key.substring(3));
+                setPrimaryStatus(key.substring(3));
             }
-            else if (key.startsWith(Wrapper.ASSET)){
-                setStatus(1, Translator.translate("launch.state.download.assets") + " " + key.substring(5));
+            else if (key.startsWith("asset")){//
+                setPrimaryStatus(Translator.translate("launch.state.download.assets") + " " + key.substring(5));
+            }
+            else if (key.equals(Wrapper.ASSET_LOAD)){
+                setPrimaryStatus(Translator.translate("launch.state.assets"));
             }
             else if (key.startsWith(Wrapper.ACQUIRE_VERSION))
-                setStatus(1, Translator.translateFormat("launch.state.acquire", key.substring(10)));
+                setPrimaryStatus(Translator.translateFormat("launch.state.acquire", key.substring(10)));
             else if (key.startsWith(Launcher.PREPARE)){
-                setStatus(1, Translator.translateFormat("launch.state.prepare", key.substring(7)));
+                setPrimaryStatus(Translator.translateFormat("launch.state.prepare", key.substring(7)));
                 Discord.getDiscord().setActivity(a -> a.state = Translator.translate("discord.state.prepare"));
             }
             else if (key.startsWith("."))
-                setStatus(1, dot(key.substring(1)));
+                setPrimaryStatus(dot(key.substring(1)));
             else if (key.startsWith(",")){
                 var s = key.split(":\\.");
-                setStatus(0, dot(s[1]));
-                setStatus(1, s[0].substring(1));
+                setSecondaryStatus(dot(s[1]));
+                setPrimaryStatus(s[0].substring(1));
             }
             /*else if (key.equals("jvdown")){
 
             }*/
             else
-                setStatus(1, key);
+                setPrimaryStatus(key);
         }
     }
 
@@ -365,6 +422,11 @@ public class Main extends HandlerController {
             }
         });
         cMenu.addItem(null, Translator.translate("extensions"), a -> addTab("pages/extensions", Translator.translate("extensions"), true, ExtensionsPage.class));
+        cMenu.addItem(null, Translator.translate("tutorial.tutorials"), a -> {
+            /*instructor.load(Instructor.generateGeneralTutorial());
+            instructor.start();*/
+            addTab("pages/tutorials", Translator.translate("tutorial.tutorials"), true, TutorialsPage.class);
+        });
 
         try{
             setUser(Configurator.getConfig().getUser().reload());
@@ -381,23 +443,17 @@ public class Main extends HandlerController {
         }
 
         tab.setOnKeyPressed(a -> handler.execute((KeyEvent) new KeyEvent(TAB_KEY_PRESS).setSource(a)));
+        tab.getSelectionModel().selectedItemProperty().addListener((a, o, n) -> handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(n)));
 
-        btnPlay.setOnMouseClicked(a -> {
-            if (running.get()){
-                if (selectedProfile != null) {
-                    selectedProfile.getWrapper().setStopRequested(true);
-                    Vanilla.getVanilla().setStopRequested(true);
-                    NetUtil.stop();
-                    Discord.getDiscord().setActivity(Activity.setForIdling());
-                }
-                running.set(false);
-            }
-            else if (selectedProfile != null){
-                launch(selectedProfile, a.isShiftDown(), null);
-            }
-        });
+        btnPlay.setOnMouseClicked(a -> launchClick(a.isShiftDown()));
 
         head.setCornerRadius(64, 64, 16);
+
+        instructor.setPopup(stepPopup);
+    }
+
+    public void setFocusLimiter(FocusLimiter limit){
+        focusLimiter = limit;
     }
 
     public static AnchorPane getExternalLayer(CTab tab){
@@ -430,14 +486,31 @@ public class Main extends HandlerController {
 
     @Override
     public void init() {
-        var scene = getStage().getLScene();
+        addRegisteredEventFilter(EventFilter.node(root, MouseEvent.ANY, (a) -> {
+            if (focusLimiter == null)
+                return;
+
+            var node = (Node) a.getTarget();
+
+            if (focusLimiter.verify(a.getSceneX(), a.getSceneY()))
+                return;
+
+            if (a.getEventType() == MouseEvent.MOUSE_CLICKED){
+                focusLimiter.focus();
+                focusLimiter.onFocusLimitIgnored(Tool.findNodeController(node), node);
+            }
+
+            a.consume();
+        }));
+
+        var stage = getStage();
         tab.setOnMousePressed(a -> {
             if (a.getTarget() instanceof StackPane sp && sp.getStyleClass().contains("tab-header-background"))
-                scene.onMousePressed(a);
+                stage.onMousePressed(a);
         });
-        tab.setOnMouseDragged(scene::onMouseDragged);
+        tab.setOnMouseDragged(stage::onMouseDragged);
 
-        scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, x -> {
+        addRegisteredEventFilter(EventFilter.window(getStage(), javafx.scene.input.KeyEvent.KEY_PRESSED, x -> {
             if (!x.isShiftDown() || x.getTarget() instanceof TextField)
                 return;
 
@@ -455,12 +528,11 @@ public class Main extends HandlerController {
                     return;
                 relocateTab(i1, i1 + 1);
             }
-        });
+        }));
 
         addTab("pages/main", "        ", false, MainPage.class);
 
         setBackground(Configurator.getConfig().getBackgroundImage());
-
 
         if (Configurator.getConfig().shouldShowHelloDialog()){
             var x = new DStartupConfigurator().execute();
@@ -468,6 +540,8 @@ public class Main extends HandlerController {
                 Configurator.getConfig().setShowHelloDialog(false);
                 Configurator.save();
             }
+
+            createDefaultProfile = true;
         }
 
         double w = Configurator.getConfig().getWindowWidth();
@@ -486,14 +560,23 @@ public class Main extends HandlerController {
         pane.setFitToWidth(true);
         pane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         pane.setFitToHeight(true);
-        pane.addEventFilter(ScrollEvent.SCROLL, a -> {
+        addRegisteredEventFilter(EventFilter.node(pane, ScrollEvent.SCROLL, a -> {
             double val = a.getDeltaY() * 0.01 * (pane.getHeight() * 1 / 800);
             pane.setVvalue(pane.getVvalue() - val);
-        });
+        }));
         return pane;
     }
     public void closeTab(int index){
-        tab.getTabs().remove(index);
+        var t = tab.getTabs().get(index);
+        if (t instanceof CTab ct)
+            ct.dispose();
+        tab.getTabs().remove(t);
+    }
+
+    public void closeTab(Tab tab){
+        if (tab instanceof CTab ct)
+            ct.dispose();
+        getTab().getTabs().remove(tab);
     }
 
     public void relocateTab(int i1, int i2){
@@ -516,7 +599,7 @@ public class Main extends HandlerController {
         tab.getTabs().add(index, t1);
         tab.getSelectionModel().select(t1);
 
-        handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t));
+        //handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t1));
 
         ExtensionWrapper.getWrapper().fireEvent(API_TAB_LOAD, t1);
 
@@ -538,7 +621,7 @@ public class Main extends HandlerController {
         tab.getSelectionModel().select(t1);
         t1.getController().onShown();
 
-        handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t1));
+        //handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t1));
 
         ExtensionWrapper.getWrapper().fireEvent(API_TAB_LOAD, t1);
 
@@ -565,7 +648,7 @@ public class Main extends HandlerController {
         if (!running.get())
             running.set(true);
         String id = e.getKey().equals(NetUtils.DOWNLOAD) ? "mb" : e.getKey();
-        setStatus(0, df.format(e.getRemain()) + id + " / " + df.format(e.getTotal()) + id);
+        setSecondaryStatus(df.format(e.getRemain()) + id + " / " + df.format(e.getTotal()) + id);
 
         setProgress(e.getProgress());
     }
@@ -578,7 +661,10 @@ public class Main extends HandlerController {
             progress = 0;
         }
 
-        this.progress.setProgress(progress);
+
+        percentage = progress;
+        statusNeedsUpdate = true;
+        //this.progress.setProgress(progress);
     }
     public void showProgress(){
         this.progress.setProgress(0);
@@ -607,41 +693,66 @@ public class Main extends HandlerController {
     }
 
     /**
-     * Sets the status object.
-     * @param priority Priority order of the status. Objects that have different priorities are separated by '|'
-     * @param text Status text.
+     * Triggers the update of the status.
      */
-    public void setStatus(int priority, String text){
+    public void updateStatus(){
         if (!running.get())
             return;
 
-        if (priority < 0)
-            priority = 0;
-        else if (priority >= status.length)
-            priority = status.length - 1;
+        String s1 = status[0];
+        String s2 = status[1];
 
-        status[priority] = text;
+        String stat = null;
+        if (s1 != null && !s1.isBlank())
+            stat = s1;
 
-        var f = Arrays.stream(status).filter(a -> a != null && !a.isBlank()).collect(Collectors.toList());
-        Collections.reverse(f);
-
-        String stat = String.join(" | ", f);
+        if (s2 != null && !s2.isBlank())
+            stat = stat == null ? s2 : stat + " | " + s2;
 
         lblStatus.setText(stat);
+        progress.setProgress(percentage);
     }
 
     /**
-     * Sets the status object with the highest priority order.
+     * Sets the primary status.
      * @param text Status text.
      */
     public void setPrimaryStatus(String text){
-        for (int i = 1; i < status.length; i++)
-            setStatus(i, null);
-        setStatus(0, text);
+        status[0] = text;
+        statusNeedsUpdate = true;
+        //updateStatus();
+    }
+
+    /**
+     * Sets the secondary status.
+     * @param text Status text.
+     */
+    public void setSecondaryStatus(String text){
+        status[1] = text;
+        statusNeedsUpdate = true;
+        //updateStatus();
     }
 
     public EventHandler<KeyEvent> getHandler(){
         return handler;
+    }
+
+    public boolean launchClick(boolean cache){
+        if (running.get()){
+            if (selectedProfile != null) {
+                selectedProfile.getWrapper().setStopRequested(true);
+                Vanilla.getVanilla().setStopRequested(true);
+                NetUtil.stop();
+                Discord.getDiscord().setActivity(Activity.setForIdling());
+            }
+            running.set(false);
+            return false;
+        }
+        else if (selectedProfile != null){
+            launch(selectedProfile, cache, null);
+            return true;
+        }
+        return false;
     }
 
     public void launch(Profile p, boolean cache, ServerInfo server){
@@ -656,9 +767,7 @@ public class Main extends HandlerController {
                 Cat.sleep(200);
 
                 if (wr.isStopRequested()){
-                    wr.setStopRequested(false);
-                    Vanilla.getVanilla().setStopRequested(false);
-                    running.set(false);
+                    clearAllStates();
                     throw new StopException();
                 }
 
@@ -682,11 +791,7 @@ public class Main extends HandlerController {
             var f = a.getSource().getException();
 
             Cat.sleep(500);
-            UI.runAsync(() -> {
-                running.set(false);
-                wr.setStopRequested(false);
-                Vanilla.getVanilla().setStopRequested(false);
-            });
+            UI.runAsync(this::clearAllStates);
 
             if (f instanceof NoConnectionException){
                 announceLater(Translator.translate("error.oops"),Translator.translate("error.connection"), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
@@ -716,5 +821,39 @@ public class Main extends HandlerController {
 
     public void setDialogLayer(boolean v){
         dialogLayer.setVisible(v);
+    }
+
+    @Override
+    public void onShown() {
+        var path = Configurator.getConfig().getGamePath().toString();
+        if (!Tool.checkStringValidity(path, Tool.ValidityDegree.HIGH_PATH))
+            announceLater(Translator.translate("announce.warn"), Translator.translate("settings.warn.invalidGamePath"), Announcement.AnnouncementType.INFO, Duration.millis(8000));
+
+        instructor.setBaseNode(getRootNode());
+
+        if (!createDefaultProfile)
+            return;
+
+        createDefaultProfile = false;
+
+        UI.runAsync(() -> {
+            var p = Profiler.getProfiler().generateDefaultProfile();
+            var size = tab.getBoundsInLocal();
+            var tab1 = (Region)tab.getTabs().get(0).getContent();
+            var obj = FDObject.createSingle(p, tab1.getWidth() / 2 - 64, tab1.getHeight() / 2 - 64);
+            FloatDock.getDock().place(obj, false);
+            selectProfile(p);
+        });
+
+        instructor.load(Instructor.generateGeneralTutorial());
+        instructor.start(false);
+    }
+
+    @Override
+    public void dispose(){
+        statusExecutor.shutdown();
+        stepPopup.dispose();
+        Launcher.getLauncher().setOnAuthFail(null);
+        super.dispose();
     }
 }

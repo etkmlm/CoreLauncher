@@ -3,6 +3,7 @@ package com.laeben.corelauncher.ui.controller.page;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
+import com.laeben.corelauncher.api.Tool;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -19,6 +20,7 @@ import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.control.CTab;
 import com.laeben.corelauncher.ui.control.CWorker;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.JavaManager;
@@ -65,6 +67,10 @@ public class SettingsPage extends HandlerController {
     @FXML
     private Spinner<Integer> txtMaxRAM;
     @FXML
+    private Spinner<Integer> txtThreads;
+    @FXML
+    private Spinner<Integer> txtScale;
+    @FXML
     private Slider sldRAM;
     @FXML
     private CheckBox chkOldReleases;
@@ -78,6 +84,8 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkAutoUpdate;
     @FXML
     private CheckBox chkDebugLogMode;
+    @FXML
+    private CheckBox chkSelectPlay;
     /*@FXML
     private CButton btnSaveRAM;
     @FXML
@@ -94,6 +102,13 @@ public class SettingsPage extends HandlerController {
     private CWorker workerImages;
 
     @FXML
+    private CButton btnSelectDefaultOptions;
+    @FXML
+    private CButton btnResetDefaultOptions;
+    @FXML
+    private CButton btnOpenDefaultOptions;
+
+    @FXML
     private CheckBox chkDiscordEnable;
     @FXML
     private CheckBox chkInGameRPC;
@@ -105,6 +120,9 @@ public class SettingsPage extends HandlerController {
 
     private CButton btnSave;
 
+    private final SpinnerValueFactory.IntegerSpinnerValueFactory fThreads;
+    private final SpinnerValueFactory.IntegerSpinnerValueFactory fScale;
+
     //private final SpinnerValueFactory.IntegerSpinnerValueFactory fCommPort;
     private final ObservableList<String> languages;
     private final ObservableList<String> javas;
@@ -112,6 +130,8 @@ public class SettingsPage extends HandlerController {
     private final RAMManager ram;
 
     private boolean changeAccount;
+
+    private boolean needsToRestart;
 
     private void tryToEnableSave(){
         if (btnSave != null && !btnSave.isVisible())
@@ -127,9 +147,20 @@ public class SettingsPage extends HandlerController {
                 tryToEnableSave();
             }
         };
+        fThreads = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
+        fThreads.setAmountToStepBy(1);
+
+        fScale = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
+        fScale.setAmountToStepBy(1);
         //fCommPort = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
         //fCommPort.setAmountToStepBy(1);
 
+
+        fThreads.valueProperty().addListener(a -> tryToEnableSave());
+        fScale.valueProperty().addListener(a -> {
+            needsToRestart = true;
+            tryToEnableSave();
+        });
         /*fCommPort.valueProperty().addListener(a -> {
             Configurator.getConfig().setCommPort(fCommPort.getValue());
             Configurator.save();
@@ -257,12 +288,48 @@ public class SettingsPage extends HandlerController {
             }
         });
 
+        btnSelectDefaultOptions.setOnMouseClicked(a -> {
+            var selector = new DProfileSelector(DProfileSelector.Functionality.SINGLE_PROFILE_SELECTOR);
+            var x = selector.show(null, Profiler.getProfiler().getAllProfiles());
+            if (x.isEmpty() || x.get().getProfiles().isEmpty())
+                return;
+
+            var profile = x.get().getProfiles().get(0);
+            var options = profile.getPath().to("options.txt");
+            if (!options.exists()){
+                Main.getMain().announceLater(Translator.translate("error.oops"), Translator.translate("profile.options.error"), Announcement.AnnouncementType.ERROR, Duration.seconds(2));
+                return;
+            }
+
+            options.copy(Configurator.getConfig().getLauncherPath().to("options.txt"));
+            Main.getMain().announceLater(Translator.translate("profile.options.title"), Translator.translate("profile.options.okDefault"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+        });
+
+        btnResetDefaultOptions.setOnMouseClicked(a -> {
+            var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
+                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                    .executeForResult();
+
+            if (k.isEmpty() || k.get().result() != CMsgBox.ResultType.YES)
+                return;
+
+            Configurator.getConfig().getLauncherPath().to("options.txt").delete();
+            Main.getMain().announceLater(Translator.translate("announce.successful"), Translator.translate("profile.options.reset"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+        });
+
+        btnOpenDefaultOptions.setOnMouseClicked(a -> {
+            var path = Configurator.getConfig().getLauncherPath().to("options.txt");
+            if (!path.exists())
+                return;
+            OSUtil.open(path.toFile());
+        });
+
         txtCustomBackground.setCursor(Cursor.HAND);
         txtCustomBackground.setOnMouseClicked(x -> {
             if (x.getButton() == MouseButton.PRIMARY){
                 var path = Configurator.getConfig().getBackgroundImage();
                 if (path != null)
-                    OSUtil.openFolder(path.parent().toFile().toPath());
+                    OSUtil.open(path.parent().toFile());
             }
             else if (x.getButton() == MouseButton.SECONDARY){
                 Configurator.getConfigurator().setCustomBackground(null);
@@ -312,6 +379,11 @@ public class SettingsPage extends HandlerController {
             Configurator.save();
         });
 
+        chkSelectPlay.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setEnabledSelectAndPlayDock(chkSelectPlay.isSelected());
+            Configurator.save();
+        });
+
         chkGamelog.selectedProperty().addListener(x -> {
             Configurator.getConfig().setDelGameLogs(chkGamelog.isSelected());
             Configurator.save();
@@ -339,9 +411,18 @@ public class SettingsPage extends HandlerController {
             try{
                 var path = Path.begin(file.toPath());
                 var oldPath = Configurator.getConfig().getGamePath();
+                if (!Tool.checkStringValidity(path.toString(), Tool.ValidityDegree.HIGH_PATH)){
+                    var t = CMsgBox.msg(Alert.AlertType.WARNING, Translator.translate("ask.ask"), Translator.translate("settings.ask.invalidGamePath"))
+                            .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                            .executeForResult();
+                    if (t.isEmpty() || t.get().result() == CMsgBox.ResultType.NO)
+                        return;
+                }
 
                 Configurator.getConfigurator().setGamePath(path);
-                var op = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("settings.ask.gamePath")).setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO).executeForResult();
+                var op = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("settings.ask.gamePath"))
+                        .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                        .executeForResult();
 
                 if (op.isPresent() && op.get().result() == CMsgBox.ResultType.YES)
                     Profiler.getProfiler().moveProfiles(oldPath);
@@ -354,8 +435,10 @@ public class SettingsPage extends HandlerController {
         });
 
         txtGamePath.setCursor(Cursor.HAND);
-        txtGamePath.setOnMouseClicked(a -> OSUtil.openFolder(Configurator.getConfig().getGamePath().toFile().toPath()));
+        txtGamePath.setOnMouseClicked(a -> OSUtil.open(Configurator.getConfig().getGamePath().toFile()));
 
+        txtThreads.setValueFactory(fThreads);
+        txtScale.setValueFactory(fScale);
         //txtCommPort.setValueFactory(fCommPort);
 
         txtAccount.setOnKeyPressed(a -> changeAccount = true);
@@ -407,11 +490,25 @@ public class SettingsPage extends HandlerController {
                 Configurator.getConfigurator().setDefaultAccount(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
             }
 
+            Configurator.getConfig().setUIScale(fScale.getValue());
+            Configurator.getConfig().setDownloadThreadsCount(fThreads.getValue());
             Configurator.getConfig().setDefaultMinRAM(ram.getMin());
             Configurator.getConfig().setDefaultMaxRAM(ram.getMax());
             Configurator.save();
 
             btnSave.setVisible(false);
+
+            if (needsToRestart){
+                var r = CMsgBox.msg(Alert.AlertType.WARNING, Translator.translate("announce.warn"), Translator.translate("settings.warn.restart"))
+                        .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                        .executeForResult();
+
+                if (r.isEmpty() || r.get().result() != CMsgBox.ResultType.YES)
+                    return;
+
+
+                CoreLauncher.restart();
+            }
         });
 
         AnchorPane.setBottomAnchor(btnSave, 20.0);
@@ -442,6 +539,8 @@ public class SettingsPage extends HandlerController {
 
             ram.setMin(c.getDefaultMinRAM());
             ram.setMax(c.getDefaultMaxRAM());
+            fThreads.setValue(c.getDownloadThreadsCount());
+            fScale.setValue(c.getUIScale());
             //fCommPort.setValue(c.getCommPort());
             //sldRAM.setValue(c.getDefaultMaxRAM());
             chkOldReleases.setSelected(c.isShowOldReleases());
@@ -453,6 +552,7 @@ public class SettingsPage extends HandlerController {
             chkHideAfter.setSelected(c.hideAfter());
             chkAutoUpdate.setSelected(c.isEnabledAutoUpdate());
             chkDebugLogMode.setSelected(c.getDebugLogMode());
+            chkSelectPlay.setSelected(c.isEnabledSelectAndPlayDock());
             chkGamelog.setSelected(c.delGameLogs());
             chkGuiShortcut.setSelected(c.useNonGUIShortcut());
 
@@ -480,6 +580,7 @@ public class SettingsPage extends HandlerController {
 
     @Override
     public void dispose(){
-
+        ram.dispose();
+        super.dispose();
     }
 }

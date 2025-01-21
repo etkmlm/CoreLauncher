@@ -22,6 +22,8 @@ public class Config {
     private Java defaultJava;
     private int defaultMinRAM;
     private int defaultMaxRAM;
+    private int downloadThreads;
+    private int uiScale;
     private boolean showOldReleases;
     private boolean showSnapshots;
     private boolean logMode;
@@ -31,6 +33,7 @@ public class Config {
     private boolean delGameLogs;
     private boolean showHelloDialog;
     private boolean placeNewProfileToDock;
+    private boolean selectAndPlayDock;
     private List<Integer> announces;
 
     private double windowWidth;
@@ -62,6 +65,20 @@ public class Config {
         if (announces == null)
             announces = new ArrayList<>();
         return announces;
+    }
+
+    public int getUIScale(){
+        return uiScale < 1 ? 100 : uiScale;
+    }
+    public void setUIScale(int uiScale){
+        this.uiScale = uiScale;
+    }
+
+    public int getDownloadThreadsCount(){
+        return downloadThreads == 0 ? 10 : downloadThreads;
+    }
+    public void setDownloadThreadsCount(int downloadThreads){
+        this.downloadThreads = downloadThreads;
     }
 
     public Path getLastBackupPath() { return lastBackupPath; }
@@ -109,6 +126,13 @@ public class Config {
     }
     public void setEnabledInGameRPC(boolean v){
         this.enableInGameRPC = v;
+    }
+
+    public boolean isEnabledSelectAndPlayDock(){
+        return selectAndPlayDock;
+    }
+    public void setEnabledSelectAndPlayDock(boolean v){
+        this.selectAndPlayDock = v;
     }
 
     public double getWindowWidth(){

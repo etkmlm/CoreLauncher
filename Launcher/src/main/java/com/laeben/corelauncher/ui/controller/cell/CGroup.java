@@ -19,6 +19,8 @@ import com.laeben.corelauncher.ui.util.ProfileUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import javafx.animation.ScaleTransition;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
@@ -72,6 +74,8 @@ public class CGroup extends CDockObject {
     private HBox topBox;
 
     private Consumer<TransferInfo> onTransfer;
+
+    private final EventHandler onRootEvent;
 
     public CGroup(){
         gPopup = new Popup();
@@ -145,7 +149,7 @@ public class CGroup extends CDockObject {
         trns.setFromY(0);
         trns.setToY(1);
 
-        gPopup.addEventFilter(MouseEvent.MOUSE_CLICKED, this::onClicked);
+        onRootEvent = this::onRootEvent;
     }
 
     private void selectAllObjects(){
@@ -208,25 +212,7 @@ public class CGroup extends CDockObject {
             btnRename.setVisible(false);
         });
 
-        gPopup.addEventFilter(EventType.ROOT, e -> {
-            if (e instanceof javafx.scene.input.KeyEvent a){
-                if (txtName.isFocused())
-                    return;
-
-                if (a.isControlDown() && a.getCode() == KeyCode.A){
-                    selectAllObjects();
-                    return;
-                }
-
-                if (a.getCode() == KeyCode.ESCAPE){
-                    deselectAllObjects();
-                }
-                else if (a.getCode() == KeyCode.DELETE || a.getCode() == KeyCode.BACK_SPACE){
-                    getSelectedItems().forEach(x -> FloatDock.getDock().removeFromGroup(item, x.getPrimaryProfile()));
-                    reloadItems();
-                }
-            }
-        });
+        gPopup.addEventFilter(EventType.ROOT, onRootEvent);
 
         mainPane.getChildren().clear();
 
@@ -267,6 +253,28 @@ public class CGroup extends CDockObject {
         reloadMeta();
 
         return true;
+    }
+
+    private void onRootEvent(Event e){
+        if (e instanceof javafx.scene.input.KeyEvent a){
+            if (txtName.isFocused())
+                return;
+
+            if (a.isControlDown() && a.getCode() == KeyCode.A){
+                selectAllObjects();
+                return;
+            }
+
+            if (a.getCode() == KeyCode.ESCAPE){
+                deselectAllObjects();
+            }
+            else if (a.getCode() == KeyCode.DELETE || a.getCode() == KeyCode.BACK_SPACE){
+                getSelectedItems().forEach(x -> FloatDock.getDock().removeFromGroup(object, x.getPrimaryProfile()));
+                reloadItems();
+            }
+        }
+        else if (e instanceof MouseEvent a && a.getEventType() == MouseEvent.MOUSE_CLICKED)
+            onClicked(a);
     }
 
     private void onClicked(MouseEvent a){
@@ -421,6 +429,11 @@ public class CGroup extends CDockObject {
         lvProfiles.getChildren().clear();
         for (int i = 0; i < object.getProfiles().size(); i++)
             lvProfiles.getChildren().add(new CProfile()
+                    .setOnMenuClick(a -> {
+                        if (a.equals(CDockObject.EDIT) || a.equals(CDockObject.COPY))
+                            close();
+                        return true;
+                    })
                     .set(FDObject.createSingle(object.getProfiles().get(i), i, 0))
                     .setListener(this::onProfileEvent)
                     .setGrabListener(this::onProfileDragEvent)
@@ -452,5 +465,10 @@ public class CGroup extends CDockObject {
                 box.setClip(rect);
             });
         }
+    }
+
+    @Override
+    public void dispose(){
+        gPopup.removeEventFilter(EventType.ROOT, onRootEvent);
     }
 }

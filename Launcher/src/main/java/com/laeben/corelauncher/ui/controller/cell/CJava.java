@@ -79,7 +79,7 @@ public class CJava extends CCell<Java> {
         txtName.setFocusedAnimation(Color.TEAL, Duration.millis(200));
         txtName.setText(java.getName());
 
-        txtPath.setOnMouseClicked(a -> OSUtil.openFolder(java.getPath().toFile().toPath()));
+        txtPath.setOnMouseClicked(a -> OSUtil.open(java.getPath().toFile()));
         txtPath.setText(java.getPath().toString());
         btnAction.setOnMouseClicked((a) -> JavaManager.getManager().deleteJava(java));
 

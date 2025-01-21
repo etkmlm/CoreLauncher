@@ -1,6 +1,7 @@
 #root{
     -fx-background-color: #232323aa;
     -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
     -fx-padding: 10px;
 }
 
@@ -9,7 +10,9 @@
     -fx-background-radius: 8px;
     -fx-font-size: 20pt;
     -fx-pref-width: 64px;
+    -fx-min-width: 64px;
     -fx-pref-height: 64px;
+    -fx-min-height: 64px;
 }
 
 .cbutton:hover{

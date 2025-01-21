@@ -17,7 +17,7 @@ public class Translator {
     }
 
     public List<Locale> getAllLanguages(){
-        return bundles.stream().map(ResourceBundle::getLocale).collect(Collectors.toList());
+        return bundles.stream().map(ResourceBundle::getLocale).distinct().collect(Collectors.toList());
     }
 
     public void setLanguage(Locale selectedLanguage){

@@ -2,18 +2,18 @@ package com.laeben.corelauncher.api;
 
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
-import com.laeben.corelauncher.CoreLauncher;
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.entity.ImageEntity;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
 import com.laeben.corelauncher.api.util.OSUtil;
+import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
+import com.laeben.corelauncher.util.ImageUtil;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -81,7 +81,7 @@ public class Profiler {
      * @param destination shortcut path
      */
     public static void createShortcut(Profile p, Path destination) throws URISyntaxException {
-        var javaPath = Path.begin(OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString()));
+        var javaPath = Path.begin(OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString(), true));
 
         Path iconPath;
 
@@ -95,7 +95,7 @@ public class Profiler {
             boolean t = iconPath.exists();
 
             if (!iconPath.exists())
-                t = CoreLauncherFX.extractLocalImage("shortcut/" + icon, iconPath);
+                t = ImageUtil.extractLocalImage("shortcut/" + icon, iconPath);
 
             if (!t)
                 iconPath = null;
@@ -362,6 +362,11 @@ public class Profiler {
         handler.execute(new ChangeEvent(PROFILE_DELETE, p, null));
     }
 
+    public Profile generateDefaultProfile(){
+        return createAndSetProfile(Translator.translate("profile.defaultName"), a -> {
+           a.setVersionId(Vanilla.getVanilla().getAllVersions().get(0).id);
+        });
+    }
 
 }
 

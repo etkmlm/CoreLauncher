@@ -42,6 +42,7 @@ public class ForgeModpack {
     public void applyResources(List<CResource> res, List<ForgeFile> files){
         mp.mods = new ArrayList<>();
         mp.resources = new ArrayList<>();
+        mp.shaders = new ArrayList<>();
 
         for(var r : res){
             if (manifest != null){
@@ -53,13 +54,15 @@ public class ForgeModpack {
             }
 
             if (!(r instanceof ModpackContent mpc))
-                return;
+                continue;
             mpc.setModpackId(mp.id);
 
             if (r instanceof Mod m)
                 mp.mods.add(m);
             else if (r instanceof Resourcepack p)
                 mp.resources.add(p);
+            else if (r instanceof Shader s)
+                mp.shaders.add(s);
         }
     }
 }

@@ -15,13 +15,17 @@ import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.dialog.DModSelector;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.ui.entity.animation.ReverseBorderColorAnimation;
+import com.laeben.corelauncher.util.ImageUtil;
 import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 import java.util.Optional;
 
@@ -33,15 +37,31 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
     private Link link;
     private final ObjectProperty<CResource> exists;
 
+    private final ReverseBorderColorAnimation animation;
+
     private DModSelector selector;
 
     public ResourceCell(){
         setGraphic(gr = UI.getUI().load(CoreLauncherFX.class.getResource("layout/cells/resource.fxml"), this));
-
+        var rg = (Region)gr;
+        rg.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
+        animation = new ReverseBorderColorAnimation();
+        animation.setNode(rg);
+        animation.setDuration(Duration.millis(2000));
+        animation.setReverseDelay(100);
 
         exists = new SimpleObjectProperty<>();
 
-        exists.addListener(a -> UI.runAsync(() -> btnInstall.setText(exists.get() == null ? "⭳" : "—")));
+        exists.addListener(a -> UI.runAsync(() -> {
+            var val = exists.get();
+            if (val == null){
+                animation.setColor(Color.web("#7f32a8"));
+            }
+            else
+                animation.setColor(Color.web("#ababab"));
+            animation.playFromStart();
+            btnInstall.setText(val == null ? "⭳" : "—");
+        }));
     }
 
     @FXML
@@ -80,9 +100,9 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
         txtDesc.setText((i.getDescription() != null ? i.getDescription() + "\n\n" : "") + DateUtil.toString(i.getCreationDate(), Configurator.getConfig().getLanguage()));
         if (i.getIcon() != null && !i.getIcon().isEmpty()){
             if (i.getIcon().startsWith("http"))
-                icon.setImage(new Image(i.getIcon(), true));
+                icon.setImageAsync(ImageUtil.getNetworkImage(i.getIcon(), icon.getFitWidth(), icon.getFitHeight()));
             else
-                icon.setImage(CoreLauncherFX.getLocalImage(i.getIcon()));
+                icon.setImage(ImageUtil.getLocalImage(i.getIcon()));
         }
 
         if (i instanceof ResourceOpti){
@@ -103,9 +123,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
     @FXML
     public void initialize(){
-
-
-            //btnInstall.enableTransparentAnimation();
+        //btnInstall.enableTransparentAnimation();
         //btnMore.enableTransparentAnimation();
         icon.setCornerRadius(72, 72, 10);
         btnInstall.setOnMouseClicked(a -> new Thread(() -> {

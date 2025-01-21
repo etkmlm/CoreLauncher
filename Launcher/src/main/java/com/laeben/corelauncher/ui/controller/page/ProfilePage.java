@@ -4,7 +4,6 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.Configurator;
@@ -22,6 +21,8 @@ import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.dialog.DResourceSelector;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.util.ImageUtil;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -38,8 +39,6 @@ import java.util.stream.Stream;
 
 public class ProfilePage extends HandlerController {
     public static final String KEY = "pgprofile";
-
-    public GridPane grid;
 
     private Profile profile;
 
@@ -62,7 +61,7 @@ public class ProfilePage extends HandlerController {
                 return;
 
             if (a.getKey().equals(Profiler.PROFILE_DELETE))
-                Main.getMain().getTab().getTabs().remove((Tab) this.parentObj);
+                Main.getMain().closeTab((Tab) this.parentObj);
             else if (a.getKey().equals(Profiler.PROFILE_UPDATE))
                 setProfile((Profile)a.getNewValue());
         }, true);
@@ -93,6 +92,17 @@ public class ProfilePage extends HandlerController {
     private VBox vResources;
     @FXML
     private VBox vShaders;
+
+    @FXML
+    private Label lblModpacks;
+    @FXML
+    private Label lblResources;
+    @FXML
+    private Label lblShaders;
+    @FXML
+    private Label lblWorlds;
+    @FXML
+    private Label lblMods;
 
     private final CList<CResource> lvMods;
     private final CList<CResource> lvModpacks;
@@ -150,7 +160,7 @@ public class ProfilePage extends HandlerController {
         badges.getChildren().clear();
         badges.getChildren().add(wrIcon);
 
-        imgProfile.setImage(CoreLauncherFX.getImageFromProfile(profile, 96, 96));
+        imgProfile.setImageAsync(ImageUtil.getImageFromProfile(profile, 96, 96));
 
         setUser();
 
@@ -203,7 +213,7 @@ public class ProfilePage extends HandlerController {
             if (x.isPresent() && x.get().result() == CMsgBox.ResultType.YES)
                 Profiler.getProfiler().deleteProfile(profile);
         });
-        btnOpenFolder.setOnMouseClicked(a -> OSUtil.openFolder(profile.getPath().toFile().toPath()));
+        btnOpenFolder.setOnMouseClicked(a -> OSUtil.open(profile.getPath().toFile()));
         btnUpdate.setOnMouseClicked(a -> new Thread(() -> {
             try {
                 UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.multiple", profile.getName()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
@@ -239,7 +249,7 @@ public class ProfilePage extends HandlerController {
                 Modder.getModder().includeAll(p, all);
 
                 if (!conflicts.isEmpty()){
-                    var result = CMsgBox.msg(Alert.AlertType.WARNING, Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.conflict", all.size(), conflicts.keySet().size(), String.join(",", conflicts.values().stream().map(k -> k.get(0).name).toList()))).setButtons(CMsgBox.ResultType.OPTION, CMsgBox.ResultType.OPTION, CMsgBox.ResultType.OPTION).executeForResult();
+                    var result = CMsgBox.msg(Alert.AlertType.WARNING, Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.conflict", all.size(), conflicts.size(), String.join(",", conflicts.values().stream().map(k -> k.get(0).name).toList()))).setButtons(CMsgBox.ResultType.OPTION, CMsgBox.ResultType.OPTION, CMsgBox.ResultType.OPTION).executeForResult();
                     if (result.isEmpty() || (int)result.get().extra() == 3)
                         return;
                     all.clear();
@@ -351,6 +361,12 @@ public class ProfilePage extends HandlerController {
         lvResources.setFilterFactory(f);
         lvShaders.setFilterFactory(f);
 
+        lvMods.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblMods, "mods.type.mods"));
+        lvModpacks.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblModpacks, "mods.type.modpacks"));
+        lvWorlds.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblWorlds, "mods.type.worlds"));
+        lvResources.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblResources, "mods.type.resources"));
+        lvShaders.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblShaders, "mods.type.shaders"));
+
         txtSearch.textProperty().addListener(a -> {
             String text = txtSearch.getText();
             lvMods.filter(text);
@@ -363,6 +379,15 @@ public class ProfilePage extends HandlerController {
         imgProfile.setCornerRadius(128, 128, 40);
 
         txtSearch.setFocusedAnimation(Color.TEAL, Duration.millis(200));
+    }
+
+    private void invalidateCount(List list, Label lbl, String translateKey){
+        var size = list.size();
+        var str = Translator.translate(translateKey);
+        if (size > 0)
+            str += " (" + size + ")";
+
+        lbl.setText(str);
     }
 
     private CPRCell cellFactory(){

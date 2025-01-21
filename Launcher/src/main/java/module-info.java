@@ -15,9 +15,9 @@ module com.laeben.corelauncher {
     requires java.sql;
     requires org.apache.commons.lang3;
 
+    opens com.laeben.corelauncher.ui.tutorial to javafx.fxml, com.google.gson;
+    opens com.laeben.corelauncher.ui.tutorial.entity to com.google.gson;
     opens com.laeben.corelauncher to javafx.fxml, com.laeben.core;
-    opens com.laeben.corelauncher.discord.entity to com.google.gson;
-    opens com.laeben.corelauncher.discord.entity.response to com.google.gson;
 
     opens com.laeben.corelauncher.util;
     opens com.laeben.corelauncher.util.entity;
@@ -57,6 +57,7 @@ module com.laeben.corelauncher {
 
     opens com.laeben.corelauncher.api;
     opens com.laeben.corelauncher.api.util;
+    opens com.laeben.corelauncher.api.util.entity;
     opens com.laeben.corelauncher.api.ui;
     opens com.laeben.corelauncher.api.ui.entity;
     opens com.laeben.corelauncher.api.entity;
@@ -74,7 +75,10 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.ui.controller.browser;
     opens com.laeben.corelauncher.ui.controller.cell;
     opens com.laeben.corelauncher.ui.dialog;
+    opens com.laeben.corelauncher.ui.entity.animation;
 
-
-
+    opens com.laeben.corelauncher.discord;
+    opens com.laeben.corelauncher.discord.channel;
+    opens com.laeben.corelauncher.discord.entity;
+    opens com.laeben.corelauncher.discord.entity.response;
 }

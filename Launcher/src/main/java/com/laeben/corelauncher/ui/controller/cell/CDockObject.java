@@ -229,7 +229,7 @@ public abstract class CDockObject extends GridCell {
         menu.addItem(ImageCacheManager.getImage("folder.png", 32), Translator.translate("profile.menu.open"), a -> {
             if (onAction != null && !onAction.test(OPEN))
                 return;
-            OSUtil.openFolder(profile.getPath().toFile().toPath());
+            OSUtil.open(profile.getPath().toFile());
         });
         menu.addItem(ImageCacheManager.getImage("backup.png", 48), Translator.translate("profile.menu.backup"), a -> {
             if (onAction != null && !onAction.test(BACKUP))
@@ -293,4 +293,9 @@ public abstract class CDockObject extends GridCell {
     }
 
     protected void onVanished(ActionEvent e){}
+
+    public void dispose(){
+        listener = null;
+        grabListener = null;
+    }
 }

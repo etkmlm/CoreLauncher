@@ -22,8 +22,13 @@ public abstract class HandlerController extends Controller {
             handlers.add(handler);
     }
 
+    protected void markRootNode(){
+
+    }
+
     @Override
     public void dispose(){
+        super.dispose();
         handlers.forEach(a -> a.removeHandler(key));
         handlers.clear();
     }

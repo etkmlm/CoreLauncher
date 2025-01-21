@@ -274,7 +274,12 @@ public class MainPage extends HandlerController {
     }
 
     private void removeObj(FDObject obj){
-        root.getChildren().removeIf(b -> b instanceof CDockObject c && c.getObject().equals(obj));
+        var all = root.getChildren().stream().filter(b -> b instanceof CDockObject c && c.getObject().equals(obj)).toList();
+        for (var a : all){
+            ((CDockObject)a).dispose();
+            root.getChildren().remove(a);
+        }
+        //root.getChildren().removeIf(b -> b instanceof CDockObject c && c.getObject().equals(obj));
     }
     private CDockObject placeObj(FDObject obj){
         CDockObject p;
@@ -438,6 +443,21 @@ public class MainPage extends HandlerController {
             return;
 
         Main.getMain().selectProfile((Profile) e.getSource());
+
+        if (Configurator.getConfig().isEnabledSelectAndPlayDock()){
+            boolean v1 = Main.getMain().launchClick(false);
+            if (!v1)
+                Main.getMain().launchClick(false);
+        }
+    }
+
+    @Override
+    public void dispose(){
+        for (var c : root.getChildren()){
+            if (c instanceof CDockObject cdo)
+                cdo.dispose();
+        }
+        super.dispose();
     }
 
 }

@@ -1,0 +1,18 @@
+#root{
+    -fx-background-color: #262626;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+}
+
+#lblTitle{
+    -fx-font-size: 16pt;
+    -fx-font-weight: bold;
+}
+
+#lblDescription{
+    -fx-font-size: 14pt;
+}
+
+#btnStart{
+    -fx-font-size: 20pt;
+}

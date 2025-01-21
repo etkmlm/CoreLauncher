@@ -83,7 +83,7 @@ public class FilterSection extends VBox {
     }
 
     public String getSelectedChoice(){
-        return selected.get(0);
+        return selected.isEmpty() ? null : selected.get(0);
     }
 
     public List<String> getSelectedChoices(){

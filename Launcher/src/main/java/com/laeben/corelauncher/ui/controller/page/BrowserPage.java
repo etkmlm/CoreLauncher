@@ -1,6 +1,5 @@
 package com.laeben.corelauncher.ui.controller.page;
 
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
@@ -17,6 +16,7 @@ import com.laeben.corelauncher.ui.controller.browser.*;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.entity.FilterPreset;
 import com.laeben.corelauncher.ui.entity.FilterSection;
+import com.laeben.corelauncher.util.ImageUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -55,7 +55,7 @@ public class BrowserPage extends HandlerController {
 
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
             if (a.getKey().equals(Profiler.PROFILE_UPDATE)){
-                icon.setImage(CoreLauncherFX.getImageFromProfile(profile, 32, 32));
+                icon.setImageAsync(ImageUtil.getImageFromProfile(profile, 32, 32));
                 lblProfileName.setText(profile.getName());
                 reloadTitle(profile);
                 lblInfo.setText(profile.getWrapper().getType().getIdentifier() + " - " + profile.getWrapperVersion());
@@ -72,7 +72,7 @@ public class BrowserPage extends HandlerController {
         wrVersion = profile.getWrapperVersion();
         version = profile.getVersionId();
 
-        icon.setImage(CoreLauncherFX.getImageFromProfile(profile, 32, 32));
+        icon.setImageAsync(ImageUtil.getImageFromProfile(profile, 32, 32));
         lblProfileName.setText(profile.getName());
         reloadTitle(profile);
         lblInfo.setText(profile.getWrapper().getType().getIdentifier() + " - " + profile.getWrapperVersion());
@@ -149,7 +149,7 @@ public class BrowserPage extends HandlerController {
                         .addChoice(Translator.translate("mods.type.mod"), "mod", a -> setCurseForgeCategories(a.preset(), ResourceType.MOD))
                         .addChoice(Translator.translate("mods.type.resourcepack"), "resource", a -> setCurseForgeCategories(a.preset(), ResourceType.RESOURCE))
                         .addChoice("OptiFine", "optifine", a -> setOptiFine(a.preset()))
-                        //.addChoice(Translator.translate("mods.type.shader"), "shader", a -> setCurseForgeCategories(a.preset(), ResourceType.SHADER))
+                        .addChoice(Translator.translate("mods.type.shader"), "shader", a -> setCurseForgeCategories(a.preset(), ResourceType.SHADER))
                         .addChoice(Translator.translate("mods.type.world"), "world", a -> setCurseForgeCategories(a.preset(), ResourceType.WORLD)),
                 FilterSection.create(Translator.translate("mods.browse.categories"), "cat", FilterSection.Type.MULTIPLE),
                 FilterSection.create(Translator.translate("mods.browse.sortBy"), "sortby", FilterSection.Type.SINGLE)

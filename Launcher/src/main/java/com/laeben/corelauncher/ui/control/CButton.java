@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.ui.control;
 
-import com.laeben.corelauncher.ui.entity.BackgroundColorAnimation;
-import com.laeben.corelauncher.ui.entity.ColorAnimation;
+import com.laeben.corelauncher.ui.entity.animation.BackgroundColorAnimation;
+import com.laeben.corelauncher.ui.entity.animation.ColorAnimation;
 import javafx.animation.*;
 import javafx.scene.control.Button;
 import javafx.scene.paint.Color;

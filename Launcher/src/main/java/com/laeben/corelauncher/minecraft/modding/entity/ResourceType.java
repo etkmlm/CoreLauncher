@@ -3,7 +3,7 @@ package com.laeben.corelauncher.minecraft.modding.entity;
 import java.util.Arrays;
 
 public enum ResourceType {
-    MOD(6, "mod"), MODPACK(4471, "modpack"), RESOURCE(12, "resourcepack"), WORLD(17, "world"), SHADER(0, "shader");
+    MOD(6, "mod"), MODPACK(4471, "modpack"), RESOURCE(12, "resourcepack"), WORLD(17, "world"), SHADER(6552, "shader");
 
     private static final ResourceType[] GLOBAL = { ResourceType.RESOURCE, ResourceType.SHADER, ResourceType.WORLD };
 

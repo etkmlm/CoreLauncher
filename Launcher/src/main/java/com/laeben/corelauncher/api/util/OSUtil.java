@@ -5,6 +5,7 @@ import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.entity.Java;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -30,9 +31,9 @@ public class OSUtil {
         return defaultJava.identify() && defaultJava.arch == 64;
     }
 
-    public static Path getJavaFile(String root){
+    public static Path getJavaFile(String root, boolean preferWindow){
         if (systemOS == OS.WINDOWS){
-            return Path.of(root, "bin", "javaw.exe");
+            return Path.of(root, "bin", preferWindow ? "javaw.exe" : "java.exe");
         }
         else
             return Path.of(root, "bin", "java");
@@ -59,13 +60,13 @@ public class OSUtil {
         }
     }
 
-    public static void openFolder(Path path){
+    public static void open(File file){
         if (!Desktop.isDesktopSupported())
             return;
 
         new Thread(() -> {
             try {
-                Desktop.getDesktop().open(path.toFile());
+                Desktop.getDesktop().open(file);
             } catch (IOException e) {
                 Logger.getLogger().log(e);
             }

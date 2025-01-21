@@ -24,7 +24,7 @@
     <GridPane hgap="20" vgap="10" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="60" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10">
         <columnConstraints>
             <ColumnConstraints prefWidth="200" />
-            <ColumnConstraints hgrow="ALWAYS"/>
+            <ColumnConstraints hgrow="ALWAYS" />
         </columnConstraints>
         <rowConstraints>
             <RowConstraints prefHeight="40"/>

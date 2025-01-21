@@ -22,10 +22,16 @@
 
 #lvResources{
     -fx-background-color: #262626aa;
+    -fx-fill-width: true;
+}
+
+.scroll-bar:horizontal{
+    -fx-opacity: 0;
+    -fx-pref-height: 0;
 }
 
 .scroll-pane, .scroll-bar{
-    -fx-hbar-policy: never;
+    -fx-hbar-policy: never!important;
 }
 
 .clear-button{

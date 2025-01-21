@@ -1,13 +1,13 @@
 package com.laeben.corelauncher.util.entity;
 
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.util.ImageUtil;
 import javafx.scene.image.Image;
 
 public interface ImageCache<T> {
     int getSize();
     Image getCachedImage();
-    Image getImage();
+    ImageTask getImage();
     T getKey();
 
     static <T> ImageCache<T> get(T key, int size){
@@ -26,7 +26,7 @@ public interface ImageCache<T> {
         public ProfileImageCache(Profile profile, int size){
             this.profile = profile;
             this.size = size;
-            this.image = getImage();
+            this.image = ImageUtil.getImageSync(getImage(), true);
         }
 
         @Override
@@ -40,8 +40,8 @@ public interface ImageCache<T> {
         }
 
         @Override
-        public Image getImage() {
-            return CoreLauncherFX.getImageFromProfile(profile, size, size);
+        public ImageTask getImage() {
+            return ImageUtil.getImageFromProfile(profile, size, size);
         }
 
         @Override
@@ -57,7 +57,7 @@ public interface ImageCache<T> {
         public StringImageCache(String key, int size){
             this.key = key;
             this.size = size;
-            this.image = getImage();
+            this.image = ImageUtil.getImageSync(getImage(), true);
         }
 
         @Override
@@ -71,8 +71,8 @@ public interface ImageCache<T> {
         }
 
         @Override
-        public Image getImage() {
-            return CoreLauncherFX.getLocalImage(key);
+        public ImageTask getImage() {
+            return ImageTask.fromImage(ImageUtil.getLocalImage(key));
         }
 
         @Override

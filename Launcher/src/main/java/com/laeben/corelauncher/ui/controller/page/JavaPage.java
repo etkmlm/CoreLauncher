@@ -13,11 +13,12 @@ import com.laeben.corelauncher.ui.control.CField;
 import com.laeben.corelauncher.ui.control.CList;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.dialog.DJavaSelector;
+import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.util.JavaManager;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
@@ -97,18 +98,16 @@ public class JavaPage extends HandlerController {
 
     @Override
     public void init(){
-        getScene().getWindow().addEventFilter(EventType.ROOT, x -> {
-            if (x instanceof javafx.scene.input.KeyEvent e){
-                if (e.getTarget().equals(txtSearch))
-                    return;
+        addRegisteredEventFilter(EventFilter.window(getStage(), KeyEvent.ANY, e -> {
+            if (e.getTarget().equals(txtSearch))
+                return;
 
-                if (pList.onKeyEvent(e))
-                    return;
+            if (pList.onKeyEvent(e))
+                return;
 
-                if (e.getCode() == KeyCode.DELETE)
-                    deleteSelectedJavaEntities();
-            }
-        });
+            if (e.getCode() == KeyCode.DELETE)
+                deleteSelectedJavaEntities();
+        }));
 
         txtSearch.setOnKeyPressed(a -> {
             if (a.getCode() == KeyCode.ESCAPE)

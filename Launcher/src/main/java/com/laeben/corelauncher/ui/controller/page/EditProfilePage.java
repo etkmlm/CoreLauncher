@@ -2,9 +2,11 @@ package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
-import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.Tool;
 import com.laeben.corelauncher.api.entity.*;
+import com.laeben.corelauncher.api.ui.Controller;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
+import com.laeben.corelauncher.api.ui.entity.FocusLimiter;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
@@ -21,22 +23,24 @@ import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.dialog.DImageSelector;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
+import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.JavaManager;
 import com.laeben.core.util.StrUtil;
+import com.laeben.corelauncher.util.NTSManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 import org.controlsfx.control.SearchableComboBox;
 
-import java.util.regex.Pattern;
-
-public class EditProfilePage extends HandlerController {
+public class EditProfilePage extends HandlerController implements FocusLimiter {
     public static final String KEY = "pgedit";
 
     @FXML
@@ -116,6 +120,22 @@ public class EditProfilePage extends HandlerController {
     private Profile profile;
     private Profile tempProfile;
 
+    /**
+     * NTS Info
+     * icon - 0
+     * name - 1
+     * loader - 2
+     * version - 3
+     * loader version - 4
+     * java - 5
+     * account - 6
+     * online - 7
+     * jvm - 8
+     * mm ram - 9
+     */
+    private final NTSManager nts;
+    private Bounds headerCache;
+
     public EditProfilePage setProfile(Profile p){
         profile = p;
         reload();
@@ -125,11 +145,24 @@ public class EditProfilePage extends HandlerController {
     public EditProfilePage(){
         super(KEY);
         wrapperGroup = new ToggleGroup();
+        nts = new NTSManager(10);
+        nts.setOnSet(a -> {
+            boolean f = nts.needsToSave();
+            boolean k = nts.calcNts();
+            if (k && !profile.isEmpty())
+                Main.getMain().setFocusLimiter(this);
+            else
+                Main.getMain().setFocusLimiter(null);
+
+            if (f != k || a == 1)
+                reloadTitle(tempProfile);
+        });
 
         ram = new RAMManager() {
             @Override
             public void needsToSave() {
-                //
+                nts.set(9, true);
+                //needsToSave = true;
             }
         };
 
@@ -140,7 +173,6 @@ public class EditProfilePage extends HandlerController {
         versions = FXCollections.observableList(Vanilla.getVanilla().getAllVersions().stream().filter(x -> x.type == null || (x.type.equals("snapshot") && showSnap) || ((x.type.equals("old_beta") || x.type.equals("old_alpha")) && showOld) || x.type.equals("release")).map(x -> x.id).toList());
         wrapperVersions = FXCollections.observableArrayList();
         wrapperVersions.add("...");
-
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
             if (!(a instanceof ChangeEvent ce))
@@ -183,10 +215,14 @@ public class EditProfilePage extends HandlerController {
         }
     }
 
-    private boolean isValidName(String name){
-        final Pattern pattern = Pattern.compile("^[a-zA-Z0-9_\\-.\\s]*$");
+    @Override
+    public Node getTargetFocusNode() {
+        return getRootNode();
+    }
 
-        return pattern.matcher(name).matches();
+    @Override
+    public void onFocusLimitIgnored(Controller by, Node target){
+        Main.getMain().announceLater(Translator.translate("announce.warn"), Translator.translate("profile.edit.focus"), Announcement.AnnouncementType.ERROR, Duration.millis(1000));
     }
 
     @Override
@@ -207,7 +243,8 @@ public class EditProfilePage extends HandlerController {
             var ent = x.get();
             tempProfile.setIcon(ent.isEmpty() ? null : ent);
             ImageCacheManager.remove(profile);
-            icon.setImage(CoreLauncherFX.getImage(tempProfile.getIcon()));
+            icon.setImageAsync(ImageUtil.getImage(tempProfile.getIcon()));
+            nts.set(0, true);
         });
 
         cbGameVersion.valueProperty().addListener(x -> {
@@ -218,6 +255,8 @@ public class EditProfilePage extends HandlerController {
 
             tempProfile.setVersionId(value);
 
+            nts.set(3, !value.equals(profile.getVersionId()));
+
             refreshWrapperVersions();
         });
         cbGameVersion.setItems(versions);
@@ -227,10 +266,22 @@ public class EditProfilePage extends HandlerController {
             var java = tryGetSelectedJava();
 
             tempProfile.setJava(java);
+
+            if (profile == null || profile.isEmpty())
+                return;
+            if (profile.getJava() == null && java == null)
+                nts.set(5, false);
+
+            nts.set(5, java != null && profile.getJava() == null || !profile.getJava().equals(java));
         });
         cbJavaVersion.setItems(javaVersions);
 
-        btnJavaManager.setOnMouseClicked((a) -> Main.getMain().addTab("pages/java", Translator.translate("frame.title.javaman"), true, JavaPage.class));
+        btnJavaManager.setOnMouseClicked((a) -> {
+            if (nts.needsToSave())
+                onFocusLimitIgnored(null, null);
+            else
+                Main.getMain().addTab("pages/java", Translator.translate("frame.title.javaman"), true, JavaPage.class);
+        });
 
 
         imgVanilla.setOnMouseClicked(a -> wrapperGroup.selectToggle(vanilla));
@@ -252,6 +303,7 @@ public class EditProfilePage extends HandlerController {
 
         wrapperGroup.selectedToggleProperty().addListener(a -> {
             var wrapper = Wrapper.getWrapper(((RadioButton)wrapperGroup.getSelectedToggle()).getId());
+            nts.set(2, profile.getWrapper().getType() != wrapper.getType());
             tempProfile.setWrapper(wrapper);
             if (cbGameVersion.getValue() != null && !cbGameVersion.getValue().isBlank())
                 refreshWrapperVersions();
@@ -267,6 +319,7 @@ public class EditProfilePage extends HandlerController {
                 return;
 
             tempProfile.setWrapperVersion(value);
+            nts.set(3, !value.equals(profile.getWrapperVersion()));
         });
         txtWrapper.setCursor(Cursor.HAND);
         btnSelectWrapper.setOnMouseClicked(a -> {
@@ -293,23 +346,24 @@ public class EditProfilePage extends HandlerController {
         txtWrapper.setOnMouseClicked(a -> {
             var path = ((Custom)tempProfile.getWrapper()).getPath(tempProfile.getVersionId());
             if (path.exists())
-                OSUtil.openFolder(path.toFile().toPath());
+                OSUtil.open(path.toFile());
         });
 
         btnSave.setOnMouseClicked(a -> {
             String name = txtName.getText();
-            if (!isValidName(name)){
-                Main.getMain().getAnnouncer().announce(new Announcement(
-                        Translator.translate("error.oops"),
-                        Translator.translate("profile.edit.error.invalidName"),
-                        Announcement.AnnouncementType.ERROR), Duration.seconds(2));
-                return;
-            }
 
             if (name == null || name.isBlank()){
                 Main.getMain().getAnnouncer().announce(new Announcement(
                         Translator.translate("error.oops"),
                         Translator.translate("profile.edit.error.name"),
+                        Announcement.AnnouncementType.ERROR), Duration.seconds(2));
+                return;
+            }
+
+            if (!Tool.checkStringValidity(name, Tool.ValidityDegree.HIGH)){
+                Main.getMain().getAnnouncer().announce(new Announcement(
+                        Translator.translate("error.oops"),
+                        Translator.translate("profile.edit.error.invalidName"),
                         Announcement.AnnouncementType.ERROR), Duration.seconds(2));
                 return;
             }
@@ -337,25 +391,40 @@ public class EditProfilePage extends HandlerController {
                 return;
             }
 
+            boolean isNew = profile.isEmpty();
+
+            if (!name.equals(profile.getName()) && !Profiler.getProfiler().getProfile(name).isEmpty()) {
+                Main.getMain().getAnnouncer().announce(new Announcement(
+                        Translator.translate("error.oops"),
+                        Translator.translate("profile.edit.error.contains"),
+                        Announcement.AnnouncementType.ERROR), Duration.seconds(2));
+                return;
+            }
+
             try{
-                if (profile == null){
+                if (isNew){
                     var p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
                     setProfile(p);
                 }
-                else {
+                else
                     Profiler.getProfiler().setProfile(profile.getName(), b -> b.cloneFrom(tempProfile));
-                }
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
             }
 
-            if (Configurator.getConfig().shouldPlaceNewProfileToDock()){
-                Main.getMain().getTab().getTabs().remove((CTab)getParentObject());
+            Main.getMain().setFocusLimiter(null);
+
+            if (isNew && Configurator.getConfig().shouldPlaceNewProfileToDock()){
+                Main.getMain().closeTab((CTab)getParentObject());
                 Main.getMain().getTab().getSelectionModel().select(0);
             }
-            else
+            else if (isNew)
                 Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
+            else{
+                nts.clear();
+                Main.getMain().announceLater(Translator.translate("announce.successful"), Translator.translate("announce.info.profile.save"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+            }
         });
 
 
@@ -364,6 +433,23 @@ public class EditProfilePage extends HandlerController {
     @Override
     public void init(){
         reload();
+
+        txtName.textProperty().addListener((a, b, c) -> {
+            tempProfile.setName(c);
+            nts.set(1, !c.equals(profile.getName()));
+        });
+        txtWrapper.textProperty().addListener((a, b, c) -> {
+            nts.set(4, true);
+        });
+        txtAccount.textProperty().addListener((a, b, c) -> {
+            nts.set(6, !profile.tryGetUser().getUsername().equals(c));
+        });
+        chkAccOnline.selectedProperty().addListener((a, b, c) -> {
+            nts.set(7, profile.tryGetUser().isOnline() != c);
+        });
+        txtArgs.textProperty().addListener((a, b, c) -> {
+            nts.set(8, true);
+        });
     }
 
     private Java tryGetSelectedJava(){
@@ -400,17 +486,19 @@ public class EditProfilePage extends HandlerController {
     }
 
     private void reloadTitle(Profile p){
-        ((CTab)parentObj).setText(Translator.translate("frame.title.pedit") + (p.getName() == null ? "" : " - " + StrUtil.sub(p.getName(), 0, 30)));
+        ((CTab)parentObj).setText(Translator.translate("frame.title.pedit") + (p.getName() == null ? "" : " - " + StrUtil.sub(p.getName(), 0, 30) + (nts.needsToSave() ? "*" : "")));
     }
 
     private void reload(){
-        if (profile == null)
+        if (profile == null){
             tempProfile = Profile.empty();
+            profile = Profile.empty();
+        }
         else
             tempProfile = Profile.empty().cloneFrom(profile);
 
         try{
-            btnBack.setVisible(profile != null);
+            btnBack.setVisible(!profile.isEmpty());
 
             txtName.setText(tempProfile.getName());
             reloadTitle(tempProfile);
@@ -420,7 +508,7 @@ public class EditProfilePage extends HandlerController {
             var j = tempProfile.getJava();
             cbJavaVersion.setValue(j != null ? j.toIdentifier() : "...");
 
-            icon.setImage(CoreLauncherFX.getImage(tempProfile.getIcon()));
+            icon.setImageAsync(ImageUtil.getImage(tempProfile.getIcon()));
 
             if (tempProfile.getUser() != null){
                 txtAccount.setText(tempProfile.getUser().getUsername());
@@ -451,5 +539,21 @@ public class EditProfilePage extends HandlerController {
         catch (Exception e){
             Logger.getLogger().log(e);
         }
+    }
+
+    @Override
+    public boolean verify(double mX, double mY) {
+        if (headerCache == null){
+            var pane = (StackPane)Main.getMain().getTab().lookup(".tab-header-area .headers-region");
+            headerCache = pane.localToScene(pane.getBoundsInLocal());
+        }
+        return (headerCache.getMaxX() < mX && headerCache.getMaxY() > mY) || FocusLimiter.super.verify(mX, mY);
+    }
+
+    @Override
+    public void dispose(){
+        ram.dispose();
+        Main.getMain().setFocusLimiter(null);
+        super.dispose();
     }
 }

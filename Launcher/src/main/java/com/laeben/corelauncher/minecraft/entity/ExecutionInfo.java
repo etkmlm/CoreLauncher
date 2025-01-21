@@ -28,6 +28,7 @@ public class ExecutionInfo{
     public Java java;
     public Path dir;
     public String[] args;
+    public boolean ignoreAuth;
 
     public ServerInfo server;
 
@@ -69,6 +70,12 @@ public class ExecutionInfo{
 
     public ExecutionInfo includeServer(ServerInfo info){
         this.server = info;
+
+        return this;
+    }
+
+    public ExecutionInfo ignoreAuthentication(){
+        ignoreAuth = true;
 
         return this;
     }
@@ -199,7 +206,7 @@ public class ExecutionInfo{
                     .register("${game_assets}", assetsRoot.toString())
                     .register("${assets_index_name}", assets.id)
                     .register("${auth_uuid}", account.reload().getUuid())
-                    .register("${auth_access_token}", account.isOnline() ? account.authenticate().getTokener().getAccessToken() : "null")
+                    .register("${auth_access_token}", account.getCachedToken())
                     .register("${user_properties}", "{}")
                     .register("${user_type}", "msa")
                     .register("${version_type}", version.type == null ? "release" : version.type)

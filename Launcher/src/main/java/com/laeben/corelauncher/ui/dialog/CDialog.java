@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.dialog;
 
+import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.controller.Main;
@@ -21,6 +22,8 @@ import java.util.Optional;
 
 public class CDialog<T> extends Dialog<T> {
     public static final String API_DIALOG_CREATE = "onDialogCreate";
+    public static final String DIALOG_SHOWN = "dialogShown";
+    public static final String DIALOG_HIDE = "dialogHide";
 
     protected Node node;
 
@@ -40,7 +43,7 @@ public class CDialog<T> extends Dialog<T> {
         getDialogPane().prefHeightProperty().bind(n.prefHeightProperty());
         getDialogPane().prefWidthProperty().bind(n.prefWidthProperty());
 
-        ((Stage)getDialogPane().getScene().getWindow()).getIcons().addAll(LStage.LOGO16, LStage.LOGO32, LStage.LOGO64);
+        ((Stage)getDialogPane().getScene().getWindow()).getIcons().addAll(LStage.getIconSet());
 
         setResultConverter(a -> null);
 
@@ -68,12 +71,14 @@ public class CDialog<T> extends Dialog<T> {
 
     protected Optional<T> action(){
         Main.getMain().setDialogLayer(true);
+        UI.getUI().getHandler().execute(new KeyEvent(DIALOG_SHOWN).setSource(this));
         if (enableAnimation){
             node.setTranslateY(1000);
             trns.playFromStart();
         }
         var res = super.showAndWait();
         Main.getMain().setDialogLayer(false);
+        UI.getUI().getHandler().execute(new KeyEvent(DIALOG_HIDE).setSource(this));
 
         return res;
     }

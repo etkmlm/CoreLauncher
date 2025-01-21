@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.modrinth;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.RequestParameter;
@@ -132,20 +133,18 @@ public class Modrinth implements ModSource {
         for (var dep : v.getDependencies()){
             if (!dep.isRequired() && !dep.isEmbedded())
                 continue;
-            if (dep.projectId != null)
-                projects.add(dep.projectId);
-            else if (dep.versionId != null)
+            if (dep.versionId != null)
                 versions.add(dep.versionId);
+            else if (dep.projectId != null)
+                projects.add(dep.projectId);
         }
 
         var all = new ArrayList<CResource>();
         if (opt.getIncludeSelf())
             all.add(CResource.fromRinthResourceGeneric(res, v));
 
-        if (projects.isEmpty())
-            return all;
-
-        all.addAll(getCoreResources(projects, res.getResourceType() == ResourceType.MODPACK ? opt.clone().dependencies(false) : opt));
+        if (!projects.isEmpty())
+            all.addAll(getCoreResources(projects, res.getResourceType() == ResourceType.MODPACK ? opt.clone().dependencies(false) : opt));
 
         if (versions.isEmpty())
             return all;
@@ -177,13 +176,36 @@ public class Modrinth implements ModSource {
         var str = factory.create()
                 .to("/v2/project/" + rId + "/version");
 
-        if (vId != null)
+        var validVer = vId != null;
+        var validLoader = loader != null && loader.getIdentifier() != null && !loader.isNative();
+
+        if (validVer)
             str.withParam(new RequestParameter("game_versions", StrUtil.jsArray(List.of(vId))).markAsEscapable());
 
-        if (loader != null && loader.getIdentifier() != null && !loader.isNative())
+        if (validLoader)
             str.withParam(new RequestParameter("loaders", StrUtil.jsArray(List.of(loader.getIdentifier()))).markAsEscapable());
 
-        return processVersions(str.getString());
+        var vers = processVersions(str.getString());
+        if (!validVer && !validLoader)
+            return vers;
+
+        var newVers = new ArrayList<Version>();
+        for (var ver : vers){
+            if (ver.gameVersions != null){
+                if (validVer && ver.gameVersions.stream().allMatch(x -> x != null && !x.isBlank() && !vId.startsWith(x)))
+                    continue;
+            }
+
+            if (ver.loaders != null){
+                if (validLoader && !ver.loaders.contains(loader.getIdentifier()))
+                    continue;
+            }
+
+            newVers.add(ver);
+        }
+
+
+        return newVers;
     }
 
 
@@ -341,6 +363,7 @@ public class Modrinth implements ModSource {
     public void applyModpack(Modpack mp, Path path, Options opt) throws NoConnectionException, HttpException, StopException {
         mp.mods = new ArrayList<>();
         mp.resources = new ArrayList<>();
+        mp.shaders = new ArrayList<>();
 
         var vDeps = getVersions(mp.dependencies.stream().filter(x -> x.fileId != null).map(x -> x.fileId.toString()).toList());
         var pDeps = getResources(vDeps.stream().map(x -> x.projectId).toList());
@@ -362,6 +385,34 @@ public class Modrinth implements ModSource {
             all.add(res);
         }
 
+        var mf = gson.fromJson(extractModpack(path, mp).read(), JsonObject.class);
+        String key;
+
+        key = opt.getLoaderType().getIdentifier();
+
+        if (opt.getLoaderType() == LoaderType.FABRIC)
+            key += "-loader";
+
+        // check disabled dependencies
+        if (mf.has("files")){
+            var files = mf.get("files").getAsJsonArray().asList();
+            for (var f : files){
+                var fobj = f.getAsJsonObject();
+                List<JsonElement> downloads;
+                if (!fobj.has("path") || !fobj.get("path").getAsString().endsWith(".disabled") || !fobj.has("downloads") || (downloads = fobj.get("downloads").getAsJsonArray().asList()).isEmpty())
+                    continue;
+                for (var d : downloads){
+                    var ds = d.getAsString();
+                    if (!ds.startsWith("https://cdn.modrinth.com/data"))
+                        continue;
+                    var spl = ds.split("/");
+                    var pId = spl[4];
+                    all.removeIf(a -> a.getId().equals(pId));
+                }
+
+            }
+        }
+
         for (var a : all){
             if (a instanceof Mod m)
                 mp.mods.add(m);
@@ -371,13 +422,8 @@ public class Modrinth implements ModSource {
                 mp.shaders.add(s);
         }
 
-        var mf = gson.fromJson(extractModpack(path, mp).read(), JsonObject.class);
-        String key;
-
-        key = opt.getLoaderType().getIdentifier();
-
-        if (opt.getLoaderType() == LoaderType.FABRIC)
-            key += "-loader";
+        if (!mf.has("dependencies"))
+            return;
 
         var deps = mf.get("dependencies").getAsJsonObject();
         if (deps == null)

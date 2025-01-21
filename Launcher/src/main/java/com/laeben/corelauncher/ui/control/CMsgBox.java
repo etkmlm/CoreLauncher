@@ -1,10 +1,11 @@
 package com.laeben.corelauncher.ui.control;
 
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.dialog.CDialog;
+import com.laeben.corelauncher.util.ImageUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
@@ -18,7 +19,13 @@ import java.util.Optional;
 public class CMsgBox extends CDialog<CMsgBox.Result> {
 
     public enum ResultType {
-        YES, NO, OK, CANCEL, OPTION
+
+        YES(true), NO(false), OK(true), CANCEL(true), OPTION(false);
+
+        final boolean isPositive;
+        ResultType(boolean isPositive) {
+            this.isPositive = isPositive;
+        }
     }
 
     public record Result(ResultType result, Object extra){
@@ -27,8 +34,12 @@ public class CMsgBox extends CDialog<CMsgBox.Result> {
 
     private final List<ResultType> resultTypes;
 
+    private boolean enableKeys = true;
+
     public CMsgBox(Alert.AlertType type) {
         super("layout/dialog/messagebox.fxml", false);
+
+        resultTypes = new ArrayList<>();
 
         var n = (Region)node;
         getDialogPane().prefHeightProperty().bind(n.heightProperty());
@@ -37,9 +48,19 @@ public class CMsgBox extends CDialog<CMsgBox.Result> {
         getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
         getDialogPane().lookupButton(ButtonType.CANCEL).setStyle("-fx-opacity: 0");
 
-        icon.setImage(CoreLauncherFX.getLocalImage("dialog/dialog-" + type.name().toLowerCase(Locale.US) + ".png"));
+        getDialogPane().addEventFilter(javafx.scene.input.KeyEvent.KEY_RELEASED, a -> {
+            if (!enableKeys || (a.getCode() != KeyCode.ENTER && a.getCode() != KeyCode.ESCAPE) || resultTypes.stream().anyMatch(t -> t == ResultType.OPTION))
+                return;
+            boolean enter = a.getCode() == KeyCode.ENTER;
 
-        resultTypes = new ArrayList<>();
+            var f = resultTypes.stream().filter(x -> enter == x.isPositive).findFirst();
+            if (f.isPresent()) {
+                setResult(new Result(f.get(), 0));
+                close();
+            }
+        });
+
+        icon.setImage(ImageUtil.getLocalImage("dialog/dialog-" + type.name().toLowerCase(Locale.US) + ".png"));
     }
 
     public static CMsgBox msg(Alert.AlertType type, String title, String desc){
@@ -60,6 +81,11 @@ public class CMsgBox extends CDialog<CMsgBox.Result> {
         return this;
     }
 
+    public CMsgBox disableKeys(){
+        enableKeys = false;
+        return this;
+    }
+
     @FXML
     private Label title;
     @FXML
@@ -75,15 +101,14 @@ public class CMsgBox extends CDialog<CMsgBox.Result> {
     public void initialize(){
         icon.setCornerRadius(48, 48, 16);
 
-        content.maxWidthProperty().bind(title.widthProperty().multiply(1.75));
-
         content.textProperty().addListener(a -> {
             var txt = new Text(content.getText());
             txt.setFont(content.getFont());
             txt.setBoundsType(TextBoundsType.VISUAL);
-            txt.setWrappingWidth(content.getWidth());
+            txt.setWrappingWidth(500);
 
-            content.setPrefHeight(txt.getLayoutBounds().getHeight()*2.5);
+            content.setPrefHeight(txt.getLayoutBounds().getHeight() * 2.5);
+            content.setPrefWidth(txt.getLayoutBounds().getWidth() * 1.75);
         });
 
         btnClose.enableTransparentAnimation();

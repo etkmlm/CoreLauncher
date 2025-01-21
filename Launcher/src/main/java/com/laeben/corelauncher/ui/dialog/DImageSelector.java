@@ -1,13 +1,13 @@
 package com.laeben.corelauncher.ui.dialog;
 
 import com.laeben.core.entity.Path;
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.entity.ImageEntity;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
+import com.laeben.corelauncher.util.ImageUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -58,21 +58,21 @@ public class DImageSelector extends CDialog<ImageEntity> {
         img.setFitWidth(48);
         img.setFitHeight(48);
         img.setCornerRadius(48, 48, 8);
-        img.setImage(CoreLauncherFX.getLocalImage(url));
+        img.setImage(ImageUtil.getLocalImage(url));
         img.setOnMouseClicked(a -> {
             network = false;
             path = null;
             embedded = true;
             ok = true;
             this.url = url;
-            image.setImage(CoreLauncherFX.getLocalImage(url));
+            image.setImage(ImageUtil.getLocalImage(url));
         });
 
         return img;
     }
     public void initialize(){
         image.setCornerRadius(image.getFitWidth(), image.getFitHeight(), 16);
-        rectImage.setFill(new ImagePattern(CoreLauncherFX.getDefaultImage(128)));
+        rectImage.setFill(new ImagePattern(ImageUtil.getDefaultImage(128)));
 
 
 

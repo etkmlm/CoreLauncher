@@ -26,7 +26,7 @@ public class Custom extends Wrapper<Version> {
         }
         catch (Exception e){
             Logger.getLogger().log(e);
-            return new Version(id);
+            return null;
         }
 
     }

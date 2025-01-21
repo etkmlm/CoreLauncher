@@ -8,7 +8,7 @@
 <?import javafx.scene.shape.*?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      alignment="CENTER" style="-fx-padding: 5px;" stylesheets="@../../style/cells/resource.css">
+      alignment="CENTER" stylesheets="@../../style/cells/resource.css">
     <HBox prefHeight="175" fx:id="root" alignment="CENTER">
         <CView fitWidth="72" fitHeight="72" fx:id="icon"/>
         <Rectangle width="10"/>

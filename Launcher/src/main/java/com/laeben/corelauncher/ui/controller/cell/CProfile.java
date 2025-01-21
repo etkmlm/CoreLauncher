@@ -23,6 +23,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 public class CProfile extends CDockObject{
     @FXML
@@ -37,11 +38,14 @@ public class CProfile extends CDockObject{
     private final FadeTransition hover;
     private final TranslateTransition trns;
 
+    private Predicate<String> onMenuClick;
+
     public CProfile(){
         hover = new FadeTransition();
         hover.setFromValue(0);
         hover.setToValue(1);
         hover.setDuration(animationDuration);
+        getStyleClass().add("cprofile");
 
         trns = new TranslateTransition();
         trns.setFromY(90);
@@ -109,7 +113,7 @@ public class CProfile extends CDockObject{
             if (a.equals(CDockObject.DELETE))
                 vanish();
 
-            return true;
+            return onMenuClick == null || onMenuClick.test(a);
         });
         menu.addItem(ImageCacheManager.getImage("close.png", 48), Translator.translate("option.remove"), a -> vanish());
 
@@ -162,11 +166,22 @@ public class CProfile extends CDockObject{
         board.setContent(content);
     }
 
+    public CProfile setOnMenuClick(Predicate<String> onMenuClick){
+        this.onMenuClick = onMenuClick;
+        return this;
+    }
+
     public CDockObject getOnObject(){
         return on;
     }
 
     public void setOnObject(CDockObject on){
         this.on = on;
+    }
+
+    @Override
+    public void dispose(){
+        onMenuClick = null;
+        super.dispose();
     }
 }

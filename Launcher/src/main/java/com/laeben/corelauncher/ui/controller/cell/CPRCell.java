@@ -74,7 +74,8 @@ public class CPRCell<T extends CResource> extends CCell<T> {
     public CCell setItem(T item) {
         this.item = item;
 
-        image.setImage(item.getIcon(32, 32));
+        image.setImageAsync(item.getIcon(32, 32));
+
         lblName.setText(item.name);
 
         lblName.setTooltip(new Tooltip(item.fileName));

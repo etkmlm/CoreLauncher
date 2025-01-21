@@ -67,6 +67,6 @@ public class ExtensionsPage extends HandlerController {
 
         txtSearch.textProperty().addListener(a -> pList.filter(txtSearch.getText()));
 
-        btnOpenFolder.setOnMouseClicked(a -> OSUtil.openFolder(ExtensionWrapper.getWrapper().getPath().toFile().toPath()));
+        btnOpenFolder.setOnMouseClicked(a -> OSUtil.open(ExtensionWrapper.getWrapper().getPath().toFile()));
     }
 }

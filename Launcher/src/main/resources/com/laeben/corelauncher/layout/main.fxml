@@ -7,6 +7,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.*?>
+<?import com.laeben.corelauncher.ui.tutorial.StepPopup?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.laeben.corelauncher.ui.controller.Main"
@@ -37,5 +38,6 @@
 
     <CAnnouncer fx:id="announcer" translateX="620" AnchorPane.topAnchor="50" AnchorPane.rightAnchor="20"/>
 
+    <StepPopup fx:id="stepPopup"/>
     <Region style="-fx-background-color: #10101077" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" maxWidth="Infinity" maxHeight="Infinity" fx:id="dialogLayer" visible="false"/>
 </AnchorPane>

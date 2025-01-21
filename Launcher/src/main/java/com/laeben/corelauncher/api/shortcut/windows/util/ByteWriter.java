@@ -1,6 +1,5 @@
 package com.laeben.corelauncher.api.shortcut.windows.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;

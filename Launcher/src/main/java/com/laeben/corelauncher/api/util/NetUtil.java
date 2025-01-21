@@ -5,6 +5,7 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.ImageEntity;
+import com.laeben.corelauncher.api.util.entity.NetParcel;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -24,6 +25,10 @@ public class NetUtil extends com.laeben.core.util.NetUtils{
         catch (UnknownHostException e){
             throw new NoConnectionException();
         }
+    }
+
+    public static Path download(NetParcel parcel) throws NoConnectionException, HttpException, StopException {
+        return download(parcel.getUrl(), parcel.getPath(), parcel.useOriginalName());
     }
 
     public static Path download(String url, Path path, boolean uon) throws NoConnectionException, HttpException, StopException {

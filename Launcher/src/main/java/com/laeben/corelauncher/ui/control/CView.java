@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.ui.control;
 
+import com.laeben.corelauncher.util.ImageUtil;
+import com.laeben.corelauncher.util.entity.ImageTask;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
@@ -29,5 +31,9 @@ public class CView extends ImageView {
         } catch (IOException ignored) {
 
         }
+    }
+
+    public void setImageAsync(ImageTask task){
+        ImageUtil.getImageAsync(task, this::setImage, false);
     }
 }

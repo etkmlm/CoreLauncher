@@ -36,7 +36,7 @@ public class Vanilla extends Wrapper<Version> {
     @Override
     public Version getVersion(String id, String wrId){
         logState(Wrapper.ACQUIRE_VERSION + id);
-        return getAllVersions().stream().filter(x -> x.checkId(id)).findFirst().orElse(new Version());
+        return getAllVersions().stream().filter(x -> x.checkId(id)).findFirst().orElse(null);
     }
 
     private String getVersionString(String id){

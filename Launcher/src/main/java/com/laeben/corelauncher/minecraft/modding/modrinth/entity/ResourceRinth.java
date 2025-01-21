@@ -13,6 +13,7 @@ public class ResourceRinth implements ModResource {
     public String slug;
     public String team;
     public List<String> loaders;
+    @SerializedName("date_modified")
     public String published;
     public List<String> versions;
 

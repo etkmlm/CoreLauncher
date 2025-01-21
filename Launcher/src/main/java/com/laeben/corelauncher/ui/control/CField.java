@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.ui.control;
 
-import com.laeben.corelauncher.ui.entity.BorderColorAnimation;
-import com.laeben.corelauncher.ui.entity.ColorAnimation;
+import com.laeben.corelauncher.ui.entity.animation.BorderColorAnimation;
+import com.laeben.corelauncher.ui.entity.animation.ColorAnimation;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;

@@ -121,7 +121,7 @@ public class UI {
         scene.setFill(Color.TRANSPARENT);
         stage.setStageScene(scene);
 
-        stage.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, a -> close(stage));
+        stage.addRegisteredEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, a -> close(stage));
 
         if (loader.getController() instanceof Controller c)
             c.setStage(stage).setNode(root);
@@ -211,6 +211,7 @@ public class UI {
             st.close();
 
         if (st instanceof LStage stage){
+            stage.dispose();
             windows.remove(stage);
             handler.execute(new KeyEvent(WINDOW_CLOSE).setSource(stage));
             if (windows.isEmpty() && implicit)

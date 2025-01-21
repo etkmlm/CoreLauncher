@@ -93,6 +93,10 @@ public class Transformer implements ClassFileTransformer {
 
                 ClassPool pool = ClassPool.getDefault();
                 CtClass cls = pool.get(className.replace('/', '.'));
+                if (cls.isFrozen()){
+                    System.out.println("CLPatcher - Defrost Class");
+                    cls.defrost();
+                }
                 CtField field = cls.getField("enabled");
                 cls.removeField(field);
                 cls.addField(CtField.make("private boolean enabled = true;", cls));

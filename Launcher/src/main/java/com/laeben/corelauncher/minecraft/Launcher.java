@@ -21,18 +21,22 @@ import com.laeben.core.util.events.KeyEvent;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class Launcher {
     public static final String SESSION_START = "sessionStart";
     public static final String SESSION_END = "sessionEnd";
     public static final String SESSION_RECEIVE = "sessionReceive";
+    public static final String AUTH_FAIL = "authFail";
     public static final String PREPARE = "prepare";
     public static final String JAVA = "java";
 
 
     public static Launcher instance;
     private final EventHandler<BaseEvent> handler;
+
+    private Function<ValueEvent, Boolean> onAuthFail;
 
     public Launcher(){
         handler = new EventHandler<>();
@@ -50,6 +54,10 @@ public class Launcher {
 
     private void handleState(String key){
         handler.execute(new KeyEvent(key));
+    }
+
+    public void setOnAuthFail(Function<ValueEvent, Boolean> onAuthFail){
+        this.onAuthFail = onAuthFail;
     }
 
     /**
@@ -72,6 +80,13 @@ public class Launcher {
         Modder.getModder().installWorlds(profile, profile.getOnlineWorlds());
         Modder.getModder().installResourcepacks(profile, profile.getResources());
         Modder.getModder().installShaders(profile, profile.getShaders());
+
+        var op1 = Configurator.getConfig().getLauncherPath().to("options.txt");
+        if (op1.exists()){
+            var op2 = profile.getPath().to("options.txt");
+            if (!op2.exists())
+                op1.copy(op2);
+        }
     }
 
     /**
@@ -125,7 +140,7 @@ public class Launcher {
 
             }
 
-            if (!info.java.getExecutable().exists()){
+            if (!info.java.getWindowExecutable().exists()){
                 JavaManager.getManager().reload();
                 info.java = null;
                 launch(info);
@@ -144,7 +159,7 @@ public class Launcher {
 
             // Static commands
             String[] rootCmds = {
-                    info.java.getExecutable().toString(),
+                    info.java.getWindowExecutable().toString(),
                     libPath,
                     //"-javaagent:" + linfo.agentPath, // Don't worry (yup), this contains launcher's patches to mc like 1.16.4 multiplayer bug
                     "-Dorg.lwjgl.util.Debug=true",
@@ -154,7 +169,18 @@ public class Launcher {
             // If the version lower than 1.7.2 (very legacy) then copy all textures to resources folder in profile folder
             if (linfo.assets.isVeryLegacy()){
                 var resources = info.dir.to("resources");
-                Configurator.getConfig().getGamePath().to("assets", "virtual", "verylegacy").copy(resources);
+                Configurator.getConfig().getGamePath().to("assets", "virtual", "verylegacy").copy(resources, false);
+            }
+
+            try{
+                info.account.cacheToken();
+            }
+            catch (PerformException e){
+                Logger.getLogger().log(LogType.ERROR, "Authentication failed: " + e.getMessage() + " XErr " + e.getValue());
+                if (onAuthFail != null && !onAuthFail.apply((ValueEvent) new ValueEvent(AUTH_FAIL, e.getValue()).setSource(info))){
+                    throw new StopException();
+                }
+                Logger.getLogger().log(LogType.ERROR, "Ignoring authentication failure...");
             }
 
             String[] gameCmds = linfo.getGameArguments();

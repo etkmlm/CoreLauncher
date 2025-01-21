@@ -22,7 +22,7 @@
                     <ColumnConstraints minWidth="100"/>
                 </columnConstraints>
                 <Label styleClass="property-key" text="%profile.edit.type" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
-                <HBox alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <HBox fx:id="loaders" alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0">
 
                     <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgVanilla" fitHeight="48" fitWidth="48">

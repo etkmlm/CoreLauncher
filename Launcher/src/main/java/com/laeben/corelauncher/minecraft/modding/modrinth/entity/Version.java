@@ -36,7 +36,7 @@ public class Version {
     public String name;
     @SerializedName("version_number")
     public String version;
-    @SerializedName("game_Versions")
+    @SerializedName("game_versions")
     public List<String> gameVersions;
     public List<String> loaders;
     public List<RinthFile> files;

@@ -8,6 +8,7 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.cell.CMCell;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.api.ui.UI;
@@ -135,6 +136,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
                     mpContentContainer.setManaged(true);
                     mpButtonContainer.setManaged(false);
                     mpButtonContainer.setVisible(false);
+                    Main.getMain().clearAllStates();
                 });
             });
 

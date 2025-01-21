@@ -46,7 +46,7 @@ public class CResourceCell extends ListCell<CResource> {
             return;
         }
 
-        icon.setImage(item.getIcon());
+        icon.setImageAsync(item.getIcon());
         lblName.setText(item.name);
         lblAuthor.setText(item.authors == null ? null : String.join(",", item.authors));
         txtDesc.setText(item.desc);

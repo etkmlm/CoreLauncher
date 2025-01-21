@@ -32,7 +32,7 @@ public class Forge extends Wrapper<ForgeVersion> {
 
     @Override
     public ForgeVersion getVersion(String id, String wrId){
-        return getVersions(id).stream().filter(x -> x.getWrapperVersion().equals(wrId)).findFirst().orElse(new ForgeVersion(id));
+        return getVersions(id).stream().filter(x -> x.getWrapperVersion().equals(wrId)).findFirst().orElse(null);
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CCombo;
+import com.laeben.corelauncher.ui.control.CMsgBox;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -60,6 +61,10 @@ public class DStartupConfigurator extends CDialog<Boolean>{
 
         btnApply.enableTransparentAnimation();
         btnApply.setOnMouseClicked(a -> {
+            if (txtUsername.getText() == null || txtUsername.getText().isBlank()){
+                CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("error.username")).execute();
+                return;
+            }
             Configurator.getConfigurator().setDefaultAccount(Account.fromUsername(txtUsername.getText() == null || txtUsername.getText().isBlank() ? "IAMUSER" : txtUsername.getText()).setOnline(chkOnline.isSelected()));
             Configurator.save();
             setResult(true);

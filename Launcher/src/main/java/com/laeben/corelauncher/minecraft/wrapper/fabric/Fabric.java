@@ -127,7 +127,7 @@ public class Fabric<T extends BaseFabricVersion> extends Wrapper<T> {
             logState(".fabric.state.install");
             try{
                 var process = new ProcessBuilder()
-                        .command(JavaManager.getDefault().getExecutable().toString(), "-jar", path.toString(), "client", "-dir", gameDir.toString(), "-mcversion", v.id, "-loader", v.getWrapperVersion(), "-noprofile")
+                        .command(JavaManager.getDefault().getWindowExecutable().toString(), "-jar", path.toString(), "client", "-dir", gameDir.toString(), "-mcversion", v.id, "-loader", v.getWrapperVersion(), "-noprofile")
                         .inheritIO()
                         .start();
                 process.waitFor();

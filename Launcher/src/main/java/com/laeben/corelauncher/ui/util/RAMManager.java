@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.util;
 
+import javafx.event.EventHandler;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -12,6 +13,8 @@ public abstract class RAMManager {
 
     private final int maxGb;
     private final int step;
+
+    private final EventHandler<ScrollEvent> scroller;
 
     private Spinner<Integer> spnMin;
     private Spinner<Integer> spnMax;
@@ -34,7 +37,9 @@ public abstract class RAMManager {
         fMax.setAmountToStepBy(stepMb);
 
         this.step = stepMb;
-        this.maxGb = maxGb; 
+        this.maxGb = maxGb;
+
+        scroller = ControlUtil::scroller;
     }
 
     public abstract void needsToSave();
@@ -76,6 +81,16 @@ public abstract class RAMManager {
             fMax.setValue((int) slider.getValue());
         });
 
+        /*spnMax.focusedProperty().addListener((a, b, c) -> {
+            if (!c)
+                spnMax.commitValue();
+        });
+
+        spnMin.focusedProperty().addListener((a, b, c) -> {
+            if (!c)
+                spnMin.commitValue();
+        });*/
+
         spnMax.valueProperty().addListener((a, oldVal, newVal) -> {
             try{
                 if (newVal == null)
@@ -101,8 +116,8 @@ public abstract class RAMManager {
             }
         });
 
-        spnMax.addEventFilter(ScrollEvent.ANY, ControlUtil::scroller);
-        spnMin.addEventFilter(ScrollEvent.ANY, ControlUtil::scroller);
+        spnMax.addEventFilter(ScrollEvent.ANY, scroller);
+        spnMin.addEventFilter(ScrollEvent.ANY, scroller);
     }
 
     public void setMin(int val){
@@ -119,5 +134,10 @@ public abstract class RAMManager {
 
     public int getMax(){
         return fMax.getValue();
+    }
+
+    public void dispose(){
+        spnMax.removeEventFilter(ScrollEvent.ANY, scroller);
+        spnMin.removeEventFilter(ScrollEvent.ANY, scroller);
     }
 }

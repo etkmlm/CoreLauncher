@@ -10,6 +10,8 @@ import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.api.util.CargoNet;
+import com.laeben.corelauncher.api.util.entity.NetParcel;
 import com.laeben.corelauncher.minecraft.entity.Asset;
 import com.laeben.corelauncher.minecraft.entity.AssetIndex;
 import com.laeben.corelauncher.minecraft.entity.Library;
@@ -35,7 +37,8 @@ public abstract class Wrapper<H extends Version> {
     public static final String SERVER_DOWNLOAD = "serverDown";
     public static final String ACQUIRE_VERSION = "acqVersion";
     public static final String LIBRARY = "lib";
-    public static final String ASSET = "asset";
+    //public static final String ASSET = "asset";
+    public static final String ASSET_LOAD = "assetLoad";
 
     private static final String ASSET_URL = "https://resources.download.minecraft.net/";
 
@@ -80,14 +83,17 @@ public abstract class Wrapper<H extends Version> {
         return Configurator.getConfig().getGamePath();
     }
 
-    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
+    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude, CargoNet cargo) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
         Path libPath = libDir.to(asset.path.split("/"));
         if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || disableCache)
         {
-            NetUtil.download(asset.url, libPath, false, true);
+            var parcel = NetParcel.create(asset.url, libPath, false).setState(asset);
+            if (exclude != null)
+                parcel.setOnFinish(() -> libPath.extract(nativeDir, exclude));
+            cargo.add(parcel);
+            //NetUtil.download(asset.url, libPath, false, true);
         }
-
-        if (exclude != null)
+        else if (exclude != null)
         {
             libPath.extract(nativeDir, exclude);
         }
@@ -110,15 +116,16 @@ public abstract class Wrapper<H extends Version> {
         Path libDir = getGameDir().to("libraries");
         for (Library l : LauncherConfig.LAUNCHER_LIBRARIES){
             Path p = libDir.to(l.calculatePath());
-            if (!p.exists()){
-                try(var libStr = CoreLauncherFX.class.getResourceAsStream("libraries/" + l.fileName)){
-                    assert libStr != null;
+            try(var libStr = CoreLauncherFX.class.getResourceAsStream("libraries/" + l.fileName)){
+                assert libStr != null;
+                if (!p.exists() || p.getSize() != libStr.available()){
                     libStr.transferTo(new FileOutputStream(p.prepare().toFile()));
                 }
-                catch (Exception e){
-                    Logger.getLogger().log(e);
-                }
             }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
+
         }
     }
 
@@ -129,6 +136,19 @@ public abstract class Wrapper<H extends Version> {
         Path nativeDir = getGameDir().to("versions", v.getJsonName(), "natives");
 
         setupLauncherLibraries();
+
+        var cargo = new CargoNet(Configurator.getConfig().getDownloadThreadsCount()) {
+            @Override
+            public void onParcelDone(NetParcel p, Path path, int done, int total) {
+                var lib = p.<Asset>getState();
+
+                if (!p.isSuccessful() && p.getException() instanceof StopException){
+                    terminate();
+                }
+
+                logState(LIBRARY + lib.path + " " + done + "/" + total);
+            }
+        };
 
         if (v.libraries == null)
             return;
@@ -150,10 +170,10 @@ public abstract class Wrapper<H extends Version> {
                 var nativeAsset = lib.getNativeAsset();
 
                 if (mainAsset != null)
-                    downloadLibraryAsset(mainAsset, libDir, nativeDir, null);
+                    downloadLibraryAsset(mainAsset, libDir, nativeDir, null, cargo);
 
                 if (nativeAsset != null)
-                    downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude);
+                    downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude, cargo);
 
                 Logger.getLogger().logDebug("OK\n");
             }
@@ -164,6 +184,32 @@ public abstract class Wrapper<H extends Version> {
                 Logger.getLogger().log(LogType.INFO, "ERRLIB: " + lib.name);
                 Logger.getLogger().log(e);
             }
+        }
+
+        try{
+
+            if (!cargo.await()){
+                boolean nc;
+                for (var p : cargo.getParcels()){
+                    if (p.isSuccessful())
+                        continue;
+                    var asset = p.<Asset>getState();
+                    var ex = p.getException();
+                    if (ex instanceof StopException || ex instanceof NoConnectionException){
+                        throw ex;
+                    }
+
+                    Logger.getLogger().log(LogType.INFO, "ERRLIB: " + asset.path);
+                    Logger.getLogger().log(ex);
+                }
+                throw new PerformException("Exception while completing the cargo request.");
+            }
+        }
+        catch (StopException | NoConnectionException e){
+            throw e;
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
         }
     }
 
@@ -211,20 +257,21 @@ public abstract class Wrapper<H extends Version> {
             return;
         }
 
-        int count = index.objects.size();
-        int i = 1;
-        for (var asset : index.objects)
-        {
-            if (stopRequested)
-                throw new StopException();
-            try{
-                String hash = asset.SHA1;
-                String nhash = hash.substring(0, 2);
-                String url = ASSET_URL + nhash + "/" + hash;
+        logState(ASSET_LOAD);
 
-                Path path = assetDir.to(nhash, hash);
-                if (!path.exists() || disableCache)
-                    NetUtil.download(url, path.forceSetDir(false), false, true);
+        long stamp = System.currentTimeMillis();
+
+        var cargo = new CargoNet(Configurator.getConfig().getDownloadThreadsCount()) {
+            @Override
+            public void onParcelDone(NetParcel p, Path path, int done, int size) {
+                var asset = p.<Asset>getState();
+                logState(asset.path + " " + done + "/" + size);
+
+                if (!p.isSuccessful()){
+                    if (p.getException() instanceof StopException)
+                        terminate();
+                    return;
+                }
 
                 if (vIndex.isLegacy()){
                     var f = legacyDir.to(asset.path);
@@ -236,19 +283,72 @@ public abstract class Wrapper<H extends Version> {
                     if (!f.exists())
                         path.copy(f);
                 }
+            }
+        };
 
-                Logger.getLogger().logDebug((i++) + " / " + count);
-                logState(ASSET + i + "/" + count);
-                //logProgress(i, count);
+        int count = index.objects.size();
+        int i = 1;
+        for (var asset : index.objects)
+        {
+            if (stopRequested)
+                throw new StopException();
+
+            String hash = asset.SHA1;
+            String nhash = hash.substring(0, 2);
+            String url = ASSET_URL + nhash + "/" + hash;
+
+            Path path = assetDir.to(nhash, hash);
+            if (!path.exists() || disableCache){
+                cargo.add(NetParcel.create(url, path.forceSetDir(false), false).setState(asset));
+                //NetUtil.download(url, path.forceSetDir(false), false, true);
+                continue;
             }
-            catch (NoConnectionException | StopException e){
-                throw e;
+
+            if (vIndex.isLegacy()){
+                var f = legacyDir.to(asset.path);
+                if (!f.exists())
+                    path.copy(f);
             }
-            catch (Exception e){
-                Logger.getLogger().log(LogType.INFO, "ERRASST: " + asset.id);
-                Logger.getLogger().log(e);
+            else if (vIndex.isVeryLegacy()){
+                var f = veryLegacyDir.to(asset.path);
+                if (!f.exists())
+                    path.copy(f);
+            }
+
+            //Logger.getLogger().logDebug((i++) + " / " + count);
+            logState(i + "/" + count);
+        }
+
+        try{
+
+            if (!cargo.await()){
+                boolean nc;
+                for (var p : cargo.getParcels()){
+                    if (p.isSuccessful())
+                        continue;
+                    var asset = p.<Asset>getState();
+
+                    var ex = p.getException();
+                    if (ex instanceof StopException || ex instanceof NoConnectionException){
+                        throw ex;
+                    }
+
+                    Logger.getLogger().log(LogType.INFO, "ERRASST: " + asset.id);
+                    Logger.getLogger().log(ex);
+                }
+                throw new PerformException("Exception while completing the cargo request.");
             }
         }
+        catch (StopException | NoConnectionException e){
+            throw e;
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }
+
+
+        stamp = System.currentTimeMillis() - stamp;
+        Logger.getLogger().log(LogType.INFO, "Assets loaded in " + stamp + " milliseconds.");
     }
 
     public static <T extends Wrapper> T getWrapper(String identifier){

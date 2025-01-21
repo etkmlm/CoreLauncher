@@ -2,6 +2,7 @@ package com.laeben.corelauncher.minecraft.util;
 
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.util.APIListener;
 import com.laeben.corelauncher.util.GsonUtil;
@@ -92,7 +93,7 @@ public class Authenticator {
         return new XblInfo(accessToken, refreshAccessToken, expiresIn);
     }
 
-    public AuthInfo getATokenFromToken(String token) throws NoConnectionException {
+    public AuthInfo getATokenFromToken(String token) throws NoConnectionException, PerformException {
         String json =
                 """
                 {
@@ -127,7 +128,13 @@ public class Authenticator {
                 }
                 """.replace("$", xblToken);
 
-        String authToken = gson.fromJson(NetUtil.post(XSTS_URL, xjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class).get("Token").getAsString();
+        var xstsResponse = gson.fromJson(NetUtil.post(XSTS_URL, xjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+
+        if (xstsResponse.has("XErr")){
+            throw new PerformException("authFail", xstsResponse.get("XErr").getAsLong());
+        }
+
+        String authToken = xstsResponse.get("Token").getAsString();
 
         String fjson = "{ \"identityToken\": \"XBL3.0 x=" + hash + ";" + authToken + "\" }";
         var user = gson.fromJson(NetUtil.post(MC_AUTH_URL, fjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
@@ -139,7 +146,7 @@ public class Authenticator {
         return new AuthInfo(name, mcAccessToken, expiresIn);
     }
 
-    public Tokener authenticate(String username){
+    public Tokener authenticate(String username) throws PerformException {
         try{
             OSUtil.openURL(CODE_URL);
             String code = listen("code");
@@ -149,8 +156,7 @@ public class Authenticator {
             var info = getATokenFromToken(xbl.xbl);
 
             return new Tokener(xbl, info);
-        }
-        catch (IOException | NoConnectionException e){
+        } catch (IOException | NoConnectionException e){
             return Tokener.empty(username);
         }
     }

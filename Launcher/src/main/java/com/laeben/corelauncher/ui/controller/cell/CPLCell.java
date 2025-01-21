@@ -32,8 +32,6 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
     private final BooleanProperty selected;
     private boolean selectionDisabled = false;
 
-
-
     public CPLCell() {
         super("layout/cells/ccell.fxml");
 
@@ -42,8 +40,6 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
         menu = new CMenu();
 
         box.getChildren().addAll(btnPlay, new Rectangle(15, 0), menu);
-
-
     }
 
     private Profile item;
@@ -103,7 +99,7 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
         btnMenu.setPrefHeight(72);
         btnMenu.setText("...");
         //btnMenu.setPadding(new Insets(0, 0, 5, 0));
-        btnMenu.setStyle("-fx-font-size: 18pt; -fx-background-color: transparent;");
+        btnMenu.setStyle("-fx-font-size: 18pt; -fx-padding: 0 0 10px 0; -fx-background-color: transparent;");
         btnMenu.enableTransparentAnimation();
         btnMenu.setOnMouseClicked(a -> menu.show());
 

@@ -90,27 +90,27 @@
             <ColumnConstraints percentWidth="50"/>
         </columnConstraints>
         <VBox fx:id="vModpacks" GridPane.columnIndex="0" GridPane.rowIndex="0">
-            <Label styleClass="header" text="%mods.type.modpacks"/>
+            <Label fx:id="lblModpacks" styleClass="header" text="%mods.type.modpacks"/>
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvModpacks"/>-->
         </VBox>
         <VBox fx:id="vResources" GridPane.columnIndex="1" GridPane.rowIndex="0">
-            <Label styleClass="header" text="%mods.type.resources"/>
+            <Label fx:id="lblResources" styleClass="header" text="%mods.type.resources"/>
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvResources"/>-->
         </VBox>
         <VBox fx:id="vShaders" GridPane.columnIndex="0" GridPane.rowIndex="1">
-            <Label styleClass="header" text="%mods.type.shader"/>
+            <Label fx:id="lblShaders" styleClass="header" text="%mods.type.shaders"/>
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvShaders"/>-->
         </VBox>
         <VBox fx:id="vWorlds" GridPane.columnIndex="1" GridPane.rowIndex="1">
-            <Label styleClass="header" text="%mods.type.worlds"/>
+            <Label fx:id="lblWorlds" styleClass="header" text="%mods.type.worlds"/>
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvWorlds"/>-->
         </VBox>
         <VBox fx:id="vMods" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
-            <Label styleClass="header" text="%mods.type.mods"/>
+            <Label fx:id="lblMods" styleClass="header" text="%mods.type.mods"/>
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvMods"/>-->
         </VBox>

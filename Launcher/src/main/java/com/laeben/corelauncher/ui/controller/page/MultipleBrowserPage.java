@@ -4,7 +4,6 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.util.StrUtil;
@@ -22,6 +21,7 @@ import com.laeben.corelauncher.ui.controller.browser.Search;
 import com.laeben.corelauncher.ui.controller.browser.SearchManager;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.util.ImageUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -76,7 +76,7 @@ public class MultipleBrowserPage extends HandlerController {
 
         lblProfileName.setText(profile.getName());
         reloadTitle(profile);
-        profileIcon.setImage(CoreLauncherFX.getImageFromProfile(profile, 32, 32));
+        profileIcon.setImageAsync(ImageUtil.getImageFromProfile(profile, 32, 32));
 
         btnBack.enableTransparentAnimation();
         btnBack.setOnMouseClicked(a -> Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile));

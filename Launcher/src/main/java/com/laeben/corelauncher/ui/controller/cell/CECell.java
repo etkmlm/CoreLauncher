@@ -1,9 +1,9 @@
 package com.laeben.corelauncher.ui.controller.cell;
 
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
+import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import com.laeben.corelauncher.wrap.entity.Extension;
 import javafx.fxml.FXML;
@@ -50,7 +50,7 @@ public class CECell extends CCell<Extension>{
         warning.setVisible(!item.isCompatible());
         Tooltip.install(warning, new Tooltip(Translator.translateFormat("extensions.incompatible", item.getTarget())));
 
-        icon.setImage(item.getIcon() != null ? item.getIcon() : CoreLauncherFX.getDefaultImage(128));
+        icon.setImage(item.getIcon() != null ? item.getIcon() : ImageUtil.getDefaultImage(128));
 
         btnRemove.setOnMouseClicked(a -> ExtensionWrapper.getWrapper().removeExtension(item));
 

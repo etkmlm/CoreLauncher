@@ -50,15 +50,13 @@ public class NeoForge extends Wrapper<NeoForgeVersion> {
 
     @Override
     public NeoForgeVersion getVersion(String id, String wrId) {
-        return getVersions(id).stream().filter(a -> a.getWrapperVersion().equals(wrId)).findFirst().orElse(new NeoForgeVersion(wrId));
+        return getVersions(id).stream().filter(a -> a.getWrapperVersion().equals(wrId)).findFirst().orElse(null);
     }
 
     @Override
     public List<NeoForgeVersion> getAllVersions() {
         if (!cache.isEmpty() && !disableCache)
             return cache;
-
-
 
         try {
             var all = gson.fromJson(NetUtil.urlToString(NEO_INDEX), JsonObject.class);

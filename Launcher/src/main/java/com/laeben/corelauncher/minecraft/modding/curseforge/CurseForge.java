@@ -271,6 +271,6 @@ public class CurseForge implements ModSource {
 
         m.mods = resources.stream().filter(x -> x instanceof Mod).map(x -> (Mod)x).toList();
         m.resources = resources.stream().filter(x -> x instanceof Resourcepack).map(x -> (Resourcepack)x).toList();
-        m.shaders = List.of();
+        m.shaders = resources.stream().filter(x -> x instanceof Shader).map(x -> (Shader)x).toList();
     }
 }

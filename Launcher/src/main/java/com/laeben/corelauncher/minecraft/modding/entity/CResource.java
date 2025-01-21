@@ -6,11 +6,11 @@ import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ResourceForge
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.ResourceRinth;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.RinthFile;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.Version;
-import javafx.scene.image.Image;
+import com.laeben.corelauncher.util.ImageUtil;
+import com.laeben.corelauncher.util.entity.ImageTask;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 public class CResource implements Comparable<CResource> {
     public ModSource.Type source;
@@ -144,6 +144,8 @@ public class CResource implements Comparable<CResource> {
             return (T) Resourcepack.fromForgeResource(vId, loader, r, file);
         else if (r.classId == ResourceType.WORLD.getId())
             return (T) World.fromResource(vId, loader, r);
+        else if (r.classId == ResourceType.SHADER.getId())
+            return (T) Shader.fromForgeResource(vId, loader, r, file);
         else
             return (T) fromForgeResource(new CResource(), vId, loader, r, file);
     }
@@ -184,8 +186,24 @@ public class CResource implements Comparable<CResource> {
 
         return res;
     }
+
+    public ImageTask getIcon(){
+        return getIcon(-1, -1);
+    }
+
+    public ImageTask getIcon(double w, double h){
+        if (logoUrl == null || logoUrl.isBlank()){
+            return ImageTask.NULL;
+        }
+
+        if (!logoUrl.startsWith("/")){
+            return ImageUtil.getNetworkImage(logoUrl, w, h);
+        }
+        else
+            return ImageTask.fromImage(ImageUtil.getLocalImage(logoUrl, w, h));
+    }
     
-    public Image getIcon(double w, double h){
+    /*public Image getIcon(double w, double h){
         if (logoUrl == null || logoUrl.isBlank())
             return null;
         return logoUrl.startsWith("/") ? new Image(Objects.requireNonNull(CResource.class.getResourceAsStream(logoUrl)), w, h, false, false) : new Image(logoUrl, w, h, false, false, true);
@@ -194,7 +212,7 @@ public class CResource implements Comparable<CResource> {
         if (logoUrl == null || logoUrl.isBlank())
             return null;
         return logoUrl.startsWith("/") ? new Image(Objects.requireNonNull(CResource.class.getResourceAsStream(logoUrl))) : new Image(logoUrl, true);
-    }
+    }*/
 
     public void setFile(CResource file){
         fileId = file.id;

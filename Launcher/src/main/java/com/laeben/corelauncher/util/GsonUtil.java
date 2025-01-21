@@ -2,6 +2,7 @@ package com.laeben.corelauncher.util;
 
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
+import com.laeben.core.entity.TranslationBundle;
 import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.Image;
@@ -35,6 +36,7 @@ public class GsonUtil {
             .registerTypeAdapter(Quilt.class, new Wrapper.WrapperFactory())
             .registerTypeAdapter(Custom.class, new Wrapper.WrapperFactory())
             .registerTypeAdapter(Image.class, new Image.ImageFactory())
+            .registerTypeAdapter(TranslationBundle.class, new TranslationBundle.TranslationBundleFactory())
             .registerTypeAdapter(ModSource.TypeFactory.class, new ModSource.TypeFactory())
             .addSerializationExclusionStrategy(new ExclusionStrategy() {
                 @Override

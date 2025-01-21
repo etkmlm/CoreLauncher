@@ -35,7 +35,10 @@ import javafx.scene.control.Alert;
 import javafx.util.Duration;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.BindException;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
@@ -49,7 +52,6 @@ public class CoreLauncher {
 
     public static boolean OS_64;
     public static boolean GUI_INIT = false;
-    public static boolean RESTART = false;
 
     static {
         Path p;
@@ -81,7 +83,7 @@ public class CoreLauncher {
         if (listArgs.contains("--old")){
             try{
                 Thread.sleep(2000);
-                var j = OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString());
+                var j = OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString(), true);
                 String oldJar = listArgs.get(listArgs.indexOf("--old") + 1);
                 var old = LAUNCHER_PATH.to("clold.jar");
                 LAUNCHER_PATH.to(oldJar).move(old);
@@ -99,7 +101,7 @@ public class CoreLauncher {
         else if (listArgs.contains("--new")){
             try{
                 Thread.sleep(2000);
-                var j = OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString());
+                var j = OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString(), true);
                 String newJar = listArgs.get(listArgs.indexOf("--new") + 1);
                 var n = LAUNCHER_PATH.to(newJar);
                 LAUNCHER_PATH.to("clnew.jar").move(n);
@@ -125,6 +127,7 @@ public class CoreLauncher {
 
         System.setProperty("java.net.preferIPv4Stack", "true");
         System.setProperty("com.sun.net.ssl.checkRevocation", "false");
+        System.setProperty("sun.jnu.encoding", "UTF-8");
 
         NetUtil.patchSSL();
 
@@ -247,11 +250,12 @@ public class CoreLauncher {
         if (Debug.DEBUG)
             Debug.run();
         else{
-            do{
-                System.setProperty("glass.win.uiScale", "100%");
-                CoreLauncherFX.launchFX();
-            }
-            while (RESTART);
+            /*System.setProperty("prism.lcdtext", "false");
+            System.setProperty("prism.text", "t2k");*/
+            System.setProperty("prism.allowhidpi", "true");
+            System.setProperty("glass.win.uiScale", Configurator.getConfig().getUIScale() + "%");
+            System.setProperty("glass.gtk.uiScale", Configurator.getConfig().getUIScale() + "%");
+            CoreLauncherFX.launchFX();
         }
 
         Configurator.getConfig().getTemporaryFolder().getFiles().forEach(Path::delete);
@@ -284,7 +288,7 @@ public class CoreLauncher {
                         if (name == null)
                             return;
                         new ProcessBuilder()
-                                .command(JavaManager.getDefault().getExecutable().toString(), "-jar", n.toString(), "--old", name.getName())
+                                .command(JavaManager.getDefault().getWindowExecutable().toString(), "-jar", n.toString(), "--old", name.getName())
                                 .start();
                         System.exit(0);
                     }
@@ -327,5 +331,22 @@ public class CoreLauncher {
             Main.getMain().announceLater(title, content, Announcement.AnnouncementType.BROADCAST, Duration.millis(ann.getDuration()));
         }
         Configurator.save();
+    }
+
+    public static void restart(){
+        var java = JavaManager.getDefault().getExecutable();
+
+        try {
+            var jar = CoreLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+            var jarFile = Paths.get(jar).toFile();
+
+            var process = new ProcessBuilder()
+                    .command(java.toString(), "-jar", jarFile.getAbsolutePath())
+                    .directory(jarFile.getParentFile())
+                    .start();
+        } catch (IOException | URISyntaxException e) {
+            Logger.getLogger().log(e);
+        }
+        UI.shutdown();
     }
 }
