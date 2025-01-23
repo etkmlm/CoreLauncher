@@ -84,18 +84,15 @@ public class Modrinth implements ModSource {
         return json.asList().stream().map(x -> gson.fromJson(x, ResourceRinth.class)).toList();
     }
 
-    /**
-     * Extracts modpack content to target path.
-     *
-     * @param path target directory path
-     * @param mp modpack meta
-     * @return the path of modpack manifest file
-     */
-    public Path extractModpack(Path path, Modpack mp) throws NoConnectionException, HttpException, StopException {
+    @Override
+    public Path extractModpack(Modpack mp, Path path, boolean overwriteManifest) throws NoConnectionException, HttpException, StopException {
         var zip = path.to("mpInfo.zip");
         String name = StrUtil.pure(mp.name);
         var tempDir = path.to(name);
         var manifest = path.to("manifest-" + name + ".json");
+        if (overwriteManifest)
+            manifest.delete();
+
         if (!manifest.exists()){
             var ppp = NetUtil.download(mp.fileUrl, zip, false);
             //Modder.getModder().getHandler().execute(new KeyEvent("stop"));
@@ -385,7 +382,7 @@ public class Modrinth implements ModSource {
             all.add(res);
         }
 
-        var mf = gson.fromJson(extractModpack(path, mp).read(), JsonObject.class);
+        var mf = gson.fromJson(extractModpack(mp, path, true).read(), JsonObject.class);
         String key;
 
         key = opt.getLoaderType().getIdentifier();
@@ -428,6 +425,8 @@ public class Modrinth implements ModSource {
         var deps = mf.get("dependencies").getAsJsonObject();
         if (deps == null)
             return;
+
+        mp.targetVersionId = deps.get("minecraft").getAsString();
 
         String ver = deps.get(key).getAsString();
         mp.wr = opt.getWrapper();

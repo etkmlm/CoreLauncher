@@ -18,6 +18,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -43,7 +44,11 @@ public class CList<T> extends VBox {
 
     private Supplier<CCell<T>> cellFactory;
     private Predicate<Filter<T>> filterFactory;
-    private Equator<T> itemEqualsFactory;
+
+    private boolean inFilterMode;
+    private Consumer<Integer> onVisibleCountChanged;
+
+    //private Equator<T> itemEqualsFactory;
     private final VBox list;
     private final HBox nullPane;
 
@@ -93,7 +98,31 @@ public class CList<T> extends VBox {
         items.addListener((ListChangeListener<? super T>) a -> {
             while (a.next()){
                 if (a.wasUpdated() || (a.wasAdded() && a.wasRemoved())){
-                    for (int i = 0; i < list.getChildren().size(); i++){
+                    if (inFilterMode){
+                        // maybe cell check and update cells
+                        break;
+                    }
+
+                    var sz = list.getChildren().size();
+                    for (int i = a.getFrom(); i < a.getTo(); i++) {
+                        if (i == sz)
+                            break;
+
+                        var item = items.get(i);
+                        list.getChildren().set(i, getCell(item));
+                    }
+
+                    /*int j = a.getFrom();
+                    for (int i = 0; i < list.getChildren().size(); i++) {
+                        if (j == a.getTo())
+                            break;
+
+                        var item = items.get(j++);
+                        list.getChildren().set(i, getCell(item));
+                    }*/
+
+                    // WHY TF I DID THIS??!!
+                    /*for (int i = 0; i < list.getChildren().size(); i++){
                         for (int j = a.getFrom(); j < a.getTo(); j++){
                             var item = items.get(j);
                             var f = (CCell<T>)list.getChildren().get(i);
@@ -101,7 +130,7 @@ public class CList<T> extends VBox {
                                 list.getChildren().set(i, getCell(item));
                             }
                         }
-                    }
+                    }*/
                 }
                 else if (a.wasAdded()){
                     if (loadLimit == -1){
@@ -122,6 +151,9 @@ public class CList<T> extends VBox {
 
                 nullMode(items.isEmpty());
             }
+
+            if (onVisibleCountChanged != null)
+                onVisibleCountChanged.accept(inFilterMode ? list.getChildren().size() : items.size());
         });
 
         selectedItems.addListener((ListChangeListener<? super T>) a -> {
@@ -147,9 +179,9 @@ public class CList<T> extends VBox {
         cellFactory = factory;
     }
 
-    public void setItemEqualsFactory(Equator<T> factory){
+    /*public void setItemEqualsFactory(Equator<T> factory){
         this.itemEqualsFactory = factory;
-    }
+    }*/
 
     public boolean onKeyEvent(KeyEvent e){
         boolean ca = e.isControlDown() && e.getCode() == KeyCode.A;
@@ -161,6 +193,10 @@ public class CList<T> extends VBox {
             deselectAll();
 
         return ca || esc;
+    }
+
+    public void setOnVisibleCountChanged(Consumer<Integer> onVisibleCountChanged){
+        this.onVisibleCountChanged = onVisibleCountChanged;
     }
 
     private CCell<T> getCell(T item){
@@ -231,18 +267,28 @@ public class CList<T> extends VBox {
         this.filterFactory = factory;
     }
     public void filter(String text){
-        if (filterFactory == null)
+        if (filterFactory == null){
+            inFilterMode = false;
             return;
+        }
 
         if (text == null || text.isBlank()){
+            if (onVisibleCountChanged != null)
+                onVisibleCountChanged.accept(items.size());
+
             list.getChildren().clear();
+            inFilterMode = false;
             lastLoadedIndex = -1;
             load();
             return;
         }
 
+        inFilterMode = true;
+
         UI.runAsync(() -> {
             list.getChildren().setAll(items.stream().filter(a -> filterFactory.test(new Filter<>(a, text))).map(this::getCell).toList());
+            if (onVisibleCountChanged != null)
+                onVisibleCountChanged.accept(list.getChildren().size());
             nullMode(list.getChildren().isEmpty());
         });
     }

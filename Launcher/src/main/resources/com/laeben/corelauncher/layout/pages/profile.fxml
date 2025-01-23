@@ -2,7 +2,6 @@
 
 <?import com.laeben.corelauncher.ui.control.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 <AnchorPane xmlns="http://javafx.com/javafx"
@@ -11,9 +10,7 @@
             prefWidth="900.0" styleClass="root" stylesheets="@../../style/pages/profile.css,@../../style/controls/clui.css">
     <CView fx:id="imgProfile" fitHeight="128" fitWidth="128" AnchorPane.leftAnchor="10" AnchorPane.topAnchor="10"/>
     <HBox fx:id="boxUser" AnchorPane.topAnchor="145" AnchorPane.leftAnchor="10">
-        <ImageView fitWidth="32" fitHeight="32" fx:id="imgUserHead">
-
-        </ImageView>
+        <CView fitWidth="32" fitHeight="32" fx:id="imgUserHead"/>
         <Rectangle width="5"/>
         <VBox alignment="CENTER">
             <Label fx:id="lblUsername" text="Username"/>

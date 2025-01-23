@@ -258,7 +258,7 @@ public abstract class CDockObject extends GridCell {
     }
 
     public void selectPrimary(){
-        if (moving)
+        if (moving || listener == null)
             return;
         listener.accept((KeyEvent) new KeyEvent(SELECT).setSource(getPrimaryProfile()));
     }

@@ -89,7 +89,7 @@ public class Logger {
     }
 
     public void logDebug(LogType type, String content){
-        if (Configurator.getConfig().getDebugLogMode())
+        if (Configurator.getConfig() != null && Configurator.getConfig().getDebugLogMode())
             log(type, content);
         else
             System.out.println(generate(type, content));

@@ -124,14 +124,12 @@ public class WorldsPage extends HandlerController {
         lvWorlds.setItems(worlds);
 
         lvWorlds.getSelectionModel().selectedItemProperty().addListener(a -> {
-            var item = lvWorlds.getSelectionModel().getSelectedItem();
-
             if (local == null)
                 return;
 
-            var s = local.stream().filter(x -> x.levelName.equals(item)).findFirst();
+            var s = local.get(lvWorlds.getSelectionModel().getSelectedIndex());
 
-            s.ifPresent(this::select);
+            select(s);
         });
 
         lblSeed.setOnMouseClicked(a -> {

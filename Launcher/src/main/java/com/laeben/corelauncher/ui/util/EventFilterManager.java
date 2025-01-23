@@ -29,5 +29,7 @@ public class EventFilterManager {
         for (var filter : filters){
             filter.remove();
         }
+
+        filters.clear();
     }
 }

@@ -86,6 +86,8 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkDebugLogMode;
     @FXML
     private CheckBox chkSelectPlay;
+    @FXML
+    private CheckBox chkAutoWrapper;
     /*@FXML
     private CButton btnSaveRAM;
     @FXML
@@ -107,6 +109,8 @@ public class SettingsPage extends HandlerController {
     private CButton btnResetDefaultOptions;
     @FXML
     private CButton btnOpenDefaultOptions;
+    @FXML
+    private CButton btnGC;
 
     @FXML
     private CheckBox chkDiscordEnable;
@@ -155,12 +159,6 @@ public class SettingsPage extends HandlerController {
         //fCommPort = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
         //fCommPort.setAmountToStepBy(1);
 
-
-        fThreads.valueProperty().addListener(a -> tryToEnableSave());
-        fScale.valueProperty().addListener(a -> {
-            needsToRestart = true;
-            tryToEnableSave();
-        });
         /*fCommPort.valueProperty().addListener(a -> {
             Configurator.getConfig().setCommPort(fCommPort.getValue());
             Configurator.save();
@@ -228,10 +226,20 @@ public class SettingsPage extends HandlerController {
 
     @Override
     public void preInit(){
+        reload();
+
+        fThreads.valueProperty().addListener(a -> tryToEnableSave());
+        fScale.valueProperty().addListener(a -> {
+            needsToRestart = true;
+            tryToEnableSave();
+        });
+
         txtAccount.textProperty().addListener(a -> tryToEnableSave());
 
         ram.setControls(txtMinRAM, txtMaxRAM, sldRAM);
         ram.setup();
+
+        btnGC.setOnMouseClicked(a -> System.gc());
 
         cbLanguage.valueProperty().addListener(x -> {
             try{
@@ -400,6 +408,10 @@ public class SettingsPage extends HandlerController {
             Configurator.getConfig().setEnabledInGameRPC(chkInGameRPC.isSelected());
             Configurator.save();
         });
+        chkAutoWrapper.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setAutoChangeWrapper(chkAutoWrapper.isSelected());
+            Configurator.save();
+        });
 
         btnSelectGamePath.setOnMouseClicked(x -> {
             DirectoryChooser chooser = new DirectoryChooser();
@@ -451,8 +463,6 @@ public class SettingsPage extends HandlerController {
         btnCheckUpdate.setText(Translator.translate("settings.checkup"));
         btnCheckUpdate.setOnMouseClicked(a -> CoreLauncher.updateCheck());
         lblVersion.setText(Double.toString(LauncherConfig.VERSION));
-
-        reload();
     }
 
     @Override
@@ -555,6 +565,7 @@ public class SettingsPage extends HandlerController {
             chkSelectPlay.setSelected(c.isEnabledSelectAndPlayDock());
             chkGamelog.setSelected(c.delGameLogs());
             chkGuiShortcut.setSelected(c.useNonGUIShortcut());
+            chkAutoWrapper.setSelected(c.isAutoChangeWrapper());
 
             chkInGameRPC.setDisable(c.isDisabledRPC());
             //txtCommPort.setDisable(c.isDisabledRPC());

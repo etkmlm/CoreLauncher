@@ -14,6 +14,7 @@ import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.ImageUtil;
+import com.laeben.corelauncher.util.entity.LogType;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -363,8 +364,11 @@ public class Profiler {
     }
 
     public Profile generateDefaultProfile(){
+        var release = Vanilla.getVanilla().getLatestRelease();
+        if (release == null)
+            Logger.getLogger().log(LogType.WARN, "Latest release is null!");
         return createAndSetProfile(Translator.translate("profile.defaultName"), a -> {
-           a.setVersionId(Vanilla.getVanilla().getAllVersions().get(0).id);
+           a.setVersionId(release == null ? "1.21" : release);
         });
     }
 

@@ -164,4 +164,14 @@ public interface ModSource {
      * @param opt options entity which must contain a {@link Wrapper}
      */
     void applyModpack(Modpack mp, Path path, Options opt) throws NoConnectionException, HttpException, StopException;
+
+    /**
+     * Extracts the modpack entity.
+     *
+     * @param mp modpack entity
+     * @param path target directory
+     * @param overwriteManifest overwrite manifest file
+     * @return the path of modpack manifest file
+     */
+    Path extractModpack(Modpack mp, Path path, boolean overwriteManifest) throws NoConnectionException, HttpException, StopException;
 }

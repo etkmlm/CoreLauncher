@@ -8,6 +8,7 @@ import java.util.List;
 
 public class ForgeModpack {
     private transient Manifest manifest;
+    private transient String versionId;
     private final Modpack mp;
 
     public ForgeModpack(Modpack mp) {
@@ -24,6 +25,7 @@ public class ForgeModpack {
         String loader = mf.minecraft.modLoaders.stream().filter(x -> x.primary).findFirst().get().id;
         String[] ldr = loader.split("-");
 
+        mp.targetVersionId = mf.minecraft.version;
         mp.wr = Wrapper.getWrapper(ldr[0]);
         mp.wrId = ldr[1];
     }

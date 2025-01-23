@@ -127,6 +127,7 @@ public class CResource implements Comparable<CResource> {
                     .map(x -> x.versionId != null ? CResource.asDependencyFile(x.versionId) : CResource.asDependency(x.projectId))
                     .filter(x -> x.id != null || x.fileId != null)
                     .toList();
+
             p.setFile(CResource.fromRinthFile(v.getFile(), v.getPublished()));
         }
 
@@ -164,6 +165,7 @@ public class CResource implements Comparable<CResource> {
 
     public static CResource fromForgeFile(ForgeFile file, int modId){
         var res = new CResource();
+        res.fileId = file.id;
         res.fileUrl = file.downloadUrl != null ? file.downloadUrl : "https://www.curseforge.com/api/v1/mods/" + modId + "/files/" + file.id + "/download";
         res.fileName = file.fileName;
         res.forgeModules = file.getModules();
@@ -177,6 +179,7 @@ public class CResource implements Comparable<CResource> {
     public static CResource fromRinthFile(RinthFile file, Date fileDate){
         var res = new CResource();
 
+        res.fileId = file.id;
         res.fileDate = fileDate;
         res.fileUrl = file.url;
         res.fileName = file.filename;
@@ -251,7 +254,7 @@ public class CResource implements Comparable<CResource> {
 
     @Override
     public boolean equals(Object obj){
-        return obj instanceof CResource res && res.id != null && res.fileName.equals(fileName) && (res.id instanceof Double || res.id instanceof Integer ? res.getIntId() == getIntId() : res.id.equals(id));
+        return obj instanceof CResource res && res.id != null && (res.fileId == null || fileId == null || res.fileId.equals(fileId)) && res.fileName.equals(fileName) && (res.id instanceof Double || res.id instanceof Integer ? res.getIntId() == getIntId() : res.id.equals(id));
     }
 
     public boolean isSameResource(Object obj){

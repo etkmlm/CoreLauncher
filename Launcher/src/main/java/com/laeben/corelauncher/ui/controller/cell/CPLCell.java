@@ -20,6 +20,7 @@ import javafx.util.Duration;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+// Profile List Cell
 public class CPLCell extends CCell<Profile> implements CLSelectable {
     public static final String EXECUTOR_ROOT = "root";
     public static final String EXECUTOR_MENU = "menu";

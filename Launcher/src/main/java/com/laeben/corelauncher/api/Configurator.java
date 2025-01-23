@@ -68,7 +68,7 @@ public class Configurator {
         configLoadIndex++;
         if (configFilePath.exists()){
             var read = configFilePath.read();
-
+            Logger.getLogger().logDebug("Loading config from: " + read);
             config = gson.fromJson(read, Config.class);
 
             configLoadIndex = 1;
@@ -139,13 +139,13 @@ public class Configurator {
             if (c == null)
                 return false;
             String serialized = gson.toJson(c);
+            Logger.getLogger().logDebug("Saving config file: " + c.getUser().getUsername() + "\n" + serialized);
             configFilePath.write(serialized);
 
             return configFilePath.exists();
         }
         catch (Exception e){
             Logger.getLogger().log(e);
-
             return false;
         }
     }

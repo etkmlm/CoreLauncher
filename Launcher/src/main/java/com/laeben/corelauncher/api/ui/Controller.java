@@ -128,11 +128,15 @@ public abstract class Controller {
 
     }
 
+    public void removeRegisteredEventFilter(Object s){
+        efManager.removeEventFilter(s);
+    }
+
     public void addRegisteredEventFilter(EventFilter filter){
         efManager.addEventFilter(filter);
     }
 
     public void dispose(){
-
+        efManager.clear();
     }
 }

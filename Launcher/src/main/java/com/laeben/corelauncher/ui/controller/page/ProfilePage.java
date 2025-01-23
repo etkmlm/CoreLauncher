@@ -13,6 +13,7 @@ import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.CResource;
+import com.laeben.corelauncher.minecraft.modding.entity.Modpack;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.cell.CPRCell;
@@ -22,7 +23,6 @@ import com.laeben.corelauncher.ui.dialog.DResourceSelector;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.util.ImageUtil;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -62,8 +62,8 @@ public class ProfilePage extends HandlerController {
 
             if (a.getKey().equals(Profiler.PROFILE_DELETE))
                 Main.getMain().closeTab((Tab) this.parentObj);
-            else if (a.getKey().equals(Profiler.PROFILE_UPDATE))
-                setProfile((Profile)a.getNewValue());
+            /*else if (a.getKey().equals(Profiler.PROFILE_UPDATE))
+                setProfile((Profile)a.getNewValue());*/
         }, true);
 
         registerHandler(Configurator.getConfigurator().getHandler(), a -> {
@@ -78,7 +78,7 @@ public class ProfilePage extends HandlerController {
     @FXML
     private HBox badges;
     @FXML
-    private ImageView imgUserHead;
+    private CView imgUserHead;
     @FXML
     private CView imgProfile;
 
@@ -266,6 +266,8 @@ public class ProfilePage extends HandlerController {
                 else
                     UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.multiple", profile.getName(), all.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
 
+                UI.runAsync(() -> setProfile(profile));
+
             } catch (NoConnectionException | HttpException | StopException ignored) {
 
             }
@@ -341,17 +343,22 @@ public class ProfilePage extends HandlerController {
         vResources.getChildren().add(lvResources);
         vShaders.getChildren().add(lvShaders);
 
-        lvMods.setCellFactory(this::cellFactory);
+        /*lvMods.setCellFactory(this::cellFactory);
         lvModpacks.setCellFactory(this::cellFactory);
         lvWorlds.setCellFactory(this::cellFactory);
         lvResources.setCellFactory(this::cellFactory);
-        lvShaders.setCellFactory(this::cellFactory);
+        lvShaders.setCellFactory(this::cellFactory);*/
+        lvMods.setCellFactory(() -> cellFactory(lvMods));
+        lvModpacks.setCellFactory(() -> cellFactory(lvModpacks));
+        lvWorlds.setCellFactory(() -> cellFactory(lvWorlds));
+        lvResources.setCellFactory(() -> cellFactory(lvResources));
+        lvShaders.setCellFactory(() -> cellFactory(lvShaders));
 
-        lvMods.setItemEqualsFactory(CResource::isSameResource);
+        /*lvMods.setItemEqualsFactory(CResource::isSameResource);
         lvModpacks.setItemEqualsFactory(CResource::isSameResource);
         lvWorlds.setItemEqualsFactory(CResource::isSameResource);
         lvResources.setItemEqualsFactory(CResource::isSameResource);
-        lvShaders.setItemEqualsFactory(CResource::isSameResource);
+        lvShaders.setItemEqualsFactory(CResource::isSameResource);*/
 
         Predicate<CList.Filter<CResource>> f = (a) -> a.input().name.toLowerCase(Locale.US).contains(a.query().toLowerCase(Locale.US));
 
@@ -361,11 +368,11 @@ public class ProfilePage extends HandlerController {
         lvResources.setFilterFactory(f);
         lvShaders.setFilterFactory(f);
 
-        lvMods.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblMods, "mods.type.mods"));
-        lvModpacks.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblModpacks, "mods.type.modpacks"));
-        lvWorlds.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblWorlds, "mods.type.worlds"));
-        lvResources.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblResources, "mods.type.resources"));
-        lvShaders.getItems().addListener((ListChangeListener<CResource>) change -> invalidateCount(change.getList(), lblShaders, "mods.type.shaders"));
+        lvMods.setOnVisibleCountChanged(c -> invalidateCount(c, lblMods, "mods.type.mods"));
+        lvModpacks.setOnVisibleCountChanged( c -> invalidateCount(c, lblModpacks, "mods.type.modpacks"));
+        lvWorlds.setOnVisibleCountChanged( c -> invalidateCount(c, lblWorlds, "mods.type.worlds"));
+        lvResources.setOnVisibleCountChanged( c -> invalidateCount(c, lblResources, "mods.type.resources"));
+        lvShaders.setOnVisibleCountChanged( c -> invalidateCount(c, lblShaders, "mods.type.shaders"));
 
         txtSearch.textProperty().addListener(a -> {
             String text = txtSearch.getText();
@@ -377,12 +384,12 @@ public class ProfilePage extends HandlerController {
         });
 
         imgProfile.setCornerRadius(128, 128, 40);
+        imgUserHead.setCornerRadius(32, 32, 16);
 
         txtSearch.setFocusedAnimation(Color.TEAL, Duration.millis(200));
     }
 
-    private void invalidateCount(List list, Label lbl, String translateKey){
-        var size = list.size();
+    private void invalidateCount(int size, Label lbl, String translateKey){
         var str = Translator.translate(translateKey);
         if (size > 0)
             str += " (" + size + ")";
@@ -390,7 +397,20 @@ public class ProfilePage extends HandlerController {
         lbl.setText(str);
     }
 
-    private CPRCell cellFactory(){
-        return new CPRCell(profile);
+    private <T extends CResource> CPRCell<T> cellFactory(CList<T> list){
+        return new CPRCell<T>(profile).setOnAction(k -> {
+            var cell = (CPRCell<T>)k.getSource();
+            var item = (T)k.getValue();
+            if (k.getKey().equals(CPRCell.UPDATE)){
+                int index = list.getItems().indexOf(cell.getItem());
+                list.getItems().set(index, item);
+            }
+            else if (k.getKey().equals(CPRCell.REMOVE)){
+                if (item instanceof Modpack)
+                    setProfile(profile);
+                else
+                    list.getItems().remove(item);
+            }
+        });
     }
 }

@@ -75,8 +75,12 @@ public class Fabric<T extends BaseFabricVersion> extends Wrapper<T> {
     public List<T> getVersions(String id) {
         logState("acqVersionFabric - " + id);
 
-        if (!cache.isEmpty() && !disableCache)
-            return (List<T>) cache;
+        // version id does not matter now
+
+        if (!cache.isEmpty() && !disableCache){
+            cache.forEach(a -> a.id = id);
+            return (List<T>)cache;
+        }
         cache.clear();
 
         try{

@@ -12,6 +12,7 @@ import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.ui.control.CButton;
+import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.dialog.DModSelector;
 import com.laeben.corelauncher.api.ui.UI;
@@ -151,6 +152,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
                         }
 
                         mod = all.get(0);
+
                         Modder.getModder().includeAll(profile, all);
                     }
 

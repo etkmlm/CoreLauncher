@@ -126,18 +126,22 @@
                 <Label styleClass="property-key" text="%settings.selectPlay" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                 <CheckBox fx:id="chkSelectPlay" GridPane.columnIndex="2" GridPane.rowIndex="6" />
 
-                <Label styleClass="property-key" text="%settings.threads" GridPane.columnIndex="1" GridPane.rowIndex="7">
+                <Label styleClass="property-key" text="%settings.autoWrapper" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                <CheckBox fx:id="chkAutoWrapper" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+
+                <Label styleClass="property-key" text="%settings.threads" GridPane.columnIndex="1" GridPane.rowIndex="8">
                     <tooltip>
                         <Tooltip text="%settings.tip.threads"/>
                     </tooltip>
                 </Label>
-                <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="8" />
 
-                <Label styleClass="property-key" text="%settings.scale" GridPane.columnIndex="1" GridPane.rowIndex="8"/>
-                <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                <Label styleClass="property-key" text="%settings.scale" GridPane.columnIndex="1" GridPane.rowIndex="9"/>
+                <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="9" />
 
-                <CButton fx:id="btnCheckUpdate" text="%settings.update" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="11"/>
-                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="10">
+                <CButton fx:id="btnCheckUpdate" text="%settings.update" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="12"/>
+                <CButton fx:id="btnGC" text="%settings.gc" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="13"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="11">
                     <CButton fx:id="btnClearImages" text="%settings.images.clear"/>
                     <CWorker fx:id="workerImages"/>
                 </HBox>

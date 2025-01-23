@@ -10,11 +10,14 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+// Mod Cell
 public class CMCell extends CCell<CResource>{
 
     private CResource item;
@@ -23,14 +26,14 @@ public class CMCell extends CCell<CResource>{
     private Profile profile;
 
     private final BooleanProperty installed;
-    private Predicate<CMCell> clicked;
+    private Consumer<CMCell> clicked;
 
     public CMCell() {
         super("layout/cells/ccell.fxml");
 
         btnInstall = new CButton();
         btnInstall.setText("⭳");
-        btnInstall.setStyle("-fx-font-size: 14pt;-fx-background-color: transparent");
+        btnInstall.setStyle("-fx-font-size: 14pt;-fx-background-color: transparent;-fx-min-width: 45px;-fx-pref-width: 45px;");
         btnInstall.enableTransparentAnimation();
 
         installed = new SimpleBooleanProperty();
@@ -52,7 +55,7 @@ public class CMCell extends CCell<CResource>{
         return this;
     }
 
-    public CMCell setOnInstallClicked(Predicate<CMCell> clicked){
+    public CMCell setOnInstallClicked(Consumer<CMCell> clicked){
         this.clicked = clicked;
         return this;
     }
@@ -72,14 +75,17 @@ public class CMCell extends CCell<CResource>{
         //image.setImage(item.getIcon());
         image.setManaged(false);
         image.setVisible(false);
-        lblName.setText(item.fileName + " - " + DateUtil.toString(item.fileDate, Configurator.getConfig().getLanguage()));
+        var text = item.fileName + " - " + DateUtil.toString(item.fileDate, Configurator.getConfig().getLanguage());
+
+        lblName.setText(text);
+        lblName.setTooltip(new Tooltip(text));
 
         var res = profile.getResource(item.id);
         setInstalled(res != null && res.fileName != null && res.fileName.equals(item.fileName));
 
         btnInstall.setOnMouseClicked(a -> {
             if (clicked != null)
-                setInstalled(clicked.test(this));
+                clicked.accept(this);
         });
 
         super.getChildren().clear();

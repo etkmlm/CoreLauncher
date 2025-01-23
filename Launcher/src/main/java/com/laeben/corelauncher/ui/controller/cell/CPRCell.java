@@ -3,6 +3,8 @@ package com.laeben.corelauncher.ui.controller.cell;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.util.events.KeyEvent;
+import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
@@ -21,7 +23,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+import java.util.function.Consumer;
+
+// Profile Resource Cell
 public class CPRCell<T extends CResource> extends CCell<T> {
+
+    public static final String UPDATE = "update";
+    public static final String REMOVE = "remove";
 
     private T item;
 
@@ -51,7 +59,6 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         btnUpdate.enableTransparentAnimation();
 
         box.getChildren().addAll(btnUpdate, new Rectangle(10, 0), btnRemove);
-
     }
 
     @FXML
@@ -65,9 +72,16 @@ public class CPRCell<T extends CResource> extends CCell<T> {
     private final CButton btnRemove;
     private final CButton btnUpdate;
 
+    private Consumer<ValueEvent> onAction;
+
     @FXML
     public void initialize(){
 
+    }
+
+    public CPRCell<T> setOnAction(Consumer<ValueEvent> onAction){
+        this.onAction = onAction;
+        return this;
     }
 
     @Override
@@ -86,8 +100,13 @@ public class CPRCell<T extends CResource> extends CCell<T> {
                 UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.single", item.name), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
                 var upResources = Modder.getModder().getUpdate(profile, item);
                 if (upResources != null){
+                    var res = upResources.stream().filter(k -> k.isSameResource(item)).findFirst().orElse(item);
                     Modder.getModder().includeAll(profile, upResources);
-                    UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.single", item.name, item.fileName), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                    UI.runAsync(() -> {
+                        if (onAction != null)
+                            onAction.accept((ValueEvent) new ValueEvent(UPDATE, res).setSource(this));
+                        Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.single", item.name, item.fileName), Announcement.AnnouncementType.INFO), Duration.seconds(2));
+                    });
                 }
                 else{
                     UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.mpcontent", item.name), Announcement.AnnouncementType.ERROR), Duration.seconds(4)));
@@ -105,6 +124,8 @@ public class CPRCell<T extends CResource> extends CCell<T> {
             if (x.isEmpty() || x.get().result() != CMsgBox.ResultType.YES)
                 return;
             Modder.getModder().remove(profile, item);
+            if (onAction != null)
+                onAction.accept((ValueEvent) new ValueEvent(REMOVE, item).setSource(this));
         });
 
         super.getChildren().clear();

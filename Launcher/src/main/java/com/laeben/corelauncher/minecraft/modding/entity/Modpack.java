@@ -10,6 +10,7 @@ import java.util.List;
 
 public class Modpack extends CResource {
     public transient Wrapper wr;
+    public transient String targetVersionId;
     public transient String wrId;
     public transient List<Mod> mods;
     public transient List<Resourcepack> resources;

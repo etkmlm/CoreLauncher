@@ -11,12 +11,12 @@ import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
+import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
-import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ForgeModpack;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
+import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -24,6 +24,8 @@ import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.api.ui.UI;
+import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
 
 import java.io.FileNotFoundException;
 import java.net.URLDecoder;
@@ -31,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -63,7 +66,9 @@ public class Modder {
             var vers = mp.getSource().getCoreResource(mp.getId(), opt);
             if (vers == null)
                 continue;
-            all.add((Modpack) vers.get(0));
+            var nmp = (Modpack) vers.get(0);
+            if (!nmp.equals(mp))
+                all.add(nmp);
         }
         return all;
     }
@@ -94,7 +99,7 @@ public class Modder {
             all.addAll(mr);
 
 
-        return all.stream().collect(Collectors.groupingBy(CResource::getId));
+        return all.stream().filter(a -> !resources.contains(a)).collect(Collectors.groupingBy(CResource::getId));
     }
 
     public List<CResource> getUpdate(Profile p, CResource m) throws NoConnectionException, HttpException {
@@ -386,19 +391,22 @@ public class Modder {
 
         for (var mp : mps){
             handler.execute(new KeyEvent(".resource.install;" + mp.name));
-            if (mp.isForge())
-                CurseForge.getForge().extractModpack(path, new ForgeModpack(mp));
+            mp.getSource().extractModpack(mp, path, false);
+            /*if (mp.isForge())
+                CurseForge.getForge().extractModpack(path, mp);
             else if (mp.isModrinth())
-                Modrinth.getModrinth().extractModpack(p.getPath(), mp);
+                Modrinth.getModrinth().extractModpack(p.getPath(), mp);*/
         }
     }
     public void includeModpack(Profile p, Modpack mp) throws NoConnectionException, HttpException, StopException {
         var path = p.getPath();
 
-        var oldMp = p.getModpacks().stream().filter(a -> a.equals(mp)).findFirst();
-        oldMp.ifPresent(modpack -> p.getModpacks().remove(modpack));
+        var oldMp = p.getModpacks().stream().filter(a -> a.isSameResource(mp)).findFirst();
+        oldMp.ifPresent(a -> remove(p, a));
 
         mp.getSource().applyModpack(mp, path, ModSource.Options.create(p));
+
+        boolean check = checkModpackOverride(p, mp);
 
         EventHandler.disable();
 
@@ -415,11 +423,52 @@ public class Modder {
                 ImageCacheManager.remove(pxt);
                 pxt.setIcon(NetUtil.downloadImage(Configurator.getConfig().getImagePath(), mp.logoUrl).setUrl(mp.logoUrl));
             }
-            pxt.setWrapper(mp.wr);
-            pxt.setWrapperVersion(mp.wrId);
+
+            if (check){
+                pxt.setVersionId(mp.targetVersionId);
+                pxt.setWrapper(mp.wr);
+                pxt.setWrapperVersion(mp.wrId);
+            }
             pxt.getModpacks().add(mp);
         });
     }
+    private boolean checkModpackOverride(Profile profile, Modpack modpack) throws StopException {
+        var task = new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                if (modpack.targetVersionId != null && !modpack.targetVersionId.equals(profile.getVersionId())){
+                    var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.version"))
+                            .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
+                            .executeForResult();
+
+                    if (k.isEmpty() || k.get().result() == CMsgBox.ResultType.CANCEL)
+                        throw new StopException();
+
+                    return k.get().result() == CMsgBox.ResultType.YES;
+                } else if (!Configurator.getConfig().isAutoChangeWrapper() && (modpack.wr.getType() != profile.getWrapper().getType() || !modpack.wrId.equals(profile.getWrapperVersion()))){
+                    var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.wrapper"))
+                            .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
+                            .executeForResult();
+
+                    if (k.isEmpty() || k.get().result() == CMsgBox.ResultType.CANCEL)
+                        throw new StopException();
+
+                    return k.get().result() == CMsgBox.ResultType.YES;
+                }
+
+                return true;
+            }
+        };
+
+        UI.runAsync(task);
+        try {
+            return task.get();
+        } catch (InterruptedException | ExecutionException e) {
+            handler.execute(new KeyEvent(EventHandler.STOP));
+            throw new StopException();
+        }
+    }
+
 
     public void installShaders(Profile p, List<Shader> shs) throws NoConnectionException, FileNotFoundException, HttpException, StopException {
         var path = p.getPath().to("shaderpacks");
@@ -519,6 +568,7 @@ public class Modder {
 
             var mods = profile.getMods().stream().filter(x -> x.belongs((Modpack) finalR)).toList();
             var packs = profile.getResources().stream().filter(x -> x.belongs((Modpack) finalR)).toList();
+            var shaders = profile.getShaders().stream().filter(x -> x.belongs((Modpack) finalR)).toList();
             for (var md : mods){
                 if (md.fileName == null)
                     continue;
@@ -530,6 +580,13 @@ public class Modder {
                 if (pk.fileName == null)
                     continue;
                 var pth = resourcesPath.to(pk.fileName);
+                if (pth.exists())
+                    pth.delete();
+            }
+            for (var s : shaders){
+                if (s.fileName == null)
+                    continue;
+                var pth = shadersPath.to(s.fileName);
                 if (pth.exists())
                     pth.delete();
             }

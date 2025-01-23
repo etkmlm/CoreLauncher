@@ -58,7 +58,9 @@ public class Version {
     }
 
     public RinthFile getFile(){
-        return getFiles().get(0);
+        var file = getFiles().get(0);
+        file.id = id;
+        return file;
     }
 
     public Date getPublished(){

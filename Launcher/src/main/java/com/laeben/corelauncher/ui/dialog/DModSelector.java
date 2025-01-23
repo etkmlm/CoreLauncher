@@ -12,6 +12,7 @@ import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.cell.CMCell;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.util.ImageUtil;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -68,7 +69,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
 
         icon.setCornerRadius(128, 128, 8);
         if (resource.getIcon() != null && !resource.getIcon().isEmpty() && !resource.getIcon().equals("optifine"))
-            icon.setImage(new Image(resource.getIcon(), true));
+            icon.setImageAsync(ImageUtil.getNetworkImage(resource.getIcon(), 128, 128));
 
         txtSearchVersion.textProperty().addListener(a -> lvVersions.filter(txtSearchVersion.getText()));
         lblName.setText(resource.getName());
@@ -85,11 +86,12 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
         icon.setOnMouseClicked(a -> navigateWeb());
 
         lvVersions.setFilterFactory(a -> a.query() != null && a.input().fileName.contains(a.query().toLowerCase(Locale.US)));
-        lvVersions.setCellFactory(() -> new CMCell().setProfile(profile).setOnInstallClicked(a -> {
+        lvVersions.setCellFactory(() -> new CMCell().setProfile(profile).setOnInstallClicked(a -> new Thread(() -> {
             if (a.isInstalled()){
                 installed = null;
                 Modder.getModder().remove(profile, a.getItem());
-                return false;
+                UI.runAsync(() -> a.setInstalled(false));
+                return;
             }
 
             try {
@@ -101,18 +103,17 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
                     Modder.getModder().include(profile, a.getItem());
 
                 installed = a.getItem();
-                lvVersions.getList().getChildren().forEach(x -> {
+                UI.runAsync(() -> lvVersions.getList().getChildren().forEach(x -> {
                     var cell = (CMCell)x;
-                    if (!cell.equals(a))
-                        cell.setInstalled(false);
-                });
-                return true;
+                    cell.setInstalled(cell.equals(a));
+                }));
+                return;
             } catch (NoConnectionException | HttpException | StopException e) {
                 Logger.getLogger().log(e);
             }
 
-            return false;
-        }));
+            UI.runAsync(() -> a.setInstalled(false));
+        }).start()));
 
         boolean b = resource.getResourceType() == ResourceType.MODPACK;
         mpButtonContainer.setVisible(b);

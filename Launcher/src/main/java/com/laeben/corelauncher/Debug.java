@@ -1,7 +1,5 @@
 package com.laeben.corelauncher;
 
-import java.awt.*;
-
 public class Debug {
 
     public static final boolean DEBUG = false;

@@ -78,7 +78,8 @@ public class CProfile extends CDockObject{
         else
             FloatDock.getDock().remove(object);
 
-        listener.accept(new KeyEvent(FloatDock.REMOVE));
+        if (listener != null)
+            listener.accept(new KeyEvent(FloatDock.REMOVE));
     }
 
     @Override

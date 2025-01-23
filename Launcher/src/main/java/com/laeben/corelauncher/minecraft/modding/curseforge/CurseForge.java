@@ -85,13 +85,16 @@ public class CurseForge implements ModSource {
         return abc.distinct().toList();
     }
 
-    public Path extractModpack(Path path, ForgeModpack mp) throws NoConnectionException, HttpException, StopException {
+    @Override
+    public Path extractModpack(Modpack mp, Path path, boolean overwriteManifest) throws NoConnectionException, HttpException, StopException {
         var zip = path.to("mpInfo.zip");
-        String name = StrUtil.pure(mp.getPack().name);
+        String name = StrUtil.pure(mp.name);
         var tempDir = path.to(name);
         var manifest = path.to("manifest-" + name + ".json");
+        if (overwriteManifest)
+            manifest.delete();
         if (!manifest.exists()){
-            var ppp = NetUtil.download(mp.getPack().fileUrl, zip, false);
+            var ppp = NetUtil.download(mp.fileUrl, zip, false);
             //Modder.getModder().getHandler().execute(new KeyEvent("stop"));
             zip.extract(tempDir, null);
             assert ppp != null;
@@ -263,7 +266,7 @@ public class CurseForge implements ModSource {
     public void applyModpack(Modpack m, Path path, Options opt) throws NoConnectionException, HttpException, StopException {
         var mp = new ForgeModpack(m);
 
-        var manifest = gson.fromJson(extractModpack(path, mp).read(), Manifest.class);
+        var manifest = gson.fromJson(extractModpack(m, path, true).read(), Manifest.class);
         mp.applyManifest(manifest);
 
         var resources = getCoreResources(mp.getProjectIds(), Options.create(opt.getVersionId(), null).meta());

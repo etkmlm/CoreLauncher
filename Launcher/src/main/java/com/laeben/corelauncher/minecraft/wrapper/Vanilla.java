@@ -65,18 +65,17 @@ public class Vanilla extends Wrapper<Version> {
 
     @Override
     public List<Version> getAllVersions() {
-        if (_info == null || disableCache){
-            try{
-                _info = GsonUtil.empty().fromJson(NetUtil.urlToString(INFO_URL), MainInfo.class);
-            }
-            catch (NoConnectionException e){
-                return getOfflineVersions();
-            }
-            catch (Exception e){
-                Logger.getLogger().log(e);
-            }
-        }
-        return _info.versions;
+        if (_info == null || disableCache)
+            reload();
+
+        return _info == null ? getOfflineVersions() : _info.versions;
+    }
+
+    public String getLatestRelease(){
+        if (_info == null || disableCache)
+            reload();
+
+        return _info == null ? null : _info.latest.release;
     }
 
     @Override
@@ -138,6 +137,19 @@ public class Vanilla extends Wrapper<Version> {
 
         downloadLibraries(info);
         downloadAssets(info);
+    }
+
+    public void reload(){
+        _info = null;
+        try{
+            _info = GsonUtil.empty().fromJson(NetUtil.urlToString(INFO_URL), MainInfo.class);
+        }
+        catch (NoConnectionException ignored){
+
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }
     }
 
 

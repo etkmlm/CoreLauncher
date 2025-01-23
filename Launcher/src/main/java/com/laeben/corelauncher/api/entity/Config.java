@@ -34,6 +34,7 @@ public class Config {
     private boolean showHelloDialog;
     private boolean placeNewProfileToDock;
     private boolean selectAndPlayDock;
+    private boolean autoChangeWrapper;
     private List<Integer> announces;
 
     private double windowWidth;
@@ -112,6 +113,13 @@ public class Config {
     }
     public void setUseNonGuiShortcut(boolean val){
         useNonGuiShortcut = val;
+    }
+
+    public boolean isAutoChangeWrapper(){
+        return autoChangeWrapper;
+    }
+    public void setAutoChangeWrapper(boolean val){
+        autoChangeWrapper = val;
     }
 
     public boolean isDisabledRPC(){

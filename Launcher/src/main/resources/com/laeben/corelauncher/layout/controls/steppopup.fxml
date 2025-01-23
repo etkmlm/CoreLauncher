@@ -5,7 +5,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
-<?import javafx.scene.shape.Rectangle?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       prefHeight="250" minWidth="200" maxWidth="300" alignment="CENTER" spacing="10" id="root" stylesheets="@../../style/controls/clui.css,@../../style/controls/steppopup.css">

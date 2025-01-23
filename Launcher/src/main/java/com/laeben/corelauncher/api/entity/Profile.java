@@ -270,6 +270,7 @@ public class Profile {
         else if (r instanceof Modpack mp){
             getMods().removeIf(x -> x.belongs(mp));
             getResources().removeIf(x -> x.belongs(mp));
+            getShaders().removeIf(x -> x.belongs(mp));
             getModpacks().removeIf(x -> x.isSameResource(mp));
         }
         else if (r instanceof Resourcepack rp){

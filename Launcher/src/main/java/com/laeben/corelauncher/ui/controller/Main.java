@@ -568,14 +568,18 @@ public class Main extends HandlerController {
     }
     public void closeTab(int index){
         var t = tab.getTabs().get(index);
-        if (t instanceof CTab ct)
+        if (t instanceof CTab ct){
+            removeRegisteredEventFilter(ct.getContent());
             ct.dispose();
+        }
         tab.getTabs().remove(t);
     }
 
     public void closeTab(Tab tab){
-        if (tab instanceof CTab ct)
+        if (tab instanceof CTab ct){
+            removeRegisteredEventFilter(ct.getContent());
             ct.dispose();
+        }
         getTab().getTabs().remove(tab);
     }
 
@@ -638,7 +642,10 @@ public class Main extends HandlerController {
         var scroll = getScroll();
         scroll.setContent(n.getRootNode());
         t.setContent(scroll);
-        t.setOnClosed(a -> t.dispose());
+        t.setOnClosed(a -> {
+            removeRegisteredEventFilter(scroll);
+            t.dispose();
+        });
         t.setController(n.setNode(scroll).setParentObject(t).setStage(getStage()));
 
         return t;
