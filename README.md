@@ -15,6 +15,12 @@ Lightweight, useful, fabulously customizable launcher for Minecraft.
 
 [![Tutorial](https://img.youtube.com/vi/t_RVLlCXcdA/0.jpg)](https://www.youtube.com/watch?v=t_RVLlCXcdA)
 
+## Useful Links
+
+[Releases](https://github.com/etkmlm/CoreLauncher/releases)
+
+[Installer Releases](https://github.com/etkmlm/CoreLauncherInstaller/releases)
+
 ## Why should I use Core Launcher?
 Because,
 - It is open source.
