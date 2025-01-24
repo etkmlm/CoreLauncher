@@ -3,11 +3,17 @@
 # Core Launcher
 Lightweight, useful, fabulously customizable launcher for Minecraft.
 
-# Social
+## Social
 
 [Discord](https://discord.gg/MEJQtCvwqf)
 
+[YouTube](https://www.youtube.com/@corelauncher)
+
 [Reddit](https://www.reddit.com/r/corelauncher/)
+
+## Installation Tutorial Video ▶
+
+[![Tutorial](https://img.youtube.com/vi/t_RVLlCXcdA/0.jpg)](https://www.youtube.com/watch?v=t_RVLlCXcdA)
 
 ## Why should I use Core Launcher?
 Because,
@@ -17,13 +23,14 @@ Because,
 - It is modular.
 - It contains the CurseForge, Modrinth, and the OptiFine APIs. *
 - It is built with a useful and efficiency-based UI.
-- It includes the most used modding APIs like Forge and Fabric.
+- It includes the most used modding APIs like Forge, Fabric, Quilt, NeoForge, etc.
 - It supports CLI.
-- It has its own Java Download Manager.
+- It has its own Java download manager.
+- It has a rich featured resource browser.
 - You can download multiple modpacks in one profile.
 - You can see your worlds (including seeds, game mode, and worlds' spawn point), and resources (mods, resourcepacks, modpacks, and worlds) on one page.
 - You can easily back up, import, and share your profiles and worlds.
-- Also, it supports offline and online authentication.
+- Also, it supports offline and Microsoft authentication.
 
 Create a profile, select your loader (wrapper), customize your resources, and play!
 
