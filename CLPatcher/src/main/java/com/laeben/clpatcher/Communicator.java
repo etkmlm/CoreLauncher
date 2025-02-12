@@ -4,6 +4,7 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class Communicator {
     private static final int STATUS_CODE = 101;
@@ -32,7 +33,7 @@ public class Communicator {
         buffer.putInt(type.ordinal());
         if (data != null)
             buffer.put(data);
-        print.println(new String(buffer.array()));
+        print.println(new String(buffer.array(), StandardCharsets.UTF_8));
     }
 
     public static void send(InGameType type, String message){

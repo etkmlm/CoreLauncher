@@ -2,6 +2,7 @@ package com.laeben.clpatcher;
 
 import javassist.*;
 
+import java.io.ByteArrayInputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
@@ -66,14 +67,16 @@ public class Transformer implements ClassFileTransformer {
                 ClassPool pool = ClassPool.getDefault();
                 pool.insertClassPath(jarPath);
                 pool.importPackage("com.laeben.clpatcher");
-                CtClass cls = pool.get(className.replace('/', '.'));
+                //CtClass cls = pool.get(className.replace('/', '.'));
+                CtClass cls = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
 
                 boolean a = className.equals(clzClientPacketListener);
                 CtMethod handle = cls.getDeclaredMethod(a ? mtdHandle : "handleLogin");
                 handle.insertAfter(a ? injectListenerObfuscated : injectListener);
 
-                cls.freeze();
+                //cls.freeze();
                 classfileBuffer = cls.toBytecode();
+                cls.detach();
             }
             else if (className.equals(clzScreenTitle) || className.equals("net/minecraft/client/gui/screens/TitleScreen") || className.equals("net/minecraft/client/gui/screen/MainMenuScreen")){
                 System.out.println("CLPatcher - Patching TitleScreen");
@@ -81,18 +84,21 @@ public class Transformer implements ClassFileTransformer {
                 ClassPool pool = ClassPool.getDefault();
                 pool.insertClassPath(jarPath);
                 pool.importPackage("com.laeben.clpatcher");
-                CtClass cls = pool.get(className.replace('/', '.'));
+                //CtClass cls = pool.get(className.replace('/', '.'));
+                CtClass cls = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
 
                 CtMethod mtd = cls.getDeclaredMethod(className.equals(clzScreenTitle) ? mtdTitleInit : "init");
                 mtd.insertAfter(injectTitle);
-                cls.freeze();
+                //cls.freeze();
                 classfileBuffer = cls.toBytecode();
+                cls.detach();
             }
             else if (className.startsWith("com/mojang/authlib/yggdrasil/response/PrivilegesResponse$Privileges$Privilege")){
                 System.out.println("CLPatcher - Patching Multiplayer Privileges");
 
                 ClassPool pool = ClassPool.getDefault();
-                CtClass cls = pool.get(className.replace('/', '.'));
+                //CtClass cls = pool.get(className.replace('/', '.'));
+                CtClass cls = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
                 if (cls.isFrozen()){
                     System.out.println("CLPatcher - Defrost Class");
                     cls.defrost();
@@ -102,6 +108,7 @@ public class Transformer implements ClassFileTransformer {
                 cls.addField(CtField.make("private boolean enabled = true;", cls));
 
                 classfileBuffer = cls.toBytecode();
+                cls.detach();
             }
         }
         catch (Exception e){
