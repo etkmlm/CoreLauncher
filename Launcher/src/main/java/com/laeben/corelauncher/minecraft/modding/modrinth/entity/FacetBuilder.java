@@ -24,12 +24,17 @@ public class FacetBuilder {
     }
 
     public FacetBuilder add(Facet f){
-        var a = facets.stream().filter(x -> x.id != null && x.id.equals(f.id)).findFirst();
-        a.ifPresent(facets::remove);
+        var g = get(f.id);
+        if (g != null)
+            facets.remove(g);
 
         facets.add(f);
 
         return this;
+    }
+
+    public Facet get(String id){
+        return facets.stream().filter(e -> e.id != null && e.id.equals(id)).findFirst().orElse(null);
     }
 
     public void remove(String id){
@@ -37,7 +42,6 @@ public class FacetBuilder {
     }
 
     public List<Facet> build(){
-
         if (loader != null){
             if (facets.stream().noneMatch(x -> x.key.equals("categories") && x.values.contains(loader)))
                 facets.add(Facet.get("categories", loader).setId("loader"));

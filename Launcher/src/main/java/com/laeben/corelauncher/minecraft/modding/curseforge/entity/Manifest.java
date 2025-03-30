@@ -5,7 +5,7 @@ import java.util.List;
 public class Manifest {
     public static class Minecraft{
         public String version;
-        public List<CurseWrapper> modLoaders;
+        public List<CurseForgeWrapper> modLoaders;
     }
 
     public static class ManifestFile{

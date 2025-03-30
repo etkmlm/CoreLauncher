@@ -33,7 +33,7 @@
                 <TextField fx:id="txtGamePath" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
                 <CButton styleClass="transparent" fx:id="btnSelectGamePath" text="..." GridPane.columnIndex="3" GridPane.rowIndex="3"/>
 
-                <Label styleClass="property-key" text="%account" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <Label styleClass="property-key" text="%username" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                 <TextField fx:id="txtAccount" minWidth="160" GridPane.columnIndex="2" GridPane.rowIndex="4"/>
                 <CheckBox alignment="CENTER" maxHeight="Infinity" fx:id="chkOnline" text="%online" GridPane.columnIndex="3" GridPane.rowIndex="4"/>
 

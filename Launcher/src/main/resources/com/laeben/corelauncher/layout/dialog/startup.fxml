@@ -17,7 +17,7 @@
         <Label fx:id="lblLanguage" text="%settings.language"/>
         <CCombo fx:id="cbLanguage" GridPane.columnIndex="1" maxWidth="Infinity"/>
 
-        <Label fx:id="lblUsername" text="%account" GridPane.rowIndex="1"/>
+        <Label fx:id="lblUsername" text="%username" GridPane.rowIndex="1"/>
         <HBox alignment="CENTER" spacing="10" GridPane.rowIndex="1" GridPane.columnIndex="1">
             <TextField fx:id="txtUsername" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             <CheckBox fx:id="chkOnline" maxWidth="Infinity" text="%online"/>

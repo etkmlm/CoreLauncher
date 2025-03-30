@@ -2,7 +2,7 @@ package com.laeben.corelauncher.minecraft.modding.modrinth.entity;
 
 import com.google.gson.annotations.SerializedName;
 
-public class RinthFile {
+public class ModrinthFile {
     public transient String id;
     public String url;
     public String filename;

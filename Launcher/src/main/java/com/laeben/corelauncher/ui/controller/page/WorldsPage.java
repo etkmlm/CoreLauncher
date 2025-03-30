@@ -7,7 +7,7 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
-import com.laeben.corelauncher.minecraft.modding.entity.World;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.World;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.*;

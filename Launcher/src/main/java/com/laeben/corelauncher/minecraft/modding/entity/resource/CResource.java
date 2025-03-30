@@ -1,18 +1,51 @@
-package com.laeben.corelauncher.minecraft.modding.entity;
+package com.laeben.corelauncher.minecraft.modding.entity.resource;
 
+import com.google.gson.*;
 import com.google.gson.annotations.Expose;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ForgeFile;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ResourceForge;
-import com.laeben.corelauncher.minecraft.modding.modrinth.entity.ResourceRinth;
-import com.laeben.corelauncher.minecraft.modding.modrinth.entity.RinthFile;
+import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeFile;
+import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeResource;
+import com.laeben.corelauncher.minecraft.modding.entity.ModSource;
+import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
+import com.laeben.corelauncher.minecraft.modding.modrinth.entity.ModrinthResource;
+import com.laeben.corelauncher.minecraft.modding.modrinth.entity.ModrinthFile;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.Version;
+import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.entity.ImageTask;
 
+import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
 
 public class CResource implements Comparable<CResource> {
+    public static final class CResourceFactory implements JsonDeserializer<CResource> {
+        @Override
+        public CResource deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            if (!json.isJsonObject())
+                return null;
+
+            var obj = json.getAsJsonObject();
+            if (!obj.has("type"))
+                return GsonUtil.EMPTY_GSON.fromJson(json, CResource.class);
+
+            var typeStr = obj.get("type").getAsString();
+
+            ResourceType type = null;
+
+            for (ResourceType t : ResourceType.values()){
+                if (t.name().equals(typeStr)){
+                    type = t;
+                    break;
+                }
+            }
+
+            if (type == null)
+                return GsonUtil.EMPTY_GSON.fromJson(json, CResource.class);
+
+            return (CResource) GsonUtil.EMPTY_GSON.fromJson(json, type.getEntityClass());
+        }
+    }
+
     public ModSource.Type source;
 
     @Expose
@@ -27,6 +60,7 @@ public class CResource implements Comparable<CResource> {
     public Object id;
     public String name;
     public String logoUrl;
+    public ResourceType type = getType();
 
     /* These fields are null when isMeta = true */
     public Object fileId;
@@ -34,7 +68,7 @@ public class CResource implements Comparable<CResource> {
     public String fileName;
 
     public transient List<CResource> dependencies;
-    public transient List<ForgeFile.Module> forgeModules;
+    public transient List<CurseForgeFile.Module> forgeModules;
 
     protected transient boolean isMeta = true;
     /**/
@@ -80,7 +114,7 @@ public class CResource implements Comparable<CResource> {
         return ResourceType.MOD;
     }
 
-    protected static <T extends CResource> T fromForgeResource(T p, String versionId, String loader, ResourceForge r, ForgeFile file){
+    protected static <T extends CResource> T fromForgeResource(T p, String versionId, String loader, CurseForgeResource r, CurseForgeFile file){
         p.id = r.id;
         p.name = r.name;
         if (r.authors != null)
@@ -111,10 +145,10 @@ public class CResource implements Comparable<CResource> {
 
         return p;
     }
-    protected static <T extends CResource> T fromRinthResource(T p, ResourceRinth r, Version v){
+    protected static <T extends CResource> T fromRinthResource(T p, ModrinthResource r, Version v){
         p.id = r.getId();
         p.name = r.title;
-        p.authors = r.getAuthors();
+        p.authors = List.of(r.getAuthors());
         p.desc = r.description;
         p.logoUrl = r.icon;
         p.createDate = r.getCreationDate();
@@ -136,12 +170,12 @@ public class CResource implements Comparable<CResource> {
         return p;
     }
 
-    public static <T extends CResource> T fromForgeResourceGeneric(String vId, String loader, ResourceForge r, ForgeFile file){
+    public static <T extends CResource> T fromForgeResourceGeneric(String vId, String loader, CurseForgeResource r, CurseForgeFile file){
         if (r.classId == ResourceType.MOD.getId())
             return (T) Mod.fromForgeResource(vId, loader, r, file);
         else if (r.classId == ResourceType.MODPACK.getId())
             return (T) Modpack.fromForgeResource(vId, loader, r, file);
-        else if (r.classId == ResourceType.RESOURCE.getId())
+        else if (r.classId == ResourceType.RESOURCEPACK.getId())
             return (T) Resourcepack.fromForgeResource(vId, loader, r, file);
         else if (r.classId == ResourceType.WORLD.getId())
             return (T) World.fromResource(vId, loader, r);
@@ -150,12 +184,12 @@ public class CResource implements Comparable<CResource> {
         else
             return (T) fromForgeResource(new CResource(), vId, loader, r, file);
     }
-    public static <T extends CResource> T fromRinthResourceGeneric(ResourceRinth r, Version v){
+    public static <T extends CResource> T fromRinthResourceGeneric(ModrinthResource r, Version v){
         if (r.projectType.equals(ResourceType.MOD.getName()))
             return (T) Mod.fromRinthResource(r, v);
         else if (r.projectType.equals(ResourceType.MODPACK.getName()))
             return (T) Modpack.fromRinthResource(r, v);
-        else if (r.projectType.equals(ResourceType.RESOURCE.getName()))
+        else if (r.projectType.equals(ResourceType.RESOURCEPACK.getName()))
             return (T) Resourcepack.fromRinthResource(r, v);
         else if (r.projectType.equals(ResourceType.SHADER.getName()))
             return (T) Shader.fromRinthResource(r, v);
@@ -163,7 +197,7 @@ public class CResource implements Comparable<CResource> {
             return (T) fromRinthResource(new CResource(), r, v);
     }
 
-    public static CResource fromForgeFile(ForgeFile file, int modId){
+    public static CResource fromForgeFile(CurseForgeFile file, int modId){
         var res = new CResource();
         res.fileId = file.id;
         res.fileUrl = file.downloadUrl != null ? file.downloadUrl : "https://www.curseforge.com/api/v1/mods/" + modId + "/files/" + file.id + "/download";
@@ -176,7 +210,7 @@ public class CResource implements Comparable<CResource> {
 
         return res;
     }
-    public static CResource fromRinthFile(RinthFile file, Date fileDate){
+    public static CResource fromRinthFile(ModrinthFile file, Date fileDate){
         var res = new CResource();
 
         res.fileId = file.id;
@@ -254,7 +288,7 @@ public class CResource implements Comparable<CResource> {
 
     @Override
     public boolean equals(Object obj){
-        return obj instanceof CResource res && res.id != null && (res.fileId == null || fileId == null || res.fileId.equals(fileId)) && res.fileName.equals(fileName) && (res.id instanceof Double || res.id instanceof Integer ? res.getIntId() == getIntId() : res.id.equals(id));
+        return obj instanceof CResource res && res.id != null && (res.fileId == null || fileId == null || res.fileId.equals(fileId)) && (res.fileName == null && fileName == null || fileName != null && fileName.equals(res.fileName)) && (res.id instanceof Double || res.id instanceof Integer ? res.getIntId() == getIntId() : res.id.equals(id));
     }
 
     public boolean isSameResource(Object obj){

@@ -1,6 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge.entity;
 
-public class ForgeCategory {
+public class CurseForgeCategory {
     public int id;
     public int gameId;
     public String name;

@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.ui.control;
 
-import com.laeben.corelauncher.ui.entity.FilterPreset;
-import com.laeben.corelauncher.ui.entity.FilterSection;
+import com.laeben.corelauncher.ui.entity.filter.FilterPreset;
+import com.laeben.corelauncher.ui.entity.filter.FilterSection;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -24,10 +24,19 @@ public class CFilterPane extends VBox {
     }
 
     public void setPreset(String id){
+        presets.forEach(a -> a.setEnabledEventListening(a.id().equals(id) || a.id().equals(pinnedPreset)));
+
         getChildren().clear();
         getChildren().addAll(getPreset(pinnedPreset).sections());
-        if (id != null)
-            getChildren().addAll(getPreset(id).sections());
+        if (id != null){
+            var preset = getPreset(id);
+
+            if (preset != null){
+                var sections = preset.sections();
+                sections.forEach(FilterSection::invalideSelections);
+                getChildren().addAll(sections);
+            }
+        }
         getChildren().add(new Rectangle(0, 10));
         addClearButton();
 
@@ -60,7 +69,7 @@ public class CFilterPane extends VBox {
         btnClear.setPrefWidth(100);
         btnClear.setOnMouseClicked(a -> {
             presets.forEach(b -> b.sections().forEach(FilterSection::clearChoices));
-            setPreset(null);
+            //setPreset(null);
         });
         hbox.getChildren().add(btnClear);
 
@@ -72,5 +81,11 @@ public class CFilterPane extends VBox {
         var preset = new FilterPreset(id, ss);
         ss.forEach(a -> a.setPreset(preset));
         presets.add(preset);
+    }
+
+    public void dispose(){
+        getChildren().clear();
+        presets.forEach(FilterPreset::dispose);
+        presets.clear();
     }
 }

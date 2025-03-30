@@ -27,7 +27,8 @@ public class Configurator {
     private static Config config;
     private static int configLoadIndex = 1;
     private final Path configFilePath;
-    private static final Gson gson = GsonUtil.DEFAULT_GSON.newBuilder().registerTypeAdapter(Profile.class, new Profile.ProfileFactory()).create();
+    private static final Gson gson = GsonUtil.DEFAULT_GSON.newBuilder().
+            registerTypeAdapter(Profile.class, new Profile.ProfileFieldFactory()).create();
 
 
     public Configurator(Path configPath){

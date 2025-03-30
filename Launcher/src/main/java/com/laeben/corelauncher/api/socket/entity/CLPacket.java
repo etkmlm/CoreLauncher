@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.api.socket.entity;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class CLPacket {
     private final CLPacketType type;
@@ -23,7 +24,7 @@ public class CLPacket {
         int size = buffer.getInt();
         byte[] bytes = new byte[size];
         buffer.get(bytes);
-        return new String(bytes);
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public int readInt(){

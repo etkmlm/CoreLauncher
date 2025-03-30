@@ -25,6 +25,8 @@ public class CMenu extends VBox implements PopupNode {
 
     private boolean menuOpen;
 
+    private int animationDuration = 100;
+
     public CMenu(){
         popup = new Popup();
         popup.setAutoHide(true);
@@ -42,11 +44,16 @@ public class CMenu extends VBox implements PopupNode {
         //trns.setToY(1);
         trns.setToX(1);
         trns.setNode(menu);
-        trns.setDuration(Duration.millis(500));
+        trns.setDuration(Duration.millis(animationDuration));
         popup.setOnHidden(a -> menuOpen = false);
 
         menu.setStyle("-fx-min-width: 120px;-fx-background-color: #333840aa;-fx-background-radius: 10px;");
         menuOpen = false;
+    }
+
+    public void setAnimationDuration(int duration){
+        animationDuration = duration;
+        trns.setDuration(Duration.millis(animationDuration));
     }
 
     public void setButton(CButton button){

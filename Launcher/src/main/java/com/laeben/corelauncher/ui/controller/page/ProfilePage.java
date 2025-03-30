@@ -12,8 +12,9 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.minecraft.modding.Modder;
-import com.laeben.corelauncher.minecraft.modding.entity.CResource;
-import com.laeben.corelauncher.minecraft.modding.entity.Modpack;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.Modpack;
+import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.cell.CPRCell;
@@ -35,7 +36,6 @@ import javafx.util.Duration;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 public class ProfilePage extends HandlerController {
     public static final String KEY = "pgprofile";
@@ -167,19 +167,19 @@ public class ProfilePage extends HandlerController {
         lblGameVersion.setText(p.getVersionId());
 
         lvMods.setLoadLimit(10);
-        lvMods.getItems().setAll(p.getMods().stream().map(x -> (CResource)x).toList());
+        lvMods.getItems().setAll(p.getMods());
         lvMods.load();
 
-        lvModpacks.getItems().setAll(p.getModpacks().stream().map(x -> (CResource)x).toList());
+        lvModpacks.getItems().setAll(p.getModpacks());
         lvModpacks.load();
 
-        lvWorlds.getItems().setAll(p.getOnlineWorlds().stream().map(x -> (CResource)x).toList());
+        lvWorlds.getItems().setAll(p.getOnlineWorlds());
         lvWorlds.load();
 
-        lvResources.getItems().setAll(p.getResources().stream().map(x -> (CResource)x).toList());
+        lvResources.getItems().setAll(p.getResourcepacks());
         lvResources.load();
 
-        lvShaders.getItems().setAll(p.getShaders().stream().map(x -> (CResource)x).toList());
+        lvShaders.getItems().setAll(p.getShaders());
         lvShaders.load();
 
         btnEdit.setOnMouseClicked(a -> Main.getMain().replaceTab(this, "pages/profileedit", "", true, EditProfilePage.class).setProfile(profile));
@@ -196,7 +196,7 @@ public class ProfilePage extends HandlerController {
                 return;
 
             try {
-                Modder.getModder().includeAll(profile, r.get());
+                Modder.getModder().include(profile, r.get());
             } catch (NoConnectionException | StopException | HttpException e) {
                 if (!Main.getMain().announceLater(e, Duration.seconds(2)))
                     Logger.getLogger().log(e);
@@ -219,10 +219,10 @@ public class ProfilePage extends HandlerController {
                 UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.multiple", profile.getName()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
                 var all = new ArrayList<CResource>(Modder.getModder().getModpackUpdates(p, p.getModpacks()));
 
-                var allStream = Stream.of(p.getMods().stream(), p.getResources().stream(), p.getShaders().stream()).flatMap(n -> n).map(x -> (CResource)x).toList();
+                //var allStream = Stream.of(p.getMods().stream(), p.getResourcepacks().stream(), p.getShaders().stream()).flatMap(n -> n).map(x -> (CResource)x).toList();
 
                 var conflicts = new HashMap<Object, List<CResource>>();
-                var c1 = Modder.getModder().getUpdates(p, allStream);
+                var c1 = Modder.getModder().getUpdates(p, p.getAllResources().stream().filter(x -> x.getType() != ResourceType.MODPACK || x.getType() != ResourceType.WORLD).toList());
                 for (var c : c1.keySet()){
                     var n = c1.get(c);
                     if (n.size() == 1)
@@ -246,7 +246,7 @@ public class ProfilePage extends HandlerController {
                     }
                 }
 
-                Modder.getModder().includeAll(p, all);
+                Modder.getModder().include(p, all);
 
                 if (!conflicts.isEmpty()){
                     var result = CMsgBox.msg(Alert.AlertType.WARNING, Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.conflict", all.size(), conflicts.size(), String.join(",", conflicts.values().stream().map(k -> k.get(0).name).toList()))).setButtons(CMsgBox.ResultType.OPTION, CMsgBox.ResultType.OPTION, CMsgBox.ResultType.OPTION).executeForResult();
@@ -259,7 +259,7 @@ public class ProfilePage extends HandlerController {
                         return f.get(reverse ? f.size() -1 : 0);
                     }).toList());
 
-                    Modder.getModder().includeAll(p, all);
+                    Modder.getModder().include(p, all);
 
                     UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.multiple", profile.getName(), all.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
                 }

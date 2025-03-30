@@ -240,7 +240,7 @@ public abstract class Wrapper<H extends Version> {
             else
                 asstText = assetFile.read();
 
-            var n = GsonUtil.empty().fromJson(asstText, JsonObject.class);
+            var n = GsonUtil.EMPTY_GSON.fromJson(asstText, JsonObject.class);
 
             index = new AssetIndex();
             index.objects = new ArrayList<>();

@@ -301,10 +301,12 @@ public class Profiler {
                 set.accept(profile);
             if (profile.getName() == null)
                 return;
-            profile.save();
+
+            // swapped 306-308 and 309, need to move the profile contents before saving
             if (!profile.getName().equals(n)){
                 profilesDir.to(n).move(profile.getPath());
             }
+            profile.save();
 
             handler.execute(new ChangeEvent(PROFILE_UPDATE, Profile.fromName(n), profile));
         }
@@ -315,7 +317,7 @@ public class Profiler {
 
     public void reload(){
         try{
-            profiles = profilesDir.getFiles().stream().map(Profile::get).collect(Collectors.toList());
+            profiles = profilesDir.getFiles().stream().map(Profile::fromFolder).collect(Collectors.toList());
             profiles.removeIf(a -> a == null || a.isEmpty());
             handler.execute(new ChangeEvent(EventHandler.RELOAD, null, null));
         }
@@ -337,7 +339,7 @@ public class Profiler {
             if (profilesDir.getFiles().stream().anyMatch(x -> x.getName().equals(name)))
                 return Profile.empty();
 
-            var profile = Profile.get(profilesDir.to(StrUtil.pure(name)));
+            var profile = Profile.fromFolder(profilesDir.to(StrUtil.pure(name)));
             profiles.add(profile);
             handler.execute(new ChangeEvent(PROFILE_CREATE, null, List.of(profile)));
             return profile;

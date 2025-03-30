@@ -5,9 +5,12 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.Translator;
-import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.Mod;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.Resourcepack;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.Shader;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.cell.CMCell;
 import com.laeben.corelauncher.ui.control.*;
@@ -20,7 +23,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -29,11 +31,15 @@ import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class DModSelector<T extends ModResource> extends CDialog<CResource> {
 
     private final T resource;
-    private final Profile profile;
+    private final ResourcePreferences preferences;
+
+    private final Executor executor;
 
     private CResource installed;
 
@@ -60,10 +66,12 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
     @FXML
     private CWorker<List<CResource>, Void> wModpack;
 
-    public DModSelector(final T resource, Profile p) {
+    public DModSelector(final T resource, ResourcePreferences p) {
         super("layout/dialog/modselector.fxml", false);
         this.resource = resource;
-        profile = p;
+        preferences = p;
+
+        executor = Executors.newSingleThreadExecutor();
 
         getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
 
@@ -86,7 +94,21 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
         icon.setOnMouseClicked(a -> navigateWeb());
 
         lvVersions.setFilterFactory(a -> a.query() != null && a.input().fileName.contains(a.query().toLowerCase(Locale.US)));
-        lvVersions.setCellFactory(() -> new CMCell().setProfile(profile).setOnInstallClicked(a -> new Thread(() -> {
+        lvVersions.setCellFactory(() -> new CMCell().setOnTestExistance(a -> {
+            if (preferences.getProfile() != null){
+                var res = preferences.getProfile().getResource(a.getItem().id);
+                return res != null && res.fileName != null && res.fileName.equals(a.getItem().fileName);
+            }
+            else
+                return false;
+        }).setOnInstallClicked(a -> executor.execute(() -> {
+            var profile = preferences.getProfile() == null ? null : preferences.getProfile();
+
+            if (profile == null){
+
+                //profile = ResourcePreferences.createProfileFromPreferences(preferences, a.getItem().);
+            }
+
             if (a.isInstalled()){
                 installed = null;
                 Modder.getModder().remove(profile, a.getItem());
@@ -97,10 +119,10 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
             try {
                 if (a.getItem().getType() != ResourceType.MODPACK){
                     var items = resource.getSourceType().getSource().getDependencies(List.of(a.getItem()), ModSource.Options.create(profile).dependencies(true));
-                    Modder.getModder().includeAll(profile, items);
+                    Modder.getModder().include(profile, items);
                 }
                 else
-                    Modder.getModder().include(profile, a.getItem());
+                    Modder.getModder().include(profile, List.of(a.getItem()));
 
                 installed = a.getItem();
                 UI.runAsync(() -> lvVersions.getList().getChildren().forEach(x -> {
@@ -113,7 +135,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
             }
 
             UI.runAsync(() -> a.setInstalled(false));
-        }).start()));
+        })));
 
         boolean b = resource.getResourceType() == ResourceType.MODPACK;
         mpButtonContainer.setVisible(b);
@@ -124,15 +146,15 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
             wModpack.begin().withTask(a -> new Task<>() {
                     @Override
                     protected List<CResource> call() throws Exception {
-                        return resource.getSourceType().getSource().getCoreResource(resource, ModSource.Options.create(profile).aggregateModpack());
+                        return preferences.getProfile() == null ? List.of() : resource.getSourceType().getSource().getCoreResource(resource, ModSource.Options.create(preferences.getProfile()).aggregateModpack());
                     }
             }).onDone(x -> {
                 var mps = x.getValue();
-                var mods = String.join("\n", mps.stream().filter(a -> a instanceof Mod).map(a -> a.name).toList());
-                var ress = String.join("\n", mps.stream().filter(a -> a instanceof Resourcepack).map(a -> a.name).toList());
-                var shaders = String.join("\n", mps.stream().filter(a -> a instanceof Shader).map(a -> a.name).toList());
-                UI.runAsync(() ->{
-                    txtModpackContent.setText(Translator.translateFormat("mods.all.content", mods, ress, shaders));
+                var mods = mps.stream().filter(a -> a instanceof Mod).map(a -> a.name).toList();
+                var ress = mps.stream().filter(a -> a instanceof Resourcepack).map(a -> a.name).toList();
+                var shaders = mps.stream().filter(a -> a instanceof Shader).map(a -> a.name).toList();
+                UI.runAsync(() -> {
+                    txtModpackContent.setText(Translator.translateFormat("mods.all.content", mods.size(), String.join("\n", mods), ress.size(), String.join("\n", ress), shaders.size(), String.join("\n", shaders)));
                     mpContentContainer.setVisible(true);
                     mpContentContainer.setManaged(true);
                     mpButtonContainer.setManaged(false);
@@ -160,7 +182,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
 
     public Optional<CResource> select(CResource installed) throws NoConnectionException, HttpException {
         this.installed = installed;
-        lvVersions.getItems().setAll(resource.getSourceType().getSource().getAllCoreResources(resource, ModSource.Options.create(profile.getVersionId(), profile.getLoaderType(resource.getResourceType()))));
+        //lvVersions.getItems().setAll(resource.getSourceType().getSource().getAllCoreResources(resource, ModSource.Options.create(profile.getVersionId(), profile.getLoaderType(resource.getResourceType()))));
         lvVersions.load();
         return super.action();
     }

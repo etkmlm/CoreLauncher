@@ -2,7 +2,7 @@ package com.laeben.corelauncher.ui.controller.browser;
 
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.UI;
-import com.laeben.corelauncher.minecraft.modding.entity.CResource;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
 import javafx.fxml.FXML;

@@ -592,8 +592,18 @@ public class Main extends HandlerController {
         tab.getTabs().setAll(tabs);
     }
 
-    public <T extends Controller> T replaceTab(Controller dest, String fxml, String title, boolean closable, Class<T> type){
-        var t = tab.getTabs().stream().filter(x -> x instanceof CTab ct && dest.equals(ct.getController())).findFirst();
+    /**
+     * Replaces the old tab with the new one.
+     * @param from old controller
+     * @param fxml target layout path
+     * @param title target title
+     * @param closable is the new tab closable
+     * @param type type instance
+     * @return the controller of the new tab
+     * @param <T> type of the new controller
+     */
+    public <T extends Controller> T replaceTab(Controller from, String fxml, String title, boolean closable, Class<T> type){
+        var t = tab.getTabs().stream().filter(x -> x instanceof CTab ct && from.equals(ct.getController())).findFirst();
         int index = t.map(tab.getTabs()::indexOf).orElse(-1);
         if (index != -1)
             closeTab(index);
@@ -610,6 +620,15 @@ public class Main extends HandlerController {
         return (T)t1.getController();
     }
 
+    /**
+     * Creates a tab, and adds it to the pane.
+     * @param fxml target layout path
+     * @param title target title
+     * @param closable is the tab closable
+     * @param type type instance
+     * @return controller
+     * @param <T> type of the controller
+     */
     public <T extends Controller> T addTab(String fxml, String title, boolean closable, Class<T> type){
         var t = tab.getTabs().stream().filter(x -> x.getText().equals(title)).findFirst().orElse(null);
 

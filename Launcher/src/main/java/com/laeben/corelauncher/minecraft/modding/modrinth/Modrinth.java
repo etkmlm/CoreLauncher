@@ -12,6 +12,7 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.*;
 import com.laeben.corelauncher.ui.controller.browser.ModrinthSearch;
 import com.laeben.corelauncher.ui.controller.browser.Search;
@@ -29,10 +30,10 @@ public class Modrinth implements ModSource {
     private final Gson gson;
     private final RequesterFactory factory;
 
-    private List<RinthCategory> categories;
+    private List<ModrinthCategory> categories;
 
     public Modrinth(){
-        gson = GsonUtil.empty();
+        gson = GsonUtil.EMPTY_GSON;
 
         factory = new RequesterFactory(BASE_URL);
 
@@ -44,7 +45,7 @@ public class Modrinth implements ModSource {
      * @param type main type of the mod resource. (modpack, mod, resourcepack, shader, etc.)
      * @return categories
      */
-    public List<RinthCategory> getCategories(String type){
+    public List<ModrinthCategory> getCategories(String type){
         if (categories == null || categories.isEmpty())
             reload();
         return categories.stream().filter(x -> x.projectType.equals(type)).toList();
@@ -59,13 +60,13 @@ public class Modrinth implements ModSource {
      * @param search parameters
      * @return response
      */
-    public SearchResponseRinth search(SearchRinth search) throws NoConnectionException, HttpException {
+    public ModrinthSearchResponse search(ModrinthSearchRequest search) throws NoConnectionException, HttpException {
         var str = factory.create()
                 .to("/v2/search")
                 .withParams(search.getParams())
                 .getString();
 
-        return gson.fromJson(str, SearchResponseRinth.class);
+        return gson.fromJson(str, ModrinthSearchResponse.class);
     }
 
     /**
@@ -73,7 +74,7 @@ public class Modrinth implements ModSource {
      * @param ids project ids
      * @return found projects
      */
-    public List<ResourceRinth> getResources(List<String> ids) throws NoConnectionException, HttpException {
+    public List<ModrinthResource> getResources(List<String> ids) throws NoConnectionException, HttpException {
         var str = factory.create()
                 .to("/v2/projects")
                 .withParam(new RequestParameter("ids", StrUtil.jsArray(ids)).markAsEscapable())
@@ -81,7 +82,7 @@ public class Modrinth implements ModSource {
 
         var json = gson.fromJson(str, JsonArray.class);
 
-        return json.asList().stream().map(x -> gson.fromJson(x, ResourceRinth.class)).toList();
+        return json.asList().stream().map(x -> gson.fromJson(x, ModrinthResource.class)).toList();
     }
 
     @Override
@@ -121,7 +122,7 @@ public class Modrinth implements ModSource {
         return processVersions(str);
     }
 
-    public List<CResource> getDependenciesFromVersion(Version v, ResourceRinth res, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getDependenciesFromVersion(Version v, ModrinthResource res, Options opt) throws NoConnectionException, HttpException {
         if (opt.getIncludeSelf() && res == null)
             res = getResources(List.of(v.projectId)).get(0);
 
@@ -218,7 +219,7 @@ public class Modrinth implements ModSource {
      * Get all categories from Modrinth.
      * @return categories
      */
-    public List<RinthCategory> getAllCategories() throws NoConnectionException, HttpException {
+    public List<ModrinthCategory> getAllCategories() throws NoConnectionException, HttpException {
         var str = factory.create()
                 .to("/v2/tag/category")
                 .getString();
@@ -227,7 +228,7 @@ public class Modrinth implements ModSource {
         if (f == null)
             return List.of();
 
-        return f.asList().stream().map(x -> gson.fromJson(x, RinthCategory.class)).toList();
+        return f.asList().stream().map(x -> gson.fromJson(x, ModrinthCategory.class)).toList();
     }
 
     /**
@@ -270,7 +271,7 @@ public class Modrinth implements ModSource {
         return all;
     }
 
-    private Version getNewestVersionOfProject(ResourceRinth r, String vId, LoaderType loader) throws NoConnectionException, HttpException {
+    private Version getNewestVersionOfProject(ModrinthResource r, String vId, LoaderType loader) throws NoConnectionException, HttpException {
         /*List<Version> vs = r.versions == null || r.versions.isEmpty() ?
                 getProjectVersions(r.id, vId, loader) :
                 getVersions(List.of(r.versions.get(0)));*/
@@ -297,12 +298,12 @@ public class Modrinth implements ModSource {
     @Override
     public List<CResource> getAllCoreResources(ModResource res, Options opt) throws NoConnectionException, HttpException {
         var versions = getProjectVersions(res.getId().toString(), opt.getVersionId(), opt.getLoaderType());
-        return versions.stream().map(a -> (CResource)CResource.fromRinthResourceGeneric((ResourceRinth) res, a)).toList();
+        return versions.stream().map(a -> (CResource)CResource.fromRinthResourceGeneric((ModrinthResource) res, a)).toList();
     }
 
     @Override
     public List<CResource> getCoreResource(ModResource res, Options opt) throws NoConnectionException, HttpException {
-        if (!(res instanceof ResourceRinth r))
+        if (!(res instanceof ModrinthResource r))
             return null;
 
         var v = opt.useMeta() ? null : getNewestVersionOfProject(r, opt.getVersionId(), opt.getLoaderType());

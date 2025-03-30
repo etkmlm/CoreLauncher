@@ -81,4 +81,6 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.discord.channel;
     opens com.laeben.corelauncher.discord.entity;
     opens com.laeben.corelauncher.discord.entity.response;
+    opens com.laeben.corelauncher.ui.entity.filter;
+    opens com.laeben.corelauncher.minecraft.modding.entity.resource;
 }

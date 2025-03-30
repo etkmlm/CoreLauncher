@@ -13,6 +13,8 @@ import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.nbt.entity.NBTList;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.World;
 import com.laeben.corelauncher.minecraft.wrapper.forge.Forge;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
@@ -221,7 +223,7 @@ public class MultipleBrowserPage extends HandlerController {
 
         btnApply.setOnMouseClicked(a -> {
             try {
-                Modder.getModder().includeAll(profile, resources);
+                Modder.getModder().include(profile, resources);
             } catch (NoConnectionException | StopException ignored) {
 
             } catch (HttpException e) {
@@ -283,7 +285,7 @@ public class MultipleBrowserPage extends HandlerController {
         cbSource.getItems().setAll(Arrays.stream(ModSource.Type.values()).map(ModSource.Type::getSource).toList());
         cbSource.setValueFactory(a -> a.getType().name());
 
-        cbMainType.getItems().setAll(ResourceType.MOD, ResourceType.WORLD, ResourceType.SHADER, ResourceType.RESOURCE);
+        cbMainType.getItems().setAll(ResourceType.MOD, ResourceType.WORLD, ResourceType.SHADER, ResourceType.RESOURCEPACK);
         cbMainType.setValueFactory(a -> Translator.translate("mods.type." + a.getName()));
     }
 

@@ -21,6 +21,7 @@ import com.laeben.core.util.events.KeyEvent;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -78,14 +79,18 @@ public class Launcher {
         }
 
         Modder.getModder().installWorlds(profile, profile.getOnlineWorlds());
-        Modder.getModder().installResourcepacks(profile, profile.getResources());
+        Modder.getModder().installResourcepacks(profile, profile.getResourcepacks());
         Modder.getModder().installShaders(profile, profile.getShaders());
 
         var op1 = Configurator.getConfig().getLauncherPath().to("options.txt");
-        if (op1.exists()){
-            var op2 = profile.getPath().to("options.txt");
-            if (!op2.exists())
+        var op2 = profile.getPath().to("options.txt");
+        if (!op2.exists()){
+            if (op1.exists())
                 op1.copy(op2);
+            else {
+                var lang = Configurator.getConfig().getLanguage();
+                op2.write("lang:" + lang);
+            }
         }
     }
 
@@ -137,10 +142,11 @@ public class Launcher {
                         }
                     }
                 }
-
             }
 
+            Logger.getLogger().log(LogType.INFO, "Checking Java executable...");
             if (!info.java.getWindowExecutable().exists()){
+                Logger.getLogger().log(LogType.INFO, "Java executable '" + info.java.getWindowExecutable() + "' does not exist, invalidating versions.");
                 JavaManager.getManager().reload();
                 info.java = null;
                 launch(info);
@@ -157,13 +163,17 @@ public class Launcher {
             //String cp = String.join(c, linfo.libraries) + c + linfo.clientPath;
             String cp = String.join(c, linfo.libraries) + c + client;
 
+            var locale = Locale.getDefault();
+
             // Static commands
             String[] rootCmds = {
                     info.java.getWindowExecutable().toString(),
                     libPath,
                     //"-javaagent:" + linfo.agentPath, // Don't worry (yup), this contains launcher's patches to mc like 1.16.4 multiplayer bug
                     "-Dorg.lwjgl.util.Debug=true",
-                    "-Dfml.ignoreInvalidMinecraftCertificates=true"
+                    "-Dfml.ignoreInvalidMinecraftCertificates=true",
+                    "-Duser.language=" + locale.getLanguage(),
+                    "-Duser.country=" + locale.getCountry(),
             };
 
             // If the version lower than 1.7.2 (very legacy) then copy all textures to resources folder in profile folder

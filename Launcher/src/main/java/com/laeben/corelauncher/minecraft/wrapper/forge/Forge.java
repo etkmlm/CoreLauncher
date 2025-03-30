@@ -167,7 +167,7 @@ public class Forge extends Wrapper<ForgeVersion> {
 
             logState(".launch.state.finish");
 
-            var read = GsonUtil.empty().fromJson(profileInfo.read(), JsonObject.class);
+            var read = GsonUtil.EMPTY_GSON.fromJson(profileInfo.read(), JsonObject.class);
             var profiles = read.get("profiles").getAsJsonObject();
             var forge = profiles.get("forge");
             if (forge == null)

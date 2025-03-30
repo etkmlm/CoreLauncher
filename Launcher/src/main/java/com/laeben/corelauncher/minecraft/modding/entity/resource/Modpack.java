@@ -1,9 +1,11 @@
-package com.laeben.corelauncher.minecraft.modding.entity;
+package com.laeben.corelauncher.minecraft.modding.entity.resource;
 
 import com.laeben.corelauncher.minecraft.Wrapper;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ForgeFile;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ResourceForge;
-import com.laeben.corelauncher.minecraft.modding.modrinth.entity.ResourceRinth;
+import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeFile;
+import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeResource;
+import com.laeben.corelauncher.minecraft.modding.entity.ModSource;
+import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
+import com.laeben.corelauncher.minecraft.modding.modrinth.entity.ModrinthResource;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.Version;
 
 import java.util.List;
@@ -20,11 +22,11 @@ public class Modpack extends CResource {
         super(type);
     }
 
-    public static Modpack fromForgeResource(String vId, String loader, ResourceForge r, ForgeFile f){
+    public static Modpack fromForgeResource(String vId, String loader, CurseForgeResource r, CurseForgeFile f){
         return fromForgeResource(new Modpack(ModSource.Type.CURSEFORGE), vId, loader, r, f);
     }
 
-    public static Modpack fromRinthResource(ResourceRinth r, Version v){
+    public static Modpack fromRinthResource(ModrinthResource r, Version v){
         return fromRinthResource(new Modpack(ModSource.Type.MODRINTH), r, v);
     }
 

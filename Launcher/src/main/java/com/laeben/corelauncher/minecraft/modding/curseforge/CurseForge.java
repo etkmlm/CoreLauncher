@@ -13,7 +13,8 @@ import com.laeben.corelauncher.minecraft.modding.curseforge.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.core.entity.Path;
 import com.google.gson.*;
-import com.laeben.corelauncher.ui.controller.browser.ForgeSearch;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
+import com.laeben.corelauncher.ui.controller.browser.CurseForgeSearch;
 import com.laeben.corelauncher.ui.controller.browser.Search;
 import com.laeben.corelauncher.util.GsonUtil;
 
@@ -28,12 +29,12 @@ public class CurseForge implements ModSource {
 
     private final Gson gson;
 
-    private List<ForgeCategory> categories;
+    private List<CurseForgeCategory> categories;
     private final RequesterFactory factory;
 
 
     public CurseForge(){
-        gson = GsonUtil.empty();
+        gson = GsonUtil.EMPTY_GSON;
 
         factory = new RequesterFactory(BASE_URL);
 
@@ -44,12 +45,16 @@ public class CurseForge implements ModSource {
         return instance;
     }
 
-    public SearchResponseForge search(SearchForge s) throws NoConnectionException, HttpException {
-        String a = get("/v1/mods/search", RequestParameter.classToParams(s, SearchForge.class));
-        return gson.fromJson(a, SearchResponseForge.class);
+    public CurseForgeSearchResponse search(CurseForgeSearchRequest s) throws NoConnectionException, HttpException {
+        var params = RequestParameter.classToParams(s, CurseForgeSearchRequest.class);
+        if (s.gameVersions != null)
+            params.stream().filter(x -> x.key().equals("gameVersions")).findFirst().ifPresent(RequestParameter::markAsEscapable);
+
+        String a = get("/v1/mods/search", params);
+        return gson.fromJson(a, CurseForgeSearchResponse.class);
     }
 
-    public List<ResourceForge> getResources(List<Object> ids) throws NoConnectionException {
+    public List<CurseForgeResource> getResources(List<Object> ids) throws NoConnectionException {
         if (ids.isEmpty())
             return null;
         var request = new ModsRequest();
@@ -60,9 +65,9 @@ public class CurseForge implements ModSource {
             return null;
         var data = gson.fromJson(f, JsonObject.class).get("data").getAsJsonArray();
 
-        return data.asList().stream().map(a -> gson.fromJson(a, ResourceForge.class)).toList();
+        return data.asList().stream().map(a -> gson.fromJson(a, CurseForgeResource.class)).toList();
     }
-    public ResourceForge getFullResource(ResourceForge r, Options opt) throws NoConnectionException, HttpException {
+    public CurseForgeResource getFullResource(CurseForgeResource r, Options opt) throws NoConnectionException, HttpException {
         var params = new ArrayList<RequestParameter>();
         params.add(new RequestParameter("gameVersion", opt.getVersionId()));
         if (opt.hasLoaderType())
@@ -70,18 +75,18 @@ public class CurseForge implements ModSource {
 
         String g = get("/v1/mods/" + r.id + "/files", params);
         var rs = gson.fromJson(g, JsonObject.class);
-        r.latestFiles = rs.get("data").getAsJsonArray().asList().stream().map(x -> gson.fromJson(x, ForgeFile.class)).toList();
+        r.latestFiles = rs.get("data").getAsJsonArray().asList().stream().map(x -> gson.fromJson(x, CurseForgeFile.class)).toList();
         return r;
     }
 
-    public List<ForgeFile> getFiles(List<Integer> ids) throws NoConnectionException {
+    public List<CurseForgeFile> getFiles(List<Integer> ids) throws NoConnectionException {
         var obj = new JsonObject();
         var arr = new JsonArray();
         arr.asList().addAll(ids.stream().map(JsonPrimitive::new).toList());
         obj.add("fileIds", arr);
         String pst = gson.toJson(obj);
         String ans = post("/v1/mods/files", pst);
-        var abc = gson.fromJson(ans, JsonObject.class).get("data").getAsJsonArray().asList().stream().map(x -> gson.fromJson(x, ForgeFile.class));
+        var abc = gson.fromJson(ans, JsonObject.class).get("data").getAsJsonArray().asList().stream().map(x -> gson.fromJson(x, CurseForgeFile.class));
         return abc.distinct().toList();
     }
 
@@ -137,11 +142,11 @@ public class CurseForge implements ModSource {
 
         var data = gson.fromJson(get, JsonObject.class).get("data").getAsJsonArray();
 
-        categories = data.asList().stream().map(x -> gson.fromJson(x, ForgeCategory.class)).toList();
+        categories = data.asList().stream().map(x -> gson.fromJson(x, CurseForgeCategory.class)).toList();
 
     }
 
-    public List<ForgeCategory> getCategories(){
+    public List<CurseForgeCategory> getCategories(){
         if (categories == null || categories.isEmpty())
             reload();
         return categories;
@@ -216,7 +221,7 @@ public class CurseForge implements ModSource {
 
     @Override
     public List<CResource> getAllCoreResources(ModResource r, Options opt) throws NoConnectionException, HttpException {
-        var full = getFullResource((ResourceForge) r, opt);
+        var full = getFullResource((CurseForgeResource) r, opt);
 
         var loader = opt.hasLoaderType() ? opt.getLoaderType().getIdentifier() : null;
         var files = full.searchGame(opt.getVersionId(), loader);
@@ -259,21 +264,17 @@ public class CurseForge implements ModSource {
 
     @Override
     public <T extends Enum> Search<T> getSearch(Profile p) {
-        return (Search<T>) new ForgeSearch(p);
+        return (Search<T>) new CurseForgeSearch(p);
     }
 
     @Override
     public void applyModpack(Modpack m, Path path, Options opt) throws NoConnectionException, HttpException, StopException {
-        var mp = new ForgeModpack(m);
+        var mp = new CurseForgeModpack(m);
 
         var manifest = gson.fromJson(extractModpack(m, path, true).read(), Manifest.class);
         mp.applyManifest(manifest);
 
         var resources = getCoreResources(mp.getProjectIds(), Options.create(opt.getVersionId(), null).meta());
         mp.applyResources(resources, getFiles(mp.getFileIds()));
-
-        m.mods = resources.stream().filter(x -> x instanceof Mod).map(x -> (Mod)x).toList();
-        m.resources = resources.stream().filter(x -> x instanceof Resourcepack).map(x -> (Resourcepack)x).toList();
-        m.shaders = resources.stream().filter(x -> x instanceof Shader).map(x -> (Shader)x).toList();
     }
 }

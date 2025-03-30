@@ -2,6 +2,7 @@ package com.laeben.corelauncher.minecraft.entity;
 
 import com.laeben.corelauncher.api.entity.Java;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -42,5 +43,26 @@ public class Version {
     }
     public String getClientName(){
         return id;
+    }
+
+
+    public static class VersionIdComparator implements Comparator<String> {
+
+        public static final VersionIdComparator INSTANCE = new VersionIdComparator();
+
+        @Override
+        public int compare(String o1, String o2) {
+            try{
+                int i1 = Integer.parseInt(o1.replace(".", ""));
+                int i2 = Integer.parseInt(o2.replace(".", ""));
+
+                return i1 - i2;
+            }
+            catch (NumberFormatException ignored){
+
+            }
+
+            return 0;
+        }
     }
 }

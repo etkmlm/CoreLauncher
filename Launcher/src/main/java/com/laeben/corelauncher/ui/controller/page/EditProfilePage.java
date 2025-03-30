@@ -293,12 +293,33 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         imgCustom.setOnMouseClicked(a -> wrapperGroup.selectToggle(custom));
 
         vanilla.setToggleGroup(wrapperGroup);
+        vanilla.setTooltip(new Tooltip("Vanilla"));
+        Tooltip.install(imgVanilla, vanilla.getTooltip());
+
         forge.setToggleGroup(wrapperGroup);
+        forge.setTooltip(new Tooltip("Forge"));
+        Tooltip.install(imgForge, forge.getTooltip());
+
         neoforge.setToggleGroup(wrapperGroup);
+        neoforge.setTooltip(new Tooltip("NeoForge"));
+        Tooltip.install(imgNeoForge, neoforge.getTooltip());
+
         fabric.setToggleGroup(wrapperGroup);
+        fabric.setTooltip(new Tooltip("Fabric"));
+        Tooltip.install(imgFabric, fabric.getTooltip());
+
         quilt.setToggleGroup(wrapperGroup);
+        quilt.setTooltip(new Tooltip("Quilt"));
+        Tooltip.install(imgQuilt, quilt.getTooltip());
+
         optifine.setToggleGroup(wrapperGroup);
+        optifine.setTooltip(new Tooltip("OptiFine"));
+        Tooltip.install(imgOptiFine, optifine.getTooltip());
+
         custom.setToggleGroup(wrapperGroup);
+        custom.setTooltip(new Tooltip(Translator.translate("mods.custom")));
+        Tooltip.install(imgCustom, custom.getTooltip());
+
         wrapperGroup.selectToggle(vanilla);
 
         wrapperGroup.selectedToggleProperty().addListener(a -> {

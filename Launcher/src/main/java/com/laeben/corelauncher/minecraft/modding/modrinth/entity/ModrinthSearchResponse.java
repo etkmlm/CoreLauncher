@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class SearchResponseRinth {
-    public List<ResourceRinth> hits;
+public class ModrinthSearchResponse {
+    public List<ModrinthResource> hits;
     public int offset;
     public int limit;
     @SerializedName("total_hits")

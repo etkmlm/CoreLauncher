@@ -5,6 +5,7 @@ import com.laeben.corelauncher.api.entity.Logger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class ByteReader {
     private final ByteArrayInputStream stream;
@@ -89,7 +90,7 @@ public class ByteReader {
 
     public String readString(int len) {
         try{
-            return new String(stream.readNBytes(len));
+            return new String(stream.readNBytes(len), StandardCharsets.UTF_8);
         }catch (IOException e){
             Logger.getLogger().log(e);
             return null;

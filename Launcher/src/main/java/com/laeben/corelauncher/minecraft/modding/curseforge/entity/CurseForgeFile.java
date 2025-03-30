@@ -5,7 +5,7 @@ import com.google.gson.annotations.Expose;
 import java.util.Date;
 import java.util.List;
 
-public class ForgeFile {
+public class CurseForgeFile {
     public static class Dependency{
         public int modId;
         public FileRelationType relationType;
@@ -16,11 +16,11 @@ public class ForgeFile {
         public long fingerprint;
     }
 
-    public ForgeFile(){
+    public CurseForgeFile(){
 
     }
 
-    public ForgeFile(int id, int modId){
+    public CurseForgeFile(int id, int modId){
         this.id = id;
         this.modId = modId;
     }
@@ -69,6 +69,6 @@ public class ForgeFile {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof ForgeFile f && f.id == id;
+        return obj instanceof CurseForgeFile f && f.id == id;
     }
 }

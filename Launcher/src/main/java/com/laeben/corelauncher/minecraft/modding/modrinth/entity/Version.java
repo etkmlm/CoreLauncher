@@ -39,7 +39,7 @@ public class Version {
     @SerializedName("game_versions")
     public List<String> gameVersions;
     public List<String> loaders;
-    public List<RinthFile> files;
+    public List<ModrinthFile> files;
     @SerializedName("date_published")
     public String published;
 
@@ -50,14 +50,14 @@ public class Version {
         return dependencies;
     }
 
-    public List<RinthFile> getFiles(){
+    public List<ModrinthFile> getFiles(){
         if (files == null)
             return List.of();
 
         return files;
     }
 
-    public RinthFile getFile(){
+    public ModrinthFile getFile(){
         var file = getFiles().get(0);
         file.id = id;
         return file;

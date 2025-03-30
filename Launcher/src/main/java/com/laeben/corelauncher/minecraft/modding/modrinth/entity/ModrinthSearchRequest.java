@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchRinth {
+public class ModrinthSearchRequest {
     public String query;
     public String index;
     public FacetBuilder facets;
@@ -31,8 +31,11 @@ public class SearchRinth {
         if (index != null)
             list.add(new RequestParameter("index", index));
         var build = facets.build();
-        if (!build.isEmpty())
-            list.add(new RequestParameter("facets", StrUtil.jsArray(build.stream().filter(Facet::isPresent).map(Facet::toString).toList())).markAsEscapable());
+        if (!build.isEmpty()){
+            var facets = build.stream().filter(Facet::isPresent).map(Facet::toString).toList();
+            if (!facets.isEmpty())
+                list.add(new RequestParameter("facets", StrUtil.jsArray(facets)).markAsEscapable());
+        }
         list.add(new RequestParameter("offset", offset));
         if (limit != 0)
             list.add(new RequestParameter("limit", limit));

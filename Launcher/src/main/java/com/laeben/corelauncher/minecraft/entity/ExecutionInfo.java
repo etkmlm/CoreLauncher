@@ -117,10 +117,10 @@ public class ExecutionInfo{
             //            wrappedJsonPath = gameDir.to("versions", version.getJsonName(), version.getJsonName() + ".json");
             //            clientPath = versionDir.to(version.getClientName() + ".jar");
 
-            var v0 = GsonUtil.empty().fromJson(jsonPath.read(), Version.class);
+            var v0 = GsonUtil.EMPTY_GSON.fromJson(jsonPath.read(), Version.class);
             if (v0 == null)
                 throw new VersionNotFoundException("Cannot find path " + jsonPath);
-            var v = GsonUtil.empty().fromJson(wrappedJsonPath.read(), Version.class);
+            var v = GsonUtil.EMPTY_GSON.fromJson(wrappedJsonPath.read(), Version.class);
             if (v == null)
                 throw new VersionNotFoundException("Cannot find path " + wrappedJsonPath);
             assets = v0.getAssetIndex();

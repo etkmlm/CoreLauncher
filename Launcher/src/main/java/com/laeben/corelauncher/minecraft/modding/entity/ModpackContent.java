@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.minecraft.modding.entity;
 
+import com.laeben.corelauncher.minecraft.modding.entity.resource.Modpack;
+
 public interface ModpackContent {
     Object getModpackId();
     void setModpackId(Object id);

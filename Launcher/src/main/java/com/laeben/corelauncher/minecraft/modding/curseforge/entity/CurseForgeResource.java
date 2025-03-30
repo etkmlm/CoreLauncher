@@ -7,7 +7,7 @@ import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ResourceForge implements ModResource {
+public class CurseForgeResource implements ModResource {
 
     public static class Links{
         public String websiteUrl;
@@ -18,10 +18,10 @@ public class ResourceForge implements ModResource {
     public String name;
     public String summary;
     public int classId;
-    public List<ForgeCategory> categories;
+    public List<CurseForgeCategory> categories;
     public Image logo;
     public List<Author> authors;
-    public List<ForgeFile> latestFiles;
+    public List<CurseForgeFile> latestFiles;
 
     public int downloadCount;
     public int mainFileId;
@@ -33,7 +33,7 @@ public class ResourceForge implements ModResource {
     public Date dateModified;
     public Date dateReleased;
 
-    public List<ForgeFile> searchGame(String versionId, String loader){
+    public List<CurseForgeFile> searchGame(String versionId, String loader){
         if (latestFiles == null)
             return List.of();
         String[] spl = versionId.split("\\.");
@@ -81,8 +81,8 @@ public class ResourceForge implements ModResource {
     }
 
     @Override
-    public List<String> getCategories() {
-        return categories.stream().map(a -> a.name).toList();
+    public String[] getCategories() {
+        return categories.stream().map(a -> a.name).toArray(String[]::new);
     }
 
     @Override
@@ -96,13 +96,42 @@ public class ResourceForge implements ModResource {
     }
 
     @Override
-    public List<String> getAuthors() {
-        return authors != null ? authors.stream().map(a -> a.name).toList() : null;
+    public String[] getAuthors() {
+        return authors != null ? authors.stream().map(a -> a.name).toArray(String[]::new) : null;
     }
 
     @Override
-    public List<String> getGameVersions() {
-        return latestFiles != null ? Arrays.stream(latestFiles.get(0).gameVersions).toList() : null;
+    public String[] getGameVersions() {
+        if (latestFiles == null)
+            return null;
+        List<String> versions = new ArrayList<>();
+        for (var f : latestFiles){
+            for (var x : f.gameVersions){
+                if (x.contains(".") && !x.contains("-"))
+                    versions.add(x);
+            }
+        }
+        return versions.stream().distinct().toArray(String[]::new);
+    }
+
+    @Override
+    public LoaderType[] getLoaders() {
+        if (latestFiles == null)
+            return null;
+
+        var lst = new ArrayList<LoaderType>();
+        for (var f : latestFiles){
+            if (f.gameVersions == null)
+                continue;
+            for (var v : f.gameVersions){
+                var k = v.toLowerCase(Locale.US);
+                if (LoaderType.TYPES.containsKey(k)){
+                    lst.add(LoaderType.TYPES.get(k));
+                }
+            }
+        }
+
+        return lst.stream().distinct().toArray(LoaderType[]::new);
     }
 
     @Override
@@ -114,50 +143,4 @@ public class ResourceForge implements ModResource {
     public Date getCreationDate() {
         return dateCreated;
     }
-
-    /*@Override
-    public List<CResource> getResourceWithDependencies(Profile profile) {
-        ResourceForge resource;
-
-        try {
-            resource = CurseForge.getForge().getFullResource(profile.getVersionId(), profile.getWrapper().getType(), this);
-        } catch (NoConnectionException | HttpException ignored) {
-            resource = null;
-        }
-
-        if (resource == null)
-            return null;
-
-        var mod = CResource.fromForgeResourceGeneric(profile.getVersionId(), profile.getWrapperIdentifier(resource.getResourceType()), resource, null);
-
-        List<CResource> all = null;
-
-        try{
-            all = CurseForge.getForge().getDependencies(List.of(mod), profile);
-        } catch (NoConnectionException ignored) {
-
-        }
-
-        if (all == null)
-            all = List.of(mod);
-
-        return all;
-    }
-
-    @Override
-    public List<CResource> getAllVersions(Profile profile){
-        ResourceForge resource = null;
-        try {
-            resource = CurseForge.getForge().getFullResource(profile.getVersionId(), profile.getWrapper().getType(), this);
-        } catch (NoConnectionException | HttpException ignored) {
-
-        }
-
-        if (resource == null)
-            return null;
-
-        var id = profile.getWrapperIdentifier(resource.getResourceType());
-        var files = resource.searchGame(profile.getVersionId(), id);
-        return files.stream().map(a -> (CResource)CResource.fromForgeResourceGeneric(profile.getVersionId(), id, this, a)).toList();
-    }*/
 }

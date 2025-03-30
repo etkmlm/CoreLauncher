@@ -104,11 +104,11 @@ public class Vanilla extends Wrapper<Version> {
             if (!jsonPath.exists() || disableCache)
             {
                 String vJson = getVersionString(v.id);
-                info = GsonUtil.empty().fromJson(vJson, Version.class);
+                info = GsonUtil.EMPTY_GSON.fromJson(vJson, Version.class);
                 jsonPath.write(vJson);
             }
             else
-                info = GsonUtil.empty().fromJson(jsonPath.read(), Version.class);
+                info = GsonUtil.EMPTY_GSON.fromJson(jsonPath.read(), Version.class);
 
             if (!clientPath.exists() || disableCache || !checkLen(info.downloads.client.url, clientPath)){
                 logState(Wrapper.CLIENT_DOWNLOAD);
@@ -142,7 +142,7 @@ public class Vanilla extends Wrapper<Version> {
     public void reload(){
         _info = null;
         try{
-            _info = GsonUtil.empty().fromJson(NetUtil.urlToString(INFO_URL), MainInfo.class);
+            _info = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(INFO_URL), MainInfo.class);
         }
         catch (NoConnectionException ignored){
 

@@ -1,8 +1,9 @@
-package com.laeben.corelauncher.minecraft.modding.entity;
+package com.laeben.corelauncher.minecraft.modding.entity.resource;
 
 import com.laeben.corelauncher.api.nbt.NBTFile;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ResourceForge;
+import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeResource;
 import com.laeben.core.entity.Path;
+import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 
 import java.io.IOException;
 
@@ -38,7 +39,7 @@ public class World extends CResource{
     public Path iconPath;
     public long seed;
 
-    public static World fromResource(String vId, String loader, ResourceForge r){
+    public static World fromResource(String vId, String loader, CurseForgeResource r){
         var pack = fromForgeResource(new World(), vId, loader, r, null);
         if (!pack.forgeModules.isEmpty())
             pack.name = pack.forgeModules.stream().findFirst().get().name;

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 public class ServerHandshake {
     public record Response(int players, int maxPlayers){
@@ -100,7 +101,7 @@ public class ServerHandshake {
         var gfd = readVarInt(responseBytes);
         byte[] response = new byte[gfd];
         responseBytes.get(response);
-        var obj = GsonUtil.empty().fromJson(new String(response), JsonObject.class);
+        var obj = GsonUtil.EMPTY_GSON.fromJson(new String(response, StandardCharsets.UTF_8), JsonObject.class);
 
         if (!obj.has("players"))
             return null;

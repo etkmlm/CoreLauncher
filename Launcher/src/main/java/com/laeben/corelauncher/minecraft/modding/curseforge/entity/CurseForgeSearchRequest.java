@@ -1,16 +1,21 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge.entity;
 
-public class SearchForge {
+import java.util.List;
+
+public class CurseForgeSearchRequest {
     public String searchFilter;
     public String gameVersion;
+    public List<String> gameVersions;
     public int classId;
     public int categoryId;
-    public String categoryIds;
+    public List<String> categoryIds;
+    //public String categoryIds;
     public int pageSize;
     public int index;
     public ModsSearchSortField sortField;
     public String sortOrder;
-    public CurseWrapper.Type modLoaderType;
+    public CurseForgeWrapper.Type modLoaderType;
+    public List<CurseForgeWrapper.Type> modLoaderTypes;
 
     public void setSortOrder(boolean asc){
         sortOrder = asc ? "asc" : "desc";

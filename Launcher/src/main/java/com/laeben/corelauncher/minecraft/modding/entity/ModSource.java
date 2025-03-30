@@ -8,6 +8,8 @@ import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.Modpack;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.ui.controller.browser.Search;
 

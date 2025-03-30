@@ -1,7 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.entity;
 
 import java.util.Date;
-import java.util.List;
 
 public interface ModResource {
 
@@ -9,11 +8,12 @@ public interface ModResource {
     String getName();
     String getDescription();
     ResourceType getResourceType();
-    List<String> getCategories();
+    String[] getCategories();
     String getIcon();
     String getURL();
-    List<String> getAuthors();
-    List<String> getGameVersions();
+    String[] getAuthors();
+    String[] getGameVersions();
+    LoaderType[] getLoaders();
     ModSource.Type getSourceType();
     Date getCreationDate();
 

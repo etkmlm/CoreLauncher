@@ -8,6 +8,8 @@ import com.laeben.corelauncher.minecraft.wrapper.neoforge.NeoForge;
 import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
 import com.laeben.corelauncher.minecraft.wrapper.quilt.Quilt;
 
+import java.util.*;
+
 public enum LoaderType {
 
     CUSTOM("custom", Custom.class, true),
@@ -20,6 +22,13 @@ public enum LoaderType {
     NEOFORGE("neoforge", NeoForge.class, false),
     OPTIFINE("optifine", OptiFine.class, true);
 
+    public final static Map<String, LoaderType> TYPES = new HashMap<>();
+
+    static {
+        for (var type : LoaderType.values()) {
+            TYPES.put(type.getIdentifier(), type);
+        }
+    }
 
     final String identifier;
     final Class cls;
@@ -29,6 +38,10 @@ public enum LoaderType {
         this.identifier = identifier;
         this.cls = cls;
         this.ntv = ntv;
+    }
+
+    public static LoaderType fromIdentifier(final String identifier) {
+        return Arrays.stream(values()).filter(a -> a.identifier.equals(identifier)).findFirst().orElse(null);
     }
 
     public String getIdentifier(){
@@ -45,6 +58,10 @@ public enum LoaderType {
 
     public String getQueryIdentifier(){
         return ntv ? null : identifier;
+    }
+
+    public boolean isSupported(){
+        return cls != null;
     }
 
     @Override

@@ -73,8 +73,7 @@ public class JavaManager {
 
             try {
                 var j = new Java(file);
-                if (j.isLoaded())
-                    lst.add(j);
+                lst.add(j);
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
@@ -84,6 +83,8 @@ public class JavaManager {
         var cst = Configurator.getConfig().getCustomJavaVersions();
         if (cst != null)
             lst.addAll(cst);
+
+        lst.removeIf(x -> !x.isLoaded());
 
         return lst;
     }
@@ -103,7 +104,7 @@ public class JavaManager {
         var os = CoreLauncher.SYSTEM_OS;
         String url = ADOPTIUM + j.majorVersion + "/hotspot?os=" + os.getName() + "&image_type=jdk&architecture=" + (is64Bit ? "x64" : "x86");
         try{
-            var arr = GsonUtil.empty().fromJson(NetUtil.urlToString(url), JsonArray.class);
+            var arr = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(url), JsonArray.class);
             if (arr == null || arr.isEmpty())
                 return null;
             var object = arr.get(0);

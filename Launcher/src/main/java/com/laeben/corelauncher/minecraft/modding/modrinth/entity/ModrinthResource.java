@@ -4,10 +4,12 @@ import com.google.gson.annotations.SerializedName;
 import com.laeben.corelauncher.api.util.DateUtil;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class ResourceRinth implements ModResource {
+public class ModrinthResource implements ModResource {
     @SerializedName("project_id")
     public String pId;
     public String slug;
@@ -50,8 +52,8 @@ public class ResourceRinth implements ModResource {
     }
 
     @Override
-    public List<String> getCategories() {
-        return categories;
+    public String[] getCategories() {
+        return categories.toArray(String[]::new);
     }
 
     @Override
@@ -65,13 +67,36 @@ public class ResourceRinth implements ModResource {
     }
 
     @Override
-    public List<String> getAuthors() {
-        return List.of(team == null ? author : team);
+    public String[] getAuthors() {
+        return new String[] {team == null ? author : team};
     }
 
     @Override
-    public List<String> getGameVersions() {
-        return gameVersions;
+    public String[] getGameVersions() {
+        var vers = new ArrayList<String>();
+        var vs = versions != null ? versions : gameVersions;
+        if (vs != null){
+            for (var v : vs){
+                if (v.contains(".") && !v.contains("-"))
+                    vers.add(v);
+            }
+        }
+
+        return vers.toArray(String[]::new);
+    }
+
+    @Override
+    public LoaderType[] getLoaders() {
+        if (categories == null)
+            return null;
+
+        var arr = new ArrayList<LoaderType>();
+        for (var c : categories){
+            if (LoaderType.TYPES.containsKey(c)){
+                arr.add(LoaderType.TYPES.get(c));
+            }
+        }
+        return arr.stream().distinct().toArray(LoaderType[]::new);
     }
 
     @Override
@@ -83,41 +108,5 @@ public class ResourceRinth implements ModResource {
     public Date getCreationDate() {
         return DateUtil.fromString(published);
     }
-
-
-    /*public List<CResource> getAllVersions(Profile p){
-        List<Version> versions;
-        try{
-            versions = Modrinth.getModrinth().getProjectVersions(
-                    getId(),
-                    p.getVersionId(),
-                    p.getWrapperIdentifier(projectType));
-        } catch (NoConnectionException | HttpException e) {
-            versions = List.of();
-        }
-        return versions.stream().map(a -> (CResource)CResource.fromRinthResourceGeneric(this, a)).toList();
-    }
-
-
-    public List<CResource> getResourceWithDependencies(Profile p) {
-        var id = p.getWrapperIdentifier(projectType);
-
-        List<Version> versions;
-
-        try{
-            versions = Modrinth.getModrinth().getProjectVersions(getId(), p.getVersionId(), id);
-        } catch (NoConnectionException | HttpException e) {
-            versions = List.of();
-        }
-
-        if (versions.isEmpty())
-            return null;
-
-        try{
-            return Modrinth.getModrinth().getDependenciesFromVersion(versions.get(0), p.getVersionId(), id);
-        } catch (NoConnectionException | HttpException e) {
-            return null;
-        }
-    }*/
 
 }

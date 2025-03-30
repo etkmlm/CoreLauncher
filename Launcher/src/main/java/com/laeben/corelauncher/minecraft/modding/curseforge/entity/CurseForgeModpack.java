@@ -2,16 +2,17 @@ package com.laeben.corelauncher.minecraft.modding.curseforge.entity;
 
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ForgeModpack {
+public class CurseForgeModpack {
     private transient Manifest manifest;
     private transient String versionId;
     private final Modpack mp;
 
-    public ForgeModpack(Modpack mp) {
+    public CurseForgeModpack(Modpack mp) {
         this.mp = mp;
     }
 
@@ -41,7 +42,7 @@ public class ForgeModpack {
 
         return manifest.files.stream().map(x -> (Object) x.projectID).toList();
     }
-    public void applyResources(List<CResource> res, List<ForgeFile> files){
+    public void applyResources(List<CResource> res, List<CurseForgeFile> files){
         mp.mods = new ArrayList<>();
         mp.resources = new ArrayList<>();
         mp.shaders = new ArrayList<>();

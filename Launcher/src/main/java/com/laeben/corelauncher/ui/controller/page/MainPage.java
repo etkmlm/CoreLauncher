@@ -101,6 +101,13 @@ public class MainPage extends HandlerController {
 
             Main.getMain().addTab("pages/profileedit", Translator.translate("frame.title.pedit"), true, EditProfilePage.class);
         });
+        dockContext.addItem(null, Translator.translate("dock.menu.browser"), a -> {
+            var f = root.localToScreen(root.getBoundsInLocal());
+            lX = a.getScreenX() - f.getMinX();
+            lY = a.getScreenY() - f.getMinY();
+
+            Main.getMain().addTab("pages/browser", Translator.translate("frame.title.browser"), true, BrowserPage.class).setProfile(null);
+        });
 
         dockGhost = new CButton();
         dockGhost.setScaleX(0);

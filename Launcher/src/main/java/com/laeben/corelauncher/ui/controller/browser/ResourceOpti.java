@@ -1,28 +1,24 @@
 package com.laeben.corelauncher.ui.controller.browser;
 
-import com.laeben.corelauncher.api.entity.Profile;
-import com.laeben.corelauncher.minecraft.modding.entity.Mod;
-import com.laeben.corelauncher.minecraft.modding.entity.ModResource;
-import com.laeben.corelauncher.minecraft.modding.entity.ModSource;
-import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
+import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.Mod;
 import com.laeben.corelauncher.minecraft.wrapper.optifine.entity.OptiVersion;
 
 import java.util.Date;
-import java.util.List;
 
 public class ResourceOpti implements ModResource {
 
     private String id;
     private Date date;
     private String jsonName;
-    private Profile profile;
+    private String versionId;
 
-    public static ResourceOpti fromOptiVersion(Profile p, OptiVersion ver){
+    public static ResourceOpti fromOptiVersion(String versionId, OptiVersion ver){
         var res = new ResourceOpti();
         res.id = ver.getWrapperVersion();
         res.date = ver.releaseTime;
         res.jsonName = ver.getJsonName();
-        res.profile = p;
+        res.versionId = versionId;
         return res;
     }
 
@@ -58,8 +54,8 @@ public class ResourceOpti implements ModResource {
     }
 
     @Override
-    public List<String> getCategories() {
-        return List.of();
+    public String[] getCategories() {
+        return null;
     }
 
     @Override
@@ -73,13 +69,18 @@ public class ResourceOpti implements ModResource {
     }
 
     @Override
-    public List<String> getAuthors() {
-        return List.of("OptiFine");
+    public String[] getAuthors() {
+        return new String[]{"OptiFine"};
     }
 
     @Override
-    public List<String> getGameVersions() {
-        return List.of(profile.getVersionId());
+    public String[] getGameVersions() {
+        return new String[] {versionId};
+    }
+
+    @Override
+    public LoaderType[] getLoaders() {
+        return new LoaderType[]{LoaderType.FORGE};
     }
 
     @Override

@@ -135,7 +135,7 @@ public class Account{
                 Logger.getLogger().log(LogType.WARN, "Cannot acquire account '" + username + "', response from server: \n" + accInfoJson);
                 throw new NoConnectionException();
             }
-            var accInfo = GsonUtil.empty().fromJson(accInfoJson, JsonArray.class);
+            var accInfo = GsonUtil.EMPTY_GSON.fromJson(accInfoJson, JsonArray.class);
             if (!accInfo.isEmpty()){
 
                 uuid = accInfo.get(0).getAsJsonObject().get("id").getAsString();
@@ -143,12 +143,12 @@ public class Account{
                 String js = NetUtil.urlToString(PROFILE_URL + uuid);
 
                 if (js != null){
-                    var properties = GsonUtil.empty().fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
+                    var properties = GsonUtil.EMPTY_GSON.fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
 
                     var b64textures = properties.asList().stream().map(JsonElement::getAsJsonObject).filter(x -> x.get("name").getAsString().equals("textures")).findFirst().orElse(null);
                     String base64profile = b64textures == null ? null : b64textures.get("value").getAsString();
 
-                    var textures = GsonUtil.empty().fromJson(new String(Base64.getDecoder().decode(base64profile)), JsonObject.class).get("textures").getAsJsonObject();
+                    var textures = GsonUtil.EMPTY_GSON.fromJson(new String(Base64.getDecoder().decode(base64profile)), JsonObject.class).get("textures").getAsJsonObject();
 
                     var skin = textures.get("SKIN");
                     if (skin != null)

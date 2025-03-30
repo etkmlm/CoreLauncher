@@ -144,7 +144,7 @@ public class NeoForge extends Wrapper<NeoForgeVersion> {
 
             logState(".launch.state.finish");
 
-            var read = GsonUtil.empty().fromJson(profileInfo.read(), JsonObject.class);
+            var read = GsonUtil.EMPTY_GSON.fromJson(profileInfo.read(), JsonObject.class);
             var profiles = read.get("profiles").getAsJsonObject();
             var forge = profiles.get("neoforge");
             if (forge == null)

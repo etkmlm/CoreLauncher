@@ -45,7 +45,7 @@ public class Authenticator {
     public Authenticator(){
         instance = this;
 
-        gson = GsonUtil.empty();
+        gson = GsonUtil.EMPTY_GSON;
     }
 
     public static Authenticator getAuthenticator(){

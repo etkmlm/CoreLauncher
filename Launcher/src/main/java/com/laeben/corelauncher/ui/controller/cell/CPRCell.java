@@ -3,13 +3,12 @@ package com.laeben.corelauncher.ui.controller.cell;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
-import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.Modder;
-import com.laeben.corelauncher.minecraft.modding.entity.CResource;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
@@ -101,7 +100,7 @@ public class CPRCell<T extends CResource> extends CCell<T> {
                 var upResources = Modder.getModder().getUpdate(profile, item);
                 if (upResources != null){
                     var res = upResources.stream().filter(k -> k.isSameResource(item)).findFirst().orElse(item);
-                    Modder.getModder().includeAll(profile, upResources);
+                    Modder.getModder().include(profile, upResources);
                     UI.runAsync(() -> {
                         if (onAction != null)
                             onAction.accept((ValueEvent) new ValueEvent(UPDATE, res).setSource(this));

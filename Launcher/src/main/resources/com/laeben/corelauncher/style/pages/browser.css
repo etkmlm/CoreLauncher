@@ -1,3 +1,7 @@
+.root{
+    -fx-padding: 10px;
+}
+
 .radio-button{
     -fx-font-size: 13pt;
 }
@@ -25,6 +29,10 @@
     -fx-fill-width: true;
 }
 
+#lblNotFound{
+    -fx-font-size: 17pt;
+}
+
 .scroll-bar:horizontal{
     -fx-opacity: 0;
     -fx-pref-height: 0;
@@ -36,4 +44,15 @@
 
 .clear-button{
     -fx-background-color: #252525;
+}
+
+.combo-box, .combo-box .arrow-button{
+    -fx-background-color: #262626aa;
+}
+
+.filter-combo-choice{
+    -fx-padding: 5px;
+    -fx-background-radius: 8px;
+    -fx-background-color: #05050505;
+    -fx-spacing: 15px;
 }

@@ -3,14 +3,17 @@ package com.laeben.corelauncher.ui.controller.browser;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
+import com.laeben.corelauncher.minecraft.modding.entity.ResourcePreferences;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.*;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ModrinthSearch implements Search<Index> {
-    private SearchRinth searchRinth;
+    private ModrinthSearchRequest request;
     public FacetBuilder builder;
 
     private final Profile profile;
@@ -23,16 +26,22 @@ public class ModrinthSearch implements Search<Index> {
 
     public void setMainType(ResourceType type){
         builder.add(Facet.get("project_type", type.getName()).setId("type"));
-        builder.setLoader(profile.getWrapperIdentifier(type));
-        if (profile.getWrapper().getType().isNative())
-            builder.add(Facet.not("categories", List.of("modded")).setId("modded"));
-        else
+        if (profile != null){
+            builder.setLoader(profile.getWrapperIdentifier(type));
+            if (profile.getWrapper().getType().isNative())
+                builder.add(Facet.not("categories", List.of("modded")).setId("modded"));
+            else
+                builder.remove("modded");
+        }
+        else{
+            builder.setLoader(null);
             builder.remove("modded");
+        }
     }
 
     @Override
     public void setPageIndex(int index) {
-        searchRinth.offset = (index - 1) * 50;
+        request.offset = (index - 1) * 50;
     }
 
     public void setSortOrder(boolean asc){
@@ -40,25 +49,66 @@ public class ModrinthSearch implements Search<Index> {
     }
 
     public void setSortField(Index index){
-        searchRinth.setIndex(index);
+        request.setIndex(index);
     }
 
     public void setCategory(String name){
         builder.add(Facet.get("categories", name).setId("category"));
     }
 
-    public void setCategories(List<Object> names){
-        builder.add(Facet.and("categories", names.stream().map(Object::toString).toList()).setId("category"));
+    public void setCategories(List<String> names){
+        builder.add(Facet.and("categories", names.stream().toList()).setId("category"));
         //builder.add(Facet.or("categories", names.stream().map(Object::toString).toList()).setId("category"));
     }
 
-    public void reset(){
-        searchRinth = new SearchRinth();
-        searchRinth.limit = 50;
-        searchRinth.facets = builder = new FacetBuilder();
+    public void setGameVersions(List<String> versions){
+        //builder.setGameVersion(null);
 
-        builder.setGameVersion(profile.getVersionId());
-        builder.setLoader(profile.getWrapper().getType().getIdentifier());
+        if (profile != null)
+            return;
+
+        if (versions != null)
+            builder.add(Facet
+                    .or("versions", versions)
+                    .setId("versions")
+            );
+        else
+            builder.remove("versions");
+    }
+
+    @Override
+    public void setLoaders(List<LoaderType> loaders) {
+        //builder.setLoader(null);
+        if (profile != null)
+            return;
+
+        if (loaders != null)
+            builder.add(Facet
+                    .or("categories", loaders.stream().map(LoaderType::getIdentifier).toList())
+                    .setId("loaders")
+            );
+        else
+            builder.remove("loaders");
+    }
+
+    public void reset(){
+        request = new ModrinthSearchRequest();
+        request.limit = 50;
+        request.facets = builder = new FacetBuilder();
+
+        if (profile != null){
+            builder.setGameVersion(profile.getVersionId());
+            builder.setLoader(profile.getWrapper().getType().getIdentifier());
+        }
+        else{
+            builder.setGameVersion(null);
+            builder.setLoader(null);
+        }
+        // remove multiple game versions
+        builder.remove("versions");
+
+        // remove multiple loaders
+        builder.remove("loaders");
     }
 
 
@@ -67,10 +117,10 @@ public class ModrinthSearch implements Search<Index> {
     }
 
     public List<ResourceCell.Link> search(String query){
-        searchRinth.setQuery(query);
-        SearchResponseRinth resp = null;
+        request.setQuery(query);
+        ModrinthSearchResponse resp = null;
         try{
-            resp = Modrinth.getModrinth().search(searchRinth);
+            resp = Modrinth.getModrinth().search(request);
         } catch (NoConnectionException | HttpException ignored) {
 
         }
@@ -80,10 +130,33 @@ public class ModrinthSearch implements Search<Index> {
 
 
         totalPages = (int)Math.ceil(resp.totalHits / 50.0);
-        return resp.hits.stream().map(x -> new ResourceCell.Link(profile, x)).toList();
+
+        ResourcePreferences prefs;
+
+        if (profile != null)
+            prefs = ResourcePreferences.fromProfile(profile);
+        else {
+            prefs = ResourcePreferences.empty();
+
+            var loader = request.facets.get("loader");
+            var loaders = loader == null ? request.facets.get("loaders") : loader;
+
+            if (loaders != null && loaders.values != null && !loaders.values.isEmpty()){
+                prefs.includeLoaders(loaders.values.stream().map(LoaderType.TYPES::get).toList());
+            }
+
+            var ver = request.facets.get("version");
+            var vers = ver == null ? request.facets.get("versions") : ver;
+
+            if (vers != null && vers.values != null && !vers.values.isEmpty()){
+                prefs.includeGameVersions(vers.values);
+            }
+        }
+
+        return resp.hits.stream().map(x -> new ResourceCell.Link(prefs, x)).toList();
     }
 
-    public SearchRinth getSearch(){
-        return searchRinth;
+    public ModrinthSearchRequest getSearch(){
+        return request;
     }
 }

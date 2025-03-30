@@ -14,6 +14,7 @@ import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
 import com.laeben.corelauncher.ui.control.CMsgBox;
@@ -164,7 +165,7 @@ public class Modder {
             UI.runAsync(() -> {
                 remove(p, a);
                 try {
-                    include(p, up);
+                    include(p, List.of(up));
                 } catch (NoConnectionException | HttpException e) {
                     Logger.getLogger().log(e);
                 }
@@ -189,13 +190,6 @@ public class Modder {
                 Logger.getLogger().log( LogType.ERROR, "Error while installing mod: " + up.name);
             }
         }
-    }
-    public void includeMods(Profile p, List<Mod> mods){
-        for (var m : mods){
-            remove(p, m, true, false);
-            p.getMods().add(m);
-        }
-        Profiler.getProfiler().setProfile(p.getName(), null);
     }
 
     public ModInfo getModFromJarFile(Path p){
@@ -293,14 +287,6 @@ public class Modder {
         return new ModInfo(name, type, versionId, loader, version);
     }
 
-    public void includeResourcepacks(Profile p, List<Resourcepack> r){
-        for (var pack : r){
-            remove(p, pack, true, false);
-            p.getResources().add(pack);
-        }
-
-        Profiler.getProfiler().setProfile(p.getName(), null);
-    }
     public void installResourcepacks(Profile p, List<Resourcepack> rs) throws NoConnectionException, HttpException, StopException {
         var path = p.getPath().to("resourcepacks");
         int i = 0;
@@ -379,12 +365,6 @@ public class Modder {
 
         Profiler.getProfiler().setProfile(p.getName(), null);
     }
-    public void includeWorld(Profile p, World w){
-        if (p.getOnlineWorlds().stream().anyMatch(x -> x.equals(w)))
-            return;
-
-        Profiler.getProfiler().setProfile(p.getName(), a -> a.getOnlineWorlds().add(w));
-    }
 
     public void installModpacks(Profile p, List<Modpack> mps) throws NoConnectionException, HttpException, StopException {
         var path = p.getPath();
@@ -398,7 +378,7 @@ public class Modder {
                 Modrinth.getModrinth().extractModpack(p.getPath(), mp);*/
         }
     }
-    public void includeModpack(Profile p, Modpack mp) throws NoConnectionException, HttpException, StopException {
+    public int includeModpack(Profile p, Modpack mp) throws NoConnectionException, HttpException, StopException {
         var path = p.getPath();
 
         var oldMp = p.getModpacks().stream().filter(a -> a.isSameResource(mp)).findFirst();
@@ -410,9 +390,11 @@ public class Modder {
 
         EventHandler.disable();
 
-        includeMods(p, mp.mods);
-        includeResourcepacks(p, mp.resources);
-        includeShaders(p, mp.shaders);
+        int total = 0;
+
+        total += include(p, mp.mods, true);
+        total += include(p, mp.resources, true);
+        total += include(p, mp.shaders, true);
 
         EventHandler.enable();
 
@@ -429,8 +411,9 @@ public class Modder {
                 pxt.setWrapper(mp.wr);
                 pxt.setWrapperVersion(mp.wrId);
             }
-            pxt.getModpacks().add(mp);
+            pxt.getAllResources().add(mp);
         });
+        return total + 1;
     }
     private boolean checkModpackOverride(Profile profile, Modpack modpack) throws StopException {
         var task = new Task<Boolean>() {
@@ -469,7 +452,6 @@ public class Modder {
         }
     }
 
-
     public void installShaders(Profile p, List<Shader> shs) throws NoConnectionException, FileNotFoundException, HttpException, StopException {
         var path = p.getPath().to("shaderpacks");
         int i = 0;
@@ -499,33 +481,50 @@ public class Modder {
 
         }
     }
-    public void includeShaders(Profile p, List<Shader> s){
-        for (var pack : s){
-            remove(p, pack, true, false);
-            p.getShaders().add(pack);
+
+    /**
+     * Includes the given resources into the profile.
+     * Force include is false.
+     * @param p target profile
+     * @param resources resources to be included
+     * @return count of included resources
+     */
+    public <T extends CResource> int include(Profile p, List<T> resources) throws NoConnectionException, HttpException, StopException{
+        return include(p, resources, false);
+    }
+
+    /**
+     * Includes the given resources into the profile.
+     * @param p target profile
+     * @param resources resources to be included
+     * @param forceInclude ignores filtering while importing
+     * @return count of included resources
+     */
+    public <T extends CResource> int include(Profile p, List<T> resources, boolean forceInclude) throws NoConnectionException, HttpException, StopException {
+        int count = 0;
+
+        for (var r : resources){
+            if (!forceInclude && (r.isMeta() || (p.getWrapper().getType().isNative() && !r.getType().isGlobal())))
+                continue;
+
+            if (r.getType() == ResourceType.MODPACK){
+                count += includeModpack(p, (Modpack)r);
+                continue;
+            }
+
+            if (r.getType() != ResourceType.WORLD){
+                remove(p, r, true, false);
+            }
+            else if (p.getAllResources().stream().anyMatch(a -> a instanceof World w && w.equals(r)))
+                continue;
+
+            count++;
+            p.getAllResources().add(r);
         }
 
         Profiler.getProfiler().setProfile(p.getName(), null);
-    }
 
-    public void include(Profile p, CResource r) throws NoConnectionException, HttpException, StopException {
-        if (r.isMeta() || (p.getWrapper().getType().isNative() && !r.getType().isGlobal()))
-            return;
-
-        if (r instanceof Mod m)
-            includeMods(p, List.of(m));
-        else if (r instanceof Modpack mp)
-            includeModpack(p, mp);
-        else if (r instanceof Resourcepack rs)
-            includeResourcepacks(p, List.of(rs));
-        else if (r instanceof World w)
-            includeWorld(p, w);
-        else if (r instanceof Shader s)
-            includeShaders(p, List.of(s));
-    }
-    public void includeAll(Profile p, List<CResource> rs) throws NoConnectionException, HttpException, StopException {
-        for (var r : rs)
-            include(p, r);
+        return count;
     }
 
     public void remove(Profile profile, CResource r){
@@ -533,30 +532,10 @@ public class Modder {
     }
     public void remove(Profile profile, CResource r, boolean useExistingResource, boolean triggerSet){
         var path = profile.getPath();
-        var modsPath = path.to("mods");
-        //var savesPath = path.to("saves");
-        var resourcesPath = path.to("resourcepacks");
-        var shadersPath = path.to("shaderpacks");
 
         CResource finalR;
 
-        if (r instanceof Mod m){
-            if (useExistingResource){
-                var found = profile.getMods().stream().filter(a -> a.isSameResource(r)).findFirst();
-                if (found.isEmpty())
-                    return;
-                else
-                    m = found.get();
-            }
-            finalR = m;
-
-            if (m.fileName != null){
-                var pth = modsPath.to(m.fileName);
-                if (pth.exists())
-                    pth.delete();
-            }
-        }
-        else if (r instanceof Modpack mp){
+        if (r instanceof Modpack mp){
             if (useExistingResource){
                 var found = profile.getModpacks().stream().filter(a -> a.isSameResource(r)).findFirst();
                 if (found.isEmpty())
@@ -566,71 +545,39 @@ public class Modder {
             }
             finalR = mp;
 
-            var mods = profile.getMods().stream().filter(x -> x.belongs((Modpack) finalR)).toList();
-            var packs = profile.getResources().stream().filter(x -> x.belongs((Modpack) finalR)).toList();
-            var shaders = profile.getShaders().stream().filter(x -> x.belongs((Modpack) finalR)).toList();
-            for (var md : mods){
-                if (md.fileName == null)
+            for (var res : profile.getAllResources().stream().filter(x -> x instanceof ModpackContent mpc && mpc.belongs((Modpack) finalR)).toList()){
+                if (res.fileName == null)
                     continue;
-                var pth = modsPath.to(md.fileName);
-                if (pth.exists())
-                    pth.delete();
-            }
-            for (var pk : packs){
-                if (pk.fileName == null)
-                    continue;
-                var pth = resourcesPath.to(pk.fileName);
-                if (pth.exists())
-                    pth.delete();
-            }
-            for (var s : shaders){
-                if (s.fileName == null)
-                    continue;
-                var pth = shadersPath.to(s.fileName);
-                if (pth.exists())
-                    pth.delete();
+
+                path.to(res.getType().getStoringFolder(), res.fileName).delete();
             }
             var manifest = path.to("manifest-" + finalR.name + ".json");
             manifest.delete();
         }
-        else if (r instanceof Resourcepack p){
+        else{
+            var res = r;
+
             if (useExistingResource){
-                var found = profile.getResources().stream().filter(a -> a.isSameResource(r)).findFirst();
+                var found = profile.getAllResources().stream().filter(a -> a.isSameResource(r)).findFirst();
                 if (found.isEmpty())
                     return;
                 else
-                    p = found.get();
+                    res = found.get();
             }
-            finalR = p;
 
-            if (finalR.fileName != null){
-                var pth = resourcesPath.to(finalR.fileName);
-                if (pth.exists())
-                    pth.delete();
-            }
-        }
-        else if (r instanceof World w){
-            //savesPath.to(w.name).delete();
-            finalR = w;
-        }
-        else if (r instanceof Shader s){
-            if (useExistingResource){
-                var found = profile.getShaders().stream().filter(a -> a.isSameResource(r)).findFirst();
-                if (found.isEmpty())
-                    return;
-                else
-                    s = found.get();
-            }
-            finalR = s;
+            finalR = res;
 
-            shadersPath.to(finalR.name).delete();
+            if (finalR.getType() == ResourceType.SHADER && finalR.name != null)
+                path.to(finalR.getType().getStoringFolder(), finalR.name).delete();
+            else if (finalR.getType() == ResourceType.WORLD && finalR.name != null) {
+                //path.to(finalR.getType().getStoringFolder(), finalR.name).delete();
+            } else if (finalR.fileName != null)
+                path.to(finalR.getType().getStoringFolder(), finalR.fileName).delete();
         }
-        else
-            finalR = r;
 
         if (triggerSet)
-            Profiler.getProfiler().setProfile(profile.getName(), a -> a.removeSource(finalR));
+            Profiler.getProfiler().setProfile(profile.getName(), a -> a.removeResource(finalR));
         else
-            profile.removeSource(finalR);
+            profile.removeResource(finalR);
     }
 }

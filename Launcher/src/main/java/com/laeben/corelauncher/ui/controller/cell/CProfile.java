@@ -6,6 +6,7 @@ import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
@@ -84,7 +85,10 @@ public class CProfile extends CDockObject{
 
     @Override
     protected void onMouseReleased(MouseEvent e){
-        selectPrimary();
+        if (e.getButton() == MouseButton.MIDDLE)
+            OSUtil.open(getPrimaryProfile().getPath().toFile());
+        else
+            selectPrimary();
     }
 
     @Override

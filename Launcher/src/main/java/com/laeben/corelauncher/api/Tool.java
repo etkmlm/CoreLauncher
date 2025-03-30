@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
@@ -113,7 +114,6 @@ public class Tool {
      * Blank strings are directly considered invalid.
      * @param s source string
      * @param degree validity degree
-     * @return absolute url
      */
     public static boolean checkStringValidity(String s, ValidityDegree degree){
         if (s == null || s.isBlank())
@@ -153,5 +153,51 @@ public class Tool {
 
         var pattern = Pattern.compile(regex);
         return pattern.matcher(s).matches();
+    }
+
+    /**
+     * Check the validity of the given string, and beautify it.
+     * @param s source string
+     * @param degree validity degree
+     * @return beautified string or null
+     */
+    public static String beautifyString(String s, ValidityDegree degree){
+        if (s == null || s.isBlank() || degree == ValidityDegree.NONE)
+            return s;
+
+        if (degree == ValidityDegree.NORMAL){
+            var builder = new StringBuilder();
+            for (char c : s.toCharArray()){
+                if (c <= 127)
+                    builder.append(c);
+            }
+            return builder.toString();
+        }
+
+        if (degree == ValidityDegree.LOW){
+            var buffer = ByteBuffer.wrap(s.getBytes());
+            CharBuffer chars;
+            try {
+                chars = StandardCharsets.UTF_8
+                        .newDecoder()
+                        .onMalformedInput(CodingErrorAction.REPLACE)
+                        .replaceWith("")
+                        .decode(buffer);
+            } catch (CharacterCodingException ignored) {
+                return null;
+            }
+            return chars.toString();
+        }
+
+        String regex = switch (degree){
+            case HIGHEST -> "[^a-zA-Z]*";
+            case HIGHEST_PATH -> "[^a-zA-Z\\\\/:]*";
+            case HIGH -> "[^a-zA-Z0-9_\\-.\\s]*";
+            case HIGH_PATH -> "[^a-zA-Z0-9_\\-.\\s\\\\/:]*";
+            default -> "";
+        };
+
+        var pattern = Pattern.compile(regex);
+        return pattern.matcher(s).replaceAll("");
     }
 }

@@ -76,7 +76,7 @@ public class DStartupConfigurator extends CDialog<Boolean>{
     private void reloadLanguage(){
         lblTitle.setText(Translator.translate("welcome"));
         lblLanguage.setText(Translator.translate("settings.language"));
-        lblUsername.setText(Translator.translate("account"));
+        lblUsername.setText(Translator.translate("username"));
         btnApply.setText(Translator.translate("option.apply"));
         chkOnline.setText(Translator.translate("online"));
     }
