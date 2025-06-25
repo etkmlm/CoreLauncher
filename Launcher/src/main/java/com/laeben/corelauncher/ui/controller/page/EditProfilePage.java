@@ -553,8 +553,8 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             else if (!(wr instanceof Vanilla) && tempProfile.getWrapperVersion() != null){
                 cbWrapperVersion.setValue(tempProfile.getWrapperVersion());
             }
-            ram.setMin(tempProfile.getMinRAM());
-            ram.setMax(tempProfile.getMaxRAM());
+            ram.setDefaultMin(tempProfile.getMinRAM());
+            ram.setDefaultMax(tempProfile.getMaxRAM());
             sldRAM.setValue(tempProfile.getMaxRAM());
         }
         catch (Exception e){

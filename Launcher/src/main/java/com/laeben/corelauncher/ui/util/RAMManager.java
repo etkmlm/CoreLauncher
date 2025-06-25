@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.util;
 
+import javafx.beans.InvalidationListener;
 import javafx.event.EventHandler;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
@@ -15,12 +16,14 @@ public abstract class RAMManager {
     private final int step;
 
     private final EventHandler<ScrollEvent> scroller;
+    private final InvalidationListener valueListener;
 
     private Spinner<Integer> spnMin;
     private Spinner<Integer> spnMax;
     private Slider slider;
 
     private boolean sliderValueChangedAuto = false;
+    private boolean attendedAuto = false;
 
     public RAMManager() {
         this(512, 32);
@@ -30,8 +33,16 @@ public abstract class RAMManager {
         fMin = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
         fMax = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
 
-        fMin.valueProperty().addListener(a -> needsToSave());
-        fMax.valueProperty().addListener(a -> needsToSave());
+        valueListener = a -> {
+            if (attendedAuto){
+                attendedAuto = false;
+            }
+            else
+                needsToSave();
+        };
+
+        fMin.valueProperty().addListener(valueListener);
+        fMax.valueProperty().addListener(valueListener);
 
         fMin.setAmountToStepBy(stepMb);
         fMax.setAmountToStepBy(stepMb);
@@ -121,10 +132,22 @@ public abstract class RAMManager {
     }
 
     public void setMin(int val){
+        //attendedAuto = false;
+        fMin.setValue(val);
+    }
+
+    public void setDefaultMin(int val){
+        attendedAuto = true;
         fMin.setValue(val);
     }
 
     public void setMax(int val){
+        //attendedAuto = false;
+        fMax.setValue(val);
+    }
+
+    public void setDefaultMax(int val){
+        attendedAuto = true;
         fMax.setValue(val);
     }
 
@@ -139,5 +162,8 @@ public abstract class RAMManager {
     public void dispose(){
         spnMax.removeEventFilter(ScrollEvent.ANY, scroller);
         spnMin.removeEventFilter(ScrollEvent.ANY, scroller);
+
+        fMin.valueProperty().removeListener(valueListener);
+        fMax.valueProperty().removeListener(valueListener);
     }
 }
