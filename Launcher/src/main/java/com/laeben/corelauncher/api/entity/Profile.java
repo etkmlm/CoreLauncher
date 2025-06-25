@@ -59,7 +59,7 @@ public class Profile {
         }
     }
 
-    private static final Gson gson = GsonUtil.DEFAULT_GSON.newBuilder()
+    public static final Gson PROFILE_GSON = GsonUtil.DEFAULT_GSON.newBuilder()
             .registerTypeAdapter(Profile.class, new ProfileFactory())
             .create();
 
@@ -92,7 +92,7 @@ public class Profile {
     public static Profile fromFolder(Path profilePath) {
         try{
             var file = profilePath.to("profile.json");
-            return (file.exists() ? gson.fromJson(file.read(), Profile.class) : new Profile())
+            return (file.exists() ? PROFILE_GSON.fromJson(file.read(), Profile.class) : new Profile())
                     .setName(profilePath.getName()).save();
         }
         catch (Exception e){
@@ -128,10 +128,6 @@ public class Profile {
 
     public String getWrapperIdentifier(ResourceType type){
         return type == null || type.isGlobal() ? null : getWrapper().getType().getIdentifier();
-    }
-
-    public LoaderType getLoaderType(ResourceType resType){
-        return resType == null || resType.isGlobal() ? null : getWrapper().getType();
     }
 
     public Wrapper getWrapper(){
@@ -365,7 +361,7 @@ public class Profile {
             return null;
 
         try {
-            String json = gson.toJson(this);
+            String json = PROFILE_GSON.toJson(this);
 
             getPath().to("profile.json").write(json);
         }

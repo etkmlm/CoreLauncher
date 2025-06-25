@@ -2,6 +2,7 @@ package com.laeben.corelauncher.minecraft.util;
 
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.util.APIListener;
@@ -9,6 +10,7 @@ import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.laeben.corelauncher.util.entity.LogType;
 
 import java.io.IOException;
 import java.util.List;
@@ -151,6 +153,11 @@ public class Authenticator {
             OSUtil.openURL(CODE_URL);
             String code = listen("code");
 
+            if (code == null){
+                Logger.getLogger().log(LogType.ERROR, "Authentication Failed: code was null");
+                return Tokener.empty(username);
+            }
+
             var xbl = getXbl(code);
 
             var info = getATokenFromToken(xbl.xbl);
@@ -158,6 +165,9 @@ public class Authenticator {
             return new Tokener(xbl, info);
         } catch (IOException | NoConnectionException e){
             return Tokener.empty(username);
+        }
+        catch (Exception e){
+            throw new PerformException("authFail", e);
         }
     }
 }

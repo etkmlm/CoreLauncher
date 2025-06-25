@@ -9,7 +9,6 @@ import com.laeben.corelauncher.api.shortcut.Shortcut;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.util.EventHandler;
-import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
@@ -138,7 +137,7 @@ public class Profiler {
     }
 
     private Profile importFromBackup(Path p){
-        var profile = GsonUtil.DEFAULT_GSON.fromJson(p.read(), Profile.class);
+        var profile = Profile.PROFILE_GSON.fromJson(p.read(), Profile.class);
         String gen = generateName(profile.getName());
         p.parent().move(profilesDir.to(gen));
         verifyProfileIcon(profile);
@@ -188,10 +187,10 @@ public class Profiler {
             path.extract(tempProfiles, null);
             String name = path.getFirstZipEntry().replace("/", "");
             var px = tempProfiles.to(name, "profile.json");
-            p = GsonUtil.DEFAULT_GSON.fromJson(px.read(), Profile.class);
+            p = Profile.PROFILE_GSON.fromJson(px.read(), Profile.class);
         }
         else if (ext.equals("json")){
-            p = GsonUtil.DEFAULT_GSON.fromJson(path.read(), Profile.class);
+            p = Profile.PROFILE_GSON.fromJson(path.read(), Profile.class);
             path.copy(tempProfiles.to(p.getName(), "profile.json"));
         }
         else
@@ -252,9 +251,9 @@ public class Profiler {
         String read;
         if (profile.getIcon() != null && !profile.getIcon().isNetwork() && profile.getIcon().getUrl() == null){
             var p = profile.getIcon().getPath(Configurator.getConfig().getImagePath());
-            var f = GsonUtil.DEFAULT_GSON.fromJson(json.read(), Profile.class);
+            var f = Profile.PROFILE_GSON.fromJson(json.read(), Profile.class);
             f.setIcon(p.exists() ? ImageEntity.fromBase64(ImageCacheManager.encodeImage(p)) : null);
-            read = GsonUtil.DEFAULT_GSON.toJson(f);
+            read = Profile.PROFILE_GSON.toJson(f);
         }
         else
             read = json.read();

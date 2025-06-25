@@ -9,6 +9,7 @@ import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ModsSearchSor
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeSearchRequest;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeSearchResponse;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
+import com.laeben.corelauncher.minecraft.modding.entity.ModResource;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourcePreferences;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 
@@ -61,7 +62,7 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
     @Override
     public void setGameVersions(List<String> gameVersions) {
         //request.gameVersion = null;
-        request.gameVersions = gameVersions == null ? null : gameVersions.stream().map(x -> "\"" + x + "\"").toList();
+        request.gameVersions = gameVersions == null ? null : Collections.unmodifiableList(gameVersions);
     }
 
     @Override
@@ -81,7 +82,7 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
         if (profile.getWrapper().getType().isNative() && !type.isGlobal())
             setLoaderType(CurseForgeWrapper.Type.NONE);
         else
-            setLoaderType(CurseForgeWrapper.Type.fromLoaderType(profile.getLoaderType(type)));
+            setLoaderType(CurseForgeWrapper.Type.fromLoaderType(ModResource.getGlobalSafeLoaders(type, profile.getWrapper().getType())));
     }
 
     public void setSortOrder(boolean asc){
@@ -127,9 +128,9 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
             else if (request.gameVersion != null)
                 prefs.includeGameVersions(List.of(request.gameVersion));
             if (request.modLoaderTypes != null)
-                prefs.includeLoaders(request.modLoaderTypes.stream().map(CurseForgeWrapper.Type::toLoaderType).toList());
+                prefs.includeLoaderTypes(request.modLoaderTypes.stream().map(CurseForgeWrapper.Type::toLoaderType).toList());
             else if (request.modLoaderType != null)
-                prefs.includeLoaders(List.of(CurseForgeWrapper.Type.toLoaderType(request.modLoaderType)));
+                prefs.includeLoaderTypes(List.of(CurseForgeWrapper.Type.toLoaderType(request.modLoaderType)));
         }
 
         return sData.data.stream().map(x -> new ResourceCell.Link(prefs, x)).toList();

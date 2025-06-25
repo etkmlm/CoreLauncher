@@ -67,7 +67,10 @@ public class OSUtil {
         new Thread(() -> {
             try {
                 Desktop.getDesktop().open(file);
-            } catch (IOException e) {
+            } catch (IllegalArgumentException ignored){
+
+            }
+            catch (IOException e) {
                 Logger.getLogger().log(e);
             }
         }).start();

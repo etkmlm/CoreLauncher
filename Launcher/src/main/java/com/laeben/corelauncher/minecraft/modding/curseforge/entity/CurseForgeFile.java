@@ -43,6 +43,9 @@ public class CurseForgeFile {
     public int downloadCount;
     public String downloadUrl;
     public String[] gameVersions;
+    public transient String mainGameVersion;
+    public transient String mainLoader;
+
     @Expose
     public List<Dependency> dependencies;
     @Expose

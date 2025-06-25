@@ -21,11 +21,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Modrinth implements ModSource {
     //private static final String API_KEY = "$2a$10$fdQjum78EUUUcJIw2a6gb.m1DNZCQzwvf0EBcfm.YgwIrmFX/1K3m";
     private static final String BASE_URL = "https://api.modrinth.com";
+    private static final String PREFERRED_SHADER_MOD = "YL57xq9U"; // Iris
+
     private static Modrinth instance;
     private final Gson gson;
     private final RequesterFactory factory;
@@ -166,36 +169,63 @@ public class Modrinth implements ModSource {
     /**
      * Get projects' version entities from Modrinth.
      * @param rId project id
-     * @param vId version id
-     * @param loader loader identifier
+     * @param versionIds version id
+     * @param loaders loaders
      * @return full-loaded version entities
      */
-    public List<Version> getProjectVersions(String rId, String vId, LoaderType loader) throws NoConnectionException, HttpException {
+    public List<Version> getProjectVersions(String rId, List<String> versionIds, List<LoaderType> loaders) throws NoConnectionException, HttpException {
         var str = factory.create()
                 .to("/v2/project/" + rId + "/version");
 
-        var validVer = vId != null;
-        var validLoader = loader != null && loader.getIdentifier() != null && !loader.isNative();
+        boolean validVersions = versionIds != null;
+        boolean validLoaders = false;
 
-        if (validVer)
-            str.withParam(new RequestParameter("game_versions", StrUtil.jsArray(List.of(vId))).markAsEscapable());
+        List<String> loaderIds = null;
 
-        if (validLoader)
-            str.withParam(new RequestParameter("loaders", StrUtil.jsArray(List.of(loader.getIdentifier()))).markAsEscapable());
+        if (loaders != null){
+            loaderIds = loaders.stream().filter(a -> !a.isNative()).map(LoaderType::getIdentifier).toList();
+            if (!loaderIds.isEmpty())
+                validLoaders = true;
+        }
+
+        if (validVersions)
+            str.withParam(new RequestParameter("game_versions", StrUtil.jsArray(versionIds)).markAsEscapable());
+
+        if (validLoaders)
+            str.withParam(new RequestParameter("loaders", StrUtil.jsArray(loaderIds)).markAsEscapable());
 
         var vers = processVersions(str.getString());
-        if (!validVer && !validLoader)
+        if (!validVersions && !validLoaders)
             return vers;
 
         var newVers = new ArrayList<Version>();
         for (var ver : vers){
             if (ver.gameVersions != null){
-                if (validVer && ver.gameVersions.stream().allMatch(x -> x != null && !x.isBlank() && !vId.startsWith(x)))
-                    continue;
+                if (validVersions){
+                    boolean match = false;
+                    for (var v : ver.gameVersions){
+                        if (v == null || v.isBlank())
+                            continue;
+
+                        for (var x : versionIds){
+                            if (x.startsWith(v)){
+                                match = true;
+                                break;
+                            }
+                        }
+
+                        if (match)
+                            break;
+                    }
+                    if (!match)
+                        continue;
+                }
+                /*if (validVersions && ver.gameVersions.stream().allMatch(x -> x != null && !x.isBlank() && versionIds.stream().noneMatch(v -> v.startsWith(x))))
+                    continue;*/
             }
 
             if (ver.loaders != null){
-                if (validLoader && !ver.loaders.contains(loader.getIdentifier()))
+                if (validLoaders && Collections.disjoint(ver.loaders, loaderIds))
                     continue;
             }
 
@@ -258,7 +288,7 @@ public class Modrinth implements ModSource {
                 /*var v = vers.stream().filter(a -> a.projectId.equals(r.getId())).findFirst();
                 if (v.isEmpty())
                     continue;*/
-                var v = getNewestVersionOfProject(r, opt.getVersionId(), opt.getLoaderType());
+                var v = getNewestVersionOfProject(r, opt.getVersionIds(), opt.getLoaders());
                 if (v == null)
                     continue;
 
@@ -271,12 +301,12 @@ public class Modrinth implements ModSource {
         return all;
     }
 
-    private Version getNewestVersionOfProject(ModrinthResource r, String vId, LoaderType loader) throws NoConnectionException, HttpException {
+    private Version getNewestVersionOfProject(ModrinthResource r, List<String> versionIds, List<LoaderType> loaders) throws NoConnectionException, HttpException {
         /*List<Version> vs = r.versions == null || r.versions.isEmpty() ?
                 getProjectVersions(r.id, vId, loader) :
                 getVersions(List.of(r.versions.get(0)));*/
 
-        var vs = getProjectVersions(r.getId(), vId, loader);
+        var vs = getProjectVersions(r.getId(), versionIds, loaders);
 
         return vs.isEmpty() ? null : vs.get(0);
     }
@@ -297,7 +327,7 @@ public class Modrinth implements ModSource {
 
     @Override
     public List<CResource> getAllCoreResources(ModResource res, Options opt) throws NoConnectionException, HttpException {
-        var versions = getProjectVersions(res.getId().toString(), opt.getVersionId(), opt.getLoaderType());
+        var versions = getProjectVersions(res.getId().toString(), opt.getVersionIds(), opt.getLoaders());
         return versions.stream().map(a -> (CResource)CResource.fromRinthResourceGeneric((ModrinthResource) res, a)).toList();
     }
 
@@ -306,7 +336,7 @@ public class Modrinth implements ModSource {
         if (!(res instanceof ModrinthResource r))
             return null;
 
-        var v = opt.useMeta() ? null : getNewestVersionOfProject(r, opt.getVersionId(), opt.getLoaderType());
+        var v = opt.useMeta() ? null : getNewestVersionOfProject(r, opt.getVersionIds(), opt.getLoaders());
 
         return ((opt.getAggregateModpack() && res.getResourceType() == ResourceType.MODPACK) || opt.getIncludeDependencies()) && v != null ? getDependenciesFromVersion(v, r, opt) : List.of(CResource.fromRinthResourceGeneric(r, v));
     }
@@ -366,7 +396,10 @@ public class Modrinth implements ModSource {
         var vDeps = getVersions(mp.dependencies.stream().filter(x -> x.fileId != null).map(x -> x.fileId.toString()).toList());
         var pDeps = getResources(vDeps.stream().map(x -> x.projectId).toList());
 
-        var all = new ArrayList<>(getCoreResources(mp.dependencies.stream().filter(x -> x.id != null).map(x -> x.id).toList(), Options.create(opt.getVersionId(), opt.getLoaderType())));
+        var vId = opt.getVersionId();
+        var loader = opt.getLoaderType();
+
+        var all = new ArrayList<>(getCoreResources(mp.dependencies.stream().filter(x -> x.id != null).map(x -> x.id).toList(), Options.create(vId, loader)));
 
         for (var a : vDeps){
             var p = pDeps.stream().filter(x -> x.getId().equals(a.projectId)).findFirst().orElse(null);
@@ -386,9 +419,9 @@ public class Modrinth implements ModSource {
         var mf = gson.fromJson(extractModpack(mp, path, true).read(), JsonObject.class);
         String key;
 
-        key = opt.getLoaderType().getIdentifier();
+        key = loader.getIdentifier();
 
-        if (opt.getLoaderType() == LoaderType.FABRIC)
+        if (loader == LoaderType.FABRIC)
             key += "-loader";
 
         // check disabled dependencies
@@ -432,5 +465,10 @@ public class Modrinth implements ModSource {
         String ver = deps.get(key).getAsString();
         mp.wr = opt.getWrapper();
         mp.wrId = ver;
+    }
+
+
+    public List<CResource> getPreferredShaderMod(Options opt) throws NoConnectionException, HttpException {
+        return getCoreResource(PREFERRED_SHADER_MOD, opt);
     }
 }

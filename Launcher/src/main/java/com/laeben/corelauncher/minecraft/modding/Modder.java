@@ -176,7 +176,7 @@ public class Modder {
 
             try{
                 if (NetUtil.download(up.fileUrl, path.to(up.fileName), false) == null){
-                    var x = Modrinth.getModrinth().getProjectVersions(a.name, p.getVersionId(), p.getWrapper().getType());
+                    var x = Modrinth.getModrinth().getProjectVersions(a.name, List.of(p.getVersionId()), List.of(p.getWrapper().getType()));
                     var s = x.stream().flatMap(f -> f.getFiles().stream()).filter(f -> f.filename != null && f.filename.equals(a.fileName)).findFirst();
 
                     if (s.isEmpty()){

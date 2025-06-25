@@ -349,13 +349,13 @@ public class FilterSection<T> extends VBox {
     public void resetChoices(){
         selected.clear();
         states.clear();
-        vbChoices.getChildren().clear();
         if (type.getScheme().doesExistanceMeansChecked()){
-            comboBox.getItems().clear();
+            //comboBox.getItems().clear();
             comboBox.getSelectionModel().clearSelection();
             comboBox.setValue(null);
             comboIds.clear();
         }
+        vbChoices.getChildren().clear();
     }
 
     public void reselectChoices(){

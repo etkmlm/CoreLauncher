@@ -5,6 +5,8 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
@@ -16,11 +18,13 @@ import com.laeben.corelauncher.ui.controller.cell.CMCell;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.util.ImageUtil;
+import com.laeben.corelauncher.util.entity.LogType;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -34,7 +38,11 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class DModSelector<T extends ModResource> extends CDialog<CResource> {
+public class DModSelector<T extends ModResource> extends CDialog<DModSelector.ModSelection> {
+
+    public record ModSelection(CResource resource, Profile profile){
+
+    }
 
     private final T resource;
     private final ResourcePreferences preferences;
@@ -42,6 +50,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
     private final Executor executor;
 
     private CResource installed;
+    private Profile newProfile;
 
     @FXML
     private CView icon;
@@ -61,6 +70,8 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
     private CButton btnClose;
     @FXML
     private CButton btnModpack;
+    @FXML
+    private ScrollPane scroll;
     @FXML
     private CList<CResource> lvVersions;
     @FXML
@@ -83,7 +94,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
         lblName.setText(resource.getName());
         txtDesc.setText(resource.getDescription() + "\n\n" + Translator.translateFormat("mods.author",String.join(",", resource.getAuthors())));
         btnClose.setOnMouseClicked(a -> {
-            setResult(installed);
+            setResult(new ModSelection(installed, newProfile));
             close();
         });
         btnClose.enableTransparentAnimation();
@@ -93,6 +104,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
         lblName.setOnMouseClicked(a -> navigateWeb());
         icon.setOnMouseClicked(a -> navigateWeb());
 
+        lvVersions.setLoadLimit(15);
         lvVersions.setFilterFactory(a -> a.query() != null && a.input().fileName.contains(a.query().toLowerCase(Locale.US)));
         lvVersions.setCellFactory(() -> new CMCell().setOnTestExistance(a -> {
             if (preferences.getProfile() != null){
@@ -104,14 +116,30 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
         }).setOnInstallClicked(a -> executor.execute(() -> {
             var profile = preferences.getProfile() == null ? null : preferences.getProfile();
 
-            if (profile == null){
+            boolean isNewProfile = false;
 
-                //profile = ResourcePreferences.createProfileFromPreferences(preferences, a.getItem().);
+            if (profile == null){
+                if (a.getItem().targetVersionId == null || a.getItem().targetLoader == null){
+                    Logger.getLogger().log(LogType.ERROR, "Required info could not be found to create a profile.");
+                    return;
+                }
+
+                try {
+                    profile = ResourcePreferences.createProfileFromPreferences(preferences, a.getItem().targetVersionId, LoaderType.fromIdentifier(a.getItem().targetLoader), null);
+                    isNewProfile = true;
+                } catch (PerformException e) {
+                    Logger.getLogger().log(e);
+                    return;
+                }
             }
+
+            if (isNewProfile)
+                newProfile = profile;
 
             if (a.isInstalled()){
                 installed = null;
-                Modder.getModder().remove(profile, a.getItem());
+                if (!isNewProfile)
+                    Modder.getModder().remove(profile, a.getItem());
                 UI.runAsync(() -> a.setInstalled(false));
                 return;
             }
@@ -146,7 +174,7 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
             wModpack.begin().withTask(a -> new Task<>() {
                     @Override
                     protected List<CResource> call() throws Exception {
-                        return preferences.getProfile() == null ? List.of() : resource.getSourceType().getSource().getCoreResource(resource, ModSource.Options.create(preferences.getProfile()).aggregateModpack());
+                        return resource.getSourceType().getSource().getCoreResource(resource, ModSource.Options.create(preferences).aggregateModpack());
                     }
             }).onDone(x -> {
                 var mps = x.getValue();
@@ -180,10 +208,27 @@ public class DModSelector<T extends ModResource> extends CDialog<CResource> {
         }).start();
     }
 
-    public Optional<CResource> select(CResource installed) throws NoConnectionException, HttpException {
+    public Optional<ModSelection> select(CResource installed) throws NoConnectionException, HttpException {
         this.installed = installed;
-        //lvVersions.getItems().setAll(resource.getSourceType().getSource().getAllCoreResources(resource, ModSource.Options.create(profile.getVersionId(), profile.getLoaderType(resource.getResourceType()))));
+
+        ModSource.Options options;
+
+        if (preferences.getProfile() == null)
+            options = ModSource.Options.create(preferences.getGameVersions(), ModResource.getGlobalSafeLoaders(resource.getResourceType(), preferences.getLoaderTypes()));
+        else{
+            var profile = preferences.getProfile();
+            options = ModSource.Options.create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(resource.getResourceType(), profile.getWrapper().getType()));
+        }
+
+        lvVersions.getItems().setAll(resource.getSourceType().getSource().getAllCoreResources(resource, options));
         lvVersions.load();
+
+        scroll.vvalueProperty().addListener((a, b, c) -> {
+            if (b.equals(c) || scroll.getVmax() > c.doubleValue())
+                return;
+            lvVersions.load();
+        });
+
         return super.action();
     }
 

@@ -290,7 +290,7 @@ public class BrowserPage extends HandlerController {
 
                 preferences = ResourcePreferences.empty()
                         .includeGameVersions(vers)
-                        .includeLoaders(List.of(LoaderType.OPTIFINE));
+                        .includeLoaderTypes(List.of(LoaderType.OPTIFINE));
             }
 
             resources.addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeWrapperVersion), y.checkForge(y.forgeWrapperVersion))).map(a -> new ResourceCell.Link(preferences, ResourceOpti.fromOptiVersion(a.id, a))).toList());
@@ -318,6 +318,8 @@ public class BrowserPage extends HandlerController {
 
                 search.setLoaders(loaders);
             }
+            else
+                search.setLoaders(null);
         }
         else
             search.setLoaders(null);

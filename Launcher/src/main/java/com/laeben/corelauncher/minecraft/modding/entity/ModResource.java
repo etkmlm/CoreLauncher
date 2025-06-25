@@ -17,6 +17,10 @@ public interface ModResource {
     ModSource.Type getSourceType();
     Date getCreationDate();
 
+    static <T> T getGlobalSafeLoaders(ResourceType resType, T loader){
+        return resType == null || resType.isGlobal() ? null : loader;
+    }
+
     //List<CResource> getResourceWithDependencies(Profile p);
     //List<CResource> getAllVersions(Profile p);
 }

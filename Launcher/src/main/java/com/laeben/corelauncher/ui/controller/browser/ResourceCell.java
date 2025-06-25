@@ -3,9 +3,7 @@ package com.laeben.corelauncher.ui.controller.browser;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
-import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.CoreLauncherFX;
-import com.laeben.corelauncher.api.Tool;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.exception.PerformException;
@@ -13,16 +11,12 @@ import com.laeben.corelauncher.api.util.DateUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
-import com.laeben.corelauncher.minecraft.Wrapper;
-import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
-import com.laeben.corelauncher.minecraft.wrapper.entity.WrapperVersion;
+import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
-import com.laeben.corelauncher.ui.controller.Main;
-import com.laeben.corelauncher.ui.controller.page.BrowserPage;
 import com.laeben.corelauncher.ui.dialog.DModSelector;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.entity.animation.ReverseBorderColorAnimation;
@@ -39,9 +33,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class ResourceCell extends ListCell<ResourceCell.Link> {
 
@@ -71,9 +66,9 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
         exists.addListener(a -> UI.runAsync(() -> btnInstall.setText(exists.get() == null ? "⭳" : "—")));
     }
 
-    private void playAnimation(boolean val){
+    private void playAnimation(boolean isPositive){
         UI.runAsync(() -> {
-            animation.setColor(Color.web(val ? "#ababab" : "#7f32a8"));
+            animation.setColor(Color.web(isPositive ? "#ababab" : "#7f32a8"));
 
             animation.playFromStart();
         });
@@ -175,7 +170,23 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
             boolean isNewProfile = false;
 
+            boolean useShaderSetup = false;
+
             if (profile == null){
+                if (res.getResourceType() == ResourceType.SHADER && !prefs.hasLoaderTypes()){
+                    List<String> versions = null;
+                    if (prefs.hasGameVersions())
+                        versions = prefs.getGameVersions();
+
+                    prefs = ResourcePreferences.getShaderPreferences();
+
+                    if (versions != null){
+                        prefs.clearAnd().includeGameVersions(versions);
+                    }
+
+                    useShaderSetup = true;
+                }
+
                 try {
                     profile = ResourcePreferences.createProfileFromPreferences(prefs, res);
 
@@ -191,17 +202,18 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
             if (exists.get() == null){
                 try{
-                    CResource mod;
+                    CResource resourceToInstall;
                     if (res instanceof ResourceOpti ro){
-                        mod = ro.getMod();
+                        resourceToInstall = ro.getMod();
 
-                        Profiler.getProfiler().setProfile(profile.getName(), x -> x.getAllResources().add(mod));
+                        Profiler.getProfiler().setProfile(profile.getName(), x -> x.getAllResources().add(resourceToInstall));
                     }
                     else{
                         var opt = ModSource.Options
-                                .create(profile.getVersionId(), profile.getLoaderType(res.getResourceType()));
+                                .create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(res.getResourceType(), profile.getWrapper().getType()));
                         if (res.getResourceType() != ResourceType.MODPACK)
                             opt.dependencies(true);
+
                         var all = res.getSourceType().getSource()
                                 .getCoreResource(res.getId(), opt);
                         if (all == null){
@@ -209,13 +221,19 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
                             return;
                         }
 
-                        mod = all.get(0);
+                        resourceToInstall = all.get(0);
+
+                        if (useShaderSetup){
+                            var rrrr = Modrinth.getModrinth().getPreferredShaderMod(opt);
+                            if (rrrr != null)
+                                all = Stream.concat(all.stream(), rrrr.stream()).distinct().toList();
+                        }
 
                         if (Modder.getModder().include(profile, all) == 0)
                             return;
                     }
 
-                    exists.set(mod);
+                    exists.set(resourceToInstall);
                     playAnimation(true);
                 } catch (NoConnectionException | HttpException | StopException e) {
                     exists.set(null);
@@ -242,13 +260,31 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
         if (selector == null)
             selector = new DModSelector<>(link.resource(), link.preferences());
-        Optional<CResource> r = Optional.empty();
+        Optional<DModSelector.ModSelection> r = Optional.empty();
         try {
-            r = (Optional<CResource>)selector.select(exists.get());
+            r = (Optional<DModSelector.ModSelection>)selector.select(exists.get());
         } catch (NoConnectionException | HttpException ignored) {
 
         }
-        exists.set(r.orElse(null));
+
+        //selector = null;
+
+        if (r.isPresent()){
+            var g = r.get();
+
+            if (exists.get() == null && g.resource() != null)
+                playAnimation(true);
+            if (exists.get() != null && g.resource() == null)
+                playAnimation(false);
+
+            exists.set(g.resource());
+
+
+            if (g.profile() != null && onNewProfileCreated != null){
+                UI.runAsync(() -> onNewProfileCreated.accept(g.profile()));
+            }
+        }
+
     }
 
     public ObjectProperty<CResource> existsProperty(){

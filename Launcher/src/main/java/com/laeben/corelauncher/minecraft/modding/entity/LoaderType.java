@@ -10,7 +10,7 @@ import com.laeben.corelauncher.minecraft.wrapper.quilt.Quilt;
 
 import java.util.*;
 
-public enum LoaderType {
+public enum LoaderType implements CharSequence {
 
     CUSTOM("custom", Custom.class, true),
     VANILLA("vanilla", Vanilla.class, true),
@@ -62,6 +62,21 @@ public enum LoaderType {
 
     public boolean isSupported(){
         return cls != null;
+    }
+
+    @Override
+    public int length() {
+        return identifier.length();
+    }
+
+    @Override
+    public char charAt(int index) {
+        return identifier.charAt(index);
+    }
+
+    @Override
+    public CharSequence subSequence(int start, int end) {
+        return identifier.subSequence(start, end);
     }
 
     @Override

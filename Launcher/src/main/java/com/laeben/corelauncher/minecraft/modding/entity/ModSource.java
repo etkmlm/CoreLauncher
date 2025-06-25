@@ -20,26 +20,38 @@ import java.util.function.Supplier;
 public interface ModSource {
 
     class Options implements Cloneable{
-        private final String versionId;
-        private final LoaderType loader;
-        private final Wrapper<?> wrapper;
+        private final List<String> versionIds;
+        private final List<LoaderType> loaders;
+
         private boolean incDeps;
         private boolean useMeta;
         private boolean incSelf = true;
         private boolean applyMp;
         private Options(final String versionId, final LoaderType loader){
-            this.versionId = versionId;
-            this.loader = loader;
-            this.wrapper = loader == null ? null : Wrapper.getWrapper(loader.getIdentifier());
+            this.versionIds = versionId == null ? null : List.of(versionId);
+            this.loaders = loader == null ? null : List.of(loader);
         }
 
         private Options(final String versionId, final Wrapper wr){
-            this.versionId = versionId;
-            this.wrapper = wr;
-            this.loader = wr.getType();
+            this.versionIds = versionId == null ? null : List.of(versionId);
+            this.loaders = wr == null ? null : List.of(wr.getType());
         }
+
+        private Options(final List<String> versionIds, final List<LoaderType> loaders){
+            this.versionIds = versionIds == null ? null : List.copyOf(versionIds);
+            this.loaders = loaders == null ? null : List.copyOf(loaders);
+        }
+
         public static Options create(final String versionId, final LoaderType loader){
             return new Options(versionId, loader);
+        }
+
+        public static Options create(final ResourcePreferences preferences) {
+            return preferences.getProfile() != null ? Options.create(preferences.getProfile()) : new Options(preferences.getGameVersions(), preferences.getLoaderTypes());
+        }
+
+        public static Options create(final List<String> versionIds, final List<LoaderType> loaders) {
+            return new Options(versionIds, loaders);
         }
 
         public static Options create(Profile p){
@@ -55,11 +67,7 @@ public interface ModSource {
         public Options clone() {
             //return super.clone();
 
-            try {
-                return (Options) super.clone();
-            } catch (CloneNotSupportedException e) {
-                return this;
-            }
+            return new Options(List.copyOf(versionIds), List.copyOf(loaders));
         }
 
         public Options aggregateModpack(){
@@ -68,7 +76,17 @@ public interface ModSource {
         }
 
         public Wrapper getWrapper(){
-            return wrapper;
+            if (loaders == null)
+                return null;
+            return loaders.isEmpty() ? null : Wrapper.getWrapper(loaders.get(0).getIdentifier());
+        }
+
+        public List<LoaderType> getLoaders(){
+            return loaders;
+        }
+
+        public List<String> getVersionIds(){
+            return versionIds;
         }
 
         public Options self(boolean include){
@@ -82,15 +100,21 @@ public interface ModSource {
         }
 
         public String getVersionId() {
-            return versionId;
+            return versionIds == null ? null : versionIds.get(0);
         }
 
         public LoaderType getLoaderType() {
-            return loader;
+            return loaders == null ? null : loaders.get(0);
+        }
+
+        public boolean hasGameVersion(){
+            var vers = getVersionIds();
+            return vers != null && !vers.isEmpty();
         }
 
         public boolean hasLoaderType(){
-            return loader != null && loader.getIdentifier() != null;
+            var loaders = getLoaders();
+            return loaders != null && !loaders.isEmpty();
         }
 
         public boolean getIncludeDependencies() {

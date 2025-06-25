@@ -1,13 +1,15 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge.entity;
 
+import com.laeben.corelauncher.api.annotation.ReturnsNull;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.minecraft.util.VersionUtil;
 
 import java.time.temporal.ChronoField;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CurseForgeResource implements ModResource {
+    private static final Comparator<CurseForgeFile> FILE_COMPARE_BY_DATE = Comparator.comparingLong(x -> x.fileDate == null ? 0 : -x.fileDate.toInstant().getLong(ChronoField.INSTANT_SECONDS));
 
     public static class Links{
         public String websiteUrl;
@@ -33,31 +35,102 @@ public class CurseForgeResource implements ModResource {
     public Date dateModified;
     public Date dateReleased;
 
-    public List<CurseForgeFile> searchGame(String versionId, String loader){
+    @ReturnsNull
+    public List<CurseForgeFile> searchGame(List<String> versionIds, List<String> loaders){
         if (latestFiles == null)
-            return List.of();
-        String[] spl = versionId.split("\\.");
-        String base = versionId;
+            return null;
 
-        if (spl.length == 3)
-            base = spl[0] + "." + spl[1];
-        String fBase = base;
-        var f = latestFiles.stream()
-                .filter(x -> Arrays.stream(x.gameVersions)
-                        .anyMatch(y -> (y.equals(versionId) || y.equals(fBase))) && (loader == null || checkLoader(x.gameVersions, loader)))
-                .sorted(Comparator.comparingLong(x -> x.fileDate == null ? 0 :  x.fileDate.toInstant().getLong(ChronoField.INSTANT_SECONDS)))
-                .collect(Collectors.toList());
-        Collections.reverse(f);
+        ArrayList<String> versions = null;
 
-        return f.stream().toList();
+        if (versionIds != null && !versionIds.isEmpty()){
+            versions = new ArrayList<>();
+            for (var vid : versionIds){
+                var spl = vid.split("\\.");
+                if (spl.length == 3)
+                    versions.add(spl[0] + "." + spl[1]);
+            }
+            versions.addAll(versionIds);
+        }
+
+        var latest = new ArrayList<>(latestFiles);
+
+        for (var file : latestFiles) {
+            if (!checkAndFillFile(file, versions, loaders))
+                latest.remove(file);
+        }
+
+        latest.sort(FILE_COMPARE_BY_DATE);
+
+        return latest.stream().toList();
     }
 
-    private boolean checkLoader(String[] versions, String loader){
-        var all = Wrapper.getWrappers();
-        if (Arrays.stream(versions).noneMatch(x -> all.contains(x.toLowerCase())))
-            return true;
+    @ReturnsNull
+    public List<CurseForgeFile> searchGame(String versionId, String loader){
+        return searchGame(List.of(versionId), List.of(loader));
+    }
 
-        return Arrays.stream(versions).anyMatch(x -> x.toLowerCase().equals(loader));
+    /**
+     * Checks and fills the main version and loader if the given file is suitable with the filters.
+     *
+     * <p>Filters must be given null or contained at least one item.</p>
+     *
+     * <p>
+     * Successful if the given filterLoaderTypes are null.
+     * Successful if the file's game versions contain no supported loader.
+     * Successful if the file's game versions contain a supported and filter-passed (present in the filterLoaderTypes) version.
+     * </p>
+     */
+    private boolean checkAndFillFile(CurseForgeFile file, List<String> filterVersions, List<String> filterLoaderTypes){
+        var all = Wrapper.getWrappers();
+
+        boolean noSupportedLoaders = true;
+        boolean filterLoaderMatch = false;
+
+        boolean filterVersionMatch = false;
+
+        int val = 0;
+        String version = null;
+
+        for (var v : file.gameVersions){
+            if ((noSupportedLoaders || filterLoaderMatch) && filterVersionMatch)
+                break;
+
+            if (v.indexOf('.') > 0){ // get the newest version (only main versions)
+                var n = VersionUtil.calculateVersionValue(v);
+                if (n > val){
+                    val = n;
+                    version = v;
+                }
+            }
+
+            v = v.toLowerCase();
+
+            if (!filterVersionMatch && filterVersions != null && filterVersions.contains(v)){
+                filterVersionMatch = true;
+                continue;
+            }
+
+            if (!filterLoaderMatch && all.contains(v)){
+                noSupportedLoaders = false;
+
+                if (filterLoaderTypes != null){
+                    for (String loader : filterLoaderTypes) {
+                        if (loader.equals(v)) {
+                            filterLoaderMatch = true;
+                            file.mainLoader = loader;
+                            break;
+                        }
+                    }
+                }
+
+                if (file.mainLoader == null)
+                    file.mainLoader = v;
+            }
+        }
+
+        file.mainGameVersion = version;
+
+        return ((noSupportedLoaders || filterLoaderMatch) && filterVersionMatch) || (filterVersions == null && filterLoaderTypes == null);
     }
 
     @Override

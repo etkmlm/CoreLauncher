@@ -9,6 +9,7 @@ import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.ModrinthResource;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.ModrinthFile;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.Version;
+import com.laeben.corelauncher.minecraft.util.VersionUtil;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.entity.ImageTask;
@@ -66,6 +67,8 @@ public class CResource implements Comparable<CResource> {
     public Object fileId;
     public String fileUrl;
     public String fileName;
+    public transient String targetVersionId;
+    public transient String targetLoader;
 
     public transient List<CResource> dependencies;
     public transient List<CurseForgeFile.Module> forgeModules;
@@ -126,7 +129,7 @@ public class CResource implements Comparable<CResource> {
         if (r.logo != null)
             p.logoUrl = r.logo.url;
 
-        p.isMeta = versionId == null;
+        p.isMeta = file == null && versionId == null;
 
         if (!p.isMeta){
             CResource f;
@@ -136,9 +139,14 @@ public class CResource implements Comparable<CResource> {
                     return p;
 
                 f = fromForgeFile(files.get(0), p.getIntId());
+                p.targetVersionId = versionId;
+                p.targetLoader = loader;
             }
-            else
+            else{
                 f = fromForgeFile(file, p.getIntId());
+                p.targetVersionId = file.mainGameVersion;
+                p.targetLoader = file.mainLoader;
+            }
 
             p.setFile(f);
         }
@@ -162,7 +170,17 @@ public class CResource implements Comparable<CResource> {
                     .filter(x -> x.id != null || x.fileId != null)
                     .toList();
 
+
+            if (v.gameVersions != null){
+                p.targetVersionId = VersionUtil.getNewestVersion(v.gameVersions.iterator());
+            }
+
+            p.targetLoader = v.loaders == null ? null : v.loaders.get(0);
+
             p.setFile(CResource.fromRinthFile(v.getFile(), v.getPublished()));
+        }
+        else{
+            int a = 0;
         }
 
         p.setSource(ModSource.Type.MODRINTH);

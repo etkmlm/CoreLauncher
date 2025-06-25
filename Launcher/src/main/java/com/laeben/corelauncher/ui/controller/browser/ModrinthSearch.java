@@ -9,7 +9,6 @@ import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.*;
 
-import java.util.Collections;
 import java.util.List;
 
 public class ModrinthSearch implements Search<Index> {
@@ -142,7 +141,7 @@ public class ModrinthSearch implements Search<Index> {
             var loaders = loader == null ? request.facets.get("loaders") : loader;
 
             if (loaders != null && loaders.values != null && !loaders.values.isEmpty()){
-                prefs.includeLoaders(loaders.values.stream().map(LoaderType.TYPES::get).toList());
+                prefs.includeLoaderTypes(loaders.values.stream().map(LoaderType.TYPES::get).toList());
             }
 
             var ver = request.facets.get("version");

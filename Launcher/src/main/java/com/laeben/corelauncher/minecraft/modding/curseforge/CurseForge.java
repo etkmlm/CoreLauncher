@@ -47,8 +47,15 @@ public class CurseForge implements ModSource {
 
     public CurseForgeSearchResponse search(CurseForgeSearchRequest s) throws NoConnectionException, HttpException {
         var params = RequestParameter.classToParams(s, CurseForgeSearchRequest.class);
-        if (s.gameVersions != null)
-            params.stream().filter(x -> x.key().equals("gameVersions")).findFirst().ifPresent(RequestParameter::markAsEscapable);
+        if (s.gameVersions != null){
+            var vers = params.stream().filter(x -> x.key().equals("gameVersions")).findFirst().orElse(null);
+            if (vers != null){
+                var value = ((List<String>)vers.value()).stream().map(a -> "\"" + a + "\"").toList();
+                var param = new RequestParameter("gameVersions", value).markAsEscapable();
+                params.remove(vers);
+                params.add(param);
+            }
+        }
 
         String a = get("/v1/mods/search", params);
         return gson.fromJson(a, CurseForgeSearchResponse.class);
@@ -67,16 +74,21 @@ public class CurseForge implements ModSource {
 
         return data.asList().stream().map(a -> gson.fromJson(a, CurseForgeResource.class)).toList();
     }
-    public CurseForgeResource getFullResource(CurseForgeResource r, Options opt) throws NoConnectionException, HttpException {
+    public void fillResource(CurseForgeResource r, Options opt) throws NoConnectionException, HttpException {
         var params = new ArrayList<RequestParameter>();
-        params.add(new RequestParameter("gameVersion", opt.getVersionId()));
+        if (opt.hasGameVersion())
+            params.add(new RequestParameter("gameVersions", String.join(",", opt.getVersionIds())));
+
         if (opt.hasLoaderType())
-            params.add(new RequestParameter("modLoaderType", opt.getLoaderType().getIdentifier()));
+            params.add(new RequestParameter("modLoaderTypes", String.join(",", opt.getLoaders())));
+
+        /*params.add(new RequestParameter("gameVersion", opt.getVersionId()));
+        if (opt.hasLoaderType())
+            params.add(new RequestParameter("modLoaderType", opt.getLoaderType().getIdentifier()));*/
 
         String g = get("/v1/mods/" + r.id + "/files", params);
         var rs = gson.fromJson(g, JsonObject.class);
         r.latestFiles = rs.get("data").getAsJsonArray().asList().stream().map(x -> gson.fromJson(x, CurseForgeFile.class)).toList();
-        return r;
     }
 
     public List<CurseForgeFile> getFiles(List<Integer> ids) throws NoConnectionException {
@@ -162,28 +174,35 @@ public class CurseForge implements ModSource {
         if (opt.useMeta() && !opt.getIncludeDependencies())
             return resources.stream().map(x -> (CResource)CResource.fromForgeResourceGeneric(null, null, x, null)).toList();
 
+        var loaders = opt.hasLoaderType() ? opt.getLoaders().stream().map(LoaderType::toString).toList() : null;
+
         var all = new ArrayList<CResource>();
         for (var x : resources){
             try {
-                getFullResource(x, opt);
+                fillResource(x, opt);
             } catch (NoConnectionException | HttpException ignored) {
 
             }
-            var r = CResource.fromForgeResourceGeneric(opt.getVersionId(), opt.hasLoaderType() ? opt.getLoaderType().getIdentifier() : null, x, null);
-            if (r instanceof Modpack mp && opt.getAggregateModpack()){
-                var p = Configurator.getConfig().getTemporaryFolder().to(StrUtil.pure(mp.name));
-                try {
-                    applyModpack(mp, p, opt);
-                } catch (StopException ignored) {
 
+            var files = x.searchGame(opt.getVersionIds(), loaders);
+
+            for (var f : files){
+                var r = CResource.fromForgeResourceGeneric(f.mainGameVersion, f.mainLoader, x, f);
+                if (r instanceof Modpack mp && opt.getAggregateModpack()){
+                    var p = Configurator.getConfig().getTemporaryFolder().to(StrUtil.pure(mp.name));
+                    try {
+                        applyModpack(mp, p, opt);
+                    } catch (StopException ignored) {
+
+                    }
+                    p.delete();
+                    all.addAll(mp.mods);
+                    all.addAll(mp.resources);
+                    all.addAll(mp.shaders);
                 }
-                p.delete();
-                all.addAll(mp.mods);
-                all.addAll(mp.resources);
-                all.addAll(mp.shaders);
+                else
+                    all.add(r);
             }
-            else
-                all.add(r);
         }
 
         if (opt.getIncludeDependencies())
@@ -221,11 +240,13 @@ public class CurseForge implements ModSource {
 
     @Override
     public List<CResource> getAllCoreResources(ModResource r, Options opt) throws NoConnectionException, HttpException {
-        var full = getFullResource((CurseForgeResource) r, opt);
+        var cfr = (CurseForgeResource) r;
 
-        var loader = opt.hasLoaderType() ? opt.getLoaderType().getIdentifier() : null;
-        var files = full.searchGame(opt.getVersionId(), loader);
-        return files.stream().map(a -> (CResource)CResource.fromForgeResourceGeneric(opt.getVersionId(), loader, full, a)).toList();
+        fillResource(cfr, opt);
+
+        var loaders = opt.hasLoaderType() ? opt.getLoaders().stream().map(LoaderType::toString).toList() : null;
+        var files = cfr.searchGame(opt.getVersionIds(), loaders);
+        return files.stream().map(a -> (CResource)CResource.fromForgeResourceGeneric(a.mainGameVersion, a.mainLoader, cfr, a)).toList();
     }
 
     @Override

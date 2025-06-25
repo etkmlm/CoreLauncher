@@ -84,8 +84,8 @@ public class CFilterPane extends VBox {
     }
 
     public void dispose(){
-        getChildren().clear();
         presets.forEach(FilterPreset::dispose);
         presets.clear();
+        getChildren().clear();
     }
 }

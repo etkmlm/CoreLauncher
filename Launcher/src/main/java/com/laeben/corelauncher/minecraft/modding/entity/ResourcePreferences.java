@@ -8,6 +8,7 @@ import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.minecraft.Wrapper;
 import com.laeben.corelauncher.minecraft.entity.Version;
+import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
 import com.laeben.corelauncher.minecraft.wrapper.entity.WrapperVersion;
 
 import java.lang.ref.WeakReference;
@@ -16,8 +17,26 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ResourcePreferences {
-    private List<String> gameVersions;
-    private List<LoaderType> loaders;
+    private static ResourcePreferences SHADER_PREFERENCES;
+
+    /**
+     * Returns optimal no-profile shader preferences.
+     *
+     * <p>It is Fabric with the latest game version. --- Sodium & Iris</p>
+     */
+    public static ResourcePreferences getShaderPreferences(){
+        if (SHADER_PREFERENCES == null)
+            SHADER_PREFERENCES = ResourcePreferences.empty()
+                    .includeGameVersion(Vanilla.getVanilla().getLatestRelease())
+                    .includeLoaderType(LoaderType.FABRIC);
+
+        return SHADER_PREFERENCES;
+    }
+
+    private final List<String> gameVersions;
+    private final List<LoaderType> loaderTypes;
+
+    private boolean doClear = false;
 
     private WeakReference<Profile> profile;
 
@@ -30,45 +49,71 @@ public class ResourcePreferences {
     }
 
     private ResourcePreferences(){
-
+        gameVersions = new ArrayList<>();
+        loaderTypes = new ArrayList<>();
     }
 
     private ResourcePreferences(Profile profile) {
         this.profile = new WeakReference<>(profile);
         gameVersions = List.of(profile.getVersionId());
-        loaders = List.of(profile.getWrapper().getType());
+        loaderTypes = List.of(profile.getWrapper().getType());
     }
 
     public List<String> getGameVersions() {
         return gameVersions;
     }
 
-    public ResourcePreferences includeGameVersions(List<String> gameVersions) {
-        if (this.gameVersions == null)
-            this.gameVersions = new ArrayList<>();
+    public ResourcePreferences clearAnd(){
+        doClear = true;
+        return this;
+    }
 
+    public ResourcePreferences includeGameVersions(List<String> gameVersions) {
+        if (doClear){
+            this.gameVersions.clear();
+            doClear = false;
+        }
         this.gameVersions.addAll(gameVersions);
         return this;
     }
 
-    public boolean hasGameVersions() {
-        return gameVersions != null && !gameVersions.isEmpty();
-    }
-
-    public boolean hasLoaders() {
-        return loaders != null && !loaders.isEmpty();
-    }
-
-    public ResourcePreferences includeLoaders(List<LoaderType> loaders) {
-        if (this.loaders == null)
-            this.loaders = new ArrayList<>();
-
-        this.loaders.addAll(loaders);
+    public ResourcePreferences includeGameVersion(String gameVersion) {
+        if (doClear){
+            this.gameVersions.clear();
+            doClear = false;
+        }
+        this.gameVersions.add(gameVersion);
         return this;
     }
 
-    public List<LoaderType> getLoaders() {
-        return loaders;
+    public boolean hasGameVersions() {
+        return !gameVersions.isEmpty();
+    }
+
+    public boolean hasLoaderTypes() {
+        return !loaderTypes.isEmpty();
+    }
+
+    public ResourcePreferences includeLoaderTypes(List<LoaderType> loaderTypes) {
+        if (doClear){
+            this.loaderTypes.clear();
+            doClear = false;
+        }
+        this.loaderTypes.addAll(loaderTypes);
+        return this;
+    }
+
+    public ResourcePreferences includeLoaderType(LoaderType loaderType) {
+        if (doClear){
+            this.loaderTypes.clear();
+            doClear = false;
+        }
+        this.loaderTypes.add(loaderType);
+        return this;
+    }
+
+    public List<LoaderType> getLoaderTypes() {
+        return loaderTypes;
     }
 
     public Profile getProfile() {
@@ -88,22 +133,25 @@ public class ResourcePreferences {
 
         LoaderType loader;
 
-        if (prefs.hasLoaders())
-            loader = prefs.getLoaders().get(0);
+        if (prefs.hasLoaderTypes())
+            loader = prefs.getLoaderTypes().get(0);
         else if (res.getLoaders() != null && res.getLoaders().length > 0)
             loader = res.getLoaders()[0];
         else
             return null;
 
-        String name = res.getResourceType() == ResourceType.MODPACK ? Tool.beautifyString(res.getName(), Tool.ValidityDegree.HIGH) : StrUtil.toUpperFirst(loader.getIdentifier()) + " " + Translator.translate("profile");
+        String name = res.getResourceType() == ResourceType.MODPACK ? Tool.beautifyString(res.getName(), Tool.ValidityDegree.HIGH) : null;
 
         return createProfileFromPreferences(prefs, versionId, loader, name);
     }
 
     public static Profile createProfileFromPreferences(ResourcePreferences prefs, String versionId, LoaderType loader, String name) throws PerformException {
+        if (loader == null)
+            loader = LoaderType.VANILLA;
+
         var wr = Wrapper.getWrapper(loader.getIdentifier());
         String wrId = null;
-        if (!loader.isNative()){
+        if (loader != LoaderType.VANILLA){
             var wrVers = ((Wrapper<WrapperVersion>)wr).getVersions(versionId);
             if (wrVers != null && !wrVers.isEmpty())
                 wrId = wrVers.get(0).getWrapperVersion();
@@ -114,6 +162,9 @@ public class ResourcePreferences {
         }
 
         String finalWrId = wrId;
+
+        if (name == null)
+            name = StrUtil.toUpperFirst(loader.getIdentifier()) + " " + Translator.translate("profile");
 
         return Profiler.getProfiler().createAndSetProfile(Profiler.getProfiler().generateName(name), p ->
                 p.setVersionId(versionId)

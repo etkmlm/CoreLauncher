@@ -7,7 +7,6 @@ import com.laeben.corelauncher.minecraft.modding.entity.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class ModrinthResource implements ModResource {
     @SerializedName("project_id")

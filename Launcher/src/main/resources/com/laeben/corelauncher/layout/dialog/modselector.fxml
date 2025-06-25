@@ -12,7 +12,7 @@
     <Label fx:id="lblName" AnchorPane.topAnchor="15" AnchorPane.leftAnchor="153" AnchorPane.rightAnchor="70" text="Name" style="-fx-font-size: 15pt; -fx-font-weight: bold" />
     <TextArea fx:id="txtDesc" editable="false" AnchorPane.leftAnchor="153" AnchorPane.topAnchor="50" AnchorPane.rightAnchor="15" prefHeight="100"/>
 
-    <ScrollPane AnchorPane.rightAnchor="15" AnchorPane.leftAnchor="15" AnchorPane.bottomAnchor="15" AnchorPane.topAnchor="160" fitToWidth="true" styleClass="w-scroll-pane" VBox.vgrow="ALWAYS" maxWidth="Infinity">
+    <ScrollPane fx:id="scroll" AnchorPane.rightAnchor="15" AnchorPane.leftAnchor="15" AnchorPane.bottomAnchor="15" AnchorPane.topAnchor="160" fitToWidth="true" styleClass="w-scroll-pane" VBox.vgrow="ALWAYS" maxWidth="Infinity">
         <VBox>
             <HBox fx:id="mpButtonContainer">
                 <CButton fx:id="btnModpack" style="-fx-font-size: 12pt;" text="%mods.detailed"/>
