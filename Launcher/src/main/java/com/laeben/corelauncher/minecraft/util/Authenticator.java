@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.laeben.corelauncher.util.entity.LogType;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -22,13 +23,13 @@ public class Authenticator {
 
     }
     private static final String CLIENT = "957eb4bd-6505-49e7-b2b6-12cf64e8cacc";
-    private static final int LOCALHOST_PORT = 57131;
-    private static final String LOCALHOST = "http://localhost:" + LOCALHOST_PORT;
+    private static final int LOCALHOST_START_PORT = 57130;
+    private static final int LOCALHOST_END_PORT = 57150;
     private static final String MICROSOFT_X = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     private static final String CODE_URL = "https://login.live.com/oauth20_authorize.srf?" +
             "client_id=" + CLIENT +
             "&response_type=code" +
-            "&redirect_uri=" + LOCALHOST +
+            "&redirect_uri=$" +
             "&scope=XboxLive.signin offline_access";
 
     private static final String TOKEN_URL = "https://login.live.com/oauth20_token.srf";
@@ -42,6 +43,8 @@ public class Authenticator {
 
     private static Authenticator instance;
 
+    private boolean listenPortBindFail = false;
+
     private final Gson gson;
 
     public Authenticator(){
@@ -54,12 +57,16 @@ public class Authenticator {
         return instance;
     }
 
-    public String listen(String parameter) {
+    public void bindFail(){
+        listenPortBindFail = true;
+    }
+
+    public String listen(String parameter, int port) {
         String regex = ".*" + parameter + "=(.*) HTTP.*";
         Pattern p = Pattern.compile(regex, Pattern.DOTALL);
         String r = APIListener.createClosePageRequest();
 
-        String s = NetUtil.listenServer(LOCALHOST_PORT, r);
+        String s = NetUtil.listenServer(port, r);
         if (s == null)
             return null;
         var m = p.matcher(s);
@@ -81,10 +88,10 @@ public class Authenticator {
         return new XblInfo(token, rToken, ein);
     }
 
-    public XblInfo getXbl(String code) throws NoConnectionException {
+    public XblInfo getXbl(String code, String redirect) throws NoConnectionException {
         String token_con = "client_id=" + CLIENT +
                 "&code=" + code +
-                "&grant_type=authorization_code&redirect_uri=" + LOCALHOST;
+                "&grant_type=authorization_code&redirect_uri=" + redirect;
 
         var fx = gson.fromJson(NetUtil.post(TOKEN_URL, token_con, List.of(RequestParameter.contentType("application/x-www-form-urlencoded"))), JsonObject.class);
 
@@ -141,24 +148,49 @@ public class Authenticator {
         String fjson = "{ \"identityToken\": \"XBL3.0 x=" + hash + ";" + authToken + "\" }";
         var user = gson.fromJson(NetUtil.post(MC_AUTH_URL, fjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
 
-        String name = user.get("username").getAsString();
+        String name = null;
+        //String name = user.get("username").getAsString();
         String mcAccessToken = user.get("access_token").getAsString();
         int expiresIn = user.get("expires_in").getAsInt();
+
+
+        if (mcAccessToken != null){
+            var base = mcAccessToken.split("\\.")[1];
+            var js = gson.fromJson(new String(Base64.getDecoder().decode(base)), JsonObject.class);
+            if (js.has("pfd")){
+                var pfd = js.get("pfd").getAsJsonArray();
+                if (!pfd.isEmpty())
+                    name = pfd.get(0).getAsJsonObject().get("name").getAsString();
+            }
+
+        }
 
         return new AuthInfo(name, mcAccessToken, expiresIn);
     }
 
     public Tokener authenticate(String username) throws PerformException {
         try{
-            OSUtil.openURL(CODE_URL);
-            String code = listen("code");
+            int port = LOCALHOST_START_PORT;
+            String redirect, code;
+
+            do{
+                redirect = "http://localhost:" + port;
+                OSUtil.openURL(CODE_URL.replace("$", redirect));
+                code = listen("code", port);
+
+                if (code != null)
+                    break;
+
+                port++;
+            }
+            while (port <= LOCALHOST_END_PORT);
 
             if (code == null){
                 Logger.getLogger().log(LogType.ERROR, "Authentication Failed: code was null");
                 return Tokener.empty(username);
             }
 
-            var xbl = getXbl(code);
+            var xbl = getXbl(code, redirect);
 
             var info = getATokenFromToken(xbl.xbl);
 

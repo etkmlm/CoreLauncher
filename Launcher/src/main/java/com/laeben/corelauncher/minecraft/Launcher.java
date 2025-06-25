@@ -5,6 +5,8 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.ValueEvent;
+import com.laeben.corelauncher.api.entity.Account;
+import com.laeben.corelauncher.api.entity.Config;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Profile;
@@ -182,8 +184,10 @@ public class Launcher {
                 Configurator.getConfig().getGamePath().to("assets", "virtual", "verylegacy").copy(resources, false);
             }
 
+            boolean authSuccess = false;
             try{
                 info.account.cacheToken();
+                authSuccess = true;
             }
             catch (PerformException e){
                 Logger.getLogger().log(LogType.ERROR, "Authentication failed: " + e.getMessage() + " XErr " + e.getValue());
@@ -191,6 +195,21 @@ public class Launcher {
                     throw new StopException();
                 }
                 Logger.getLogger().log(LogType.ERROR, "Ignoring authentication failure...");
+            }
+
+            if (authSuccess){
+                String username = info.account.getTokener().getMicrosoftUsername();
+                if (username != null && !username.equals(info.account.getUsername())){
+                    var acc = info.account.copyAs(username);
+                    if (info.account.equals(Configurator.getConfig().getUser())){
+                        Configurator.getConfigurator().setDefaultAccount(acc);
+                        Logger.getLogger().log(LogType.INFO, "Microsoft XUID username mismatched with the local username, changing config to use Microsoft's.");
+                    }
+                    else{
+                        Logger.getLogger().log(LogType.INFO, "Microsoft XUID username mismatched with the profile's username, using Microsoft's.");
+                    }
+                    info.account = acc;
+                }
             }
 
             String[] gameCmds = linfo.getGameArguments();

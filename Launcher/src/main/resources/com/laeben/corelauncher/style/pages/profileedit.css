@@ -25,3 +25,7 @@
     -fx-background-repeat: no-repeat;
     -fx-background-position: center;
 }
+
+#btnClearAccount{
+    -fx-background-color: #1e1e20;
+}

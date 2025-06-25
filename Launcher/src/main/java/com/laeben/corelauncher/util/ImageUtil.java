@@ -11,6 +11,7 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.entity.ImageTask;
 import javafx.scene.image.*;
 
+import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -41,7 +42,10 @@ public class ImageUtil {
     public static void getImageAsync(ImageTask task, Consumer<Image> onDone, boolean useDefault){
         task.setOnSucceeded(a -> onDone.accept(task.getValue()));
         task.setOnFailed(e -> {
-            Logger.getLogger().log(e.getSource().getException());
+            if (!(e.getSource().getException() instanceof IIOException iio && iio.getCause() instanceof FileNotFoundException)){
+                Logger.getLogger().log(e.getSource().getException());
+            }
+
             onDone.accept(useDefault ? getDefaultImage(task.getRequestedWidth() < 0 ? 128 : task.getRequestedWidth()) : null);
         });
         asyncExecutor.execute(task);

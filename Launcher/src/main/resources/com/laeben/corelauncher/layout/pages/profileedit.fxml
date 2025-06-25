@@ -89,7 +89,11 @@
                 <TextField fx:id="txtArgs" maxWidth="Infinity" prefHeight="30" styleClass="field" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
                 <Label styleClass="property-key" text="%username" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                <TextField fx:id="txtAccount" maxWidth="Infinity" prefHeight="30" styleClass="field" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                <HBox GridPane.columnIndex="1" alignment="CENTER" GridPane.rowIndex="5" maxWidth="Infinity" spacing="10" prefHeight="30">
+                    <TextField HBox.hgrow="ALWAYS" fx:id="txtAccount" styleClass="field"/>
+                    <CButton fx:id="btnClearAccount" text="X" prefHeight="30"/>
+                </HBox>
+
                 <CheckBox fx:id="chkAccOnline" maxWidth="Infinity" text="%online" GridPane.columnIndex="2" GridPane.rowIndex="5"/>
 
                 <Label styleClass="property-key" text="%minMaxRam" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />

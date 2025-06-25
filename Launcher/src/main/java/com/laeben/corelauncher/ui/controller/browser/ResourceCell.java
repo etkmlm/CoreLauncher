@@ -17,6 +17,7 @@ import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.dialog.DModSelector;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.entity.animation.ReverseBorderColorAnimation;
@@ -198,6 +199,8 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
                 }
 
                 isNewProfile = true;
+
+                Main.getMain().selectProfile(profile);
             }
 
             if (exists.get() == null){
@@ -279,10 +282,13 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
             exists.set(g.resource());
 
-
-            if (g.profile() != null && onNewProfileCreated != null){
-                UI.runAsync(() -> onNewProfileCreated.accept(g.profile()));
+            if (g.profile() != null){
+                Main.getMain().selectProfile(g.profile());
+                if (onNewProfileCreated != null){
+                    UI.runAsync(() -> onNewProfileCreated.accept(g.profile()));
+                }
             }
+
         }
 
     }

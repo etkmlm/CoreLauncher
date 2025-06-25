@@ -42,7 +42,7 @@ public class Tokener {
                 .setAuthInfo(Authenticator.getAuthenticator().getATokenFromToken(xbl.xbl()));
     }
 
-    public String getXUID(){
+    public String getMicrosoftUsername(){
         return auth.username();
     }
 

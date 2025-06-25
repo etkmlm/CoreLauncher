@@ -56,6 +56,13 @@ public class Account{
         this.username = username;
     }
 
+    public Account copyAs(String username){
+        var account = new Account(username);
+        account.tokener = tokener;
+        account.isOnline = isOnline;
+        return account;
+    }
+
     /**
      * Authenticate the account with Mojang.
      * @return the account

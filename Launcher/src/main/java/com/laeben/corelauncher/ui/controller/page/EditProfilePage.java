@@ -92,6 +92,8 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     @FXML
     private Button btnSave;
     @FXML
+    private Button btnClearAccount;
+    @FXML
     private CheckBox chkAccOnline;
     @FXML
     private TextField txtArgs;
@@ -231,6 +233,11 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         btnBack.setText("⤶ " + Translator.translate("option.back"));
         btnBack.setOnMouseClicked(a -> Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile));
 
+        btnClearAccount.setOnMouseClicked(a -> {
+            txtAccount.clear();
+            chkAccOnline.setSelected(false);
+        });
+
         ram.setControls(txtMinRAM, txtMaxRAM, sldRAM);
         ram.setup();
 
@@ -247,17 +254,18 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             nts.set(0, true);
         });
 
-        cbGameVersion.valueProperty().addListener(x -> {
-            String value = cbGameVersion.getValue();
-
-            if (value == null || value.isEmpty())
+        cbGameVersion.valueProperty().addListener((x, before, after) -> {
+            if (after == null || after.isEmpty())
                 return;
 
-            tempProfile.setVersionId(value);
+            tempProfile.setVersionId(after);
 
-            nts.set(3, !value.equals(profile.getVersionId()));
+            boolean eq = after.equals(profile.getVersionId());
+            nts.set(3, !eq);
 
-            refreshWrapperVersions();
+            if (!eq)
+                refreshWrapperVersions();
+
         });
         cbGameVersion.setItems(versions);
         cbWrapperVersion.setItems(wrapperVersions);
