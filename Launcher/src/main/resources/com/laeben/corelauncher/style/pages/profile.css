@@ -9,6 +9,7 @@
 
 #txtSearch{
     -fx-font-size: 13pt;
+    -fx-background-color: #202022aa;
 }
 
 #lblUsername{

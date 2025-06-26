@@ -21,6 +21,7 @@ import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CTab;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.dialog.DImageSelector;
+import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.ImageUtil;
@@ -35,6 +36,8 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
@@ -378,90 +381,17 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
                 OSUtil.open(path.toFile());
         });
 
-        btnSave.setOnMouseClicked(a -> {
-            String name = txtName.getText();
-
-            if (name == null || name.isBlank()){
-                Main.getMain().getAnnouncer().announce(new Announcement(
-                        Translator.translate("error.oops"),
-                        Translator.translate("profile.edit.error.name"),
-                        Announcement.AnnouncementType.ERROR), Duration.seconds(2));
-                return;
-            }
-
-            if (!Tool.checkStringValidity(name, Tool.ValidityDegree.HIGH)){
-                Main.getMain().getAnnouncer().announce(new Announcement(
-                        Translator.translate("error.oops"),
-                        Translator.translate("profile.edit.error.invalidName"),
-                        Announcement.AnnouncementType.ERROR), Duration.seconds(2));
-                return;
-            }
-
-            if (name.endsWith("."))
-                name = StrUtil.trimEnd(name, '.');
-
-            tempProfile
-                    .setName(name)
-                    .setJvmArgs(txtArgs.getText().split(" "))
-                    .setMinRAM(ram.getMin())
-                    .setMaxRAM(ram.getMax());
-            if (txtAccount.getText() == null || txtAccount.getText().isBlank())
-                tempProfile.setCustomUser(null);
-            else
-                tempProfile.setCustomUser(Account.fromUsername(txtAccount.getText()).setOnline(chkAccOnline.isSelected()));
-
-            boolean check1 = tempProfile.getVersionId() == null || tempProfile.getVersionId().isBlank();
-            boolean check2 = tempProfile.getWrapper() != null && !(tempProfile.getWrapper() instanceof Vanilla) && (tempProfile.getWrapperVersion() == null || tempProfile.getWrapperVersion().isBlank() || tempProfile.getWrapperVersion().equals("..."));
-            if (check1 || check2){
-                Main.getMain().getAnnouncer().announce(new Announcement(
-                        Translator.translate("error.oops"),
-                        Translator.translate("profile.edit.error.wrapper"),
-                        Announcement.AnnouncementType.ERROR), Duration.seconds(2));
-                return;
-            }
-
-            boolean isNew = profile.isEmpty();
-
-            if (!name.equals(profile.getName()) && !Profiler.getProfiler().getProfile(name).isEmpty()) {
-                Main.getMain().getAnnouncer().announce(new Announcement(
-                        Translator.translate("error.oops"),
-                        Translator.translate("profile.edit.error.contains"),
-                        Announcement.AnnouncementType.ERROR), Duration.seconds(2));
-                return;
-            }
-
-            try{
-                if (isNew){
-                    var p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
-                    setProfile(p);
-                }
-                else
-                    Profiler.getProfiler().setProfile(profile.getName(), b -> b.cloneFrom(tempProfile));
-            }
-            catch (Exception e){
-                Logger.getLogger().log(e);
-            }
-
-            Main.getMain().setFocusLimiter(null);
-
-            if (isNew && Configurator.getConfig().shouldPlaceNewProfileToDock()){
-                Main.getMain().closeTab((CTab)getParentObject());
-                Main.getMain().getTab().getSelectionModel().select(0);
-            }
-            else if (isNew)
-                Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
-            else{
-                nts.clear();
-                Main.getMain().announceLater(Translator.translate("announce.successful"), Translator.translate("announce.info.profile.save"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
-            }
-        });
-
-
+        btnSave.setOnMouseClicked(a -> save());
     }
 
     @Override
     public void init(){
         reload();
+
+        addRegisteredEventFilter(EventFilter.node(rootNode, KeyEvent.KEY_PRESSED, a -> {
+            if (a.getCode() == KeyCode.S && a.isControlDown())
+                save();
+        }));
 
         txtName.textProperty().addListener((a, b, c) -> {
             tempProfile.setName(c);
@@ -567,6 +497,84 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         }
         catch (Exception e){
             Logger.getLogger().log(e);
+        }
+    }
+
+    public void save(){
+        String name = txtName.getText();
+
+        if (name == null || name.isBlank()){
+            Main.getMain().getAnnouncer().announce(new Announcement(
+                    Translator.translate("error.oops"),
+                    Translator.translate("profile.edit.error.name"),
+                    Announcement.AnnouncementType.ERROR), Duration.seconds(2));
+            return;
+        }
+
+        if (!Tool.checkStringValidity(name, Tool.ValidityDegree.HIGH)){
+            Main.getMain().getAnnouncer().announce(new Announcement(
+                    Translator.translate("error.oops"),
+                    Translator.translate("profile.edit.error.invalidName"),
+                    Announcement.AnnouncementType.ERROR), Duration.seconds(2));
+            return;
+        }
+
+        if (name.endsWith("."))
+            name = StrUtil.trimEnd(name, '.');
+
+        tempProfile
+                .setName(name)
+                .setJvmArgs(txtArgs.getText().split(" "))
+                .setMinRAM(ram.getMin())
+                .setMaxRAM(ram.getMax());
+        if (txtAccount.getText() == null || txtAccount.getText().isBlank())
+            tempProfile.setCustomUser(null);
+        else
+            tempProfile.setCustomUser(Account.fromUsername(txtAccount.getText()).setOnline(chkAccOnline.isSelected()));
+
+        boolean check1 = tempProfile.getVersionId() == null || tempProfile.getVersionId().isBlank();
+        boolean check2 = tempProfile.getWrapper() != null && !(tempProfile.getWrapper() instanceof Vanilla) && (tempProfile.getWrapperVersion() == null || tempProfile.getWrapperVersion().isBlank() || tempProfile.getWrapperVersion().equals("..."));
+        if (check1 || check2){
+            Main.getMain().getAnnouncer().announce(new Announcement(
+                    Translator.translate("error.oops"),
+                    Translator.translate("profile.edit.error.wrapper"),
+                    Announcement.AnnouncementType.ERROR), Duration.seconds(2));
+            return;
+        }
+
+        boolean isNew = profile.isEmpty();
+
+        if (!name.equals(profile.getName()) && !Profiler.getProfiler().getProfile(name).isEmpty()) {
+            Main.getMain().getAnnouncer().announce(new Announcement(
+                    Translator.translate("error.oops"),
+                    Translator.translate("profile.edit.error.contains"),
+                    Announcement.AnnouncementType.ERROR), Duration.seconds(2));
+            return;
+        }
+
+        try{
+            if (isNew){
+                var p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
+                setProfile(p);
+            }
+            else
+                Profiler.getProfiler().setProfile(profile.getName(), b -> b.cloneFrom(tempProfile));
+        }
+        catch (Exception e){
+            Logger.getLogger().log(e);
+        }
+
+        Main.getMain().setFocusLimiter(null);
+
+        if (isNew && Configurator.getConfig().shouldPlaceNewProfileToDock()){
+            Main.getMain().closeTab((CTab)getParentObject());
+            Main.getMain().getTab().getSelectionModel().select(0);
+        }
+        else if (isNew)
+            Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
+        else{
+            nts.clear();
+            Main.getMain().announceLater(Translator.translate("announce.successful"), Translator.translate("announce.info.profile.save"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
         }
     }
 

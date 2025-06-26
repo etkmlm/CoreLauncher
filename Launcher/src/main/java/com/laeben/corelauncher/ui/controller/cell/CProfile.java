@@ -68,6 +68,8 @@ public class CProfile extends CDockObject{
         trns.jumpTo(Duration.ZERO);
         hover.stop();
         trns.stop();
+
+        btnSelect.setText("⯈");
     }
 
     @Override
@@ -87,8 +89,10 @@ public class CProfile extends CDockObject{
     protected void onMouseReleased(MouseEvent e){
         if (e.getButton() == MouseButton.MIDDLE)
             OSUtil.open(getPrimaryProfile().getPath().toFile());
-        else
+        else{
+            btnSelect.setText("♥");
             selectPrimary();
+        }
     }
 
     @Override
