@@ -45,6 +45,9 @@ public class Modder {
     private static Modder instance;
     private final EventHandler<BaseEvent> handler;
 
+    private boolean disableCache = false;
+    private boolean stopRequested = false;
+
     public Modder(){
         handler = new EventHandler<>();
 
@@ -128,6 +131,9 @@ public class Modder {
         int i = 0;
         int size = mods.size();
         for (var a : mods.stream().toList()){
+            if (stopRequested)
+                throw new StopException();
+
             handler.execute(new KeyEvent("," + a.name + ":.resource.progress;" + (++i) + ";" + size));
 
             if (a.fileName == null){
@@ -136,7 +142,7 @@ public class Modder {
             }
 
             var pxx = path.to(a.fileName);
-            if (pxx.exists())
+            if (pxx.exists() && !disableCache && pxx.getSize() > 0)
                 continue;
 
             if (a.fileUrl == null){
@@ -292,6 +298,9 @@ public class Modder {
         int i = 0;
         int size = rs.size();
         for (var pack : rs){
+            if (stopRequested)
+                throw new StopException();
+
             handler.execute(new KeyEvent("," + pack.name + ":.resource.progress;" + (++i) + ";" + size));
 
             if (pack.fileName == null){
@@ -299,7 +308,7 @@ public class Modder {
                 continue;
             }
             var px = path.to(pack.fileName);
-            if (px.exists())
+            if (px.exists() && !disableCache && px.getSize() > 0)
                 continue;
 
             if (pack.fileUrl == null){
@@ -323,6 +332,9 @@ public class Modder {
         int size = ws.size();
 
         for (var w : ws){
+            if (stopRequested)
+                throw new StopException();
+
             handler.execute(new KeyEvent("," + w.name + ":.resource.progress;" + (++i) + ";" + size));
 
             if (w.fileName == null){
@@ -370,6 +382,9 @@ public class Modder {
         var path = p.getPath();
 
         for (var mp : mps){
+            if (stopRequested)
+                throw new StopException();
+
             handler.execute(new KeyEvent(".resource.install;" + mp.name));
             mp.getSource().extractModpack(mp, path, false);
             /*if (mp.isForge())
@@ -457,6 +472,9 @@ public class Modder {
         int i = 0;
         int size = shs.size();
         for (var shader : shs){
+            if (stopRequested)
+                throw new StopException();
+
             handler.execute(new KeyEvent("," + shader.name + ":.resource.progress;" + (++i) + ";" + size));
 
             if (shader.fileName == null){
@@ -464,7 +482,7 @@ public class Modder {
                 continue;
             }
             var pxx = path.to(shader.fileName);
-            if (pxx.exists())
+            if (pxx.exists() && !disableCache && pxx.getSize() > 0)
                 continue;
 
             if (shader.fileUrl == null){
@@ -579,5 +597,17 @@ public class Modder {
             Profiler.getProfiler().setProfile(profile.getName(), a -> a.removeResource(finalR));
         else
             profile.removeResource(finalR);
+    }
+
+    public void setDisableCache(boolean mode){
+        this.disableCache = mode;
+    }
+
+    public void setStopRequested(boolean val){
+        stopRequested = val;
+    }
+
+    public boolean isStopRequested(){
+        return stopRequested;
     }
 }

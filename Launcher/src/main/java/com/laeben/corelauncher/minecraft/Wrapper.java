@@ -58,13 +58,15 @@ public abstract class Wrapper<H extends Version> {
         return stopRequested;
     }
 
+    public void setStopRequested(boolean val){
+        stopRequested = val;
+    }
+
     public EventHandler<BaseEvent> getHandler(){
         return handler;
     }
 
-    public void setStopRequested(boolean val){
-        stopRequested = val;
-    }
+
 
     protected void logState(String key){
         handler.execute(new KeyEvent(key));
@@ -106,10 +108,8 @@ public abstract class Wrapper<H extends Version> {
         return profileInfo;
     }
 
-    public Wrapper<?> setDisableCache(boolean mode){
+    public void setDisableCache(boolean mode){
         this.disableCache = mode;
-
-        return this;
     }
 
     protected void setupLauncherLibraries(){
@@ -142,7 +142,7 @@ public abstract class Wrapper<H extends Version> {
             public void onParcelDone(NetParcel p, Path path, int done, int total) {
                 var lib = p.<Asset>getState();
 
-                if (!p.isSuccessful() && p.getException() instanceof StopException){
+                if ((!p.isSuccessful() && p.getException() instanceof StopException) || stopRequested){
                     terminate();
                 }
 

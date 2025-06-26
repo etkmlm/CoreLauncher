@@ -153,18 +153,19 @@ public class Main extends HandlerController {
             var oldProfile = (Profile)a.getOldValue();
             //var oldProfile = (Profile)a.getOldValue();
 
-            if (a.getKey().equals(Profiler.PROFILE_UPDATE)){
-                if (selectedProfile == a.getNewValue())
-                    selectProfile(selectedProfile);
-            }
-            else if (a.getKey().equals(Profiler.PROFILE_DELETE)){
-                if (selectedProfile == oldProfile)
-                    selectProfile(null);
+            switch (a.getKey()) {
+                case Profiler.PROFILE_UPDATE -> {
+                    if (selectedProfile == a.getNewValue())
+                        selectProfile(selectedProfile);
+                }
+                case Profiler.PROFILE_DELETE -> {
+                    if (selectedProfile == oldProfile)
+                        selectProfile(null);
 
-                ImageCacheManager.remove(oldProfile);
+                    ImageCacheManager.remove(oldProfile);
+                }
+                case EventHandler.RELOAD -> selectProfile(null);
             }
-            else if (a.getKey().equals(EventHandler.RELOAD))
-                selectProfile(null);
         }, true);
         registerHandler(UI.getUI().getHandler(), a -> {
             if (a instanceof KeyEvent ke && ke.getKey().equals(UI.WINDOW_CLOSE)){
@@ -180,7 +181,7 @@ public class Main extends HandlerController {
             if (!a.getKey().equals(JavaManager.DOWNLOAD_COMPLETE))
                 return;
 
-            clearAllStates();
+            refreshStates();
         }, true);
         registerHandler(Launcher.getLauncher().getHandler(), this::onGeneralEvent, true);
         registerHandler(Vanilla.getVanilla().getHandler(), this::onGeneralEvent, true);
@@ -243,11 +244,27 @@ public class Main extends HandlerController {
         instance = this;
     }
 
-    public void clearAllStates(){
+    /**
+     * Revoke stop requests and set running to false.
+     */
+    public void refreshStates(){
         running.set(false);
+        revokeStopRequests();
+    }
+
+    public void revokeStopRequests(){
         if (selectedProfile != null)
             selectedProfile.getWrapper().setStopRequested(false);
         Vanilla.getVanilla().setStopRequested(false);
+        Modder.getModder().setStopRequested(false);
+    }
+
+    public void invokeStopRequests(){
+        if (selectedProfile != null)
+            selectedProfile.getWrapper().setStopRequested(true);
+        Vanilla.getVanilla().setStopRequested(true);
+        Modder.getModder().setStopRequested(true);
+        NetUtil.stop();
     }
 
     private String dot(String f){
@@ -293,6 +310,8 @@ public class Main extends HandlerController {
             if (v.getKey().startsWith(Launcher.SESSION_END)){
                 announcer.announce(new Announcement(Translator.translate("announce.game.ended"), Translator.translateFormat("announce.misc.profile", v.getKey().substring(10)) + "\n" + Translator.translateFormat("announce.misc.ecode", v.getValue()), Announcement.AnnouncementType.GAME), Duration.seconds(3));
                 Discord.getDiscord().setActivity(Activity.setForIdling());
+                if (Configurator.getConfig().hideAfter())
+                    UI.getUI().showAll();
             }
             else if (v.getKey().equals(Launcher.SESSION_RECEIVE)){
                 var val = (CLPacket)v.getValue();
@@ -313,7 +332,7 @@ public class Main extends HandlerController {
 
             if (key.startsWith(Launcher.SESSION_START)){
                 announcer.announce(new Announcement(Translator.translate("announce.game.started"), Translator.translateFormat("announce.misc.profile", k.getKey().substring(12)), Announcement.AnnouncementType.GAME), Duration.seconds(3));
-                clearAllStates();
+                refreshStates();
                 Discord.getDiscord().setActivity(Activity.setForProfile(selectedProfile));
                 if (Configurator.getConfig().hideAfter())
                     UI.getUI().hideAll();
@@ -323,7 +342,7 @@ public class Main extends HandlerController {
                 setPrimaryStatus(Translator.translateFormat("launch.state.download.java", major));
             }
             else if (key.equals(EventHandler.STOP)){
-                clearAllStates();
+                refreshStates();
             }
             else if (key.equals(Wrapper.CLIENT_DOWNLOAD))
                 setPrimaryStatus(Translator.translate("launch.state.download.client"));
@@ -555,6 +574,7 @@ public class Main extends HandlerController {
         }
     }
 
+    /* TABS */
     private ScrollPane getScroll(){
         var pane = new ScrollPane();
         pane.setFitToWidth(true);
@@ -574,7 +594,6 @@ public class Main extends HandlerController {
         }
         tab.getTabs().remove(t);
     }
-
     public void closeTab(Tab tab){
         if (tab instanceof CTab ct){
             removeRegisteredEventFilter(ct.getContent());
@@ -582,7 +601,6 @@ public class Main extends HandlerController {
         }
         getTab().getTabs().remove(tab);
     }
-
     public void relocateTab(int i1, int i2){
         int limit = tab.getTabs().size() - 1;
         if (i2 > limit || i1 > limit)
@@ -669,6 +687,8 @@ public class Main extends HandlerController {
 
         return t;
     }
+
+    /* TABS END */
 
     private void onProgress(ProgressEvent e){
         if (!running.get())
@@ -766,9 +786,7 @@ public class Main extends HandlerController {
     public boolean launchClick(boolean cache){
         if (running.get()){
             if (selectedProfile != null) {
-                selectedProfile.getWrapper().setStopRequested(true);
-                Vanilla.getVanilla().setStopRequested(true);
-                NetUtil.stop();
+                invokeStopRequests();
                 Discord.getDiscord().setActivity(Activity.setForIdling());
             }
             running.set(false);
@@ -781,33 +799,59 @@ public class Main extends HandlerController {
         return false;
     }
 
+    /*
+    * revoke stop requests
+    * - prepare
+    * * throw stop exception
+    * clear status
+    * - launch (includes start and end session event)
+    * enable caches and remove handler
+    *
+    * in case of exception
+    * refresh states
+    * show ui
+    * enable caches and remove handler
+    *
+    * session start
+    * refresh states
+    * hide ui
+    *
+    * session end
+    * show ui
+    * */
     public void launch(Profile p, boolean cache, ServerInfo server){
         var wr = (Wrapper<?>)p.getWrapper();
         Vanilla.getVanilla().setDisableCache(cache);
-        wr.setDisableCache(cache).getHandler().addHandler(KEY, this::onGeneralEvent, true);
+        Modder.getModder().setDisableCache(cache);
+        wr.setDisableCache(cache);
+        wr.getHandler().addHandler(KEY, this::onGeneralEvent, true);
 
         var task = new Task<>() {
             @Override
             protected Object call() throws NoConnectionException, StopException, HttpException, FileNotFoundException, PerformException, VersionNotFoundException {
+                revokeStopRequests();
+
                 Launcher.getLauncher().prepare(p);
                 Cat.sleep(200);
 
-                if (wr.isStopRequested()){
-                    clearAllStates();
+                if (wr.isStopRequested())
                     throw new StopException();
-                }
 
-                UI.runAsync(() -> clearStatus());
+                UI.runAsync(Main.this::clearStatus);
 
+                // includes session start event
+                // announce -> set discord activity -> hide ui
+
+                // includes session end event
+                // announce -> set discord activity -> show ui
                 Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p).includeServer(server));
 
                 Cat.sleep(200);
-                if (Configurator.getConfig().hideAfter())
-                    UI.getUI().showAll();
 
                 wr.setDisableCache(false);
-                wr.getHandler().removeHandler(KEY);
                 Vanilla.getVanilla().setDisableCache(false);
+                Modder.getModder().setDisableCache(false);
+                wr.getHandler().removeHandler(KEY);
 
                 return null;
             }
@@ -817,7 +861,16 @@ public class Main extends HandlerController {
             var f = a.getSource().getException();
 
             Cat.sleep(500);
-            UI.runAsync(this::clearAllStates);
+
+            // reset them again because it failed
+            UI.runAsync(this::refreshStates);
+            if (Configurator.getConfig().hideAfter())
+                UI.getUI().showAll();
+            wr.setDisableCache(false);
+            wr.getHandler().removeHandler(KEY);
+            Vanilla.getVanilla().setDisableCache(false);
+            Modder.getModder().setDisableCache(false);
+            // ---
 
             if (f instanceof NoConnectionException){
                 announceLater(Translator.translate("error.oops"),Translator.translate("error.connection"), Announcement.AnnouncementType.ERROR, Duration.millis(3000));

@@ -187,7 +187,7 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
                     mpContentContainer.setManaged(true);
                     mpButtonContainer.setManaged(false);
                     mpButtonContainer.setVisible(false);
-                    Main.getMain().clearAllStates();
+                    Main.getMain().refreshStates();
                 });
             });
 
