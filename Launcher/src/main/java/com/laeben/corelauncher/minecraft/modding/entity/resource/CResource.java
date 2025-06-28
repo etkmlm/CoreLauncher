@@ -313,6 +313,10 @@ public class CResource implements Comparable<CResource> {
         return obj instanceof CResource res && ((res.fileName != null && res.fileName.equals(fileName)) || (res.id != null && ((res.id instanceof Double || res.id instanceof Integer) && (id instanceof Double || id instanceof Integer) ? res.getIntId() == getIntId() : res.id.equals(id))));
     }
 
+    public boolean checkId(Object id){
+        return this.id != null && (this.id.equals(id) || ((this.id instanceof Double || this.id instanceof Integer) && id instanceof Integer i && getIntId() == i));
+    }
+
     @Override
     public int compareTo(CResource o){
         return fileDate == null || o.fileDate == null ? -1 : fileDate.compareTo(o.fileDate);

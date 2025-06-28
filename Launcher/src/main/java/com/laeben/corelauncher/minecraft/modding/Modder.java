@@ -585,9 +585,7 @@ public class Modder {
 
             finalR = res;
 
-            if (finalR.getType() == ResourceType.SHADER && finalR.name != null)
-                path.to(finalR.getType().getStoringFolder(), finalR.name).delete();
-            else if (finalR.getType() == ResourceType.WORLD && finalR.name != null) {
+            if (finalR.getType() == ResourceType.WORLD) {
                 //path.to(finalR.getType().getStoringFolder(), finalR.name).delete();
             } else if (finalR.fileName != null)
                 path.to(finalR.getType().getStoringFolder(), finalR.fileName).delete();

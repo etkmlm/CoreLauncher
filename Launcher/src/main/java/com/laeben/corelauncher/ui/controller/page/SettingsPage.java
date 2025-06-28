@@ -88,6 +88,8 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkSelectPlay;
     @FXML
     private CheckBox chkAutoWrapper;
+    @FXML
+    private CheckBox chkOverwriteImportDefault;
     /*@FXML
     private CButton btnSaveRAM;
     @FXML
@@ -412,6 +414,10 @@ public class SettingsPage extends HandlerController {
             Configurator.getConfig().setAutoChangeWrapper(chkAutoWrapper.isSelected());
             Configurator.save();
         });
+        chkOverwriteImportDefault.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setOverwriteImported(chkOverwriteImportDefault.isSelected());
+            Configurator.save();
+        });
 
         btnSelectGamePath.setOnMouseClicked(x -> {
             DirectoryChooser chooser = new DirectoryChooser();
@@ -566,6 +572,7 @@ public class SettingsPage extends HandlerController {
             chkGamelog.setSelected(c.delGameLogs());
             chkGuiShortcut.setSelected(c.useNonGUIShortcut());
             chkAutoWrapper.setSelected(c.isAutoChangeWrapper());
+            chkOverwriteImportDefault.setSelected(c.isOverwriteImportedEnabled());
 
             chkInGameRPC.setDisable(c.isDisabledRPC());
             //txtCommPort.setDisable(c.isDisabledRPC());

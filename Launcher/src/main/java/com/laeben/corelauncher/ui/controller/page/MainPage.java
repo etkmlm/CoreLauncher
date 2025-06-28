@@ -31,6 +31,7 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
 public class MainPage extends HandlerController {
@@ -347,6 +348,9 @@ public class MainPage extends HandlerController {
                     try{
                         ProfileUtil.importO(path, a.getSceneX(), a.getSceneY());
                         c++;
+                    }
+                    catch (CancellationException ignored){
+                        break;
                     }
                     catch (Exception e){
                         Logger.getLogger().log(e);

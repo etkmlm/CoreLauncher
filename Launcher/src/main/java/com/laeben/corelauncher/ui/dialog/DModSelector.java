@@ -226,7 +226,7 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
         scroll.vvalueProperty().addListener((a, b, c) -> {
             if (b.equals(c) || scroll.getVmax() > c.doubleValue())
                 return;
-            lvVersions.load();
+            lvVersions.load(false);
         });
 
         return super.action();

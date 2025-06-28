@@ -12,7 +12,7 @@ public abstract class HandlerController extends Controller {
     private final String key;
     private final List<EventHandler<?>> handlers;
     public HandlerController(String key){
-        this.key = key;
+        this.key = key + hashCode();
         this.handlers = new ArrayList<>();
     }
 
@@ -20,10 +20,6 @@ public abstract class HandlerController extends Controller {
         handler.addHandler(key, m, async);
         if (!handlers.contains(handler))
             handlers.add(handler);
-    }
-
-    protected void markRootNode(){
-
     }
 
     @Override

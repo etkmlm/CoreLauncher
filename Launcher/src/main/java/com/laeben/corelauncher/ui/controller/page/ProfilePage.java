@@ -42,6 +42,8 @@ public class ProfilePage extends HandlerController {
 
     private Profile profile;
 
+    private boolean ignoreReload = false;
+
     private final DProfileSelector selector;
 
     public ProfilePage(){
@@ -62,8 +64,12 @@ public class ProfilePage extends HandlerController {
 
             if (a.getKey().equals(Profiler.PROFILE_DELETE))
                 Main.getMain().closeTab((Tab) this.parentObj);
-            /*else if (a.getKey().equals(Profiler.PROFILE_UPDATE))
-                setProfile((Profile)a.getNewValue());*/
+            else if (a.getKey().equals(Profiler.PROFILE_UPDATE)){ // experimental
+                if (!ignoreReload)
+                    setProfile((Profile)a.getNewValue());
+                else
+                    ignoreReload = false;
+            }
         }, true);
 
         registerHandler(Configurator.getConfigurator().getHandler(), a -> {
@@ -326,7 +332,7 @@ public class ProfilePage extends HandlerController {
         pane.vvalueProperty().addListener((a, b, c) -> {
             if (b.equals(c) || pane.getVmax() > c.doubleValue())
                 return;
-            lvMods.load();
+            lvMods.load(false);
         });
     }
 
@@ -411,6 +417,8 @@ public class ProfilePage extends HandlerController {
                 else
                     list.getItems().remove(item);
             }
+
+            ignoreReload = true;
         });
     }
 }

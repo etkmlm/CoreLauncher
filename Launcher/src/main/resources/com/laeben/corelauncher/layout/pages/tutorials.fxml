@@ -9,7 +9,7 @@
       fx:controller="com.laeben.corelauncher.ui.controller.page.TutorialsPage"
       prefHeight="400.0" prefWidth="600.0" spacing="15" style="-fx-padding: 10px" stylesheets="@../../style/controls/clui.css">
     <CField fx:id="txtSearch" promptText="%search" style="-fx-background-color: #232323aa"/>
-    <ScrollPane VBox.vgrow="ALWAYS" styleClass="w-scroll-pane" fitToWidth="true" hbarPolicy="NEVER">
+    <ScrollPane fx:id="scroll" VBox.vgrow="ALWAYS" styleClass="w-scroll-pane" fitToWidth="true" hbarPolicy="NEVER">
         <CList fx:id="pList"/>
     </ScrollPane>
 </VBox>

@@ -234,14 +234,21 @@ public class CList<T> extends VBox {
         if (limit == -1)
             reload(false);
     }
+
     public void load(){
+        load(true);
+    }
+
+    public void load(boolean allowReload){
         if (loadLimit == -1){
-            reload(false);
+            if (allowReload)
+                reload(false);
             return;
         }
 
         if (lastLoadedIndex >= items.size()){
-            reload(false);
+            if (allowReload)
+                reload(false);
             return;
         }
 

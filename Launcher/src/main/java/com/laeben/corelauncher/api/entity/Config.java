@@ -44,6 +44,7 @@ public class Config {
     //private int commPort;
     private boolean enableInGameRPC;
     private boolean useNonGuiShortcut;
+    private boolean overwriteImported;
 
     public Path getGamePath(){
         return (gamePath == null ? DEFAULT_GAME_PATH : gamePath).forceSetDir(true);
@@ -141,6 +142,13 @@ public class Config {
     }
     public void setEnabledSelectAndPlayDock(boolean v){
         this.selectAndPlayDock = v;
+    }
+
+    public boolean isOverwriteImportedEnabled(){
+        return overwriteImported;
+    }
+    public void setOverwriteImported(boolean v){
+        this.overwriteImported = v;
     }
 
     public double getWindowWidth(){

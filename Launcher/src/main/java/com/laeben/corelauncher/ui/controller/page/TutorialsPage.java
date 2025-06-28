@@ -11,6 +11,7 @@ import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.cell.CTCell;
 import com.laeben.corelauncher.ui.tutorial.entity.Tutorial;
 import javafx.fxml.FXML;
+import javafx.scene.control.ScrollPane;
 
 import java.util.List;
 
@@ -20,6 +21,8 @@ public class TutorialsPage extends HandlerController {
     private CField txtSearch;
     @FXML
     private CList<Tutorial> pList;
+    @FXML
+    private ScrollPane scroll;
 
     public TutorialsPage() {
         super(KEY);
@@ -48,6 +51,12 @@ public class TutorialsPage extends HandlerController {
         pList.setCellFactory(CTCell::new);
         pList.getItems().setAll(getOnlineTutorials());
         pList.load();
+
+        scroll.vvalueProperty().addListener((a, b, c) -> {
+            if (b.equals(c) || scroll.getVmax() > c.doubleValue())
+                return;
+            pList.load(false);
+        });
 
         txtSearch.textProperty().addListener(a -> pList.filter(txtSearch.getText()));
     }

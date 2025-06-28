@@ -2,6 +2,7 @@ package com.laeben.corelauncher.ui.util;
 
 import com.google.gson.*;
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -10,18 +11,27 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.util.entity.LogType;
+import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ProfileUtil {
     public static void export(Profile profile, Window w){
@@ -165,6 +175,9 @@ public class ProfileUtil {
     public static void importO(Path p, double x, double y){
         var temp = Configurator.getConfig().getTemporaryFolder();
 
+        if (p.isDirectory())
+            return;
+
         if (p.getExtension().equals("zip")){
             p.extract(temp, null);
             String name = p.getFirstZipEntry().replace("/", "");
@@ -172,10 +185,10 @@ public class ProfileUtil {
             if (exPath.to("profile.json").exists()){
                 /*String gen = Profiler.getProfiler().generateName(name);
                 exPath.move(Profiler.profilesDir().to(gen));*/
-                Profiler.getProfiler().importFromPath(exPath);
+                Profiler.getProfiler().importFromPath(exPath, ProfileUtil::determineProfileOverwrite);
             }
             else{
-                var ps = Profiler.getProfiler().importFromPath(exPath);
+                var ps = Profiler.getProfiler().importFromPath(exPath, ProfileUtil::determineProfileOverwrite);
                 String gen = FloatDock.getDock().generateName(name);
                 var group = FDObject.createGroup(ps, x, y, gen);
                 FloatDock.getDock().place(group, false);
@@ -187,10 +200,10 @@ public class ProfileUtil {
         if (!p.getExtension().equals("json"))
             return;
 
-        var obj = GsonUtil.DEFAULT_GSON.fromJson(p.read(), JsonObject.class);
+        var obj = Profile.PROFILE_GSON.fromJson(p.read(), JsonObject.class);
         if (obj.has("type") && obj.get("type").getAsInt() == 1){
             var profiles = obj.get("profiles").getAsJsonArray().asList().stream().map(a -> GsonUtil.DEFAULT_GSON.fromJson(a, Profile.class)).toList();
-            Profiler.getProfiler().importProfiles(profiles);
+            Profiler.getProfiler().importProfiles(profiles, ProfileUtil::determineProfileOverwrite);
 
             String name = obj.get("name").getAsString();
             String gen = FloatDock.getDock().generateName(name);
@@ -199,7 +212,63 @@ public class ProfileUtil {
             return;
         }
 
-        Profiler.getProfiler().importFromPath(p);
+        Profiler.getProfiler().importFromPath(p, ProfileUtil::determineProfileOverwrite);
+    }
+
+    private static boolean determineProfileOverwrite(Profile p) {
+        if (Configurator.getConfig().isOverwriteImportedEnabled())
+            return true;
+
+        var task = new Task<Boolean>() {
+            @Override
+            protected Boolean call() {
+
+                var oldProfile = Profiler.getProfiler().getProfile(p.getName());
+
+                var added = new ArrayList<String>();
+                var removed = oldProfile.getAllResources().stream().map(a -> a.fileName != null ? a.fileName : a.name).collect(Collectors.toList());
+
+                for(var n : p.getAllResources()){
+                    removed.remove(n.fileName == null ? n.name : n.fileName);
+                    var find = oldProfile.getAllResources().stream().filter(a -> a.isSameResource(n)).findFirst();
+                    if (find.isPresent()){
+                        if (n.fileName != null && !n.fileName.equals(find.get().fileName)){
+                            added.add(n.fileName);
+                        }
+                    }
+                    else {
+                        added.add(n.fileName == null ? n.name : n.fileName);
+                    }
+                }
+
+                String translate = Translator.translateFormat("import.ask.overwrite",
+                        p.getName(),
+                        String.join(",", removed),
+                        String.join(",", added)
+                        );
+
+                var result = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), translate)
+                        .setButtons(CMsgBox.ResultType.ALWAYS_YES, CMsgBox.ResultType.YES, CMsgBox.ResultType.NO,  CMsgBox.ResultType.CANCEL)
+                        .executeForResult();
+                if (result.isEmpty() || result.get().result() == CMsgBox.ResultType.CANCEL)
+                    throw new CancellationException();
+
+                if (result.get().result() == CMsgBox.ResultType.ALWAYS_YES){
+                    Configurator.getConfig().setOverwriteImported(true);
+                    Configurator.save();
+                }
+
+                return result.get().result().isPositive();
+            }
+        };
+
+        UI.runAsync(task);
+        try{
+            return task.get();
+        }
+        catch (InterruptedException | ExecutionException e){
+            throw new CancellationException();
+        }
     }
 
     public static void createShortcut(Profile p, Window w){

@@ -186,23 +186,26 @@ public class CurseForge implements ModSource {
 
             var files = x.searchGame(opt.getVersionIds(), loaders);
 
-            for (var f : files){
-                var r = CResource.fromForgeResourceGeneric(f.mainGameVersion, f.mainLoader, x, f);
-                if (r instanceof Modpack mp && opt.getAggregateModpack()){
-                    var p = Configurator.getConfig().getTemporaryFolder().to(StrUtil.pure(mp.name));
-                    try {
-                        applyModpack(mp, p, opt);
-                    } catch (StopException ignored) {
+            if (files == null || files.isEmpty())
+                continue;
 
-                    }
-                    p.delete();
-                    all.addAll(mp.mods);
-                    all.addAll(mp.resources);
-                    all.addAll(mp.shaders);
+            var f = files.get(0);
+
+            var r = CResource.fromForgeResourceGeneric(f.mainGameVersion, f.mainLoader, x, f);
+            if (r instanceof Modpack mp && opt.getAggregateModpack()){
+                var p = Configurator.getConfig().getTemporaryFolder().to(StrUtil.pure(mp.name));
+                try {
+                    applyModpack(mp, p, opt);
+                } catch (StopException ignored) {
+
                 }
-                else
-                    all.add(r);
+                p.delete();
+                all.addAll(mp.mods);
+                all.addAll(mp.resources);
+                all.addAll(mp.shaders);
             }
+            else
+                all.add(r);
         }
 
         if (opt.getIncludeDependencies())

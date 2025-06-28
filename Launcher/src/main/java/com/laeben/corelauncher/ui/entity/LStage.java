@@ -16,14 +16,21 @@ import javafx.stage.StageStyle;
 import java.util.Objects;
 
 public class LStage extends Stage {
+    private static final double PADDING_RESIZE = 5;
+    private static final double PADDING_MOVE_TOP = 30;
+    private static final double PADDING_MOVE_RIGHT = 15;
+    private static final double PADDING_MOVE_BOTTOM = 15;
+    private static final double PADDING_MOVE_LEFT = 15;
+
+
     private Frame frame;
 
     private LScene scene;
     private String name;
 
     private boolean moving;
-    private double xD;
-    private double yD;
+    private double mouseRelativeX;
+    private double mouseRelativeY;
 
     private Cursor c, cFinal;
 
@@ -45,7 +52,6 @@ public class LStage extends Stage {
         });
         addRegisteredEventFilter(MouseEvent.MOUSE_MOVED, this::onMouseMoved);
         addRegisteredEventFilter(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
-        //setOnMouseDragged(this::onMouseDragged);
         addRegisteredEventFilter(MouseEvent.MOUSE_RELEASED, a -> {
             cFinal = null;
             moving = false;
@@ -93,8 +99,6 @@ public class LStage extends Stage {
 
         setScene(s.setStage(this));
 
-        s.setOnMouseClicked(this::onMousePressed);
-
         scene = s;
         return this;
     }
@@ -110,12 +114,6 @@ public class LStage extends Stage {
         return scene;
     }
 
-    public void onMousePressed(MouseEvent e){
-        moving = true;
-        xD = getX() - e.getScreenX();
-        yD = getY() - e.getScreenY();
-    }
-
     public void onMouseMoved(MouseEvent e){
         if (cFinal != null || scene == null)
             return;
@@ -128,10 +126,10 @@ public class LStage extends Stage {
         double mX = e.getScreenX();
         double mY = e.getScreenY();
 
-        boolean east = mX >= maxX -5 && mX <= maxX + 5;
-        boolean north = mY >= minY - 5 && mY <= minY + 5;
-        boolean south = mY <= maxY + 5 && mY >= maxY - 5;
-        boolean west = mX >= minX - 5 && mX <= minX + 5;
+        boolean east = mX >= maxX - PADDING_RESIZE && mX <= maxX + PADDING_RESIZE;
+        boolean north = mY >= minY - PADDING_RESIZE && mY <= minY + PADDING_RESIZE;
+        boolean south = mY <= maxY + PADDING_RESIZE && mY >= maxY - PADDING_RESIZE;
+        boolean west = mX >= minX - PADDING_RESIZE && mX <= minX + PADDING_RESIZE;
 
         c = Cursor.DEFAULT;
 
@@ -170,8 +168,16 @@ public class LStage extends Stage {
 
         if (c == null || c == Cursor.DEFAULT){
             if (moving){
-                setX(e.getScreenX() + xD);
-                setY(e.getScreenY() + yD);
+                setX(e.getScreenX() - mouseRelativeX);
+                setY(e.getScreenY() - mouseRelativeY);
+            }
+            else if (e.getScreenX() < getX() + PADDING_MOVE_LEFT ||
+                    /*e.getScreenX() > getX() + getWidth() - PADDING_MOVE_RIGHT ||*/
+                    e.getScreenY() < getY() + PADDING_MOVE_TOP ||
+                    e.getScreenY() > getY() + getHeight() - PADDING_MOVE_BOTTOM) {
+                mouseRelativeX = e.getScreenX() - getX();
+                mouseRelativeY = e.getScreenY() - getY();
+                moving = true;
             }
             return;
         }

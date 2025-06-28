@@ -67,7 +67,7 @@ public interface ModSource {
         public Options clone() {
             //return super.clone();
 
-            return new Options(List.copyOf(versionIds), List.copyOf(loaders));
+            return new Options(versionIds == null ? null : List.copyOf(versionIds), loaders == null ? null : List.copyOf(loaders));
         }
 
         public Options aggregateModpack(){

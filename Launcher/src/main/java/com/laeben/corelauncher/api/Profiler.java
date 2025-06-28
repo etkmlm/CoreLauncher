@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 
@@ -152,19 +154,19 @@ public class Profiler {
      * Import profile from the zip or JSON file.
      * @param path zip or JSON file
      */
-    public List<Profile> importFromPath(Path path){
+    public List<Profile> importFromPath(Path path, Predicate<Profile> determineOverwrite){
         var ext = path.getExtension();
         var tempProfiles = Configurator.getConfig().getTemporaryFolder();
 
-        if (path.isDirectory()){
+        if (path.isDirectory()){ // backup
             var pxn = path.to("profile.json");
 
             var list = new ArrayList<Profile>();
 
             if (pxn.exists())
-                list.add(importFromBackup(pxn));
+                list.add(importFromBackup(pxn)); // single backup
             else{
-                for (var i : path.getFiles()){
+                for (var i : path.getFiles()){ // multiple backup
                     if (!i.isDirectory())
                         continue;
                     var px = i.to("profile.json");
@@ -199,11 +201,16 @@ public class Profiler {
         String first = p.getName();
         String gen = generateName(first);
 
+        if (!first.equals(gen) && determineOverwrite != null && determineOverwrite.test(p)){
+            setProfile(first, a -> a.copyModdingFrom(p));
+            tempProfiles.to(first).delete();
+            return List.of(p);
+        }
+
         tempProfiles.to(first).move(profilesDir.to(gen));
 
         verifyProfileIcon(p);
         p.setName(gen).save();
-
 
         profiles.add(p);
         var l = List.of(p);
@@ -215,9 +222,14 @@ public class Profiler {
      * Import profile from the objects.
      * @param ps profile objects
      */
-    public void importProfiles(List<Profile> ps){
+    public void importProfiles(List<Profile> ps, Predicate<Profile> determineOverwrite){
         ps.forEach(p -> {
             String gen = generateName(p.getName());
+
+            if (!p.getName().equals(gen) && determineOverwrite != null && determineOverwrite.test(p)){
+                setProfile(p.getName(), a -> a.copyModdingFrom(p));
+                return;
+            }
 
             verifyProfileIcon(p);
             p.setName(gen).save();

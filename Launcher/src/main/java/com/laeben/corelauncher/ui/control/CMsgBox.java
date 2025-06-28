@@ -19,12 +19,15 @@ import java.util.Optional;
 public class CMsgBox extends CDialog<CMsgBox.Result> {
 
     public enum ResultType {
-
-        YES(true), NO(false), OK(true), CANCEL(true), OPTION(false);
+        ALWAYS_YES(true), YES(true), ALWAYS_NO(false), NO(false), OK(true), CANCEL(true), OPTION(false);
 
         final boolean isPositive;
         ResultType(boolean isPositive) {
             this.isPositive = isPositive;
+        }
+
+        public boolean isPositive() {
+            return isPositive;
         }
     }
 

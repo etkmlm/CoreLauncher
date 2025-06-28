@@ -522,13 +522,6 @@ public class Main extends HandlerController {
             a.consume();
         }));
 
-        var stage = getStage();
-        tab.setOnMousePressed(a -> {
-            if (a.getTarget() instanceof StackPane sp && sp.getStyleClass().contains("tab-header-background"))
-                stage.onMousePressed(a);
-        });
-        tab.setOnMouseDragged(stage::onMouseDragged);
-
         addRegisteredEventFilter(EventFilter.window(getStage(), javafx.scene.input.KeyEvent.KEY_PRESSED, x -> {
             if (!x.isShiftDown() || x.getTarget() instanceof TextField)
                 return;

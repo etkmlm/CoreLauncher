@@ -234,7 +234,7 @@ public class Profile {
         var r5 = getShaders().stream().filter(x -> id.equals(x.id)).findFirst();
 
         return r5.orElse(null);*/
-        return getAllResources().stream().filter(a -> id.equals(a.getId())).findFirst().orElse(null);
+        return getAllResources().stream().filter(a -> a.checkId(id)).findFirst().orElse(null);
     }
 
     public Path getPath(){
@@ -353,6 +353,14 @@ public class Profile {
         this.modpacks = p.modpacks;
         this.worlds = p.worlds;
         this.shaders = p.shaders;*/
+        return this;
+    }
+
+    public Profile copyModdingFrom(Profile p){
+        allResources = p.allResources == null ? null : new ArrayList<>(p.allResources);
+        wrapper = p.wrapper;
+        wrapperVersion = p.wrapperVersion;
+
         return this;
     }
 
