@@ -87,7 +87,7 @@ public class SettingsPage extends HandlerController {
     @FXML
     private CheckBox chkSelectPlay;
     @FXML
-    private CheckBox chkAutoWrapper;
+    private CheckBox chkAutoLoader;
     @FXML
     private CheckBox chkOverwriteImportDefault;
     /*@FXML
@@ -410,8 +410,8 @@ public class SettingsPage extends HandlerController {
             Configurator.getConfig().setEnabledInGameRPC(chkInGameRPC.isSelected());
             Configurator.save();
         });
-        chkAutoWrapper.selectedProperty().addListener(x -> {
-            Configurator.getConfig().setAutoChangeWrapper(chkAutoWrapper.isSelected());
+        chkAutoLoader.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setAutoChangeLoader(chkAutoLoader.isSelected());
             Configurator.save();
         });
         chkOverwriteImportDefault.selectedProperty().addListener(x -> {
@@ -571,7 +571,7 @@ public class SettingsPage extends HandlerController {
             chkSelectPlay.setSelected(c.isEnabledSelectAndPlayDock());
             chkGamelog.setSelected(c.delGameLogs());
             chkGuiShortcut.setSelected(c.useNonGUIShortcut());
-            chkAutoWrapper.setSelected(c.isAutoChangeWrapper());
+            chkAutoLoader.setSelected(c.isAutoChangeLoader());
             chkOverwriteImportDefault.setSelected(c.isOverwriteImportedEnabled());
 
             chkInGameRPC.setDisable(c.isDisabledRPC());

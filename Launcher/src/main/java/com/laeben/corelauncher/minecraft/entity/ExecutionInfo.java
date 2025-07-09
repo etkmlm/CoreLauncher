@@ -65,7 +65,7 @@ public class ExecutionInfo{
                 concat.add("-Xmx" + cMax + "M");
         }
 
-        return new ExecutionInfo(profile.getName(), profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion()), profile.getUser(), profile.getJava(), profile.getPath(), concat.generate().toArray(new String[0]));
+        return new ExecutionInfo(profile.getName(), profile.getLoader().getVersion(profile.getVersionId(), profile.getLoaderVersion()), profile.getUser(), profile.getJava(), profile.getPath(), concat.generate().toArray(new String[0]));
     }
 
     public ExecutionInfo includeServer(ServerInfo info){

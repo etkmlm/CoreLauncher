@@ -217,7 +217,7 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
             options = ModSource.Options.create(preferences.getGameVersions(), ModResource.getGlobalSafeLoaders(resource.getResourceType(), preferences.getLoaderTypes()));
         else{
             var profile = preferences.getProfile();
-            options = ModSource.Options.create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(resource.getResourceType(), profile.getWrapper().getType()));
+            options = ModSource.Options.create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(resource.getResourceType(), profile.getLoader().getType()));
         }
 
         lvVersions.getItems().setAll(resource.getSourceType().getSource().getAllCoreResources(resource, options));

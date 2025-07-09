@@ -1,6 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge.entity;
 
-import com.laeben.corelauncher.minecraft.Wrapper;
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 
@@ -27,7 +27,7 @@ public class CurseForgeModpack {
         String[] ldr = loader.split("-");
 
         mp.targetVersionId = mf.minecraft.version;
-        mp.wr = Wrapper.getWrapper(ldr[0]);
+        mp.wr = Loader.getLoader(ldr[0]);
         mp.wrId = ldr[1];
     }
     public List<Integer> getFileIds(){

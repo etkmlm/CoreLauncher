@@ -2,10 +2,10 @@ package com.laeben.corelauncher.api.entity;
 
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
-import com.laeben.corelauncher.minecraft.Wrapper;
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
-import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
+import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.core.entity.Path;
 import com.google.gson.*;
@@ -81,7 +81,7 @@ public class Profile {
     private int minRAM;
     private int maxRAM;
     private int type;
-    private Wrapper wrapper;
+    private Loader wrapper;
 
     /* Generation */
 
@@ -118,7 +118,7 @@ public class Profile {
         return name;
     }
 
-    public String getWrapperVersion(){
+    public String getLoaderVersion(){
         return wrapper instanceof Vanilla ? versionId : wrapperVersion;
     }
 
@@ -126,11 +126,11 @@ public class Profile {
         return versionId;
     }
 
-    public String getWrapperIdentifier(ResourceType type){
-        return type == null || type.isGlobal() ? null : getWrapper().getType().getIdentifier();
+    public String getLoaderIdentifier(ResourceType type){
+        return type == null || type.isGlobal() ? null : getLoader().getType().getIdentifier();
     }
 
-    public Wrapper getWrapper(){
+    public Loader getLoader(){
         return wrapper == null ? new Vanilla() : wrapper;
     }
 
@@ -245,7 +245,7 @@ public class Profile {
 
     /* Setters */
 
-    public Profile setWrapperVersion(String wrapperVersion){
+    public Profile setLoaderVersion(String wrapperVersion){
         this.wrapperVersion = wrapperVersion;
         return this;
     }
@@ -255,7 +255,7 @@ public class Profile {
         return this;
     }
 
-    public Profile setWrapper(Wrapper<?> w){
+    public Profile setLoader(Loader<?> w){
         wrapper = w;
         return this;
     }

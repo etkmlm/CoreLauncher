@@ -1,6 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.entity.resource;
 
-import com.laeben.corelauncher.minecraft.Wrapper;
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeFile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeResource;
 import com.laeben.corelauncher.minecraft.modding.entity.ModSource;
@@ -11,7 +11,7 @@ import com.laeben.corelauncher.minecraft.modding.modrinth.entity.Version;
 import java.util.List;
 
 public class Modpack extends CResource {
-    public transient Wrapper wr;
+    public transient Loader wr;
     public transient String targetVersionId;
     public transient String wrId;
     public transient List<Mod> mods;

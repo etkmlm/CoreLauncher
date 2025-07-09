@@ -2,7 +2,7 @@ package com.laeben.corelauncher.ui.controller.browser;
 
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.Mod;
-import com.laeben.corelauncher.minecraft.wrapper.optifine.entity.OptiVersion;
+import com.laeben.corelauncher.minecraft.loader.optifine.entity.OptiVersion;
 
 import java.util.Date;
 
@@ -15,7 +15,7 @@ public class ResourceOpti implements ModResource {
 
     public static ResourceOpti fromOptiVersion(String versionId, OptiVersion ver){
         var res = new ResourceOpti();
-        res.id = ver.getWrapperVersion();
+        res.id = ver.getLoaderVersion();
         res.date = ver.releaseTime;
         res.jsonName = ver.getJsonName();
         res.versionId = versionId;
@@ -28,7 +28,7 @@ public class ResourceOpti implements ModResource {
         mod.fileName = jsonName + ".jar";
         mod.fileUrl = id;
         mod.name = jsonName;
-        mod.logoUrl = "/com/laeben/corelauncher/images/wrapper/optifine.png";
+        mod.logoUrl = "/com/laeben/corelauncher/images/loader/optifine.png";
 
         return mod;
     }

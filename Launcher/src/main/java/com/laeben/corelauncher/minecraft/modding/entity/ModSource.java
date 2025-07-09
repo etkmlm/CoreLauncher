@@ -6,7 +6,7 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.Profile;
-import com.laeben.corelauncher.minecraft.Wrapper;
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.Modpack;
@@ -32,7 +32,7 @@ public interface ModSource {
             this.loaders = loader == null ? null : List.of(loader);
         }
 
-        private Options(final String versionId, final Wrapper wr){
+        private Options(final String versionId, final Loader wr){
             this.versionIds = versionId == null ? null : List.of(versionId);
             this.loaders = wr == null ? null : List.of(wr.getType());
         }
@@ -55,7 +55,7 @@ public interface ModSource {
         }
 
         public static Options create(Profile p){
-            return new Options(p.getVersionId(), p.getWrapper());
+            return new Options(p.getVersionId(), p.getLoader());
         }
 
         public Options dependencies(boolean include){
@@ -75,10 +75,10 @@ public interface ModSource {
             return this;
         }
 
-        public Wrapper getWrapper(){
+        public Loader getLoader(){
             if (loaders == null)
                 return null;
-            return loaders.isEmpty() ? null : Wrapper.getWrapper(loaders.get(0).getIdentifier());
+            return loaders.isEmpty() ? null : Loader.getLoader(loaders.get(0).getIdentifier());
         }
 
         public List<LoaderType> getLoaders(){
@@ -187,7 +187,7 @@ public interface ModSource {
      *
      * @param mp modpack entity
      * @param path target directory
-     * @param opt options entity which must contain a {@link Wrapper}
+     * @param opt options entity which must contain a {@link Loader}
      */
     void applyModpack(Modpack mp, Path path, Options opt) throws NoConnectionException, HttpException, StopException;
 

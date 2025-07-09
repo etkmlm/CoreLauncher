@@ -14,8 +14,8 @@ public class CurseForgeSearchRequest {
     public int index;
     public ModsSearchSortField sortField;
     public String sortOrder;
-    public CurseForgeWrapper.Type modLoaderType;
-    public List<CurseForgeWrapper.Type> modLoaderTypes;
+    public CurseForgeLoader.Type modLoaderType;
+    public List<CurseForgeLoader.Type> modLoaderTypes;
 
     public void setSortOrder(boolean asc){
         sortOrder = asc ? "asc" : "desc";

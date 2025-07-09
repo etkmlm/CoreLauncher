@@ -4,7 +4,7 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
-import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeWrapper;
+import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeLoader;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ModsSearchSortField;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeSearchRequest;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeSearchResponse;
@@ -33,7 +33,7 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
         request.classId = ResourceType.MOD.getId();
         if (profile != null){
             request.gameVersion = profile.getVersionId();
-            request.modLoaderType = CurseForgeWrapper.Type.fromLoaderType(profile.getWrapper().getType());
+            request.modLoaderType = CurseForgeLoader.Type.fromLoaderType(profile.getLoader().getType());
         }
         else{
             request.gameVersion = null;
@@ -49,7 +49,7 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
         request.categoryId = id;
     }
 
-    public void setLoaderType(CurseForgeWrapper.Type ty){
+    public void setLoaderType(CurseForgeLoader.Type ty){
         request.modLoaderType = ty;
         request.modLoaderTypes = null;
     }
@@ -68,7 +68,7 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
     @Override
     public void setLoaders(List<LoaderType> loaders) {
         //request.modLoaderType = null;
-        request.modLoaderTypes = loaders == null ? null : loaders.stream().map(CurseForgeWrapper.Type::fromLoaderType).toList();
+        request.modLoaderTypes = loaders == null ? null : loaders.stream().map(CurseForgeLoader.Type::fromLoaderType).toList();
     }
 
     public void setMainType(ResourceType type){
@@ -79,10 +79,10 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
             return;
         }
 
-        if (profile.getWrapper().getType().isNative() && !type.isGlobal())
-            setLoaderType(CurseForgeWrapper.Type.NONE);
+        if (profile.getLoader().getType().isNative() && !type.isGlobal())
+            setLoaderType(CurseForgeLoader.Type.NONE);
         else
-            setLoaderType(CurseForgeWrapper.Type.fromLoaderType(ModResource.getGlobalSafeLoaders(type, profile.getWrapper().getType())));
+            setLoaderType(CurseForgeLoader.Type.fromLoaderType(ModResource.getGlobalSafeLoaders(type, profile.getLoader().getType())));
     }
 
     public void setSortOrder(boolean asc){
@@ -128,9 +128,9 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
             else if (request.gameVersion != null)
                 prefs.includeGameVersions(List.of(request.gameVersion));
             if (request.modLoaderTypes != null)
-                prefs.includeLoaderTypes(request.modLoaderTypes.stream().map(CurseForgeWrapper.Type::toLoaderType).toList());
+                prefs.includeLoaderTypes(request.modLoaderTypes.stream().map(CurseForgeLoader.Type::toLoaderType).toList());
             else if (request.modLoaderType != null)
-                prefs.includeLoaderTypes(List.of(CurseForgeWrapper.Type.toLoaderType(request.modLoaderType)));
+                prefs.includeLoaderTypes(List.of(CurseForgeLoader.Type.toLoaderType(request.modLoaderType)));
         }
 
         return sData.data.stream().map(x -> new ResourceCell.Link(prefs, x)).toList();

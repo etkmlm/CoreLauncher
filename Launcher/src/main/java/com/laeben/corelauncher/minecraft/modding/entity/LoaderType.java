@@ -1,12 +1,12 @@
 package com.laeben.corelauncher.minecraft.modding.entity;
 
-import com.laeben.corelauncher.minecraft.wrapper.Custom;
-import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
-import com.laeben.corelauncher.minecraft.wrapper.fabric.Fabric;
-import com.laeben.corelauncher.minecraft.wrapper.forge.Forge;
-import com.laeben.corelauncher.minecraft.wrapper.neoforge.NeoForge;
-import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
-import com.laeben.corelauncher.minecraft.wrapper.quilt.Quilt;
+import com.laeben.corelauncher.minecraft.loader.Custom;
+import com.laeben.corelauncher.minecraft.loader.Vanilla;
+import com.laeben.corelauncher.minecraft.loader.fabric.Fabric;
+import com.laeben.corelauncher.minecraft.loader.forge.Forge;
+import com.laeben.corelauncher.minecraft.loader.neoforge.NeoForge;
+import com.laeben.corelauncher.minecraft.loader.optifine.OptiFine;
+import com.laeben.corelauncher.minecraft.loader.quilt.Quilt;
 
 import java.util.*;
 

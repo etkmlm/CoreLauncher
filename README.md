@@ -25,7 +25,7 @@ Because,
 - You can easily back up, import, and share your profiles and worlds.
 - Also, it supports offline and online authentication.
 
-Create a profile, select you loader (wrapper), customize your resources, and play!
+Create a profile, select you loader, customize your resources, and play!
 
 ## How can I use it?
 

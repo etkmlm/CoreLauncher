@@ -11,9 +11,9 @@ import com.laeben.corelauncher.minecraft.modding.entity.ResourcePreferences;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.*;
-import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
-import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
-import com.laeben.corelauncher.minecraft.wrapper.optifine.entity.OptiVersion;
+import com.laeben.corelauncher.minecraft.loader.Vanilla;
+import com.laeben.corelauncher.minecraft.loader.optifine.OptiFine;
+import com.laeben.corelauncher.minecraft.loader.optifine.entity.OptiVersion;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.browser.*;
@@ -70,9 +70,9 @@ public class BrowserPage extends HandlerController {
                     icon.setImageAsync(ImageUtil.getImageFromProfile(profile, 32, 32));
                     lblProfileName.setText(profile.getName());
                     reloadTitle(profile);
-                    lblInfo.setText(profile.getWrapper().getType().getIdentifier() + " - " + profile.getWrapperVersion());
-                    if (!profile.getWrapperVersion().equals(wrVersion) || !version.equals(profile.getVersionId())){
-                        wrVersion = profile.getWrapperVersion();
+                    lblInfo.setText(profile.getLoader().getType().getIdentifier() + " - " + profile.getLoaderVersion());
+                    if (!profile.getLoaderVersion().equals(wrVersion) || !version.equals(profile.getVersionId())){
+                        wrVersion = profile.getLoaderVersion();
                         version = profile.getVersionId();
                         search.reset();
                         filterPane.clearSections();
@@ -81,15 +81,15 @@ public class BrowserPage extends HandlerController {
                 }
             }, true);
 
-            wrVersion = profile.getWrapperVersion();
+            wrVersion = profile.getLoaderVersion();
             version = profile.getVersionId();
 
             icon.setImageAsync(ImageUtil.getImageFromProfile(profile, 32, 32));
             lblProfileName.setText(profile.getName());
             reloadTitle(profile);
-            lblInfo.setText(profile.getWrapper().getType().getIdentifier() + " - " + profile.getWrapperVersion());
+            lblInfo.setText(profile.getLoader().getType().getIdentifier() + " - " + profile.getLoaderVersion());
 
-            String defCat = !profile.getWrapper().getType().isNative() ? "mod" : "resource";
+            String defCat = !profile.getLoader().getType().isNative() ? "mod" : "resource";
 
             filterPane.getPreset("modrinth").getSection("maincat").defaultChoice(defCat);
             filterPane.getPreset("curseforge").getSection("maincat").defaultChoice(defCat);
@@ -273,7 +273,7 @@ public class BrowserPage extends HandlerController {
 
         var maincat = preset.getSection("maincat");
         if (maincat.getSelectedChoice() != null && maincat.getSelectedChoice().equals("optifine")) {
-            if (profile != null && profile.getWrapper().getType().isNative())
+            if (profile != null && profile.getLoader().getType().isNative())
                 return;
 
             Stream<OptiVersion> versions;
@@ -293,7 +293,7 @@ public class BrowserPage extends HandlerController {
                         .includeLoaderTypes(List.of(LoaderType.OPTIFINE));
             }
 
-            resources.addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeWrapperVersion), y.checkForge(y.forgeWrapperVersion))).map(a -> new ResourceCell.Link(preferences, ResourceOpti.fromOptiVersion(a.id, a))).toList());
+            resources.addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeLoaderVersion), y.checkForge(y.forgeLoaderVersion))).map(a -> new ResourceCell.Link(preferences, ResourceOpti.fromOptiVersion(a.id, a))).toList());
 
             return;
         }

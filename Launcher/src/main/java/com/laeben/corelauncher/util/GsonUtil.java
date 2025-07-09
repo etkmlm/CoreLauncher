@@ -4,7 +4,7 @@ import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.laeben.core.entity.TranslationBundle;
 import com.laeben.corelauncher.api.entity.Account;
-import com.laeben.corelauncher.minecraft.Wrapper;
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.Image;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
@@ -52,9 +52,9 @@ public class GsonUtil {
                     }
                 });
 
-        var wrFact = new Wrapper.WrapperFactory();
+        var wrFact = new Loader.LoaderFactory();
 
-        builder.registerTypeAdapter(Wrapper.class, wrFact);
+        builder.registerTypeAdapter(Loader.class, wrFact);
 
         for (var l : LoaderType.values()){
             if (l.getCls() != null)

@@ -7,7 +7,7 @@ import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
 import com.laeben.corelauncher.api.util.OSUtil;
-import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
+import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.util.StrUtil;
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 

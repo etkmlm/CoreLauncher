@@ -126,8 +126,8 @@
                 <Label styleClass="property-key" text="%settings.selectPlay" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                 <CheckBox fx:id="chkSelectPlay" GridPane.columnIndex="2" GridPane.rowIndex="6" />
 
-                <Label styleClass="property-key" text="%settings.autoWrapper" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                <CheckBox fx:id="chkAutoWrapper" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                <Label styleClass="property-key" text="%settings.autoLoader" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                <CheckBox fx:id="chkAutoLoader" GridPane.columnIndex="2" GridPane.rowIndex="7" />
 
                 <Label styleClass="property-key" text="%settings.overwriteImport" GridPane.columnIndex="1" GridPane.rowIndex="8" />
                 <CheckBox fx:id="chkOverwriteImportDefault" GridPane.columnIndex="2" GridPane.rowIndex="8" />

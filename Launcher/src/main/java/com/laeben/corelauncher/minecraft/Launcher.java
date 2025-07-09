@@ -5,8 +5,6 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.ValueEvent;
-import com.laeben.corelauncher.api.entity.Account;
-import com.laeben.corelauncher.api.entity.Config;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Profile;
@@ -70,12 +68,12 @@ public class Launcher {
     public void prepare(Profile profile) throws NoConnectionException, StopException, PerformException, HttpException, FileNotFoundException, VersionNotFoundException {
         handleState(PREPARE + profile.getName());
 
-        var version = profile.getWrapper().getVersion(profile.getVersionId(), profile.getWrapperVersion());
+        var version = profile.getLoader().getVersion(profile.getVersionId(), profile.getLoaderVersion());
         if (version == null)
-            throw new VersionNotFoundException(profile.getWrapperVersion());
-        profile.getWrapper().install(version);
+            throw new VersionNotFoundException(profile.getLoaderVersion());
+        profile.getLoader().install(version);
 
-        if (!profile.getWrapper().getType().isNative()){
+        if (!profile.getLoader().getType().isNative()){
             Modder.getModder().installModpacks(profile, profile.getModpacks());
             Modder.getModder().installMods(profile, profile.getMods());
         }

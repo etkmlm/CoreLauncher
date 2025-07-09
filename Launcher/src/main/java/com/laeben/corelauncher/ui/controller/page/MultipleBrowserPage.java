@@ -15,7 +15,7 @@ import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.World;
-import com.laeben.corelauncher.minecraft.wrapper.forge.Forge;
+import com.laeben.corelauncher.minecraft.loader.forge.Forge;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.browser.CResourceCell;
@@ -233,7 +233,7 @@ public class MultipleBrowserPage extends HandlerController {
         });
 
         btnFromWorld.setOnMouseClicked(a -> {
-            if (!(profile.getWrapper() instanceof Forge)){
+            if (!(profile.getLoader() instanceof Forge)){
                 Main.getMain().announceLater(Translator.translate("error.oops"), Translator.translate("import.multiple.forge"), Announcement.AnnouncementType.ERROR, Duration.seconds(2));
                 return;
             }
@@ -277,7 +277,7 @@ public class MultipleBrowserPage extends HandlerController {
 
             var path = Path.begin(file.toPath());
 
-            loadFromResult(loadFromPath(profile.getWrapper().getType(), path.getFiles()));
+            loadFromResult(loadFromPath(profile.getLoader().getType(), path.getFiles()));
             //var files = ps.stream().filter(x -> x.getExtension() != null && x.getExtension().equals("jar")).map(x -> x.getNameWithoutExtension().split("-")[0]).toList();
             //files.forEach(this::println);
         });

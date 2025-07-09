@@ -6,10 +6,10 @@ import com.laeben.corelauncher.api.Tool;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.exception.PerformException;
-import com.laeben.corelauncher.minecraft.Wrapper;
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.entity.Version;
-import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
-import com.laeben.corelauncher.minecraft.wrapper.entity.WrapperVersion;
+import com.laeben.corelauncher.minecraft.loader.Vanilla;
+import com.laeben.corelauncher.minecraft.loader.entity.LoaderVersion;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class ResourcePreferences {
     private ResourcePreferences(Profile profile) {
         this.profile = new WeakReference<>(profile);
         gameVersions = List.of(profile.getVersionId());
-        loaderTypes = List.of(profile.getWrapper().getType());
+        loaderTypes = List.of(profile.getLoader().getType());
     }
 
     public List<String> getGameVersions() {
@@ -149,15 +149,15 @@ public class ResourcePreferences {
         if (loader == null)
             loader = LoaderType.VANILLA;
 
-        var wr = Wrapper.getWrapper(loader.getIdentifier());
+        var wr = Loader.getLoader(loader.getIdentifier());
         String wrId = null;
         if (loader != LoaderType.VANILLA){
-            var wrVers = ((Wrapper<WrapperVersion>)wr).getVersions(versionId);
+            var wrVers = ((Loader<LoaderVersion>)wr).getVersions(versionId);
             if (wrVers != null && !wrVers.isEmpty())
-                wrId = wrVers.get(0).getWrapperVersion();
+                wrId = wrVers.get(0).getLoaderVersion();
 
             if (wrId == null){
-                throw new PerformException("Wrapper identifier for " + loader + " cannot be found.");
+                throw new PerformException("Loader identifier " + loader + " could not be found.");
             }
         }
 
@@ -168,8 +168,8 @@ public class ResourcePreferences {
 
         return Profiler.getProfiler().createAndSetProfile(Profiler.getProfiler().generateName(name), p ->
                 p.setVersionId(versionId)
-                        .setWrapper(wr)
-                        .setWrapperVersion(finalWrId)
+                        .setLoader(wr)
+                        .setLoaderVersion(finalWrId)
         );
     }
 }

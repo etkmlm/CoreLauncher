@@ -25,57 +25,57 @@
                 <HBox fx:id="loaders" alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0">
                     <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgVanilla" fitHeight="48" fitWidth="48">
-                            <Image url="@../../images/wrapper/vanilla.png" />
+                            <Image url="@../../images/loader/vanilla.png" />
                         </ImageView>
                         <RadioButton fx:id="vanilla" />
                     </VBox>
                     <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgForge" fitHeight="48" fitWidth="48">
-                            <Image url="@../../images/wrapper/forge.png" />
+                            <Image url="@../../images/loader/forge.png" />
                         </ImageView>
                         <RadioButton fx:id="forge" />
                     </VBox>
                     <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgNeoForge" fitHeight="48" fitWidth="48">
-                            <Image url="@../../images/wrapper/neoforge.png" />
+                            <Image url="@../../images/loader/neoforge.png" />
                         </ImageView>
                         <RadioButton fx:id="neoforge" />
                     </VBox>
                     <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgFabric" fitHeight="48" fitWidth="48">
-                            <Image url="@../../images/wrapper/fabric.png" />
+                            <Image url="@../../images/loader/fabric.png" />
                         </ImageView>
                         <RadioButton fx:id="fabric" />
                     </VBox>
                     <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgQuilt" fitHeight="48" fitWidth="48">
-                            <Image url="@../../images/wrapper/quilt.png" />
+                            <Image url="@../../images/loader/quilt.png" />
                         </ImageView>
                         <RadioButton fx:id="quilt" />
                     </VBox>
                     <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgOptiFine" fitHeight="48" fitWidth="48">
-                            <Image url="@../../images/wrapper/optifine.png" />
+                            <Image url="@../../images/loader/optifine.png" />
                         </ImageView>
                         <RadioButton fx:id="optifine" />
                     </VBox>
                     <VBox alignment="CENTER" styleClass="rad-option">
                         <ImageView fx:id="imgCustom" fitHeight="48" fitWidth="48">
-                            <Image url="@../../images/wrapper/custom.png" />
+                            <Image url="@../../images/loader/custom.png" />
                         </ImageView>
                         <RadioButton fx:id="custom" />
                     </VBox>
                 </HBox>
 
-                <Label styleClass="property-key" text="%profile.edit.wrapperVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                <SearchableComboBox fx:id="cbWrapperVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <GridPane fx:id="pWrapper" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <Label styleClass="property-key" text="%profile.edit.loaderVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
+                <SearchableComboBox fx:id="cbLoaderVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <GridPane fx:id="pLoader" visible="false" GridPane.columnIndex="1" GridPane.rowIndex="2">
                     <columnConstraints>
                         <ColumnConstraints percentWidth="90" />
                         <ColumnConstraints percentWidth="10" />
                     </columnConstraints>
-                    <TextField editable="false" fx:id="txtWrapper" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" />
-                    <CButton styleClass="transparent" fx:id="btnSelectWrapper" maxWidth="Infinity" text="..." GridPane.columnIndex="1" />
+                    <TextField editable="false" fx:id="txtLoader" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" />
+                    <CButton styleClass="transparent" fx:id="btnSelectLoader" maxWidth="Infinity" text="..." GridPane.columnIndex="1" />
                 </GridPane>
 
                 <Label styleClass="property-key" text="%profile.edit.gameVersion" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />

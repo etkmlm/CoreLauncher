@@ -463,7 +463,7 @@ public class Modrinth implements ModSource {
         mp.targetVersionId = deps.get("minecraft").getAsString();
 
         String ver = deps.get(key).getAsString();
-        mp.wr = opt.getWrapper();
+        mp.wr = opt.getLoader();
         mp.wrId = ver;
     }
 

@@ -116,10 +116,10 @@ public class Config {
         useNonGuiShortcut = val;
     }
 
-    public boolean isAutoChangeWrapper(){
+    public boolean isAutoChangeLoader(){
         return autoChangeWrapper;
     }
-    public void setAutoChangeWrapper(boolean val){
+    public void setAutoChangeLoader(boolean val){
         autoChangeWrapper = val;
     }
 

@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge.entity;
 
 import com.laeben.corelauncher.api.annotation.ReturnsNull;
-import com.laeben.corelauncher.minecraft.Wrapper;
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.util.VersionUtil;
 
@@ -81,7 +81,7 @@ public class CurseForgeResource implements ModResource {
      * </p>
      */
     private boolean checkAndFillFile(CurseForgeFile file, List<String> filterVersions, List<String> filterLoaderTypes){
-        var all = Wrapper.getWrappers();
+        var all = Loader.getLoaders();
 
         boolean noSupportedLoaders = true;
         boolean filterLoaderMatch = false;

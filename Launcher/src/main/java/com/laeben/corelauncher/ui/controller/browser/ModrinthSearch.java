@@ -26,8 +26,8 @@ public class ModrinthSearch implements Search<Index> {
     public void setMainType(ResourceType type){
         builder.add(Facet.get("project_type", type.getName()).setId("type"));
         if (profile != null){
-            builder.setLoader(profile.getWrapperIdentifier(type));
-            if (profile.getWrapper().getType().isNative())
+            builder.setLoader(profile.getLoaderIdentifier(type));
+            if (profile.getLoader().getType().isNative())
                 builder.add(Facet.not("categories", List.of("modded")).setId("modded"));
             else
                 builder.remove("modded");
@@ -97,7 +97,7 @@ public class ModrinthSearch implements Search<Index> {
 
         if (profile != null){
             builder.setGameVersion(profile.getVersionId());
-            builder.setLoader(profile.getWrapper().getType().getIdentifier());
+            builder.setLoader(profile.getLoader().getType().getIdentifier());
         }
         else{
             builder.setGameVersion(null);

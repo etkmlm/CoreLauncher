@@ -24,18 +24,18 @@ module com.laeben.corelauncher {
 
     opens com.laeben.corelauncher.minecraft;
     opens com.laeben.corelauncher.minecraft.entity;
-    opens com.laeben.corelauncher.minecraft.wrapper;
-    opens com.laeben.corelauncher.minecraft.wrapper.entity;
-    opens com.laeben.corelauncher.minecraft.wrapper.neoforge;
-    opens com.laeben.corelauncher.minecraft.wrapper.neoforge.entity;
-    opens com.laeben.corelauncher.minecraft.wrapper.fabric;
-    opens com.laeben.corelauncher.minecraft.wrapper.fabric.entity;
-    opens com.laeben.corelauncher.minecraft.wrapper.forge;
-    opens com.laeben.corelauncher.minecraft.wrapper.forge.entity;
-    opens com.laeben.corelauncher.minecraft.wrapper.forge.installer;
-    opens com.laeben.corelauncher.minecraft.wrapper.optifine;
-    opens com.laeben.corelauncher.minecraft.wrapper.optifine.entity;
-    opens com.laeben.corelauncher.minecraft.wrapper.quilt;
+    opens com.laeben.corelauncher.minecraft.loader;
+    opens com.laeben.corelauncher.minecraft.loader.entity;
+    opens com.laeben.corelauncher.minecraft.loader.neoforge;
+    opens com.laeben.corelauncher.minecraft.loader.neoforge.entity;
+    opens com.laeben.corelauncher.minecraft.loader.fabric;
+    opens com.laeben.corelauncher.minecraft.loader.fabric.entity;
+    opens com.laeben.corelauncher.minecraft.loader.forge;
+    opens com.laeben.corelauncher.minecraft.loader.forge.entity;
+    opens com.laeben.corelauncher.minecraft.loader.forge.installer;
+    opens com.laeben.corelauncher.minecraft.loader.optifine;
+    opens com.laeben.corelauncher.minecraft.loader.optifine.entity;
+    opens com.laeben.corelauncher.minecraft.loader.quilt;
 
     opens com.laeben.corelauncher.minecraft.util;
     opens com.laeben.corelauncher.minecraft.modding;

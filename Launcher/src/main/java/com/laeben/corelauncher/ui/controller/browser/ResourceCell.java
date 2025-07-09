@@ -122,7 +122,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
         if (loaders != null && prefs.getProfile() == null){
             badges.getChildren().clear();
             for (var l : loaders){
-                var img = ImageUtil.getLocalImage("wrapper/" + l.getIdentifier() + ".png");
+                var img = ImageUtil.getLocalImage("loader/" + l.getIdentifier() + ".png");
                 if (img == null || !l.isSupported())
                     continue;
                 var view = new ImageView();
@@ -213,7 +213,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
                     }
                     else{
                         var opt = ModSource.Options
-                                .create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(res.getResourceType(), profile.getWrapper().getType()));
+                                .create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(res.getResourceType(), profile.getLoader().getType()));
                         if (res.getResourceType() != ResourceType.MODPACK)
                             opt.dependencies(true);
 

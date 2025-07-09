@@ -99,15 +99,15 @@ public class Activity {
         return a -> {
             a.timestamps = Activity.Timestamps.now();
             var assets = new Activity.Assets().setLarge("mc512", p.getVersionId());
-            if (!p.getWrapper().getType().isNative()){
-                var ident = p.getWrapper().getType().getIdentifier();
-                assets.setSmall(ident, ident + " " + p.getWrapperVersion());
+            if (!p.getLoader().getType().isNative()){
+                var ident = p.getLoader().getType().getIdentifier();
+                assets.setSmall(ident, ident + " " + p.getLoaderVersion());
             }
             a.buttons = null;
             a.party = null;
             a.assets = assets;
             a.details = Translator.translateFormat("discord.detail.play", p.getName());
-            a.state = "Minecraft " + p.getWrapper().getType().getIdentifier() + " " + p.getVersionId();
+            a.state = "Minecraft " + p.getLoader().getType().getIdentifier() + " " + p.getVersionId();
         };
     }
 

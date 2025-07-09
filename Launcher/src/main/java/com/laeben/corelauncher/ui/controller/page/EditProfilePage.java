@@ -11,10 +11,10 @@ import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
-import com.laeben.corelauncher.minecraft.Wrapper;
-import com.laeben.corelauncher.minecraft.wrapper.Custom;
-import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
-import com.laeben.corelauncher.minecraft.wrapper.entity.WrapperVersion;
+import com.laeben.corelauncher.minecraft.Loader;
+import com.laeben.corelauncher.minecraft.loader.Custom;
+import com.laeben.corelauncher.minecraft.loader.Vanilla;
+import com.laeben.corelauncher.minecraft.loader.entity.LoaderVersion;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
@@ -83,7 +83,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     private CButton btnBack;
 
     @FXML
-    private SearchableComboBox<String> cbWrapperVersion;
+    private SearchableComboBox<String> cbLoaderVersion;
     @FXML
     private SearchableComboBox<String> cbGameVersion;
     @FXML
@@ -107,19 +107,19 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     @FXML
     private Slider sldRAM;
     @FXML
-    private GridPane pWrapper;
+    private GridPane pLoader;
     @FXML
-    private TextField txtWrapper;
+    private TextField txtLoader;
     @FXML
-    private Button btnSelectWrapper;
+    private Button btnSelectLoader;
 
     @FXML
     public CView icon;
 
-    private final ToggleGroup wrapperGroup;
+    private final ToggleGroup loaderGroup;
     private final ObservableList<String> versions;
     private final ObservableList<String> javaVersions;
-    private final ObservableList<String> wrapperVersions;
+    private final ObservableList<String> loaderVersions;
     private final RAMManager ram;
 
     private Profile profile;
@@ -149,7 +149,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
     public EditProfilePage(){
         super(KEY);
-        wrapperGroup = new ToggleGroup();
+        loaderGroup = new ToggleGroup();
         nts = new NTSManager(10);
         nts.setOnSet(a -> {
             boolean f = nts.needsToSave();
@@ -176,8 +176,8 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         javaVersions = FXCollections.observableArrayList();
         reloadJava();
         versions = FXCollections.observableList(Vanilla.getVanilla().getAllVersions().stream().filter(x -> x.type == null || (x.type.equals("snapshot") && showSnap) || ((x.type.equals("old_beta") || x.type.equals("old_alpha")) && showOld) || x.type.equals("release")).map(x -> x.id).toList());
-        wrapperVersions = FXCollections.observableArrayList();
-        wrapperVersions.add("...");
+        loaderVersions = FXCollections.observableArrayList();
+        loaderVersions.add("...");
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
             if (!(a instanceof ChangeEvent ce))
@@ -267,11 +267,11 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             nts.set(3, !eq);
 
             if (!eq)
-                refreshWrapperVersions();
+                refreshLoaderVersions();
 
         });
         cbGameVersion.setItems(versions);
-        cbWrapperVersion.setItems(wrapperVersions);
+        cbLoaderVersion.setItems(loaderVersions);
 
         cbJavaVersion.valueProperty().addListener(x -> {
             var java = tryGetSelectedJava();
@@ -295,88 +295,88 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         });
 
 
-        imgVanilla.setOnMouseClicked(a -> wrapperGroup.selectToggle(vanilla));
-        imgForge.setOnMouseClicked(a -> wrapperGroup.selectToggle(forge));
-        imgNeoForge.setOnMouseClicked(a -> wrapperGroup.selectToggle(neoforge));
-        imgFabric.setOnMouseClicked(a -> wrapperGroup.selectToggle(fabric));
-        imgQuilt.setOnMouseClicked(a -> wrapperGroup.selectToggle(quilt));
-        imgOptiFine.setOnMouseClicked(a -> wrapperGroup.selectToggle(optifine));
-        imgCustom.setOnMouseClicked(a -> wrapperGroup.selectToggle(custom));
+        imgVanilla.setOnMouseClicked(a -> loaderGroup.selectToggle(vanilla));
+        imgForge.setOnMouseClicked(a -> loaderGroup.selectToggle(forge));
+        imgNeoForge.setOnMouseClicked(a -> loaderGroup.selectToggle(neoforge));
+        imgFabric.setOnMouseClicked(a -> loaderGroup.selectToggle(fabric));
+        imgQuilt.setOnMouseClicked(a -> loaderGroup.selectToggle(quilt));
+        imgOptiFine.setOnMouseClicked(a -> loaderGroup.selectToggle(optifine));
+        imgCustom.setOnMouseClicked(a -> loaderGroup.selectToggle(custom));
 
-        vanilla.setToggleGroup(wrapperGroup);
+        vanilla.setToggleGroup(loaderGroup);
         vanilla.setTooltip(new Tooltip("Vanilla"));
         Tooltip.install(imgVanilla, vanilla.getTooltip());
 
-        forge.setToggleGroup(wrapperGroup);
+        forge.setToggleGroup(loaderGroup);
         forge.setTooltip(new Tooltip("Forge"));
         Tooltip.install(imgForge, forge.getTooltip());
 
-        neoforge.setToggleGroup(wrapperGroup);
+        neoforge.setToggleGroup(loaderGroup);
         neoforge.setTooltip(new Tooltip("NeoForge"));
         Tooltip.install(imgNeoForge, neoforge.getTooltip());
 
-        fabric.setToggleGroup(wrapperGroup);
+        fabric.setToggleGroup(loaderGroup);
         fabric.setTooltip(new Tooltip("Fabric"));
         Tooltip.install(imgFabric, fabric.getTooltip());
 
-        quilt.setToggleGroup(wrapperGroup);
+        quilt.setToggleGroup(loaderGroup);
         quilt.setTooltip(new Tooltip("Quilt"));
         Tooltip.install(imgQuilt, quilt.getTooltip());
 
-        optifine.setToggleGroup(wrapperGroup);
+        optifine.setToggleGroup(loaderGroup);
         optifine.setTooltip(new Tooltip("OptiFine"));
         Tooltip.install(imgOptiFine, optifine.getTooltip());
 
-        custom.setToggleGroup(wrapperGroup);
+        custom.setToggleGroup(loaderGroup);
         custom.setTooltip(new Tooltip(Translator.translate("mods.custom")));
         Tooltip.install(imgCustom, custom.getTooltip());
 
-        wrapperGroup.selectToggle(vanilla);
+        loaderGroup.selectToggle(vanilla);
 
-        wrapperGroup.selectedToggleProperty().addListener(a -> {
-            var wrapper = Wrapper.getWrapper(((RadioButton)wrapperGroup.getSelectedToggle()).getId());
-            nts.set(2, profile.getWrapper().getType() != wrapper.getType());
-            tempProfile.setWrapper(wrapper);
+        loaderGroup.selectedToggleProperty().addListener(a -> {
+            var loader = Loader.getLoader(((RadioButton) loaderGroup.getSelectedToggle()).getId());
+            nts.set(2, profile.getLoader().getType() != loader.getType());
+            tempProfile.setLoader(loader);
             if (cbGameVersion.getValue() != null && !cbGameVersion.getValue().isBlank())
-                refreshWrapperVersions();
+                refreshLoaderVersions();
         });
 
-        cbWrapperVersion.valueProperty().addListener(a -> {
+        cbLoaderVersion.valueProperty().addListener(a -> {
             if (tempProfile.getVersionId() == null)
                 return;
 
-            var value = cbWrapperVersion.getValue();
+            var value = cbLoaderVersion.getValue();
 
             if (value == null || value.isEmpty())
                 return;
 
-            tempProfile.setWrapperVersion(value);
-            nts.set(3, !value.equals(profile.getWrapperVersion()));
+            tempProfile.setLoaderVersion(value);
+            nts.set(3, !value.equals(profile.getLoaderVersion()));
         });
-        txtWrapper.setCursor(Cursor.HAND);
-        btnSelectWrapper.setOnMouseClicked(a -> {
+        txtLoader.setCursor(Cursor.HAND);
+        btnSelectLoader.setOnMouseClicked(a -> {
             var chooser = new DirectoryChooser();
-            var file = chooser.showDialog(btnSelectWrapper.getScene().getWindow());
+            var file = chooser.showDialog(btnSelectLoader.getScene().getWindow());
             if (file == null)
                 return;
             var path = Path.begin(file.toPath());
             var json = path.to(path.getName() + ".json");
             if (!path.parent().equals(Configurator.getConfig().getGamePath().to("versions")) || !json.exists()){
-                txtWrapper.setText(Translator.translate("error.wrongPath"));
+                txtLoader.setText(Translator.translate("error.wrongPath"));
                 return;
             }
 
             try{
-                txtWrapper.setText(path.toString());
-                tempProfile.setWrapperVersion(path.getName());
+                txtLoader.setText(path.toString());
+                tempProfile.setLoaderVersion(path.getName());
             }
             catch (Exception ignored){
-                txtWrapper.setText(Translator.translate("error.wrongPath"));
+                txtLoader.setText(Translator.translate("error.wrongPath"));
             }
 
         });
-        txtWrapper.setOnMouseClicked(a -> {
-            var path = ((Custom)tempProfile.getWrapper()).getPath(tempProfile.getVersionId());
+        txtLoader.setOnMouseClicked(a -> {
+            var path = ((Custom)tempProfile.getLoader()).getPath(tempProfile.getVersionId());
             if (path.exists())
                 OSUtil.open(path.toFile());
         });
@@ -397,7 +397,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             tempProfile.setName(c);
             nts.set(1, !c.equals(profile.getName()));
         });
-        txtWrapper.textProperty().addListener((a, b, c) -> {
+        txtLoader.textProperty().addListener((a, b, c) -> {
             nts.set(4, true);
         });
         txtAccount.textProperty().addListener((a, b, c) -> {
@@ -419,26 +419,26 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         return JavaManager.getManager().tryGet(new Java(name));
     }
 
-    private void refreshWrapperVersions(){
+    private void refreshLoaderVersions(){
         /*cbWrapperVersion.getItems().clear();
         cbWrapperVersion.getItems().add("...");*/
-        wrapperVersions.setAll("...");
-        cbWrapperVersion.setValue(null);
+        loaderVersions.setAll("...");
+        cbLoaderVersion.setValue(null);
 
 
         String versionId = tempProfile.getVersionId();
-        var wr = tempProfile.getWrapper();
+        var wr = tempProfile.getLoader();
         if (wr instanceof Custom){
-            pWrapper.setVisible(true);
-            cbWrapperVersion.setVisible(false);
+            pLoader.setVisible(true);
+            cbLoaderVersion.setVisible(false);
         }
         else{
-            pWrapper.setVisible(false);
-            cbWrapperVersion.setVisible(true);
+            pLoader.setVisible(false);
+            cbLoaderVersion.setVisible(true);
             if (!(wr instanceof Vanilla)){
-                var m = tempProfile.getWrapper().getVersions(versionId).stream().map(x -> ((WrapperVersion)x).getWrapperVersion()).toList();
+                var m = tempProfile.getLoader().getVersions(versionId).stream().map(x -> ((LoaderVersion)x).getLoaderVersion()).toList();
                 //cbWrapperVersion.getItems().addAll(m);
-                wrapperVersions.addAll(m);
+                loaderVersions.addAll(m);
             }
 
         }
@@ -480,16 +480,16 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             if (tempProfile.getJvmArgs() != null)
                 txtArgs.setText(String.join(" ", tempProfile.getJvmArgs()));
 
-            Wrapper wr = tempProfile.getWrapper();
-            var wrapperToggle = wrapperGroup.getToggles().stream().filter(x -> ((RadioButton)x).getId().equals(wr.getType().getIdentifier())).findFirst().orElse(vanilla);
-            wrapperGroup.selectToggle(wrapperToggle);
+            Loader wr = tempProfile.getLoader();
+            var loaderToggle = loaderGroup.getToggles().stream().filter(x -> ((RadioButton)x).getId().equals(wr.getType().getIdentifier())).findFirst().orElse(vanilla);
+            loaderGroup.selectToggle(loaderToggle);
 
-            refreshWrapperVersions();
+            refreshLoaderVersions();
             if (wr instanceof Custom c){
-                txtWrapper.setText(c.getPath(tempProfile.getWrapperVersion()).toString());
+                txtLoader.setText(c.getPath(tempProfile.getLoaderVersion()).toString());
             }
-            else if (!(wr instanceof Vanilla) && tempProfile.getWrapperVersion() != null){
-                cbWrapperVersion.setValue(tempProfile.getWrapperVersion());
+            else if (!(wr instanceof Vanilla) && tempProfile.getLoaderVersion() != null){
+                cbLoaderVersion.setValue(tempProfile.getLoaderVersion());
             }
             ram.setDefaultMin(tempProfile.getMinRAM());
             ram.setDefaultMax(tempProfile.getMaxRAM());
@@ -533,11 +533,11 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             tempProfile.setCustomUser(Account.fromUsername(txtAccount.getText()).setOnline(chkAccOnline.isSelected()));
 
         boolean check1 = tempProfile.getVersionId() == null || tempProfile.getVersionId().isBlank();
-        boolean check2 = tempProfile.getWrapper() != null && !(tempProfile.getWrapper() instanceof Vanilla) && (tempProfile.getWrapperVersion() == null || tempProfile.getWrapperVersion().isBlank() || tempProfile.getWrapperVersion().equals("..."));
+        boolean check2 = tempProfile.getLoader() != null && !(tempProfile.getLoader() instanceof Vanilla) && (tempProfile.getLoaderVersion() == null || tempProfile.getLoaderVersion().isBlank() || tempProfile.getLoaderVersion().equals("..."));
         if (check1 || check2){
             Main.getMain().getAnnouncer().announce(new Announcement(
                     Translator.translate("error.oops"),
-                    Translator.translate("profile.edit.error.wrapper"),
+                    Translator.translate("profile.edit.error.loader"),
                     Announcement.AnnouncementType.ERROR), Duration.seconds(2));
             return;
         }

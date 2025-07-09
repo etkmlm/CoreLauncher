@@ -25,13 +25,13 @@ import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
 import com.laeben.corelauncher.minecraft.Launcher;
-import com.laeben.corelauncher.minecraft.Wrapper;
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
 import com.laeben.corelauncher.minecraft.entity.ServerInfo;
 import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.util.ServerHandshake;
-import com.laeben.corelauncher.minecraft.wrapper.Vanilla;
+import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.ui.controller.page.ExtensionsPage;
 import com.laeben.corelauncher.ui.controller.page.MainPage;
 import com.laeben.corelauncher.ui.controller.page.SettingsPage;
@@ -254,14 +254,14 @@ public class Main extends HandlerController {
 
     public void revokeStopRequests(){
         if (selectedProfile != null)
-            selectedProfile.getWrapper().setStopRequested(false);
+            selectedProfile.getLoader().setStopRequested(false);
         Vanilla.getVanilla().setStopRequested(false);
         Modder.getModder().setStopRequested(false);
     }
 
     public void invokeStopRequests(){
         if (selectedProfile != null)
-            selectedProfile.getWrapper().setStopRequested(true);
+            selectedProfile.getLoader().setStopRequested(true);
         Vanilla.getVanilla().setStopRequested(true);
         Modder.getModder().setStopRequested(true);
         NetUtil.stop();
@@ -344,18 +344,18 @@ public class Main extends HandlerController {
             else if (key.equals(EventHandler.STOP)){
                 refreshStates();
             }
-            else if (key.equals(Wrapper.CLIENT_DOWNLOAD))
+            else if (key.equals(Loader.CLIENT_DOWNLOAD))
                 setPrimaryStatus(Translator.translate("launch.state.download.client"));
-            else if (key.startsWith(Wrapper.LIBRARY)){
+            else if (key.startsWith(Loader.LIBRARY)){
                 setPrimaryStatus(key.substring(3));
             }
             else if (key.startsWith("asset")){//
                 setPrimaryStatus(Translator.translate("launch.state.download.assets") + " " + key.substring(5));
             }
-            else if (key.equals(Wrapper.ASSET_LOAD)){
+            else if (key.equals(Loader.ASSET_LOAD)){
                 setPrimaryStatus(Translator.translate("launch.state.assets"));
             }
-            else if (key.startsWith(Wrapper.ACQUIRE_VERSION))
+            else if (key.startsWith(Loader.ACQUIRE_VERSION))
                 setPrimaryStatus(Translator.translateFormat("launch.state.acquire", key.substring(10)));
             else if (key.startsWith(Launcher.PREPARE)){
                 setPrimaryStatus(Translator.translateFormat("launch.state.prepare", key.substring(7)));
@@ -387,7 +387,7 @@ public class Main extends HandlerController {
             try{
                 if (p != null && p.isValid()){
                     lblProfileName.setText(p.getName());
-                    lblProfileDescription.setText(p.getVersionId() + " " + StrUtil.toUpperFirst(p.getWrapper().getType().getIdentifier()));
+                    lblProfileDescription.setText(p.getVersionId() + " " + StrUtil.toUpperFirst(p.getLoader().getType().getIdentifier()));
                     setUser(p.getUser() == null ? Configurator.getConfig().getUser().reload() : p.getUser().reload());
                 }
                 else{
@@ -813,7 +813,7 @@ public class Main extends HandlerController {
     * show ui
     * */
     public void launch(Profile p, boolean cache, ServerInfo server){
-        var wr = (Wrapper<?>)p.getWrapper();
+        var wr = (Loader<?>)p.getLoader();
         Vanilla.getVanilla().setDisableCache(cache);
         Modder.getModder().setDisableCache(cache);
         wr.setDisableCache(cache);

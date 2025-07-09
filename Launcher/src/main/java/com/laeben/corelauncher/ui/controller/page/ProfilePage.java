@@ -156,10 +156,10 @@ public class ProfilePage extends HandlerController {
 
         lblProfileName.setText(p.getName());
 
-        var wrIcon = new ImageView(p.getWrapper().getIcon());
+        var wrIcon = new ImageView(p.getLoader().getIcon());
         wrIcon.setFitHeight(32);
         wrIcon.setFitWidth(32);
-        var tip = new Tooltip(p.getWrapper().getType().getIdentifier() + " - " + p.getWrapperVersion());
+        var tip = new Tooltip(p.getLoader().getType().getIdentifier() + " - " + p.getLoaderVersion());
         tip.setStyle("-fx-font-size: 12pt");
         Tooltip.install(wrIcon, tip);
 
@@ -315,7 +315,7 @@ public class ProfilePage extends HandlerController {
             dragMode(false);
 
             var files = a.getDragboard().getFiles().stream().map(x -> Path.begin(x.toPath())).toList();
-            var result = MultipleBrowserPage.loadFromPath(profile.getWrapper().getType(), files);
+            var result = MultipleBrowserPage.loadFromPath(profile.getLoader().getType(), files);
 
             if (result.found().isEmpty()){
                 Main.getMain().announceLater(Translator.translate("error.oops"), Translator.translate("import.error.incompatible"), Announcement.AnnouncementType.ERROR, Duration.seconds(2));

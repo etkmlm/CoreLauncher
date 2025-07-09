@@ -16,7 +16,7 @@ import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
-import com.laeben.corelauncher.minecraft.wrapper.optifine.OptiFine;
+import com.laeben.corelauncher.minecraft.loader.optifine.OptiFine;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -182,7 +182,7 @@ public class Modder {
 
             try{
                 if (NetUtil.download(up.fileUrl, path.to(up.fileName), false) == null){
-                    var x = Modrinth.getModrinth().getProjectVersions(a.name, List.of(p.getVersionId()), List.of(p.getWrapper().getType()));
+                    var x = Modrinth.getModrinth().getProjectVersions(a.name, List.of(p.getVersionId()), List.of(p.getLoader().getType()));
                     var s = x.stream().flatMap(f -> f.getFiles().stream()).filter(f -> f.filename != null && f.filename.equals(a.fileName)).findFirst();
 
                     if (s.isEmpty()){
@@ -423,8 +423,8 @@ public class Modder {
 
             if (check){
                 pxt.setVersionId(mp.targetVersionId);
-                pxt.setWrapper(mp.wr);
-                pxt.setWrapperVersion(mp.wrId);
+                pxt.setLoader(mp.wr);
+                pxt.setLoaderVersion(mp.wrId);
             }
             pxt.getAllResources().add(mp);
         });
@@ -443,8 +443,8 @@ public class Modder {
                         throw new StopException();
 
                     return k.get().result() == CMsgBox.ResultType.YES;
-                } else if (!Configurator.getConfig().isAutoChangeWrapper() && (modpack.wr.getType() != profile.getWrapper().getType() || !modpack.wrId.equals(profile.getWrapperVersion()))){
-                    var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.wrapper"))
+                } else if (!Configurator.getConfig().isAutoChangeLoader() && (modpack.wr.getType() != profile.getLoader().getType() || !modpack.wrId.equals(profile.getLoaderVersion()))){
+                    var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.loader"))
                             .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
                             .executeForResult();
 
@@ -522,7 +522,7 @@ public class Modder {
         int count = 0;
 
         for (var r : resources){
-            if (!forceInclude && (r.isMeta() || (p.getWrapper().getType().isNative() && !r.getType().isGlobal())))
+            if (!forceInclude && (r.isMeta() || (p.getLoader().getType().isNative() && !r.getType().isGlobal())))
                 continue;
 
             if (r.getType() == ResourceType.MODPACK){
