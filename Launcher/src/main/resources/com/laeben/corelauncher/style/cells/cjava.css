@@ -21,12 +21,12 @@
 }
 
 .text-field{
-    -fx-background-color: transparent;
+    -fx-background-color: transparent!important;
     -fx-font-size: 14pt;
 }
 
 #root{
     -fx-padding: 10px;
-    -fx-background-color: #232323aa;
+    -fx-background-color: -control-fill-secondary;
     -fx-background-radius: 10px;
 }

@@ -1,14 +1,29 @@
 .root{
-    -fx-padding: 10px;
+    -fx-padding: 16px;
+    -fx-spacing: 16px;
 }
 
-.radio-button{
-    -fx-font-size: 13pt;
+.radio-button, .check-box{
+    -fx-font-size: 16pt;
 }
 
-.title{
-    -fx-font-size: 15pt;
+.filter-section .title{
+    -fx-font-size: 18pt;
     -fx-font-weight: bold;
+}
+
+.filter-section .filter-choices{
+    -fx-spacing: 8px;
+}
+
+.filter-section{
+    -fx-spacing: 16px!important;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.cfilter-pane .filter-section .filter-choices:emchecked{
+    -fx-spacing: 8px;
+    -fx-padding: -30px 0 0 0;
 }
 
 #lblProfileName{
@@ -17,42 +32,48 @@
 }
 
 #txtQuery{
-    -fx-background-color: #262626aa;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
-    -fx-border-width: 1.5px;
-    -fx-font-size: 13pt;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-font-size: 14pt;
 }
 
 #lvResources{
-    -fx-background-color: #262626aa;
+    -fx-background-color: -control-fill-secondary;
     -fx-fill-width: true;
+    -fx-padding: 8px;
+
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+}
+
+#lvResources .list-cell{
+    -fx-padding: 8px;
+    -fx-background-insets: 8px, 0px;
 }
 
 #lblNotFound{
     -fx-font-size: 17pt;
 }
 
-.scroll-bar:horizontal{
-    -fx-opacity: 0;
-    -fx-pref-height: 0;
-}
-
-.scroll-pane, .scroll-bar{
-    -fx-hbar-policy: never!important;
-}
-
 .clear-button{
-    -fx-background-color: #252525;
+    -fx-background-image: url(../../images/delete.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: 36px;
+    -fx-background-position: center;
+    -fx-pref-width: 56px;
+    -fx-pref-height: 56px;
 }
 
-.combo-box, .combo-box .arrow-button{
-    -fx-background-color: #262626aa;
+#btnSearch{
+    -fx-background-image: url(../../images/search.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 28px;
 }
 
 .filter-combo-choice{
     -fx-padding: 5px;
     -fx-background-radius: 8px;
-    -fx-background-color: #05050505;
+    -fx-background-color: #00000010;
     -fx-spacing: 15px;
 }

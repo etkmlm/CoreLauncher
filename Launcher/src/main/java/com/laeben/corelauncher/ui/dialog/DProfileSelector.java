@@ -15,7 +15,6 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.controlsfx.control.SearchableComboBox;
 
@@ -169,7 +168,7 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
                 })
         );
 
-        txtSearch.setFocusedAnimation(Color.TEAL, Duration.millis(200));
+        txtSearch.setFocusedAnimation(Duration.millis(200));
         txtSearch.textProperty().addListener(a -> pList.filter(txtSearch.getText()));
 
         getDialogPane().getScene().getWindow().addEventFilter(EventType.ROOT, x -> {

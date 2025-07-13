@@ -15,6 +15,7 @@ import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.api.ui.UI;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
@@ -57,6 +58,7 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         btnUpdate.setStyle("-fx-background-color: transparent");
         btnUpdate.enableTransparentAnimation();
 
+        box.setAlignment(Pos.CENTER);
         box.getChildren().addAll(btnUpdate, new Rectangle(10, 0), btnRemove);
     }
 
@@ -96,23 +98,21 @@ public class CPRCell<T extends CResource> extends CCell<T> {
 
         btnUpdate.setOnMouseClicked(a -> new Thread(() -> {
             try {
-                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.single", item.name), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+                Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.single", item.name), Announcement.AnnouncementType.INFO, Duration.seconds(2));
                 var upResources = Modder.getModder().getUpdate(profile, item);
                 if (upResources != null){
                     var res = upResources.stream().filter(k -> k.isSameResource(item)).findFirst().orElse(item);
                     Modder.getModder().include(profile, upResources);
-                    UI.runAsync(() -> {
-                        if (onAction != null)
-                            onAction.accept((ValueEvent) new ValueEvent(UPDATE, res).setSource(this));
-                        Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.single", item.name, item.fileName), Announcement.AnnouncementType.INFO), Duration.seconds(2));
-                    });
+                    Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.single", res.name, res.fileName), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+                    if (onAction != null)
+                        UI.runAsync(() -> onAction.accept((ValueEvent) new ValueEvent(UPDATE, res).setSource(this)));
                 }
                 else{
-                    UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.mpcontent", item.name), Announcement.AnnouncementType.ERROR), Duration.seconds(4)));
+                    Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.mpcontent", item.name), Announcement.AnnouncementType.ERROR, Duration.seconds(4));
                 }
 
             } catch (NoConnectionException | HttpException | StopException ignored) {
-
+                int m = 0;
             }
         }).start());
         btnRemove.setOnMouseClicked(a -> {

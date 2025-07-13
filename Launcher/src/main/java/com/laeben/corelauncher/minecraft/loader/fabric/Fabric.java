@@ -9,7 +9,7 @@ import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.fabric.entity.BaseFabricVersion;
 import com.laeben.corelauncher.minecraft.loader.fabric.entity.FabricVersion;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.Gson;

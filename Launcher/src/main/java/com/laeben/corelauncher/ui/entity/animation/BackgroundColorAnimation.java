@@ -6,6 +6,8 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 
+import java.util.List;
+
 public class BackgroundColorAnimation extends ColorAnimation{
 
     private CornerRadii radii;
@@ -20,6 +22,6 @@ public class BackgroundColorAnimation extends ColorAnimation{
 
     @Override
     protected void interpolateColor(Region node, Color color) {
-        node.setBackground(new Background(new BackgroundFill(color, tryGetRadius(node), null)));
+        node.setBackground(new Background(List.of(new BackgroundFill(color, tryGetRadius(node), null)), node.getBackground().getImages()));
     }
 }

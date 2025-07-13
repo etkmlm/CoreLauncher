@@ -3,6 +3,7 @@ package com.laeben.corelauncher.api.entity;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.core.entity.Path;
+import com.laeben.corelauncher.util.entity.JavaSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ public class Config {
     private boolean placeNewProfileToDock;
     private boolean selectAndPlayDock;
     private boolean autoChangeWrapper;
+    private JavaSource  javaSource;
     private List<Integer> announces;
 
     private double windowWidth;
@@ -86,6 +88,11 @@ public class Config {
     public Path getLastBackupPath() { return lastBackupPath; }
     public void setLastBackupPath(Path path){
         this.lastBackupPath = path;
+    }
+
+    public JavaSource getJavaSource() { return javaSource == null ? JavaSource.AZUL : javaSource; }
+    public void setJavaSource(JavaSource source){
+        this.javaSource = source;
     }
 
     public void setLanguage(Locale l){

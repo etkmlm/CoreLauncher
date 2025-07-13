@@ -12,6 +12,8 @@
 
 .underline-text-field{
     -fx-font-size: 25pt;
+    -fx-min-height: 60px;
+    -fx-padding: 0 0 10px 0;
 }
 
 .game-version{
@@ -27,5 +29,17 @@
 }
 
 #btnClearAccount{
-    -fx-background-color: #1e1e20;
+    -fx-background-image: url(../../images/delete.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 40px;
+    -fx-padding: 8px 24px;
+}
+
+.loader{
+    -fx-padding: 0 10px 0 10px;
+}
+
+.loader .radio-button{
+    -fx-font-size: 14pt;
 }

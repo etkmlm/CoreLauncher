@@ -13,17 +13,15 @@ import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Config;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
+import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
-import com.laeben.corelauncher.ui.control.CButton;
-import com.laeben.corelauncher.ui.control.CMsgBox;
-import com.laeben.corelauncher.ui.control.CTab;
-import com.laeben.corelauncher.ui.control.CWorker;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.entity.JavaSource;
+import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.core.entity.Path;
@@ -35,6 +33,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -120,6 +119,8 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkInGameRPC;
     @FXML
     private CheckBox chkGuiShortcut;
+    @FXML
+    private CCombo<JavaSource> cbJavaSource;
     /*@FXML
     private Spinner txtCommPort;*/
 
@@ -228,6 +229,9 @@ public class SettingsPage extends HandlerController {
 
     @Override
     public void preInit(){
+        cbJavaSource.setValueFactory(JavaSource::getDisplayName);
+        cbJavaSource.getItems().setAll(JavaSource.values());
+
         reload();
 
         fThreads.valueProperty().addListener(a -> tryToEnableSave());
@@ -277,6 +281,7 @@ public class SettingsPage extends HandlerController {
 
         btnClearImages.setOnMouseClicked(a -> workerImages.run());
 
+        btnSelectBackground.enableTransparentAnimation();
         btnSelectBackground.setOnMouseClicked(x -> {
             var chooser = new FileChooser();
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
@@ -353,6 +358,12 @@ public class SettingsPage extends HandlerController {
             Configurator.save();
         });
 
+        cbJavaSource.setOnItemChanged(a -> {
+            Configurator.getConfig().setJavaSource(a);
+            Configurator.save();
+        });
+
+        btnJavaMan.enableTransparentAnimation();
         btnJavaMan.setOnMouseClicked((a) -> Main.getMain().addTab("pages/java", Translator.translate("frame.title.javaman"), true, JavaPage.class));
 
         chkPlaceDock.selectedProperty().addListener(x -> {
@@ -419,6 +430,7 @@ public class SettingsPage extends HandlerController {
             Configurator.save();
         });
 
+        btnSelectGamePath.enableTransparentAnimation();
         btnSelectGamePath.setOnMouseClicked(x -> {
             DirectoryChooser chooser = new DirectoryChooser();
             chooser.setInitialDirectory(Configurator.getConfig().getGamePath().toFile());
@@ -477,9 +489,14 @@ public class SettingsPage extends HandlerController {
 
         var c = Main.getExternalLayer(tab);
 
+        var menuBox = new HBox();
+        menuBox.setSpacing(8);
+        AnchorPane.setBottomAnchor(menuBox, 20.0);
+        AnchorPane.setRightAnchor(menuBox, 24.0);
+
         var btnReset = new CButton();
-        btnReset.getStyleClass().add("circle-button");
-        btnReset.setText(Translator.translate("option.reset"));
+        btnReset.getStyleClass().addAll("circle-button", "reset-button");
+        //btnReset.setText(Translator.translate("option.reset"));
         btnReset.setOnMouseClicked(a -> {
             var opt = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
                     .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
@@ -492,14 +509,9 @@ public class SettingsPage extends HandlerController {
             close();
         });
 
-        AnchorPane.setBottomAnchor(btnReset, 20.0);
-        AnchorPane.setRightAnchor(btnReset, 10.0);
-
-        c.getChildren().add(btnReset);
-
         btnSave = new CButton();
-        btnSave.getStyleClass().add("circle-button");
-        btnSave.setText(Translator.translate("option.save"));
+        btnSave.getStyleClass().addAll("circle-button", "save-button");
+        //btnSave.setText(Translator.translate("option.save"));
         btnSave.setVisible(false);
         btnSave.setOnMouseClicked(x -> {
             if (changeAccount){
@@ -527,10 +539,9 @@ public class SettingsPage extends HandlerController {
             }
         });
 
-        AnchorPane.setBottomAnchor(btnSave, 20.0);
-        AnchorPane.setRightAnchor(btnSave, 100.0);
+        menuBox.getChildren().addAll(btnSave, btnReset);
 
-        c.getChildren().add(btnSave);
+        c.getChildren().add(menuBox);
 
         tab.setContent(c);
     }
@@ -544,6 +555,8 @@ public class SettingsPage extends HandlerController {
             else
                 cbJava.setValue("...");
 
+            cbJavaSource.setValue(c.getJavaSource());
+
             if (c.getUser() != null){
                 txtAccount.setText(c.getUser().getUsername());
                 chkOnline.setSelected(c.getUser().isOnline());
@@ -553,8 +566,9 @@ public class SettingsPage extends HandlerController {
                 chkOnline.setSelected(false);
             }
 
-            ram.setMin(c.getDefaultMinRAM());
-            ram.setMax(c.getDefaultMaxRAM());
+            ram.setDefaultMin(c.getDefaultMinRAM());
+            ram.setDefaultMax(c.getDefaultMaxRAM());
+            sldRAM.setValue(ram.getMax());
             fThreads.setValue(c.getDownloadThreadsCount());
             fScale.setValue(c.getUIScale());
             //fCommPort.setValue(c.getCommPort());

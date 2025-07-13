@@ -4,12 +4,24 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.laeben.corelauncher.ui.controller.page.WorldsPage"
-            stylesheets="@../../style/pages/worlds.css,@../../style/controls/clui.css"
-            prefHeight="400.0" prefWidth="650.0">
-    <HBox alignment="CENTER_LEFT" styleClass="top-bar" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" prefHeight="40" >
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.laeben.corelauncher.ui.controller.page.WorldsPage"
+          stylesheets="@../../style/pages/worlds.css,@../../style/controls/clui.css"
+          maxHeight="Infinity" maxWidth="Infinity" hgap="16" vgap="16"
+          style="-fx-padding: 10px"
+>
+
+    <columnConstraints>
+        <ColumnConstraints prefWidth="275"/>
+        <ColumnConstraints hgrow="ALWAYS" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints/>
+        <RowConstraints vgrow="ALWAYS"/>
+    </rowConstraints>
+
+    <HBox alignment="CENTER_LEFT" styleClass="top-bar" GridPane.columnSpan="2" GridPane.columnIndex="0" GridPane.rowIndex="0" prefHeight="40" >
         <CButton fx:id="btnBack" styleClass="transparent"/>
         <Rectangle width="20"/>
         <CView fx:id="profileIcon" fitWidth="30" fitHeight="30"/>
@@ -17,9 +29,12 @@
         <Label fx:id="lblProfileName" styleClass="title" text="Profile Name"/>
     </HBox>
 
-    <ListView fx:id="lvWorlds" AnchorPane.bottomAnchor="10" AnchorPane.topAnchor="60" AnchorPane.leftAnchor="10" prefWidth="250"/>
-    <CButton fx:id="btnImport" styleClass="circle-button" prefWidth="64" prefHeight="64" text="⇲" AnchorPane.leftAnchor="190" AnchorPane.bottomAnchor="20"/>
-    <AnchorPane styleClass="panel" AnchorPane.leftAnchor="270" AnchorPane.topAnchor="60" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10">
+    <AnchorPane GridPane.columnIndex="0" GridPane.rowIndex="1" maxWidth="Infinity">
+        <ListView fx:id="lvWorlds" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"/>
+        <CButton fx:id="btnImport" styleClass="circle-button" prefWidth="64" prefHeight="64" AnchorPane.rightAnchor="16" AnchorPane.bottomAnchor="16"/>
+    </AnchorPane>
+
+    <AnchorPane styleClass="panel" GridPane.columnIndex="1" GridPane.rowIndex="1" >
         <HBox prefHeight="128" spacing="20" alignment="CENTER" AnchorPane.topAnchor="20" AnchorPane.leftAnchor="20">
             <CView fx:id="icon" fitWidth="128" fitHeight="128"/>
             <Label alignment="CENTER" fx:id="lblLevelName"/>
@@ -64,4 +79,4 @@
             <CButton prefHeight="64" prefWidth="64" fx:id="btnDelete"/>
         </HBox>
     </AnchorPane>
-</AnchorPane>
+</GridPane>

@@ -5,14 +5,14 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class CWorker<T, H> extends Pane {
+public class CWorker<T, H> extends StackPane {
 
     private Consumer<CWorker<T, H>> onDone;
     private Consumer<CWorker<T, H>> onFailed;

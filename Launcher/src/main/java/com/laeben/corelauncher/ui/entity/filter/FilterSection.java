@@ -2,6 +2,7 @@ package com.laeben.corelauncher.ui.entity.filter;
 
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.control.CButton;
+import javafx.css.PseudoClass;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class FilterSection<T> extends VBox {
+    public static final PseudoClass EXISTANCE_MEANS_CHECKED = PseudoClass.getPseudoClass("emchecked");
 
     public interface FilterNodeScheme<T extends Node>{
         FilterNodeScheme RADIO_BUTTON = new FilterNodeScheme<RadioButton>() {
@@ -180,20 +182,20 @@ public class FilterSection<T> extends VBox {
 
         selected = new ArrayList<>();
 
+        getStyleClass().add("filter-section");
+
         var titleLabel = new Label(title);
         titleLabel.getStyleClass().add("title");
-        getChildren().add(new Rectangle(0, 10));
         getChildren().add(titleLabel);
 
-        getChildren().add(new Rectangle(0, 10));
-
         vbChoices = new VBox();
+        vbChoices.getStyleClass().add("filter-choices");
 
         if (type.getScheme().doesExistanceMeansChecked()){
             comboBox = new SearchableComboBox<>();
             comboIds = new ArrayList<>();
 
-            vbChoices.setSpacing(10);
+            vbChoices.pseudoClassStateChanged(EXISTANCE_MEANS_CHECKED, true);
 
             comboBox.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
                 if (newValue == null || newValue.equals(-1))

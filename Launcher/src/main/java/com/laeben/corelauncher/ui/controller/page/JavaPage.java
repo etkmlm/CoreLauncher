@@ -14,12 +14,11 @@ import com.laeben.corelauncher.ui.control.CList;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.dialog.DJavaSelector;
 import com.laeben.corelauncher.ui.entity.EventFilter;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.java.JavaManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.util.Locale;
@@ -58,7 +57,7 @@ public class JavaPage extends HandlerController {
         pList.setCellFactory(CJava::new);
         pList.setSelectionEnabled(false);
 
-        txtSearch.setFocusedAnimation(Color.TEAL, Duration.millis(200));
+        txtSearch.setFocusedAnimation(Duration.millis(200));
         txtSearch.textProperty().addListener(a -> pList.filter(txtSearch.getText()));
 
         btnAdd.setOnMouseClicked(a -> {

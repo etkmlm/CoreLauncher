@@ -24,14 +24,15 @@ public class CPaginator extends HBox {
 
         btnPrevious = new CButton();
         btnNext = new CButton();
-        cbPages = new CCombo<>();
+        cbPages = new CCombo<>("cpaginator-list");
         cbPages.getItems().setAll(0);
         cbPages.setValue(0);
 
         getStyleClass().add("cpaginator");
+        setSpacing(8);
         getChildren().addAll(btnPrevious, cbPages, btnNext);
 
-        cbPages.setPrefWidth(60);
+        cbPages.setPrefWidth(90);
         //int i = cbPages.getValue();
         cbPages.setOnItemChanged(page::set);
 

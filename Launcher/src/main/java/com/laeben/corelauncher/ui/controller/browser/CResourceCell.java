@@ -11,6 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextArea;
 
+import java.awt.*;
+import java.net.URI;
 import java.util.function.Consumer;
 
 public class CResourceCell extends ListCell<CResource> {
@@ -46,8 +48,23 @@ public class CResourceCell extends ListCell<CResource> {
             return;
         }
 
+        icon.setCornerRadius(72, 72, 16);
         icon.setImageAsync(item.getIcon());
         lblName.setText(item.name);
+
+        lblName.setOnMouseClicked(a -> {
+            if (!Desktop.isDesktopSupported() || item.resourceUrl == null)
+                return;
+
+            new Thread(() -> {
+                try {
+                    Desktop.getDesktop().browse(new URI(item.resourceUrl));
+                } catch (Exception ignored) {
+
+                }
+            }).start();
+        });
+
         lblAuthor.setText(item.authors == null ? null : String.join(",", item.authors));
         txtDesc.setText(item.desc);
         btnDelete.setOnMouseClicked(a -> {

@@ -4,8 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import org.controlsfx.control.SearchableComboBox?>
 <?import javafx.scene.shape.Rectangle?>
+<?import org.controlsfx.control.SearchableComboBox?>
 <AnchorPane prefHeight="600" prefWidth="1000" styleClass="root" stylesheets="@../../style/pages/profileedit.css,@../../style/controls/clui.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.laeben.corelauncher.ui.controller.page.EditProfilePage">
     <HBox alignment="CENTER" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <VBox alignment="CENTER">
@@ -23,44 +23,44 @@
                 </columnConstraints>
                 <Label styleClass="property-key" text="%profile.edit.type" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
                 <HBox fx:id="loaders" alignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                    <VBox alignment="CENTER" styleClass="rad-option">
-                        <ImageView fx:id="imgVanilla" fitHeight="48" fitWidth="48">
+                    <VBox alignment="CENTER" styleClass="loader">
+                        <ImageView fx:id="imgVanilla" fitHeight="56" fitWidth="56">
                             <Image url="@../../images/loader/vanilla.png" />
                         </ImageView>
                         <RadioButton fx:id="vanilla" />
                     </VBox>
-                    <VBox alignment="CENTER" styleClass="rad-option">
-                        <ImageView fx:id="imgForge" fitHeight="48" fitWidth="48">
+                    <VBox alignment="CENTER" styleClass="loader">
+                        <ImageView fx:id="imgForge" fitHeight="56" fitWidth="56">
                             <Image url="@../../images/loader/forge.png" />
                         </ImageView>
                         <RadioButton fx:id="forge" />
                     </VBox>
-                    <VBox alignment="CENTER" styleClass="rad-option">
-                        <ImageView fx:id="imgNeoForge" fitHeight="48" fitWidth="48">
+                    <VBox alignment="CENTER" styleClass="loader">
+                        <ImageView fx:id="imgNeoForge" fitHeight="56" fitWidth="56">
                             <Image url="@../../images/loader/neoforge.png" />
                         </ImageView>
                         <RadioButton fx:id="neoforge" />
                     </VBox>
-                    <VBox alignment="CENTER" styleClass="rad-option">
-                        <ImageView fx:id="imgFabric" fitHeight="48" fitWidth="48">
+                    <VBox alignment="CENTER" styleClass="loader">
+                        <ImageView fx:id="imgFabric" fitHeight="56" fitWidth="56">
                             <Image url="@../../images/loader/fabric.png" />
                         </ImageView>
                         <RadioButton fx:id="fabric" />
                     </VBox>
-                    <VBox alignment="CENTER" styleClass="rad-option">
-                        <ImageView fx:id="imgQuilt" fitHeight="48" fitWidth="48">
+                    <VBox alignment="CENTER" styleClass="loader">
+                        <ImageView fx:id="imgQuilt" fitHeight="56" fitWidth="56">
                             <Image url="@../../images/loader/quilt.png" />
                         </ImageView>
                         <RadioButton fx:id="quilt" />
                     </VBox>
-                    <VBox alignment="CENTER" styleClass="rad-option">
-                        <ImageView fx:id="imgOptiFine" fitHeight="48" fitWidth="48">
+                    <VBox alignment="CENTER" styleClass="loader">
+                        <ImageView fx:id="imgOptiFine" fitHeight="56" fitWidth="56">
                             <Image url="@../../images/loader/optifine.png" />
                         </ImageView>
                         <RadioButton fx:id="optifine" />
                     </VBox>
-                    <VBox alignment="CENTER" styleClass="rad-option">
-                        <ImageView fx:id="imgCustom" fitHeight="48" fitWidth="48">
+                    <VBox alignment="CENTER" styleClass="loader">
+                        <ImageView fx:id="imgCustom" fitHeight="56" fitWidth="56">
                             <Image url="@../../images/loader/custom.png" />
                         </ImageView>
                         <RadioButton fx:id="custom" />
@@ -82,7 +82,7 @@
                 <SearchableComboBox fx:id="cbGameVersion" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
                 <Label styleClass="property-key" text="Java" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                <ComboBox fx:id="cbJavaVersion" maxWidth="Infinity" prefHeight="30"  GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <ChoiceBox fx:id="cbJavaVersion" maxWidth="Infinity" prefHeight="30"  GridPane.columnIndex="1" GridPane.rowIndex="3" />
                 <CButton styleClass="transparent" fx:id="btnJavaManager" text="..."  GridPane.columnIndex="2" GridPane.rowIndex="3" />
 
                 <Label styleClass="property-key" text="%java.args" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
@@ -91,7 +91,7 @@
                 <Label styleClass="property-key" text="%username" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
                 <HBox GridPane.columnIndex="1" alignment="CENTER" GridPane.rowIndex="5" maxWidth="Infinity" spacing="10" prefHeight="30">
                     <TextField HBox.hgrow="ALWAYS" fx:id="txtAccount" styleClass="field"/>
-                    <CButton fx:id="btnClearAccount" text="X" prefHeight="30"/>
+                    <CButton fx:id="btnClearAccount" prefHeight="30"/>
                 </HBox>
 
                 <CheckBox fx:id="chkAccOnline" maxWidth="Infinity" text="%online" GridPane.columnIndex="2" GridPane.rowIndex="5"/>
@@ -104,13 +104,14 @@
                         <ColumnConstraints percentWidth="47" />
                     </columnConstraints>
                     <rowConstraints>
+                        <RowConstraints prefHeight="10" />
                         <RowConstraints prefHeight="30" />
                         <RowConstraints prefHeight="10" />
                         <RowConstraints prefHeight="60" />
                     </rowConstraints>
-                    <Spinner fx:id="txtMinRAM" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                    <Spinner fx:id="txtMaxRAM" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-                    <Slider fx:id="sldRAM" majorTickUnit="2048" max="32768" minorTickCount="0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+                    <Spinner fx:id="txtMinRAM" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                    <Spinner fx:id="txtMaxRAM" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                    <Slider fx:id="sldRAM" majorTickUnit="2048" max="32768" minorTickCount="0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="0" GridPane.columnSpan="3" GridPane.rowIndex="3" />
                 </GridPane>
             </GridPane>
         </VBox>

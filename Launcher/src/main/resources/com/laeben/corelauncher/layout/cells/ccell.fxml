@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.shape.Rectangle?>
 <HBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml" prefWidth="200" fx:id="root" maxWidth="Infinity" style="-fx-padding: 10px 5px 10px 5px">
+      xmlns:fx="http://javafx.com/fxml" prefWidth="200" fx:id="root" alignment="CENTER" maxWidth="Infinity" style="-fx-padding: 10px 5px 10px 5px">
     <Rectangle width="5"/>
     <CView fx:id="image" fitHeight="32" fitWidth="32"/>
     <Rectangle width="15"/>

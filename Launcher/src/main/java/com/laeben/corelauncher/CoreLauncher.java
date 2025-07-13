@@ -23,7 +23,8 @@ import com.laeben.corelauncher.minecraft.loader.optifine.OptiFine;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.util.APIListener;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.java.AzulJavaManager;
+import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.entity.LogType;
@@ -151,7 +152,9 @@ public class CoreLauncher {
         new Vanilla().asInstance().getAllVersions();
         new OptiFine().asInstance();
         new Launcher();
-        new JavaManager().reload();
+
+        new AzulJavaManager().reload();
+
         new CurseForge().reload();
         new Modrinth().reload();
         new Modder();

@@ -7,9 +7,10 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.control.ScrollPane?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            prefHeight="400.0" fx:id="root" prefWidth="400.0" stylesheets="@../../style/controls/iselector.css">
+            prefHeight="400.0" fx:id="root" prefWidth="600" stylesheets="@../../style/controls/iselector.css" styleClass="dialog-content">
     <CButton prefWidth="48" prefHeight="48" text="X" fx:id="btnClose" AnchorPane.rightAnchor="16" AnchorPane.topAnchor="16"/>
     <Label text="%imageselector.title" AnchorPane.topAnchor="24" AnchorPane.leftAnchor="16" style="-fx-font-size: 16pt"/>
 
@@ -19,9 +20,11 @@
                 <Rectangle fx:id="rectImage" height="128" width="128"/>
                 <CView fx:id="image" fitHeight="128" fitWidth="128" />
             </Pane>
-            <FlowPane prefWrapLength="101" prefWidth="101" hgap="5" vgap="5" fx:id="pnImages">
+            <ScrollPane prefHeight="128" prefWidth="101" vbarPolicy="NEVER">
+                <FlowPane prefWrapLength="101" hgap="5" vgap="5" fx:id="pnImages">
 
-            </FlowPane>
+                </FlowPane>
+            </ScrollPane>
         </HBox>
         <Rectangle height="20"/>
         <HBox alignment="CENTER">
@@ -31,6 +34,10 @@
         </HBox>
     </VBox>
 
-    <CheckBox fx:id="chkOffline" text="%imageselector.download" AnchorPane.bottomAnchor="8" AnchorPane.leftAnchor="8" />
-    <CButton fx:id="btnDone" text="%option.done" AnchorPane.bottomAnchor="8" AnchorPane.rightAnchor="8" />
+    <HBox spacing="8" alignment="CENTER" AnchorPane.bottomAnchor="8" AnchorPane.leftAnchor="8" AnchorPane.rightAnchor="8">
+        <CheckBox fx:id="chkOffline" text="%imageselector.download" />
+        <Region HBox.hgrow="ALWAYS"/>
+        <CButton fx:id="btnDone" text="%option.done" />
+    </HBox>
+
 </AnchorPane>

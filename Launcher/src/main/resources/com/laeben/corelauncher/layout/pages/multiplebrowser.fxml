@@ -19,23 +19,23 @@
         <Label fx:id="lblProfileName" styleClass="title" text="Profile Name"/>
     </HBox>
 
-    <GridPane VBox.vgrow="ALWAYS" hgap="10" vgap="10">
+    <GridPane VBox.vgrow="ALWAYS" hgap="16" vgap="16">
         <columnConstraints>
             <ColumnConstraints percentWidth="40"/>
             <ColumnConstraints percentWidth="60"/>
         </columnConstraints>
         <rowConstraints>
-            <RowConstraints prefHeight="40"/>
+            <RowConstraints prefHeight="48"/>
             <RowConstraints/>
         </rowConstraints>
 
         <TextArea style="-fx-padding: 10px" fx:id="txtQuery" GridPane.vgrow="ALWAYS" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
         <ListView fx:id="lvResources" GridPane.vgrow="ALWAYS" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.rowSpan="1" />
         <Label alignment="CENTER_RIGHT" maxHeight="Infinity" fx:id="lblStatus" maxWidth="Infinity" GridPane.hgrow="ALWAYS" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-        <HBox spacing="10" GridPane.hgrow="ALWAYS" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="0">
+        <HBox alignment="CENTER" spacing="16" GridPane.hgrow="ALWAYS" maxWidth="Infinity" GridPane.rowIndex="0" GridPane.columnIndex="0">
             <CCombo fx:id="cbSource" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
             <CCombo fx:id="cbMainType" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-            <CButton fx:id="btnSearch" text="🔎" styleClass="transparent"/>
+            <CButton fx:id="btnSearch" styleClass="transparent"/>
             <CWorker fx:id="worker"/>
         </HBox>
     </GridPane>

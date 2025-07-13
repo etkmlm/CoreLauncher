@@ -1,20 +1,21 @@
 .list-view{
-    -fx-background-color: #232323aa!important;
+    -fx-background-color: -control-fill-secondary!important;
     -fx-padding: 10px;
 }
 
 .panel{
-    -fx-background-color: #232323aa;
+    -fx-background-color: -control-fill-secondary;
     -fx-background-radius: 10px;
 }
 
 .list-cell{
-    -fx-background-radius: 5px;
+    -fx-background-radius: 8px;
     -fx-alignment: center;
+    -fx-font-size: 16pt;
 }
 
 .list-cell:selected{
-    -fx-background-color: #282828ef;
+    -fx-background-color: -list-selected-fill;
 }
 
 #lblLevelName{
@@ -30,7 +31,7 @@
     -fx-padding: 10px;
     -fx-background-color: transparent;
     -fx-background-radius: 10px;
-    -fx-font-size: 13pt;
+    -fx-font-size: 16pt;
 }
 
 .prop-label:hover{
@@ -42,7 +43,7 @@
     /*-fx-background-color: #354545;*/
     -fx-background-color: #203030aa;
     -fx-background-radius: 10px;
-    -fx-font-size: 11pt;
+    -fx-font-size: 13pt;
 }
 
 #btnBackup{
@@ -58,5 +59,8 @@
 }
 
 #btnImport{
-    -fx-font-size: 16pt;
+    -fx-background-image: url(../../images/import.png);
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: 32px;
 }

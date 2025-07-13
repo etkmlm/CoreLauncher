@@ -5,7 +5,6 @@ import com.laeben.corelauncher.ui.entity.filter.FilterSection;
 import javafx.geometry.Pos;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 
 import java.util.*;
 
@@ -17,6 +16,8 @@ public class CFilterPane extends VBox {
 
     public CFilterPane() {
         presets = new ArrayList<>();
+        getStyleClass().add("cfilter-pane");
+        setSpacing(16);
     }
 
     public String getLoadedPreset(){
@@ -37,7 +38,6 @@ public class CFilterPane extends VBox {
                 getChildren().addAll(sections);
             }
         }
-        getChildren().add(new Rectangle(0, 10));
         addClearButton();
 
         loadedPreset = id;
@@ -65,8 +65,6 @@ public class CFilterPane extends VBox {
         var btnClear = new CButton();
         btnClear.getStyleClass().add("clear-button");
         btnClear.enableTransparentAnimation();
-        btnClear.setText("\uD83D\uDDD1");
-        btnClear.setPrefWidth(100);
         btnClear.setOnMouseClicked(a -> {
             presets.forEach(b -> b.sections().forEach(FilterSection::clearChoices));
             //setPreset(null);

@@ -14,7 +14,7 @@ import com.laeben.corelauncher.minecraft.mapping.PGMapper;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.util.CommandConcat;
 import com.laeben.corelauncher.util.EventHandler;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.core.util.events.KeyEvent;

@@ -72,8 +72,21 @@ public class MultipleBrowserPage extends HandlerController {
     }
 
     public void reload() {
-        cbSource.setValue(null);
-        cbMainType.setValue(null);
+        cbSource.getItems().setAll(Arrays.stream(ModSource.Type.values()).map(ModSource.Type::getSource).toList());
+        cbMainType.getItems().setAll(ResourceType.WORLD, ResourceType.SHADER, ResourceType.RESOURCEPACK);
+        cbSource.setValue(ModSource.Type.CURSEFORGE.getSource());
+        if (!profile.getLoader().getType().isNative()){
+            cbMainType.getItems().add(0, ResourceType.MOD);
+            cbMainType.setValue(ResourceType.MOD);
+
+            btnFromWorld.setVisible(true);
+            btnFromFolder.setVisible(true);
+        }
+        else{
+            cbMainType.setValue(ResourceType.RESOURCEPACK);
+            btnFromWorld.setVisible(false);
+            btnFromFolder.setVisible(false);
+        }
         manager.add(profile, ModSource.Type.values());
 
         lblProfileName.setText(profile.getName());
@@ -282,10 +295,7 @@ public class MultipleBrowserPage extends HandlerController {
             //files.forEach(this::println);
         });
 
-        cbSource.getItems().setAll(Arrays.stream(ModSource.Type.values()).map(ModSource.Type::getSource).toList());
         cbSource.setValueFactory(a -> a.getType().name());
-
-        cbMainType.getItems().setAll(ResourceType.MOD, ResourceType.WORLD, ResourceType.SHADER, ResourceType.RESOURCEPACK);
         cbMainType.setValueFactory(a -> Translator.translate("mods.type." + a.getName()));
     }
 

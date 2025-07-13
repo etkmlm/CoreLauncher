@@ -3,18 +3,17 @@
 <?import com.laeben.corelauncher.ui.control.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
+
 <AnchorPane
         xmlns="http://javafx.com/javafx/17.0.2-ea"
         xmlns:fx="http://javafx.com/fxml/1"
         fx:controller="com.laeben.corelauncher.ui.controller.page.SettingsPage"
         prefHeight="600" prefWidth="900" styleClass="root" stylesheets="@../../style/pages/settings.css,@../../style/controls/clui.css">
 
-    <VBox AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="10">
-        <VBox maxWidth="Infinity">
+    <VBox styleClass="section" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="10">
+        <VBox>
             <Label styleClass="title" text="%settings.title.general" />
-            <Rectangle height="15" />
-            <GridPane hgap="10" vgap="10" maxWidth="Infinity">
+            <GridPane>
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
                     <ColumnConstraints percentWidth="30" minWidth="400"  />
@@ -41,22 +40,21 @@
                 <ChoiceBox fx:id="cbJava" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="5"/>
                 <CButton styleClass="transparent" fx:id="btnJavaMan" text="..." GridPane.columnIndex="3" GridPane.rowIndex="5"/>
 
-                <Label styleClass="property-key" text="%settings.defaultOptions" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                <HBox spacing="10" GridPane.columnIndex="2" GridPane.rowIndex="6">
+                <Label styleClass="property-key" text="%settings.java.source" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <CCombo fx:id="cbJavaSource" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="6"/>
+
+                <Label styleClass="property-key" text="%settings.defaultOptions" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                <HBox spacing="10" GridPane.columnIndex="2" GridPane.rowIndex="7">
                     <CButton fx:id="btnSelectDefaultOptions" text="%option.selectProfile"/>
                     <CButton fx:id="btnResetDefaultOptions" text="%option.reset"/>
                     <CButton fx:id="btnOpenDefaultOptions" text="%profile.options.open"/>
                 </HBox>
 
             </GridPane>
-
-            <Rectangle height="10" />
         </VBox>
-        <Rectangle height="20"/>
-        <VBox maxWidth="Infinity">
+        <VBox>
             <Label styleClass="title" text="%settings.title.launch" />
-            <Rectangle height="15" />
-            <GridPane hgap="10" vgap="10" maxWidth="Infinity">
+            <GridPane>
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
                     <ColumnConstraints percentWidth="30" minWidth="400"  />
@@ -97,11 +95,11 @@
                 <CheckBox fx:id="chkGuiShortcut" GridPane.columnIndex="2" GridPane.rowIndex="5" />
             </GridPane>
         </VBox>
-        <Rectangle height="20"/>
-        <VBox maxWidth="Infinity">
+
+        <VBox>
             <Label styleClass="title" text="%settings.title.launcher" />
-            <Rectangle height="15" />
-            <GridPane hgap="10" vgap="10" maxWidth="Infinity">
+
+            <GridPane>
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
                     <ColumnConstraints percentWidth="30" minWidth="400"  />
@@ -140,7 +138,7 @@
                 <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="9" />
 
                 <Label styleClass="property-key" text="%settings.scale" GridPane.columnIndex="1" GridPane.rowIndex="10"/>
-                <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="11" />
+                <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="10" />
 
                 <CButton fx:id="btnCheckUpdate" text="%settings.update" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="13"/>
                 <CButton fx:id="btnGC" text="%settings.gc" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="14"/>
@@ -150,11 +148,11 @@
                 </HBox>
             </GridPane>
         </VBox>
-        <Rectangle height="20"/>
-        <VBox maxWidth="Infinity">
+
+        <VBox>
             <Label styleClass="title" text="%settings.title.discord" />
-            <Rectangle height="15" />
-            <GridPane hgap="10" vgap="10" maxWidth="Infinity">
+
+            <GridPane>
                 <columnConstraints>
                     <ColumnConstraints prefWidth="30" />
                     <ColumnConstraints percentWidth="30" minWidth="400"  />

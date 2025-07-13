@@ -1,19 +1,20 @@
 #lblProfileName{
-    -fx-font-size: 20pt;
+    -fx-font-size: 22pt;
     -fx-font-weight: 700;
 }
 
 #lblGameVersion{
-    -fx-font-size: 12pt;
+    -fx-font-size: 14pt;
 }
 
 #txtSearch{
-    -fx-font-size: 13pt;
-    -fx-background-color: #202022aa;
+    -fx-font-size: 16pt;
+    -fx-pref-height: 54px;
+    -fx-padding: 8px 16px;
 }
 
 #lblUsername{
-    -fx-font-size: 11pt;
+    -fx-font-size: 13pt;
 }
 
 #scroll-view{
@@ -24,76 +25,35 @@
     -fx-font-size: 18pt;
 
 }
-.mini-box .cbutton{
-    -fx-background-color: #282828aa;
-}
 
-.mega-box .cbutton{
-    -fx-background-color: #292929aa;
-}
+.profile-button{
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
+    -fx-background-color: -control-fill-secondary;
+    -fx-padding: 16px;
+    -fx-pref-width: 72px;
+    -fx-pref-height: 72px;
 
-#btnCopySettings{
-    -fx-background-image: url(../../images/opt.png);
     -fx-background-repeat: no-repeat;
     -fx-background-position: center;
 }
 
-#btnOpenFolder{
-    -fx-background-image: url(../../images/folder.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
-}
-
-#btnUpdate{
-    -fx-background-image: url(../../images/update.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
-}
-
-#btnSave{
-    -fx-background-image: url(../../images/save.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
-}
-
-#btnBackup{
-    -fx-background-image: url(../../images/backup.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
-}
-
-#btnExport{
-    -fx-background-image: url(../../images/export.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
-}
-
-#btnDelete{
-    -fx-background-image: url(../../images/delete.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
-}
-
-#btnEdit{
-    -fx-background-image: url(../../images/edit.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
+#btnMenu{
+    -fx-font-size: 24pt;
+    -fx-background-image: url(../../images/menu_mini.png);
 }
 
 #btnWorlds{
     -fx-background-image: url(../../images/world.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
+    -fx-padding: 16px 18px;
 }
 
-#btnAdd{
-    -fx-background-image: url(../../images/add.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
+#btnAddResource{
+    -fx-background-image: url(../../images/extension1.png);
+    -fx-padding: 16px 18px;
 }
 
-#btnAddMultiple{
+#btnMultipleBrowser{
     -fx-background-image: url(../../images/search.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
+    -fx-padding: 16px 18px;
 }

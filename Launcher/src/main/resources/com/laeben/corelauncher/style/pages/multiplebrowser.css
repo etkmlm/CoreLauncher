@@ -1,5 +1,5 @@
 #txtQuery, #lvResources{
-    -fx-background-color: #232323aa;
+    -fx-background-color: -control-fill-secondary;
     -fx-background-radius: 10px;
 }
 
@@ -11,10 +11,15 @@
     -fx-cursor: text;
 }
 
-.ccombo{
-    -fx-background-color: #262626aa!important;
-}
-
 #lblStatus{
     -fx-font-size: 14pt;
+}
+
+#btnSearch{
+    -fx-background-image: url(../../images/search.png);
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 28px;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
 }

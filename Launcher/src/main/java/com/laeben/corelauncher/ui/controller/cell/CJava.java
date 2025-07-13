@@ -4,7 +4,7 @@ import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CField;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.java.JavaManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -12,7 +12,6 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public class CJava extends CCell<Java> {
@@ -76,7 +75,7 @@ public class CJava extends CCell<Java> {
             if (a.getCode() == KeyCode.ENTER)
                 editMode.set(false);
         });
-        txtName.setFocusedAnimation(Color.TEAL, Duration.millis(200));
+        txtName.setFocusedAnimation(Duration.millis(200));
         txtName.setText(java.getName());
 
         txtPath.setOnMouseClicked(a -> OSUtil.open(java.getPath().toFile()));

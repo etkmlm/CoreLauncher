@@ -82,6 +82,8 @@ public class CList<T> extends VBox {
         setMaxHeight(Double.MAX_VALUE);
         getChildren().add(list);
 
+        list.spacingProperty().bind(spacingProperty());
+
         nullPane = new HBox();
         nullPane.setAlignment(Pos.CENTER);
         nullPane.setMaxWidth(Double.MAX_VALUE);

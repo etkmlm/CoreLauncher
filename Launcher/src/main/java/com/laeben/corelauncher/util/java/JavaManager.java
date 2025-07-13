@@ -1,10 +1,13 @@
-package com.laeben.corelauncher.util;
+package com.laeben.corelauncher.util.java;
 
+import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
+import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -12,12 +15,13 @@ import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
-import com.google.gson.JsonArray;
+import com.laeben.corelauncher.ui.controller.Main;
+import com.laeben.corelauncher.util.EventHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class JavaManager {
+public abstract class JavaManager {
     public static final String KEY = "jvman";
 
     public static final String ADD = "add";
@@ -25,10 +29,9 @@ public class JavaManager {
     public static final String UPDATE = "update";
     public static final String DOWNLOAD_COMPLETE = "down";
 
-    public record JavaDownloadInfo(String name, String url, int major){
+    public record JavaDownloadInfo(String name, String url, String displayName, int major){
 
     }
-    private static final String ADOPTIUM = "https://api.adoptium.net/v3/assets/latest/";
 
     private static JavaManager instance;
 
@@ -97,21 +100,14 @@ public class JavaManager {
         return new Java(Path.begin(OSUtil.getRunningJavaDir()));
     }
 
-    public static JavaDownloadInfo getJavaInfo(Java j, boolean is64Bit) throws NoConnectionException {
+    public abstract JavaDownloadInfo getJavaInfo(Java j, OS os, boolean is64Bit) throws NoConnectionException, HttpException;
+
+    public JavaDownloadInfo getJavaInfo(Java j, boolean is64Bit) throws NoConnectionException {
         if (j.majorVersion == 0)
             return null;
 
-        var os = CoreLauncher.SYSTEM_OS;
-        String url = ADOPTIUM + j.majorVersion + "/hotspot?os=" + os.getName() + "&image_type=jdk&architecture=" + (is64Bit ? "x64" : "x86");
         try{
-            var arr = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(url), JsonArray.class);
-            if (arr == null || arr.isEmpty())
-                return null;
-            var object = arr.get(0);
-            if (object == null)
-                return null;
-            var obj = object.getAsJsonObject();
-            return new JavaDownloadInfo(obj.get("release_name").getAsString(), obj.getAsJsonObject("binary").getAsJsonObject("package").get("link").getAsString(), j.majorVersion);
+            return getJavaInfo(j, CoreLauncher.SYSTEM_OS, is64Bit);
         }
         catch (NoConnectionException e){
             throw e;
@@ -148,13 +144,14 @@ public class JavaManager {
             return null;
 
         try{
+            Main.getMain().setPrimaryStatus(Translator.translateFormat("java.downloading", info.name));
             var file = NetUtil.download(info.url, javaDir, true, true);
             file.extract(null, null);
             file.delete();
 
             handler.execute(new KeyEvent(DOWNLOAD_COMPLETE));
 
-            return new Java(javaDir.to(info.name));
+            return new Java(info.displayName, javaDir.to(info.name));
         }
         catch (NoConnectionException | StopException e){
             throw e;

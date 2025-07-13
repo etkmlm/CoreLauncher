@@ -12,14 +12,14 @@
             prefHeight="510.0" prefWidth="650.0">
     <CButton AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" prefWidth="48" prefHeight="48" fx:id="btnClose" style="-fx-font-size: 15pt;-fx-background-color: #00000001" text="X"/>
 
-    <VBox style="-fx-background-color: #252525bb; -fx-background-radius: 15px; -fx-padding: 10px" fx:id="pBox" maxWidth="Infinity" maxHeight="Infinity" AnchorPane.rightAnchor="40" AnchorPane.leftAnchor="40" AnchorPane.topAnchor="45" AnchorPane.bottomAnchor="30">
+    <VBox styleClass="dialog-content" fx:id="pBox" maxWidth="Infinity" maxHeight="Infinity" AnchorPane.rightAnchor="40" AnchorPane.leftAnchor="40" AnchorPane.topAnchor="45" AnchorPane.bottomAnchor="30">
         <Pane fx:id="pa" managed="false" visible="false" prefWidth="200">
             <SearchableComboBox viewOrder="-1" fx:id="cGroups"/>
         </Pane>
 
-        <CField fx:id="txtSearch" promptText="%search" style="-fx-background-color: #252525"/>
+        <CField fx:id="txtSearch" promptText="%search"/>
         <Rectangle height="15"/>
-        <ScrollPane VBox.vgrow="ALWAYS" styleClass="w-scroll-pane" fitToWidth="true" hbarPolicy="NEVER" fx:id="scroll">
+        <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" hbarPolicy="NEVER" fx:id="scroll">
             <CList fx:id="pList"/>
         </ScrollPane>
     </VBox>

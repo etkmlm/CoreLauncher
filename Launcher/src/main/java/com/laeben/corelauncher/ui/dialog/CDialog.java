@@ -35,8 +35,9 @@ public class CDialog<T> extends Dialog<T> {
 
         setGraphic(node = UI.getUI().load(CoreLauncherFX.class.getResource(fxml), this));
         initStyle(StageStyle.TRANSPARENT);
-        getDialogPane().setStyle("-fx-background-color: transparent");
+        //getDialogPane().setStyle("-fx-background-color: transparent");
         getDialogPane().getScene().setFill(null);
+        getDialogPane().getStyleClass().add("cdialog");
         getDialogPane().getStylesheets().add(CoreLauncherFX.CLUI_CSS);
         getDialogPane().setPadding(Insets.EMPTY);
         var n = (Region)node;

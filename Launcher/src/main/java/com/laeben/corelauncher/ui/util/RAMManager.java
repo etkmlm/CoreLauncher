@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.ui.util;
 
-import javafx.beans.InvalidationListener;
+import com.laeben.corelauncher.ui.controller.Main;
+import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
@@ -16,7 +17,7 @@ public abstract class RAMManager {
     private final int step;
 
     private final EventHandler<ScrollEvent> scroller;
-    private final InvalidationListener valueListener;
+    private final ChangeListener<? super Integer> valueListener;
 
     private Spinner<Integer> spnMin;
     private Spinner<Integer> spnMax;
@@ -33,11 +34,16 @@ public abstract class RAMManager {
         fMin = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
         fMax = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, Integer.MAX_VALUE);
 
-        valueListener = a -> {
+        valueListener = (a, ol, ne) -> {
             if (attendedAuto){
                 attendedAuto = false;
+                return;
             }
-            else
+
+            if (ol == null && ne == null)
+                return;
+
+            if ((ol != null && ne == null) || (ol == null) || !ol.equals(ne))
                 needsToSave();
         };
 
@@ -127,8 +133,12 @@ public abstract class RAMManager {
             }
         });
 
-        spnMax.addEventFilter(ScrollEvent.ANY, scroller);
-        spnMin.addEventFilter(ScrollEvent.ANY, scroller);
+        spnMin.setOnMouseEntered(a -> Main.getMain().setPreventScrollFilter(true));
+        spnMax.setOnMouseEntered(a -> Main.getMain().setPreventScrollFilter(true));
+        spnMin.setOnMouseExited(a -> Main.getMain().setPreventScrollFilter(false));
+        spnMax.setOnMouseExited(a -> Main.getMain().setPreventScrollFilter(false));
+        spnMax.addEventFilter(ScrollEvent.SCROLL, scroller);
+        spnMin.addEventFilter(ScrollEvent.SCROLL, scroller);
     }
 
     public void setMin(int val){
@@ -162,6 +172,10 @@ public abstract class RAMManager {
     public void dispose(){
         spnMax.removeEventFilter(ScrollEvent.ANY, scroller);
         spnMin.removeEventFilter(ScrollEvent.ANY, scroller);
+        spnMin.setOnMouseEntered(null);
+        spnMin.setOnMouseExited(null);
+        spnMax.setOnMouseEntered(null);
+        spnMax.setOnMouseExited(null);
 
         fMin.valueProperty().removeListener(valueListener);
         fMax.valueProperty().removeListener(valueListener);

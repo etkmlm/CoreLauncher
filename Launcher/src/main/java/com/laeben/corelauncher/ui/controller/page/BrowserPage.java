@@ -26,9 +26,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -66,6 +66,9 @@ public class BrowserPage extends HandlerController {
 
         if (profile != null){
             registerHandler(Profiler.getProfiler().getHandler(), a -> {
+                if (!profile.equals(a.getOldValue()) && !profile.equals(a.getNewValue()))
+                    return;
+
                 if (a.getKey().equals(Profiler.PROFILE_UPDATE)){
                     icon.setImageAsync(ImageUtil.getImageFromProfile(profile, 32, 32));
                     lblProfileName.setText(profile.getName());
@@ -78,6 +81,9 @@ public class BrowserPage extends HandlerController {
                         filterPane.clearSections();
                         resources.clear();
                     }
+                }
+                else if (a.getKey().equals(Profiler.PROFILE_DELETE)){
+                    Main.getMain().closeTab((Tab) parentObj);
                 }
             }, true);
 
@@ -238,7 +244,7 @@ public class BrowserPage extends HandlerController {
                         .defaultChoice("desc")
         );
 
-        lvResources.setCellFactory(a -> new ResourceCell().setOnNewProfileCreated(this::onProfileCreated).bindWidth(lvResources.widthProperty().subtract(10)));
+        lvResources.setCellFactory(a -> new ResourceCell().setOnNewProfileCreated(this::onProfileCreated));
 
         txtQuery.setOnKeyPressed(a -> {
             if (a.getCode() != KeyCode.ENTER)
@@ -246,7 +252,7 @@ public class BrowserPage extends HandlerController {
 
             search(txtQuery.getText());
         });
-        txtQuery.setFocusedAnimation(Color.web("teal"), Duration.millis(200));
+        txtQuery.setFocusedAnimation(Duration.millis(200));
 
         btnSearch.enableTransparentAnimation();
         btnSearch.setOnMouseClicked(a -> search(txtQuery.getText()));

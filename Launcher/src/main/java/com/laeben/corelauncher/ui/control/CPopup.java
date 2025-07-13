@@ -1,7 +1,9 @@
 package com.laeben.corelauncher.ui.control;
 
+import com.laeben.corelauncher.CoreLauncherFX;
 import javafx.animation.*;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.layout.Region;
 import javafx.stage.Popup;
 import javafx.util.Duration;
@@ -35,10 +37,10 @@ public class CPopup extends Popup {
         trnsHorizontal.setDuration(Duration.millis(d));
     }
 
-    public void setContent(Node content){
+    public void setContent(Parent content){
         this.content = content;
-
         getContent().clear();
+        content.getStylesheets().add(CoreLauncherFX.CLUI_CSS);
         getContent().add(content);
 
         if (vertical && content instanceof Region r){
@@ -53,7 +55,12 @@ public class CPopup extends Popup {
 
     public void show(Node owner, double x, double y){
         if (vertical){
+
             trnsVertical.playFromStart();
+            trnsVertical.setOnFinished(a -> {
+                for (var s : content.lookupAll(".scroll-bar"))
+                    s.setOpacity(1);
+            });
         }
         else{
             content.setScaleX(0);
@@ -61,5 +68,8 @@ public class CPopup extends Popup {
         }
 
         super.show(owner, x, y);
+        for(var s : content.lookupAll(".scroll-bar")){
+            s.setOpacity(0);
+        }
     }
 }

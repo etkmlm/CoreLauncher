@@ -26,6 +26,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -41,6 +42,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class CGroup extends CDockObject {
+
+    public static final String ADD = "add";
+
     public record TransferInfo(CGroup group, List<CDockObject> cdo, double x, double y){}
 
     @FXML
@@ -117,7 +121,7 @@ public class CGroup extends CDockObject {
         mainPane = new VBox();
         mainPane.setSpacing(10);
         mainPane.setScaleY(0);
-        mainPane.setStyle("-fx-padding: 10px; -fx-background-color: #282828; -fx-background-radius: 10px;-fx-min-width: 200px;-fx-min-height: 200px");
+        mainPane.setStyle("-fx-padding: 10px; -fx-background-color: -control-fill-secondary; -fx-background-radius: 10px;-fx-min-width: 200px;-fx-min-height: 200px");
 
         gPopup.getContent().add(mainPane);
 
@@ -127,11 +131,11 @@ public class CGroup extends CDockObject {
 
         btnRename = new CButton();
         btnRename.setVisible(false);
-        btnRename.setStyle("-fx-font-size: 12pt;-fx-pref-height: 40px");
+        btnRename.setStyle("-fx-font-size: 14pt;-fx-pref-height: 45px");
         btnRename.setText(Translator.translate("option.done"));
 
         txtName = new TextField();
-        txtName.setStyle("-fx-background-color: transparent; -fx-font-weight: bolder");
+        txtName.setStyle("-fx-background-color: transparent; -fx-font-weight: bolder;");
         txtName.setFocusTraversable(false);
         txtName.focusedProperty().addListener(a -> {
             if (txtName.isFocused()){
@@ -182,13 +186,13 @@ public class CGroup extends CDockObject {
 
         menu.clear();
         menu.setButton(new CButton());
-        menu.addItem(null, Translator.translate("option.delete"), a -> vanish());
-        menu.addItem(null, Translator.translate("profile.menu.export"), a -> ProfileUtil.export(object, menu.getScene().getWindow()));
-        menu.addItem(null, Translator.translate("profile.menu.backup"), a -> ProfileUtil.backup(object, menu.getScene().getWindow()));
+        menu.addItem(ImageCacheManager.getImage("delete.png", 48), CDockObject.DELETE, Translator.translate("option.delete"), a -> vanish());
+        menu.addItem(ImageCacheManager.getImage("export.png", 48), CDockObject.EXPORT, Translator.translate("profile.menu.export"), a -> ProfileUtil.export(object, menu.getScene().getWindow()));
+        menu.addItem(ImageCacheManager.getImage("backup.png", 48), CDockObject.BACKUP, Translator.translate("profile.menu.backup"), a -> ProfileUtil.backup(object, menu.getScene().getWindow()));
 
         menuGroup.clear();
         menuGroup.setButton(menuGroupButton);
-        menuGroup.addItem(null, Translator.translate("profile.menu.add"), a -> {
+        menuGroup.addItem(null, ADD, Translator.translate("profile.menu.add"), a -> {
             var result = selector.show(List.of(), Profiler.getProfiler().getAllProfiles());
             if (result.isEmpty())
                 return;
@@ -222,6 +226,8 @@ public class CGroup extends CDockObject {
         });
 
         topBox = new HBox();
+        topBox.setAlignment(Pos.CENTER);
+        topBox.setSpacing(8);
         topBox.setPrefHeight(40);
         topBox.setFillHeight(true);
         topBox.getChildren().add(txtName);

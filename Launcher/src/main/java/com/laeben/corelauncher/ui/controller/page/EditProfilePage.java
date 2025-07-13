@@ -25,7 +25,7 @@ import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.ImageUtil;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.NTSManager;
 import javafx.collections.FXCollections;
@@ -87,15 +87,15 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     @FXML
     private SearchableComboBox<String> cbGameVersion;
     @FXML
-    private ComboBox<String> cbJavaVersion;
+    private ChoiceBox<String> cbJavaVersion;
     @FXML
     private TextField txtAccount;
     @FXML
-    private Button btnJavaManager;
+    private CButton btnJavaManager;
     @FXML
-    private Button btnSave;
+    private CButton btnSave;
     @FXML
-    private Button btnClearAccount;
+    private CButton btnClearAccount;
     @FXML
     private CheckBox chkAccOnline;
     @FXML
@@ -111,7 +111,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     @FXML
     private TextField txtLoader;
     @FXML
-    private Button btnSelectLoader;
+    private CButton btnSelectLoader;
 
     @FXML
     public CView icon;
@@ -233,7 +233,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     @Override
     public void preInit(){
         btnBack.enableTransparentAnimation();
-        btnBack.setText("⤶ " + Translator.translate("option.back"));
+        btnBack.setText("⤶ " + Translator.translate("profile.edit.back"));
         btnBack.setOnMouseClicked(a -> Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile));
 
         btnClearAccount.setOnMouseClicked(a -> {
@@ -268,7 +268,6 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
             if (!eq)
                 refreshLoaderVersions();
-
         });
         cbGameVersion.setItems(versions);
         cbLoaderVersion.setItems(loaderVersions);
@@ -287,6 +286,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         });
         cbJavaVersion.setItems(javaVersions);
 
+        btnJavaManager.enableTransparentAnimation();
         btnJavaManager.setOnMouseClicked((a) -> {
             if (nts.needsToSave())
                 onFocusLimitIgnored(null, null);
@@ -347,10 +347,10 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
             var value = cbLoaderVersion.getValue();
 
+            tempProfile.setLoaderVersion(value);
+
             if (value == null || value.isEmpty())
                 return;
-
-            tempProfile.setLoaderVersion(value);
             nts.set(3, !value.equals(profile.getLoaderVersion()));
         });
         txtLoader.setCursor(Cursor.HAND);
@@ -413,7 +413,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
     private Java tryGetSelectedJava(){
         String text = cbJavaVersion.getValue();
-        if (text.equals("..."))
+        if (text == null || text.equals("..."))
             return null;
         String name = text.split(" - ")[0];
         return JavaManager.getManager().tryGet(new Java(name));

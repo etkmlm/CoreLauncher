@@ -47,7 +47,7 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
@@ -64,6 +64,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -80,12 +81,20 @@ public class Main extends HandlerController {
     public static final String TAB_FOCUS_CHANGE = "tabFocusChange";
     public static final String TAB_KEY_PRESS = "tabKeyPress";
 
+    public static final String SETTINGS = "settings";
+    public static final String ABOUT = "about";
+    public static final String FEEDBACK = "fback";
+    public static final String EXTENSIONS = "exts";
+    public static final String TUTORIALS = "tuts";
+
     private static Main instance;
 
     @FXML
     private ProgressBar progress;
     @FXML
     private AnchorPane menu;
+    @FXML
+    private Pane menuBackground;
     @FXML
     private CView head;
     @FXML
@@ -94,8 +103,6 @@ public class Main extends HandlerController {
     private Label lblProfileName;
     @FXML
     private Label lblProfileDescription;
-    @FXML
-    private CButton btnPlay;
     @FXML
     private VBox menuInner;
     @FXML
@@ -109,7 +116,14 @@ public class Main extends HandlerController {
     @FXML
     private StepPopup stepPopup;
 
+    @FXML
+    private CButton btnPlay;
+    private final Image imgPlay;
+    private final Image imgPause;
+
     private Profile selectedProfile;
+
+    private boolean preventScrollFilter;
 
     private boolean statusNeedsUpdate;
     private double percentage;
@@ -142,8 +156,13 @@ public class Main extends HandlerController {
         df = new DecimalFormat("0.#");
         running = new SimpleBooleanProperty(false);
         running.addListener(a -> UI.runAsync(() -> {
-            btnPlay.setText(running.get() ? "⏸" : "⯈");
-            if (!running.get()){
+            if (running.get()){
+                btnPlay.getStyleClass().add("on");
+                btnPlay.getStyleClass().remove("off");
+            }
+            else{
+                btnPlay.getStyleClass().remove("on");
+                btnPlay.getStyleClass().add("off");
                 setProgress(-1);
                 clearStatus();
             }
@@ -240,6 +259,9 @@ public class Main extends HandlerController {
         },0, 50, TimeUnit.MILLISECONDS);
 
         instructor = new Instructor();
+
+        imgPlay = ImageCacheManager.getImage("play.png", 48);
+        imgPause = ImageCacheManager.getImage("menu.png", 48);
 
         instance = this;
     }
@@ -422,7 +444,7 @@ public class Main extends HandlerController {
     public void preInit(){
         var btnMenu = new CButton();
         btnMenu.getStyleClass().add("menu-button");
-        btnMenu.setText("☰");
+        btnMenu.setId("btnMenu");
         btnMenu.setPrefHeight(64);
         btnMenu.setPrefWidth(64);
         btnMenu.setOnMouseClicked(a -> cMenu.show());
@@ -431,17 +453,17 @@ public class Main extends HandlerController {
         menuTranslate.setNode(menuInner);
         prgTranslate.setNode(progress);
 
-        cMenu.addItem(null, Translator.translate("settings"), a -> addTab("pages/settings", Translator.translate("settings"), true, SettingsPage.class));
-        cMenu.addItem(null, Translator.translate("about"), a -> CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm", "https://discord.gg/MEJQtCvwqf", LauncherConfig.APPLICATION.getName())).execute());
-        cMenu.addItem(null, Translator.translate("feedback"), a -> {
+        cMenu.addItem(null, SETTINGS, Translator.translate("settings"), a -> addTab("pages/settings", Translator.translate("settings"), true, SettingsPage.class));
+        cMenu.addItem(null, ABOUT, Translator.translate("about"), a -> CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm", "https://discord.gg/MEJQtCvwqf", LauncherConfig.APPLICATION.getName())).execute());
+        cMenu.addItem(null, FEEDBACK, Translator.translate("feedback"), a -> {
             try {
                 OSUtil.openURL("https://github.com/etkmlm/CoreLauncher/issues");
             } catch (IOException ignored) {
 
             }
         });
-        cMenu.addItem(null, Translator.translate("extensions"), a -> addTab("pages/extensions", Translator.translate("extensions"), true, ExtensionsPage.class));
-        cMenu.addItem(null, Translator.translate("tutorial.tutorials"), a -> {
+        cMenu.addItem(null, EXTENSIONS, Translator.translate("extensions"), a -> addTab("pages/extensions", Translator.translate("extensions"), true, ExtensionsPage.class));
+        cMenu.addItem(null, TUTORIALS, Translator.translate("tutorial.tutorials"), a -> {
             /*instructor.load(Instructor.generateGeneralTutorial());
             instructor.start();*/
             addTab("pages/tutorials", Translator.translate("tutorial.tutorials"), true, TutorialsPage.class);
@@ -542,6 +564,13 @@ public class Main extends HandlerController {
             }
         }));
 
+        menu.boundsInLocalProperty().addListener((a, ob, bounds) -> {
+            var n = new Rectangle(0, 0, bounds.getWidth(), bounds.getHeight());
+            n.setArcWidth(32);
+            n.setArcHeight(32);
+            menuBackground.setClip(n);
+        });
+
         addTab("pages/main", "        ", false, MainPage.class);
 
         setBackground(Configurator.getConfig().getBackgroundImage());
@@ -570,11 +599,16 @@ public class Main extends HandlerController {
     /* TABS */
     private ScrollPane getScroll(){
         var pane = new ScrollPane();
+        pane.getStyleClass().add("main-scroll");
+        pane.setStyle("-fx-background-color: -tab-fill; -fx-border-radius: 0 16px 16px 16px;-fx-background-radius: 0 16px 16px 16px;");
         pane.setFitToWidth(true);
         pane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         pane.setFitToHeight(true);
         addRegisteredEventFilter(EventFilter.node(pane, ScrollEvent.SCROLL, a -> {
-            double val = a.getDeltaY() * 0.01 * (pane.getHeight() * 1 / 800);
+            if (preventScrollFilter)
+                return;
+
+            double val = a.getDeltaY() * 0.001 * (pane.getHeight() * 1 / 800);
             pane.setVvalue(pane.getVvalue() - val);
         }));
         return pane;
@@ -893,6 +927,10 @@ public class Main extends HandlerController {
 
     public void setDialogLayer(boolean v){
         dialogLayer.setVisible(v);
+    }
+
+    public void setPreventScrollFilter(boolean value){
+        this.preventScrollFilter = value;
     }
 
     @Override

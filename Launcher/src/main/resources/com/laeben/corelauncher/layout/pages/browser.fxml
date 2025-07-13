@@ -9,7 +9,7 @@
 <VBox xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.laeben.corelauncher.ui.controller.page.BrowserPage"
-            prefHeight="900.0" prefWidth="1300.0" spacing="10" styleClass="root" stylesheets="@../../style/controls/clui.css,@../../style/pages/browser.css">
+            prefHeight="900.0" prefWidth="1300.0" styleClass="root" stylesheets="@../../style/controls/clui.css,@../../style/pages/browser.css">
 
     <HBox fx:id="topBar" alignment="CENTER" styleClass="top-bar" prefHeight="40" >
         <CButton fx:id="btnBack" styleClass="transparent"/>
@@ -21,9 +21,9 @@
         <Label fx:id="lblInfo" text="Forge - 15.203.30"/>
         <Rectangle width="10"/>
     </HBox>
-    <GridPane hgap="20" vgap="10">
+    <GridPane hgap="16" vgap="16">
         <columnConstraints>
-            <ColumnConstraints prefWidth="200" />
+            <ColumnConstraints prefWidth="264" />
             <ColumnConstraints hgrow="ALWAYS" />
         </columnConstraints>
         <rowConstraints>
@@ -31,13 +31,12 @@
             <RowConstraints vgrow="ALWAYS"/>
         </rowConstraints>
 
-        <ScrollPane styleClass="w-scroll-pane" fitToWidth="true" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.rowSpan="2">
+        <ScrollPane fitToWidth="true" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.rowSpan="2">
             <CFilterPane fx:id="filterPane" />
         </ScrollPane>
-        <HBox GridPane.columnIndex="1" GridPane.rowIndex="0">
+        <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="0">
             <CField fx:id="txtQuery" HBox.hgrow="ALWAYS" promptText="%search.query" maxWidth="Infinity"/>
-            <Rectangle width="10"/>
-            <CButton fx:id="btnSearch" text="🔎" styleClass="transparent" prefWidth="60"/>
+            <CButton fx:id="btnSearch" styleClass="transparent" prefWidth="60"/>
         </HBox>
 
         <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="1">

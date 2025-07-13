@@ -1,22 +1,36 @@
 #root{
     -fx-background-color: #232323aa;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
-    -fx-padding: 10px;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-padding: 16px;
 }
 
 .cbutton{
-    -fx-background-color: #232323;
-    -fx-background-radius: 8px;
-    -fx-font-size: 20pt;
-    -fx-pref-width: 64px;
-    -fx-min-width: 64px;
-    -fx-pref-height: 64px;
-    -fx-min-height: 64px;
+    -fx-background-radius: 50%;
+    -fx-font-weight: bolder;
+    -fx-pref-width: 84px;
+    -fx-pref-height: 84px;
 }
 
 .cbutton:hover{
-    -fx-background-color: #202020ef;
+    -fx-background-color: #101010aa;
+}
+
+#btnInstall{
+    -fx-font-size: 40pt;
+}
+
+#btnInstall:installed{
+    -fx-font-size: 28pt;
+}
+
+#btnMore{
+    -fx-font-size: 18pt;
+}
+
+#btnMore {
+    -fx-alignment: center;
+    -fx-padding: -5px 0 0 0;
 }
 
 #lblName{

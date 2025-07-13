@@ -26,6 +26,7 @@ import com.laeben.corelauncher.util.entity.LogType;
 import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -40,6 +41,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class ResourceCell extends ListCell<ResourceCell.Link> {
+    public static final PseudoClass INSTALLED =  PseudoClass.getPseudoClass("installed");
 
     public record Link(ResourcePreferences preferences, ModResource resource){}
 
@@ -64,7 +66,11 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
         exists = new SimpleObjectProperty<>();
 
-        exists.addListener(a -> UI.runAsync(() -> btnInstall.setText(exists.get() == null ? "⭳" : "—")));
+        exists.addListener(a -> UI.runAsync(() -> {
+            boolean installed = exists.get() != null;
+            btnInstall.setText(installed ? "—" : "+");
+            btnInstall.pseudoClassStateChanged(INSTALLED, installed);
+        }));
     }
 
     private void playAnimation(boolean isPositive){
@@ -148,6 +154,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
         setGraphic(gr);
     }
 
+    @Deprecated
     public ResourceCell bindWidth(DoubleExpression p){
         prefWidthProperty().bind(p);
         return this;
@@ -162,7 +169,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
     public void initialize(){
         //btnInstall.enableTransparentAnimation();
         //btnMore.enableTransparentAnimation();
-        icon.setCornerRadius(72, 72, 10);
+        icon.setCornerRadius(72, 72, 16);
         btnInstall.setOnMouseClicked(a -> new Thread(() -> {
             var prefs = link.preferences();
             var res = link.resource();

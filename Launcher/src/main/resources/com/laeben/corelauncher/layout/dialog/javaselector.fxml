@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            prefHeight="300.0" prefWidth="650.0" fx:id="root" stylesheets="@../../style/controls/jselector.css">
+            prefHeight="300.0" prefWidth="650.0" fx:id="root" styleClass="dialog-content" stylesheets="@../../style/controls/jselector.css">
 
     <GridPane AnchorPane.leftAnchor="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="50" alignment="CENTER" VBox.vgrow="ALWAYS" maxHeight="Infinity" maxWidth="Infinity" hgap="10" vgap="15">
         <columnConstraints>

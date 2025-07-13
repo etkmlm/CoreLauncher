@@ -69,6 +69,7 @@ public class CResource implements Comparable<CResource> {
     public String fileName;
     public transient String targetVersionId;
     public transient String targetLoader;
+    public transient String resourceUrl;
 
     public transient List<CResource> dependencies;
     public transient List<CurseForgeFile.Module> forgeModules;
@@ -125,6 +126,7 @@ public class CResource implements Comparable<CResource> {
         p.createDate = r.dateCreated;
         p.desc = r.summary;
         p.setSource(ModSource.Type.CURSEFORGE);
+        p.resourceUrl = r.getURL();
 
         if (r.logo != null)
             p.logoUrl = r.logo.url;
@@ -160,6 +162,7 @@ public class CResource implements Comparable<CResource> {
         p.desc = r.description;
         p.logoUrl = r.icon;
         p.createDate = r.getCreationDate();
+        p.resourceUrl = r.getURL();
 
         p.isMeta = v == null;
 

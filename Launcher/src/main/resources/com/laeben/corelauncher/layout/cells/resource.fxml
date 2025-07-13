@@ -6,29 +6,25 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
-<VBox xmlns="http://javafx.com/javafx"
+<HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      alignment="CENTER" stylesheets="@../../style/cells/resource.css">
-    <HBox prefHeight="175" fx:id="root" alignment="CENTER">
-        <CView fitWidth="72" fitHeight="72" fx:id="icon"/>
-        <Rectangle width="10"/>
-        <VBox>
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label fx:id="lblName"/>
-                <HBox fx:id="badges" spacing="5" alignment="CENTER_LEFT">
+      spacing="10" prefHeight="175" fx:id="root" alignment="CENTER" stylesheets="@../../style/cells/resource.css">
+    <CView fitWidth="72" fitHeight="72" fx:id="icon"/>
+    <VBox>
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label fx:id="lblName"/>
+            <HBox fx:id="badges" spacing="6" alignment="CENTER_LEFT">
 
-                </HBox>
             </HBox>
-            <Rectangle height="3"/>
-            <Label fx:id="lblAuthor"/>
-            <Rectangle height="5"/>
-            <TextArea fx:id="txtDesc" editable="false"/>
-            <Rectangle height="10"/>
-            <Label fx:id="lblCategory"/>
-        </VBox>
-        <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-        <CButton fx:id="btnMore" text="..." />
-        <Rectangle width="10"/>
-        <CButton fx:id="btnInstall" text="⭳" />
-    </HBox>
-</VBox>
+        </HBox>
+        <Rectangle height="3"/>
+        <Label fx:id="lblAuthor"/>
+        <Rectangle height="5"/>
+        <TextArea fx:id="txtDesc" editable="false"/>
+        <Rectangle height="10"/>
+        <Label fx:id="lblCategory"/>
+    </VBox>
+    <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+    <CButton fx:id="btnMore" styleClass="transparent" text="..." />
+    <CButton fx:id="btnInstall" styleClass="transparent" text="+" />
+</HBox>

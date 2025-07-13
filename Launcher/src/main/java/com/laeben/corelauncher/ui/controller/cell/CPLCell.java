@@ -25,6 +25,7 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
     public static final String EXECUTOR_ROOT = "root";
     public static final String EXECUTOR_MENU = "menu";
     public static final String PLAY = "play";
+    public static final String SELECT = "select";
 
 
     private final CMenu menu;
@@ -150,7 +151,7 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
         CDockObject.generateProfileMenu(menu, item, btnMenu, a -> onClick == null || onClick.test((ValueEvent) new ValueEvent(EXECUTOR_MENU, a).setSource(this)));
 
         if (!selectionDisabled){
-            var btnSelect = menu.addItem(null, Translator.translate("option.select"), a -> {
+            var btnSelect = menu.addItem(null, SELECT, Translator.translate("option.select"), a -> {
                 if (isSelected())
                     setSelected(false);
                 else{

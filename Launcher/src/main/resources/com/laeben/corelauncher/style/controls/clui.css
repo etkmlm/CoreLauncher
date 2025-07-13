@@ -1,9 +1,42 @@
 *{
-    -def-background: #252525aa;
+    -tab-fill: #151515aa;
+
+    -control-fill: #303033;
+    -control-focused-border-fill: #5151bd;
+    -control-fill-bluish: #1042497F;
+    -control-fill-secondary: #232325aa;
+    -dialog-overlay-fill: #232325dd;
+    -control-popup-selected-fill: #6b93c8;
+    -list-selected-fill: #282828ef;
+    -control-popup-hover-fill: #50637c;
+    -control-popup-fill: #333840dd; /*#353538dd*/
+    -radio-fill: #262628;
+    -radio-checked-fill: #3e5160; /*#58306a*/
+
+    -button-fill: #333840;
+    -list-background: #282828;
+
+    -scroll-thumb-fill: #264545AA;
+    -slider-thumb-fill: #008080;
+    -pane-fill: #282830;
+
+    -progress-track-fill: transparent;
+    -progress-bar-fill: #007777;
+
+    -dock-default-fill: #202020;
+    
+    -text-fill: #ffffff;
+
+    -fx-focused-mark-color: transparent;
+
+    -fx-font-family: 'Segoe UI', 'Calibri';
+
+
+    -icon-shop: "M3.111 23H8.667a1 1 0 001-1V19.9a1.316 1.316 0 011.009-1.323 1.224 1.224 0 011.435 1.2V22a1 1 0 001 1h3.334a2.113 2.113 0 002.111-2.111V17.444h1.222a3.224 3.224 0 003.179-3.756A3.314 3.314 0 0019.659 11h-1.1V7.555a2.113 2.113 0 00-2.111-2.111H13V4.34a3.313 3.313 0 00-2.688-3.3A3.222 3.222 0 006.556 4.222V5.444H3.111A2.113 2.113 0 001 7.555V12a1 1 0 001 1H4.1a1.317 1.317 0 011.323 1.01 1.223 1.223 0 01-1.2 1.434H2a1 1 0 00-1 1v4.445A2.113 2.113 0 003.111 23ZM3 17.444H4.222A3.224 3.224 0 007.4 13.688 3.313 3.313 0 004.1 11H3V7.555a.111.111 0 01.111-.111H7.556a1 1 0 001-1V4.222A1.223 1.223 0 019.99 3.017 1.316 1.316 0 0111 4.34v2.1a1 1 0 001 1h4.445a.111.111 0 01.111.111V12a1 1 0 001 1h2.1a1.317 1.317 0 011.324 1.01 1.225 1.225 0 01-1.205 1.434H17.556a1 1 0 00-1 1v4.445a.111.111 0 01-.111.111H14.111V19.778A3.222 3.222 0 0010.355 16.6a3.313 3.313 0 00-2.688 3.3V21H3.111A.111.111 0 013 20.889Z";
 }
 
 .root{
-    -fx-background-color: -def-background;
+    -fx-background-color: transparent;
 }
 
 /*
@@ -20,7 +53,7 @@
 }
 
 .list-view{
-    -fx-background-color: #282828;
+    -fx-background-color: -list-background;
     -fx-background-radius: 10px;
     -fx-font-size: 12pt;
 }
@@ -31,7 +64,7 @@
 
 .list-cell{
     -fx-background-color: none;
-    -fx-text-fill: white;
+    -fx-text-fill: -text-fill;
 }
 
 .scroll-pane{
@@ -41,35 +74,31 @@
 
 .scroll-bar{
     -fx-background-color: transparent;
-    -fx-pref-width: 8px;
-
 }
 
 .scroll-bar:vertical{
     -fx-block-increment: 100!important;
     -fx-unit-increment: 100!important;
+    -fx-padding: 0 0 0 12px;
+}
+
+.searchable-combo-box .combo-box-popup .scroll-bar:vertical{
+    -fx-padding: 0 -8px 0 12px;
 }
 
 .scroll-bar .thumb{
-    -fx-background-color: #308080;
+    -fx-background-color: -scroll-thumb-fill;
+    -fx-pref-width: 4px!important;
+    -fx-max-width: 4px;
 }
 
 .scroll-bar .decrement-button, .scroll-bar .increment-button{
     -fx-background-color: transparent;
 }
 
-.w-scroll-pane .scroll-bar .thumb{
-    -fx-background-color: rgba(38, 69, 69, 0.67);;
-}
-
 .combo-box, .ccombo{
-    -fx-border-radius: 3px;
-    -fx-background-color: #353538;
+    -fx-background-color: -control-fill;
     -fx-font-size: 12pt;
-}
-
-.combo-box .list-view, .ccombo .list-view{
-    -fx-background-color: #383838;
 }
 
 .combo-box .list-cell, .lvlv .list-cell, .ccombo .list-cell{
@@ -78,27 +107,84 @@
 
 .combo-box .text-input, .ccombo .text-input{
     -fx-border-width: 0;
-    -fx-text-fill: white;
+    -fx-text-fill: -text-fill;
+}
+.context-menu, .combo-box-popup .list-view, .ccombo-list {
+    -fx-padding: 8px 16px 8px 8px;
 }
 
-.combo-box:focused, .ccombo:focused .text-input, .field:focused, .spinner:focused{
-    -fx-border-color: teal;
+.context-menu .menu-item, .combo-box-popup .list-cell:filled, .ccombo-list .list-cell:filled {
+    -fx-background-radius: 8px;
+    -fx-padding: 14px 4px 14px -4px;
+    -fx-background-insets: 4px 0;
 }
 
-.combo-box-popup .list-view {
-    -fx-background-color: #353538dd;
-    -fx-background-radius: 0 0 5 5;
+.cmenu{
+    -fx-min-width: 120px;
+    -fx-background-color: -control-popup-fill;
+    -fx-background-radius: 16px;
+    -fx-padding: 4px;
+}
+
+.cmenu .cmenu-item{
+    -fx-background-color:transparent;
+    -fx-font-size: 16pt;
+    -fx-pref-height: 50px;
+    -fx-padding: 4px 30px;
+}
+
+.combo-box-popup .list-cell:filled, .ccombo-list .list-cell:filled{
+    -fx-padding: 14px 20px;
+}
+
+.context-menu .radio{
+    -fx-opacity: 0;
+}
+
+.context-menu .menu-item:focused, .combo-box-popup .list-cell:filled:focused {
+    -fx-background-color: transparent;
+}
+
+.context-menu .menu-item:hover, .combo-box-popup .list-cell:filled:hover, .ccombo-list .list-cell:filled:hover{
+    -fx-background-color: -control-popup-hover-fill;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.context-menu .menu-item:checked, .combo-box-popup .list-cell:filled:selected, .ccombo-list .list-cell:filled:selected {
+    -fx-background-color: -control-popup-selected-fill;
+}
+
+.ccombo-list {
+    -fx-background-radius: 8px;
+}
+
+.combo-box-popup .list-view{
+    -fx-background-radius: 8px;
+}
+
+
+.combo-box-popup .list-view, .ccombo-list {
+    -fx-background-color: -control-popup-fill;
     -fx-effect: none;
+    -fx-vgap: 4px;
+    -fx-font-size: 15pt;
 }
 
 .context-menu{
-    -fx-background-color: #333840bb;
-    -fx-background-radius: 5px;
+    -fx-background-color: -control-popup-fill;
+    -fx-background-radius: 8px;
 }
 
 /*
     Controls
 */
+
+.cdialog .dialog-content{
+    -fx-background-color: -dialog-overlay-fill;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-padding: 10px;
+}
 
 .dialog-pane .graphic-container {
     -fx-padding: 0; /* 10px 0px 0px 10px */
@@ -116,7 +202,7 @@
     -fx-font-size: 13pt;
     -fx-wrap-text: true;
     -fx-background-color: transparent;
-    -fx-text-fill: white;
+    -fx-text-fill: -text-fill;
 }
 .text-area *{
     -fx-background-color: transparent!important;
@@ -124,12 +210,8 @@
 }
 
 .label{
-    -fx-text-fill: white;
+    -fx-text-fill: -text-fill;
     -fx-font-size: 13pt;
-}
-
-.rad-option {
-    -fx-padding: 0 10px 0 10px;
 }
 
 .property-key{
@@ -137,15 +219,24 @@
 }
 
 .radio-button{
-    -fx-text-fill: white;
+    -fx-text-fill: -text-fill;
 }
 
 .radio-button .radio, .check-box .box{
-    -fx-background-color: #262628;
+    -fx-background-color: -radio-fill;
 }
 
-.radio-button:selected .dot, .check-box:selected .mark{
-    -fx-background-color: darkviolet;
+.radio-button:selected .dot/*, .check-box:selected .mark*/{
+    -fx-background-color: -radio-checked-fill;
+}
+
+.check-box:selected .mark{
+    -fx-shape: "M56.084,189.137c-1.735,0.897-3.807,1.012-5.891-1.071L2.651,139.517 c-4.204-4.291-3.225-9.943,1.648-13.462c6.228-4.498,14.555-11.83,21.582-22.55c3.291-5.026,7.995-5.363,11.248-0.315 l11.727,18.205c3.258,5.053,7.006,11.389,9.018,10.677c0.816-0.288,1.806-0.995,2.986-2.393L156.169,9.877 c3.742-4.699,9.023-4.194,11.803,1.131l27.054,51.894c2.779,5.325,1.235,12.695-3.448,16.459L69.1,177.786 C64.422,181.55,59.272,187.5,56.084,189.137z";
+    -fx-background-color: -text-fill;
+}
+
+.check-box:selected .box{
+    -fx-background-color: -radio-checked-fill;
 }
 
 .slider{
@@ -153,20 +244,21 @@
 }
 
 .slider .track{
-    -fx-background-color: #353538;
+    -fx-background-color: -control-fill;
 }
 
 .slider .thumb{
-    -fx-background-color: teal;
+    -fx-background-color: -slider-thumb-fill;
 }
 
 .slider .axis {
-    -fx-tick-label-fill: white;
+    -fx-tick-label-fill: -text-fill;
 }
 
 .cbutton{
-    -fx-background-color: #303030;
+    -fx-background-color: -button-fill;
     -fx-background-radius: 8px;
+    -fx-padding: 10px 16px;
 }
 
 .text-field .context-menu{
@@ -174,18 +266,53 @@
 }
 
 .selection-menu{
-    -fx-background-color: #1042497F;
+    -fx-background-color: -control-fill-bluish;
     -fx-background-radius: 8px;
 }
 
 .check-box{
-    -fx-text-fill: white;
+    -fx-text-fill: -text-fill;
     -fx-font-size: 13pt;
 }
 
 .spinner{
     -fx-background-color: transparent;
-    -fx-border-radius: 3px;
+
+}
+
+.combo-box,
+.searchable-combo-box,
+.ccombo,
+.field,
+.text-field,
+.choice-box,
+.spinner{
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-background-color: -control-fill!important;
+    -fx-border-color: transparent;
+}
+
+.combo-box-search:focused{
+    -fx-border-width: 1px!important;
+    -fx-border-style: solid!important;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.combo-box:focused,
+.combo-box-search:focused,
+.ccombo:focused .text-field,
+.field:focused,
+.text-field:focused,
+.choice-box:focused,
+.ccombo:opened,
+.spinner:focused{
+    -fx-border-color: -control-focused-border-fill!important;
+
+}
+
+.spinner .text-field:focused{
+    -fx-border-color: transparent!important;
 }
 
 .spinner .increment-arrow-button,
@@ -193,14 +320,51 @@
 .combo-box-base .arrow-button,
 .combo-box, .searchable-combo-box,
 .text-field,
-.choice-box{
-    -fx-background-color: #202022;
+.choice-box,
+.ccombo,
+.label,
+.cbutton {
+    -fx-text-fill: -text-fill;
+    -fx-font-size: 14pt;
 }
 
-.text-field, .searchable-combo-box{
-    -fx-text-fill: white;
-    -fx-border-radius: 3px;
-    -fx-font-size: 12pt;
+.text-input{
+    -fx-background-radius: 8px;
+}
+
+.combo-box-base .arrow-button,
+.combo-box, .searchable-combo-box,
+.text-field,
+.choice-box,
+.ccombo {
+    -fx-min-height: 45px;
+    -fx-pref-height: 45px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-border-radius: 0 8px 8px 0;
+    -fx-background-radius: 0 8px 8px 0;
+}
+
+.spinner .text-field{
+    -fx-border-radius: 8px 0 0 8px;
+    -fx-background-radius: 8px 0 0 8px;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button,
+.combo-box-base .arrow-button,
+.combo-box, .searchable-combo-box,
+.text-field,
+.choice-box,
+.ccombo {
+    -fx-background-color: transparent;
+
+    -fx-min-height: 45px;
+    -fx-pref-height: 45px;
     -fx-border-color: transparent;
 }
 
@@ -210,17 +374,17 @@
     -fx-border-width: 0 0 1 0!important;
     -fx-border-radius: 0!important;
     -fx-border-color: white;
-    -fx-text-fill: white;
+    -fx-text-fill: -text-fill;
 }
 
 .underline-text-field:focused{
-    -fx-border-color: teal;
+    -fx-border-color: -control-focused-border-fill;
 }
 
 .default-button{
     -fx-font-size: 13pt;
     -fx-font-weight: bold;
-    -fx-background-color: #333840;
+    -fx-background-color: -button-fill;
     -fx-background-radius: 5px;
 }
 
@@ -233,8 +397,27 @@
     -fx-background-radius: 50%!important;
     -fx-border-radius: 50%;
     -fx-border-color: #505070;
-    -fx-text-fill: white;
+    -fx-text-fill: -text-fill;
     -fx-font-size: 15pt;
+    -fx-padding: 16px;
+}
+
+.reset-button{
+    -fx-background-image: url(../../images/refresh.png)!important;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+
+    -fx-pref-width: 64px;
+    -fx-pref-height: 64px;
+}
+
+.save-button{
+    -fx-background-image: url(../../images/save.png)!important;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+
+    -fx-pref-width: 64px;
+    -fx-pref-height: 64px;
 }
 
 .progress-bar{
@@ -242,35 +425,72 @@
 }
 
 .progress-bar .bar{
-    -fx-background-color: aqua;
+    -fx-background-color: -progress-bar-fill;
     -fx-background-insets: 0;
     -fx-background-radius: 0 5px 5px 5px;
 }
 
 .progress-bar .track{
-    -fx-background-color: #303030;
+    -fx-background-color: -progress-track-fill;
     -fx-background-radius: 0 0 5px 5px;
     -fx-background-insets: 0;
 }
 
 .top-bar {
-    -fx-background-color: #282830;
+    -fx-background-color: -pane-fill;
     -fx-background-radius: 8px;
 }
 
 .cpaginator{
-    -fx-padding: 10px;
-    -fx-font-size: 15pt;
-    -fx-background-color: #303030aa;
+    -fx-padding: 8px;
+    -fx-background-color: #2c2c2cde;
     -fx-spacing: 10px;
-    -fx-background-radius: 10px;
+
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-border-color: #433e3e;
+}
+
+.cpaginator > .cbutton{
+    -fx-font-weight: bolder;
+    -fx-font-size: 18pt;
+}
+
+.cfilter-pane .filter-section{
+    -fx-spacing: 8px;
+}
+
+.cfilter-pane .filter-section .filter-choices{
+    -fx-spacing: 8px;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.cfilter-pane .filter-section .filter-choices:emchecked{
+    -fx-spacing: 10px;
+}
+
+
+.cpaginator-list{
+    -fx-max-width: 160px;
+}
+
+.cpaginator-list .scroll-bar:vertical{
+    -fx-padding: 0 -6px 0 8px!important;
 }
 
 .cpaginator .button{
     -fx-background-color: transparent;
 }
 
+
+.progress-indicator .spinner{
+    -fx-background-color: transparent!important;
+}
+
 .cpaginator .ccombo .text-field{
     -fx-alignment: center;
     -fx-text-alignment: center;
+    -fx-font-weight: bolder;
+    -fx-font-size: 14pt;
+    -fx-padding: 8px 0 0 0;
 }

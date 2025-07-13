@@ -1,13 +1,33 @@
+* {
+    -tab-header-fill: #1a1a1a;
+    -tab-header-selected-fill: #232426;
+    -tab-header-text-fill: white;
+    -tab-header-close-text-fill: #3a3a4a;
+    -tab-header-close-text-hover-fill: teal;
+
+    -play-fill: #2b3243;
+    -menu-fill: #2d2d50;
+}
+
 .menu{
-    -fx-background-color: #2a292faa;
-    -fx-background-radius: 8px;
+    -fx-background-color: linear-gradient(to bottom left, rgba(42, 41, 47, 0.7) 0%, rgba(32, 37, 42, 0.7) 74%);
+    -fx-background-radius: 16px;
     -fx-padding: 0;
 }
 
 .menu-button{
     -fx-background-radius: 50%!important;
-    -fx-background-color: #38405a;
+    -fx-background-color: -menu-fill!important;
     -fx-font-size: 15pt;
+}
+
+
+.main-scroll > ScrollBar:vertical{
+    -fx-padding: 0 4px 0 0;
+}
+
+.main-scroll > ScrollBar .thumb{
+    -fx-pref-width: 10px!important;
 }
 
 .tab-pane{
@@ -16,7 +36,7 @@
 
 .tab-pane .tab{
     /*-fx-background-color: #252540;*/
-    -fx-background-color: #303030;
+    -fx-background-color: -tab-header-fill;
     -fx-background-radius: 5px 5px 0 0;
     -fx-background-insets: 0;
     -fx-padding: 8px 8px 8px 15px;
@@ -27,11 +47,11 @@
 }
 
 .tab-pane .tab:selected{
-    -fx-background-color: #252525;
+    -fx-background-color: -tab-header-selected-fill;
 }
 
 .tab-pane .tab .tab-label{
-    -fx-text-fill: white;
+    -fx-text-fill: -tab-header-text-fill;
     -fx-font-size: 13pt;
     -fx-padding: 0 0 -5px 0;
 }
@@ -41,7 +61,7 @@
 }
 
 .tab-pane .tab .tab-close-button{
-    -fx-background-color: #404545;
+    -fx-background-color: -tab-header-close-text-fill;
     -fx-shape: 'M 0 0 H 1.5 L 6.75 5.25 L 12 0 H 13.5 V 1.5 L 8.25 6.75 L 13.5 12 V 13.5 H 12 L 6.75 8.25 L 1.5 13.5 H 0 V 12 L 5.25 6.75 L 0 1.5 V 0';
     -fx-scale-shape: false;
     -fx-pref-width: 30px;
@@ -50,9 +70,8 @@
 }
 
 .tab-pane .tab .tab-close-button:hover{
-    -fx-background-color: teal;
+    -fx-background-color: -tab-header-close-text-hover-fill;
 }
-
 
 .tab-pane .control-buttons-tab{
     -fx-padding: 0 100px 0 0;
@@ -91,21 +110,27 @@
 }
 
 #btnPlay{
-    -fx-background-color: #383852;
-    -fx-font-size: 25pt;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-color: #31434e!important;
 }
 
-#favBox{
-    -fx-background-radius: 5px;
-    -fx-background-color: #252525;
+.on {
+    -fx-background-image: url(../images/pause.png)!important;
 }
+
+.off, #btnPlay {
+    -fx-background-image: url(../images/play.png);
+}
+
+#btnMenu{
+    -fx-background-image: url(../images/menu.png);
+    -fx-background-size: 36px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
 
 #lblStatus{
     -fx-font-size: 11pt;
-}
-
-.progress-bar .bar{
-    -fx-background-color: #007777!important;
-    -fx-background-insets: 0;
-    -fx-background-radius: 0 5px 5px 5px;
 }

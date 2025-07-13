@@ -38,7 +38,7 @@ public class CButton extends Button {
         fadeDeeper.setDuration(new Duration(300));
 
         backgroundAnimation = new BackgroundColorAnimation();
-        backgroundAnimation.setColor(Color.rgb(20, 20, 20));
+        backgroundAnimation.setColor(Color.rgb(2, 2, 2));
         backgroundAnimation.setDuration(Duration.millis(200));
         backgroundAnimation.setNode(this);
 

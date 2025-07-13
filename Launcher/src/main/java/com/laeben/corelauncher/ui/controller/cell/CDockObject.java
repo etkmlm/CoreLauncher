@@ -14,6 +14,7 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.ui.controller.Main;
+import com.laeben.corelauncher.ui.controller.page.EditProfilePage;
 import com.laeben.corelauncher.ui.controller.page.ProfilePage;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CMenu;
@@ -39,6 +40,7 @@ public abstract class CDockObject extends GridCell {
     public static final String RELEASE = "release";
     public static final String MOVE = "move";
     public static final String EDIT = "edit";
+    public static final String PAGE = "detail";
     public static final String DELETE = "delete";
     public static final String BACKUP = "backup";
     public static final String EXPORT = "export";
@@ -205,14 +207,20 @@ public abstract class CDockObject extends GridCell {
     public static void generateProfileMenu(CMenu menu, Profile profile, CButton menuButton, Predicate<String> onAction){
         menu.setButton(menuButton);
 
-        menu.addItem(ImageCacheManager.getImage("edit.png", 32), Translator.translate("option.edit"), a -> {
-            if (onAction != null && !onAction.test(EDIT))
+        menu.addItem(ImageCacheManager.getImage("pages.png", 32), PAGE, Translator.translate("profile.menu.page"), a -> {
+            if (onAction != null && !onAction.test(a.key()))
                 return;
 
             Main.getMain().addTab("pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
         });
-        menu.addItem(ImageCacheManager.getImage("export.png", 32), Translator.translate("profile.menu.export"), a -> {
-            if (onAction != null && !onAction.test(EXPORT))
+        menu.addItem(ImageCacheManager.getImage("edit.png", 32), EDIT, Translator.translate("option.edit"), a -> {
+            if (onAction != null && !onAction.test(a.key()))
+                return;
+
+            Main.getMain().addTab("pages/profileedit", "", true, EditProfilePage.class).setProfile(profile);
+        });
+        menu.addItem(ImageCacheManager.getImage("export.png", 32), EXPORT, Translator.translate("profile.menu.export"), a -> {
+            if (onAction != null && !onAction.test(a.key()))
                 return;
             ProfileUtil.export(profile, menuButton.getScene().getWindow());
         });
@@ -221,30 +229,30 @@ public abstract class CDockObject extends GridCell {
             d.ifPresent(FloatDock.getDock()::remove);
             Profiler.getProfiler().deleteProfile(profile);
         });*/
-        menu.addItem(ImageCacheManager.getImage("delete.png", 32), Translator.translate("option.delete"), a -> {
-            if (onAction != null && !onAction.test(DELETE))
+        menu.addItem(ImageCacheManager.getImage("delete.png", 32), DELETE, Translator.translate("option.delete"), a -> {
+            if (onAction != null && !onAction.test(a.key()))
                 return;
             Profiler.getProfiler().deleteProfile(profile);
         });
-        menu.addItem(ImageCacheManager.getImage("folder.png", 32), Translator.translate("profile.menu.open"), a -> {
-            if (onAction != null && !onAction.test(OPEN))
+        menu.addItem(ImageCacheManager.getImage("folder.png", 32), OPEN, Translator.translate("profile.menu.open"), a -> {
+            if (onAction != null && !onAction.test(a.key()))
                 return;
             OSUtil.open(profile.getPath().toFile());
         });
-        menu.addItem(ImageCacheManager.getImage("backup.png", 48), Translator.translate("profile.menu.backup"), a -> {
-            if (onAction != null && !onAction.test(BACKUP))
+        menu.addItem(ImageCacheManager.getImage("backup.png", 48), BACKUP, Translator.translate("profile.menu.backup"), a -> {
+            if (onAction != null && !onAction.test(a.key()))
                 return;
             ProfileUtil.backup(profile, menuButton.getScene().getWindow());
         });
-        menu.addItem(ImageCacheManager.getImage("copy.png", 32), Translator.translate("profile.menu.copy"), a -> {
-            if (onAction != null && !onAction.test(COPY))
+        menu.addItem(ImageCacheManager.getImage("copy.png", 32), COPY, Translator.translate("profile.menu.copy"), a -> {
+            if (onAction != null && !onAction.test(a.key()))
                 return;
             var p = Profiler.getProfiler().copyProfile(profile);
             Main.getMain().addTab("pages/profile", p.getName(), true, ProfilePage.class).setProfile(p);
         });
         if (CoreLauncher.SYSTEM_OS == OS.WINDOWS || CoreLauncher.SYSTEM_OS == OS.LINUX)
-            menu.addItem(ImageCacheManager.getImage("shortcut.png", 32), Translator.translate("profile.menu.shortcut"), a -> {
-                if (onAction != null && !onAction.test(SHORTCUT))
+            menu.addItem(ImageCacheManager.getImage("shortcut.png", 32), SHORTCUT, Translator.translate("profile.menu.shortcut"), a -> {
+                if (onAction != null && !onAction.test(a.key()))
                     return;
                 ProfileUtil.createShortcut(profile, menuButton.getScene().getWindow());
             });

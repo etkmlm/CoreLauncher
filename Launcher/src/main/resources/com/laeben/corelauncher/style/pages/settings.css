@@ -1,8 +1,27 @@
 .title{
-    -fx-font-size: 24pt;
+    -fx-font-size: 24pt!important;
     -fx-font-weight: 700;
 }
 
 .text-field .context-menu{
     -fx-opacity: 0;
+}
+
+.property-key{
+    -fx-font-size: 18pt;
+}
+
+.section{
+    -fx-spacing: 20;
+}
+
+.section > VBox{
+    -fx-spacing: 15;
+    -fx-max-width: infinity;
+}
+
+.section > VBox > GridPane{
+    -fx-hgap: 10;
+    -fx-vgap: 10;
+    -fx-max-width: infinity;
 }

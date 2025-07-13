@@ -66,7 +66,7 @@ public class CurseForgeResource implements ModResource {
 
     @ReturnsNull
     public List<CurseForgeFile> searchGame(String versionId, String loader){
-        return searchGame(List.of(versionId), List.of(loader));
+        return searchGame(versionId == null ? null : List.of(versionId), loader == null ? null : List.of(loader));
     }
 
     /**

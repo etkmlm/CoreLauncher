@@ -2,7 +2,6 @@ package com.laeben.corelauncher.ui.util;
 
 import com.google.gson.*;
 import com.laeben.core.entity.Path;
-import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -26,11 +25,9 @@ import javafx.util.Duration;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ProfileUtil {

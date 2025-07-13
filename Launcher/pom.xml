@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>17.0.2</version>
+            <version>21.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
@@ -34,13 +34,13 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics </artifactId>
-            <version>17.0.2</version>
+            <version>21.0.7</version>
             <classifier>win</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics </artifactId>
-            <version>17.0.2</version>
+            <version>21.0.7</version>
             <classifier>linux</classifier>
         </dependency>
         <dependency>
@@ -51,13 +51,13 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics </artifactId>
-            <version>17.0.2</version>
+            <version>21.0.7</version>
             <classifier>mac</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>17.0.2</version>
+            <version>21.0.7</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>

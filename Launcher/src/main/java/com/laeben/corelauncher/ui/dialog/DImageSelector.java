@@ -78,11 +78,16 @@ public class DImageSelector extends CDialog<ImageEntity> {
 
         pnImages.getChildren().addAll(
                 getView("creeper.png"),
+                getView("creeper_light.png"),
                 getView("zombie.png"),
+                getView("zombie_light.png"),
                 getView("skeleton.png"),
-                getView("wither.png")
+                getView("skeleton_light.png"),
+                getView("wither.png"),
+                getView("wither_light.png")
         );
 
+        btnClose.enableTransparentAnimation();
         btnClose.setOnMouseClicked(a -> {
             setResult(null);
             close();

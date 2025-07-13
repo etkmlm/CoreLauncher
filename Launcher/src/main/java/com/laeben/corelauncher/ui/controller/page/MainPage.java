@@ -36,6 +36,10 @@ import java.util.stream.Collectors;
 
 public class MainPage extends HandlerController {
     public static final String KEY = "pgmain";
+    public static final String PROFILES = "prfls";
+    public static final String NEW_GROUP = "ngrp";
+    public static final String PROFILE = "prof";
+    public static final String BROWSER = "browser";
 
     @FXML
     public SelectionPane<CDockObject> root;
@@ -64,10 +68,10 @@ public class MainPage extends HandlerController {
         selector = new DProfileSelector(DProfileSelector.Functionality.DOCK_SELECTOR);
 
         dockContext = new CMenu();
-        dockContext.addItem(null, Translator.translate("dock.menu.profiles"), a -> {
+        dockContext.addItem(null, PROFILES, Translator.translate("dock.menu.profiles"), a -> {
             var f = root.localToScreen(root.getBoundsInLocal());
-            lX = a.getScreenX() - f.getMinX();
-            lY = a.getScreenY() - f.getMinY();
+            lX = a.event().getScreenX() - f.getMinX();
+            lY = a.event().getScreenY() - f.getMinY();
 
             var result = selector.show(
                     root.getChildren().stream().filter(x -> x instanceof CGroup).map(x -> ((CGroup)x).getObject().getName()).toList(),
@@ -91,21 +95,21 @@ public class MainPage extends HandlerController {
                 }
             }
         });
-        dockContext.addItem(null, Translator.translate("dock.menu.group.new"), a -> {
+        dockContext.addItem(null, NEW_GROUP, Translator.translate("dock.menu.group.new"), a -> {
             var f = root.localToScreen(root.getBoundsInLocal());
-            FloatDock.getDock().place(FDObject.createGroup(List.of(), a.getScreenX() - f.getMinX(), a.getScreenY() - f.getMinY(), FloatDock.getDock().generateName(Translator.translate("dock.menu.group.new"))), false);
+            FloatDock.getDock().place(FDObject.createGroup(List.of(), a.event().getScreenX() - f.getMinX(), a.event().getScreenY() - f.getMinY(), FloatDock.getDock().generateName(Translator.translate("dock.menu.group.new"))), false);
         });
-        dockContext.addItem(null, Translator.translate("dock.menu.profile"), a -> {
+        dockContext.addItem(null, PROFILE, Translator.translate("dock.menu.profile"), a -> {
             var f = root.localToScreen(root.getBoundsInLocal());
-            lX = a.getScreenX() - f.getMinX();
-            lY = a.getScreenY() - f.getMinY();
+            lX = a.event().getScreenX() - f.getMinX();
+            lY = a.event().getScreenY() - f.getMinY();
 
             Main.getMain().addTab("pages/profileedit", Translator.translate("frame.title.pedit"), true, EditProfilePage.class);
         });
-        dockContext.addItem(null, Translator.translate("dock.menu.browser"), a -> {
+        dockContext.addItem(null, BROWSER, Translator.translate("dock.menu.browser"), a -> {
             var f = root.localToScreen(root.getBoundsInLocal());
-            lX = a.getScreenX() - f.getMinX();
-            lY = a.getScreenY() - f.getMinY();
+            lX = a.event().getScreenX() - f.getMinX();
+            lY = a.event().getScreenY() - f.getMinY();
 
             Main.getMain().addTab("pages/browser", Translator.translate("frame.title.browser"), true, BrowserPage.class).setProfile(null);
         });

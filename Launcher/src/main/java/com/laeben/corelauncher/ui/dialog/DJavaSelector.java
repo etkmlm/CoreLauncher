@@ -8,13 +8,12 @@ import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.*;
-import com.laeben.corelauncher.util.JavaManager;
+import com.laeben.corelauncher.util.java.JavaManager;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 
@@ -66,7 +65,7 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
         worker.begin().withTask(a -> new Task<>() {
             @Override
             protected JavaManager.JavaDownloadInfo call() throws Exception {
-                return JavaManager.getJavaInfo(Java.fromVersion(spnMajor.getValue()), CoreLauncher.OS_64);
+                return JavaManager.getManager().getJavaInfo(Java.fromVersion(spnMajor.getValue()), CoreLauncher.OS_64);
             }
         }).onDone(a -> {
             if (a.getValue() != null)
@@ -92,8 +91,9 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
             //Launcher.getLauncher().getHandler().execute(new KeyEvent("jvdown"));
         });
 
-        txtName.setFocusedAnimation(Color.TEAL, Duration.millis(200));
+        txtName.setFocusedAnimation(Duration.millis(200));
         txtPath.setCursor(Cursor.DEFAULT);
+        btnSelect.enableTransparentAnimation();
         btnSelect.setOnMouseClicked(a -> {
             var d = new DirectoryChooser().showDialog(btnSelect.getScene().getWindow());
             if (d == null)

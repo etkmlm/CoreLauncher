@@ -3,8 +3,8 @@
 }
 
 #lblName{
-    -fx-fill: white;
-    -fx-text-fill: white;
+    -fx-fill: -text-fill;
+    -fx-text-fill: -text-fill;
     -fx-font-size: 13pt;
     -fx-font-weight: 700;
 }
@@ -15,7 +15,7 @@
 }
 
 #folderRoot{
-    -fx-background-color: #303030;
+    -fx-background-color: -dock-default-fill;
     -fx-background-radius: 15px;
     -fx-padding: 8px;
 }

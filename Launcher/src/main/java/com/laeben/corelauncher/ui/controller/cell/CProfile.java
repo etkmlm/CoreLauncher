@@ -27,6 +27,9 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class CProfile extends CDockObject{
+
+    public static final String REMOVE = "remove";
+
     @FXML
     private AnchorPane imgRoot;
     @FXML
@@ -58,6 +61,8 @@ public class CProfile extends CDockObject{
     protected void onMouseEntered(MouseEvent e) {
         hover.playFromStart();
         trns.playFromStart();
+
+        btnSelect.setStyle("-fx-text-fill: white");
     }
 
     @Override
@@ -91,6 +96,7 @@ public class CProfile extends CDockObject{
             OSUtil.open(getPrimaryProfile().getPath().toFile());
         else{
             btnSelect.setText("♥");
+            btnSelect.setStyle("-fx-text-fill: #e30e0e");
             selectPrimary();
         }
     }
@@ -124,7 +130,7 @@ public class CProfile extends CDockObject{
 
             return onMenuClick == null || onMenuClick.test(a);
         });
-        menu.addItem(ImageCacheManager.getImage("close.png", 48), Translator.translate("option.remove"), a -> vanish());
+        menu.addItem(ImageCacheManager.getImage("remove.png", 48), REMOVE, Translator.translate("option.remove"), a -> vanish());
 
         //btnSelect.setOnDragDetected(a -> drag(p1, p2, img_30));
         //btnSelect.setOnMouseReleased(a -> selectPrimary());

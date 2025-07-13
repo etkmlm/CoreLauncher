@@ -73,6 +73,10 @@ public class Java {
         this.name = name;
         this.path = path;
 
+        if (name != null){
+            path.to("name.txt").write(name);
+        }
+
         identify();
     }
 
@@ -89,6 +93,11 @@ public class Java {
     public boolean identify() {
         if (path == null)
             return loaded = false;
+
+        var t = path.to("name.txt");
+
+        if (t.exists())
+            name = t.read();
 
         String version = null;
         String arch;
@@ -175,6 +184,9 @@ public class Java {
 
     public Java setName(String name){
         this.name = name;
+
+        if (path != null)
+            path.to("name.txt").write(name);
 
         return this;
     }

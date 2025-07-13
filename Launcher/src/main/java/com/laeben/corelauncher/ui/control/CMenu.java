@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.control;
 
+import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.entity.PopupNode;
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Pos;
@@ -16,6 +17,8 @@ import javafx.util.Duration;
 import java.util.function.Consumer;
 
 public class CMenu extends VBox implements PopupNode {
+
+    public record ItemClickEventArgs(MouseEvent event, String key) {}
 
     private final ScaleTransition trns;
     private CButton button;
@@ -47,7 +50,9 @@ public class CMenu extends VBox implements PopupNode {
         trns.setDuration(Duration.millis(animationDuration));
         popup.setOnHidden(a -> menuOpen = false);
 
-        menu.setStyle("-fx-min-width: 120px;-fx-background-color: #333840aa;-fx-background-radius: 10px;");
+        menu.getStylesheets().add(CoreLauncherFX.CLUI_CSS);
+        menu.getStyleClass().add("cmenu");
+        //menu.setStyle("-fx-min-width: 120px;-fx-background-color: -control-popup-fill;-fx-background-radius: 10px;");
         menuOpen = false;
     }
 
@@ -69,12 +74,13 @@ public class CMenu extends VBox implements PopupNode {
         menu.getChildren().clear();
     }
 
-    public void addItem(Image icon, String text, Consumer<MouseEvent> onClick){
-        addItem(icon, text, onClick, true);
+    public void addItem(Image icon, String key, String text, Consumer<ItemClickEventArgs> onClick){
+        addItem(icon, key, text, onClick, true);
     }
 
-    public CButton addItem(Image icon, String text, Consumer<MouseEvent> onClick, boolean hidePopup){
+    public CButton addItem(Image icon, String key, String text, Consumer<ItemClickEventArgs> onClick, boolean hidePopup){
         var hbox = new HBox();
+        hbox.setId(key);
         hbox.setAlignment(Pos.CENTER);
 
         var btn = new CButton();
@@ -82,11 +88,12 @@ public class CMenu extends VBox implements PopupNode {
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.setOnMouseClicked(x -> {
             hide();
-            onClick.accept(x);
+            onClick.accept(new ItemClickEventArgs(x, key));
             if (hidePopup)
                 usePopup(PopupWindow::hide);
         });
-        btn.setStyle("-fx-background-color:transparent;-fx-font-size: 12.5pt;-fx-pref-height: 30px;");
+        btn.getStyleClass().add("cmenu-item");
+        //btn.setStyle("-fx-background-color:transparent;-fx-font-size: 12.5pt;-fx-pref-height: 30px;");
 
         if (icon != null){
             var img = new ImageView();
@@ -106,6 +113,10 @@ public class CMenu extends VBox implements PopupNode {
         menu.getChildren().add(hbox);
 
         return btn;
+    }
+
+    public void removeItem(String key){
+        menu.getChildren().removeIf(a -> key.equals(a.getId()));
     }
 
     public boolean isMenuOpen(){

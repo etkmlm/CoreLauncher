@@ -177,7 +177,7 @@ public class Modrinth implements ModSource {
         var str = factory.create()
                 .to("/v2/project/" + rId + "/version");
 
-        boolean validVersions = versionIds != null;
+        boolean validVersions = versionIds != null && !versionIds.isEmpty();
         boolean validLoaders = false;
 
         List<String> loaderIds = null;
