@@ -59,7 +59,7 @@ public class WorldsPage extends HandlerController {
     }
 
     private void reloadTitle(Profile p){
-        ((CTab)parentObj).setText(Translator.translate("frame.title.worlds") + " - " + StrUtil.sub(p.getName(), 0, 18));
+        ((CTab)parentObj).setText(Translator.translate("world.title") + " - " + StrUtil.sub(p.getName(), 0, 18));
     }
 
     public void reload(){

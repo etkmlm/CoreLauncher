@@ -32,6 +32,7 @@ public class Launcher {
     public static final String AUTH_FAIL = "authFail";
     public static final String PREPARE = "prepare";
     public static final String JAVA = "java";
+    public static final String JAVA_DOWNLOAD_ERROR = "errJava";
 
 
     public static Launcher instance;
@@ -134,7 +135,7 @@ public class Launcher {
                                 JavaManager.getManager().downloadAndInclude(linfo.java, null);
                                 //handler.execute(new KeyEvent("jvdown"));
                             } catch (NoConnectionException e){
-                                handleState(".error.launch.java");
+                                handleState(JAVA_DOWNLOAD_ERROR);
                                 return;
                             }
                             launch(info);

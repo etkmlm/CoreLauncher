@@ -71,10 +71,10 @@ public class Quilt extends Fabric<QuiltVersion> {
             catch (Exception e){
                 Logger.getLogger().logHyph("ERRQUILT " + v.getLoaderVersion());
                 Logger.getLogger().log(e);
-                logState(".error.unknown");
+                logState(UNKNOWN_ERROR);
             }
 
-            logState(".launch.state.finish");
+            logState(LAUNCH_FINISH);
 
             path.delete();
 

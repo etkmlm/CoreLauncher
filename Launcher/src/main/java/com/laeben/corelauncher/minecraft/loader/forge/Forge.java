@@ -164,7 +164,7 @@ public class Forge extends Loader<ForgeVersion> {
             catch (Exception e){
                 Logger.getLogger().logHyph("ERRFORGE " + version.getLoaderVersion());
                 Logger.getLogger().log(e);
-                logState(".error.unknown");
+                logState(UNKNOWN_ERROR);
             }
 
             path.delete();
@@ -177,7 +177,7 @@ public class Forge extends Loader<ForgeVersion> {
                 throw new PerformException(".forge.error.unknownInstaller");
             }
 
-            logState(".launch.state.finish");
+            logState(LAUNCH_FINISH);
 
             var read = GsonUtil.EMPTY_GSON.fromJson(profileInfo.read(), JsonObject.class);
             var profiles = read.get("profiles").getAsJsonObject();

@@ -54,7 +54,7 @@ public class BrowserPage extends HandlerController {
     }
 
     private void reloadTitle(Profile p){
-        ((CTab)parentObj).setText(Translator.translate("frame.title.browser") + (p != null ? " - " + StrUtil.sub(p.getName(), 0, 30) : ""));
+        ((CTab)parentObj).setText(Translator.translate("mods.browser") + (p != null ? " - " + StrUtil.sub(p.getName(), 0, 30) : ""));
     }
 
     /**
@@ -268,7 +268,7 @@ public class BrowserPage extends HandlerController {
     }
 
     private void onProfileCreated(Profile profile) {
-        Main.getMain().replaceTab(this, "pages/browser", Translator.translate("frame.title.browser"), true, BrowserPage.class).setProfile(profile);
+        Main.getMain().replaceTab(this, "pages/browser", Translator.translate("mods.browser"), true, BrowserPage.class).setProfile(profile);
     }
 
     private void search(String query){

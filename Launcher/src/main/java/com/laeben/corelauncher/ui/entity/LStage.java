@@ -1,6 +1,8 @@
 package com.laeben.corelauncher.ui.entity;
 
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Frame;
 import com.laeben.corelauncher.ui.util.EventFilterManager;
 import javafx.event.Event;
@@ -57,6 +59,13 @@ public class LStage extends Stage {
         addRegisteredEventFilter(MouseEvent.MOUSE_MOVED, this::onMouseMoved);
         addRegisteredEventFilter(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
         addRegisteredEventFilter(MouseEvent.MOUSE_RELEASED, a -> {
+            if (cFinal != null){
+                UI.runAsync(() -> {
+                    Configurator.getConfig().setWindowSize(getWidth(), getHeight());
+                    Configurator.save();
+                });
+            }
+
             cFinal = null;
             moving = false;
             dragging = false;

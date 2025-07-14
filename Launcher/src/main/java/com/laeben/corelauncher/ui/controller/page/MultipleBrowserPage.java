@@ -62,7 +62,7 @@ public class MultipleBrowserPage extends HandlerController {
     }
 
     private void reloadTitle(Profile p){
-        ((CTab)parentObj).setText(Translator.translate("frame.title.worlds") + " - " + StrUtil.sub(p.getName(), 0, 30));
+        ((CTab)parentObj).setText(Translator.translate("world.worlds") + " - " + StrUtil.sub(p.getName(), 0, 30));
     }
 
     public void setProfile(Profile profile){

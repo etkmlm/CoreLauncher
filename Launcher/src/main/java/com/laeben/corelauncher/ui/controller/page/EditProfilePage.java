@@ -291,7 +291,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             if (nts.needsToSave())
                 onFocusLimitIgnored(null, null);
             else
-                Main.getMain().addTab("pages/java", Translator.translate("frame.title.javaman"), true, JavaPage.class);
+                Main.getMain().addTab("pages/java", Translator.translate("java.manager"), true, JavaPage.class);
         });
 
 
@@ -445,7 +445,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     }
 
     private void reloadTitle(Profile p){
-        ((CTab)parentObj).setText(Translator.translate("frame.title.pedit") + (p.getName() == null ? "" : " - " + StrUtil.sub(p.getName(), 0, 30) + (nts.needsToSave() ? "*" : "")));
+        ((CTab)parentObj).setText(Translator.translate("profile.edit") + (p.getName() == null ? "" : " - " + StrUtil.sub(p.getName(), 0, 30) + (nts.needsToSave() ? "*" : "")));
     }
 
     private void reload(){

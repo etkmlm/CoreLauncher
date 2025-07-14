@@ -191,8 +191,6 @@ public class Main extends HandlerController {
                 var stage = (Stage)a.getSource();
                 if (stage.isMaximized())
                     Configurator.getConfig().setWindowSize(-1, -1);
-                else
-                    Configurator.getConfig().setWindowSize(stage.getWidth(), stage.getHeight());
                 Configurator.save();
             }
         }, true);
@@ -353,14 +351,17 @@ public class Main extends HandlerController {
             var key = k.getKey();
 
             if (key.startsWith(Launcher.SESSION_START)){
-                announcer.announce(new Announcement(Translator.translate("announce.game.started"), Translator.translateFormat("announce.misc.profile", k.getKey().substring(12)), Announcement.AnnouncementType.GAME), Duration.seconds(3));
+                announcer.announce(new Announcement(Translator.translate("announce.game.started"), Translator.translateFormat("announce.misc.profile", k.getKey().substring(Launcher.SESSION_START.length())), Announcement.AnnouncementType.GAME), Duration.seconds(3));
                 refreshStates();
                 Discord.getDiscord().setActivity(Activity.setForProfile(selectedProfile));
                 if (Configurator.getConfig().hideAfter())
                     UI.getUI().hideAll();
             }
+            else if (key.equals(Launcher.JAVA_DOWNLOAD_ERROR)){
+                setPrimaryStatus(Translator.translate("error.launch.java"));
+            }
             else if (key.startsWith(Launcher.JAVA)){
-                String major = k.getKey().substring(4);
+                String major = k.getKey().substring(Launcher.JAVA.length());
                 setPrimaryStatus(Translator.translateFormat("launch.state.download.java", major));
             }
             else if (key.equals(EventHandler.STOP)){
@@ -368,20 +369,32 @@ public class Main extends HandlerController {
             }
             else if (key.equals(Loader.CLIENT_DOWNLOAD))
                 setPrimaryStatus(Translator.translate("launch.state.download.client"));
-            else if (key.startsWith(Loader.LIBRARY)){
+            /*else if (key.startsWith(Loader.LIBRARY)){
                 setPrimaryStatus(key.substring(3));
             }
-            else if (key.startsWith("asset")){//
+            else if (key.startsWith(Loader.ASSET)){//
                 setPrimaryStatus(Translator.translate("launch.state.download.assets") + " " + key.substring(5));
-            }
+            }*/
             else if (key.equals(Loader.ASSET_LOAD)){
-                setPrimaryStatus(Translator.translate("launch.state.assets"));
+                setPrimaryStatus(Translator.translate("launch.state.download.assets"));
+            }
+            else if (key.equals(Loader.LIBRARY_LOAD)){
+                setPrimaryStatus(Translator.translate("launch.state.download.libraries"));
+            }
+            else if (key.equals(Loader.LAUNCH_FINISH)){
+                setPrimaryStatus(Translator.translate("launch.state.finish"));
+            }
+            else if (key.equals(Loader.UNKNOWN_ERROR)){
+                setPrimaryStatus(Translator.translate("error.unknown"));
             }
             else if (key.startsWith(Loader.ACQUIRE_VERSION))
-                setPrimaryStatus(Translator.translateFormat("launch.state.acquire", key.substring(10)));
+                setPrimaryStatus(Translator.translateFormat("launch.state.acquire", key.substring(Loader.ACQUIRE_VERSION.length())));
             else if (key.startsWith(Launcher.PREPARE)){
-                setPrimaryStatus(Translator.translateFormat("launch.state.prepare", key.substring(7)));
+                setPrimaryStatus(Translator.translateFormat("launch.state.prepare", key.substring(Launcher.PREPARE.length())));
                 Discord.getDiscord().setActivity(a -> a.state = Translator.translate("discord.state.prepare"));
+            }
+            else if (key.startsWith(Modder.RESOURCE_INSTALL)){
+                setPrimaryStatus(Translator.translateFormat("resource.install", key.substring(Modder.RESOURCE_INSTALL.length())));
             }
             else if (key.startsWith("."))
                 setPrimaryStatus(dot(key.substring(1)));
@@ -390,9 +403,6 @@ public class Main extends HandlerController {
                 setSecondaryStatus(dot(s[1]));
                 setPrimaryStatus(s[0].substring(1));
             }
-            /*else if (key.equals("jvdown")){
-
-            }*/
             else
                 setPrimaryStatus(key);
         }

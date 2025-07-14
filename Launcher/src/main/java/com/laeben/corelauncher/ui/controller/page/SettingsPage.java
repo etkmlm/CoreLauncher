@@ -364,7 +364,7 @@ public class SettingsPage extends HandlerController {
         });
 
         btnJavaMan.enableTransparentAnimation();
-        btnJavaMan.setOnMouseClicked((a) -> Main.getMain().addTab("pages/java", Translator.translate("frame.title.javaman"), true, JavaPage.class));
+        btnJavaMan.setOnMouseClicked((a) -> Main.getMain().addTab("pages/java", Translator.translate("java.manager"), true, JavaPage.class));
 
         chkPlaceDock.selectedProperty().addListener(x -> {
             Configurator.getConfig().setPlaceNewProfileToDock(chkPlaceDock.isSelected());

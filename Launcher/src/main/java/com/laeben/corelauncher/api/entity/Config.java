@@ -159,11 +159,11 @@ public class Config {
     }
 
     public double getWindowWidth(){
-        return windowWidth;
+        return windowWidth == 0 ? 1612 : windowWidth;
     }
 
     public double getWindowHeight(){
-        return windowHeight;
+        return windowHeight == 0 ? 964 : windowHeight;
     }
 
     public void setWindowSize(double w, double h){

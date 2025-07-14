@@ -129,7 +129,7 @@ public class NeoForge extends Loader<NeoForgeVersion> {
             catch (Exception e){
                 Logger.getLogger().logHyph("ERRNEOFORGE " + version.getLoaderVersion());
                 Logger.getLogger().log(e);
-                logState(".error.unknown");
+                logState(UNKNOWN_ERROR);
             }
 
             path.delete();
@@ -142,7 +142,7 @@ public class NeoForge extends Loader<NeoForgeVersion> {
                 throw new PerformException(".forge.error.unknownInstaller");
             }
 
-            logState(".launch.state.finish");
+            logState(LAUNCH_FINISH);
 
             var read = GsonUtil.EMPTY_GSON.fromJson(profileInfo.read(), JsonObject.class);
             var profiles = read.get("profiles").getAsJsonObject();

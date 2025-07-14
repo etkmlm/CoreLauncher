@@ -39,7 +39,7 @@ public class MainPage extends HandlerController {
     public static final String PROFILES = "prfls";
     public static final String NEW_GROUP = "ngrp";
     public static final String PROFILE = "prof";
-    public static final String BROWSER = "browser";
+    public static final String BROWSER = "mods.browser";
 
     @FXML
     public SelectionPane<CDockObject> root;
@@ -104,14 +104,14 @@ public class MainPage extends HandlerController {
             lX = a.event().getScreenX() - f.getMinX();
             lY = a.event().getScreenY() - f.getMinY();
 
-            Main.getMain().addTab("pages/profileedit", Translator.translate("frame.title.pedit"), true, EditProfilePage.class);
+            Main.getMain().addTab("pages/profileedit", Translator.translate("profile.edit"), true, EditProfilePage.class);
         });
         dockContext.addItem(null, BROWSER, Translator.translate("dock.menu.browser"), a -> {
             var f = root.localToScreen(root.getBoundsInLocal());
             lX = a.event().getScreenX() - f.getMinX();
             lY = a.event().getScreenY() - f.getMinY();
 
-            Main.getMain().addTab("pages/browser", Translator.translate("frame.title.browser"), true, BrowserPage.class).setProfile(null);
+            Main.getMain().addTab("pages/browser", Translator.translate("mods.browser"), true, BrowserPage.class).setProfile(null);
         });
 
         dockGhost = new CButton();

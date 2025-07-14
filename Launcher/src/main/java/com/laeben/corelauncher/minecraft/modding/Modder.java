@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Modder {
+    public static final String RESOURCE_INSTALL = "resIns";
 
     public record ModInfo(String name, LoaderType type, String versionId, String loaderVer, String version){}
 
@@ -385,7 +386,7 @@ public class Modder {
             if (stopRequested)
                 throw new StopException();
 
-            handler.execute(new KeyEvent(".resource.install;" + mp.name));
+            handler.execute(new KeyEvent(RESOURCE_INSTALL + mp.name));
             mp.getSource().extractModpack(mp, path, false);
             /*if (mp.isForge())
                 CurseForge.getForge().extractModpack(path, mp);

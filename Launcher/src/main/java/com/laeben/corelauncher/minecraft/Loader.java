@@ -36,7 +36,9 @@ public abstract class Loader<H extends Version> {
     public static final String CLIENT_DOWNLOAD = "clientDown";
     public static final String SERVER_DOWNLOAD = "serverDown";
     public static final String ACQUIRE_VERSION = "acqVersion";
-    public static final String LIBRARY = "lib";
+    public static final String LIBRARY_LOAD = "libLoad";
+    public static final String LAUNCH_FINISH = "launchFinish";
+    public static final String UNKNOWN_ERROR = "errUnknown";
     //public static final String ASSET = "asset";
     public static final String ASSET_LOAD = "assetLoad";
 
@@ -135,6 +137,8 @@ public abstract class Loader<H extends Version> {
         Path libDir = getGameDir().to("libraries");
         Path nativeDir = getGameDir().to("versions", v.getJsonName(), "natives");
 
+        logState(LIBRARY_LOAD);
+
         setupLauncherLibraries();
 
         var cargo = new CargoNet(Configurator.getConfig().getDownloadThreadsCount()) {
@@ -146,7 +150,7 @@ public abstract class Loader<H extends Version> {
                     terminate();
                 }
 
-                logState(LIBRARY + lib.path + " " + done + "/" + total);
+                logState(lib.path + " " + done + "/" + total);
             }
         };
 
@@ -159,7 +163,7 @@ public abstract class Loader<H extends Version> {
                 throw new StopException();
             try{
                 Logger.getLogger().logDebug("LIB: " + lib.name);
-                logState(LIBRARY + lib.name);
+                logState(lib.name);
                 if (!lib.checkAvailability(CoreLauncher.SYSTEM_OS))
                 {
                     Logger.getLogger().logDebug("PASS\n");

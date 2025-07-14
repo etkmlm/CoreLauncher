@@ -133,12 +133,12 @@ public class UI {
 
         return stage;
     }
-    public LStage create(String name, Object controller, boolean useFrame) {
+    public LStage create(String name, String title, Object controller, boolean useFrame) {
         return create(CoreLauncherFX.class.getResource("layout/" + name + ".fxml"), name, controller, null, useFrame)
-                .setStageTitle(Translator.translate("frame.title." + name));
+                .setStageTitle(title != null ? title : Translator.translate("frame.title." + name));
     }
     public LStage create(String name){
-        return create(name, null, true);
+        return create(name, null, null, true);
     }
 
     public Node load(URL url, Object controller){

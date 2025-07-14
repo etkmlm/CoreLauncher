@@ -140,12 +140,12 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
             catch (Exception e){
                 Logger.getLogger().logHyph("ERRFABRIC " + v.getLoaderVersion());
                 Logger.getLogger().log(e);
-                logState(".error.unknown");
+                logState(UNKNOWN_ERROR);
             }
 
             path.delete();
 
-            logState(".launch.state.finish");
+            logState(LAUNCH_FINISH);
         }
         catch (NoConnectionException | StopException e){
             throw e;

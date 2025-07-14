@@ -166,7 +166,7 @@ public class OptiFine extends Loader<OptiVersion> {
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
-                logState(".error.unknown");
+                logState(UNKNOWN_ERROR);
             }
 
             path.delete();
@@ -196,7 +196,7 @@ public class OptiFine extends Loader<OptiVersion> {
             Logger.getLogger().log(e);
         }
 
-        logState(".launch.state.finish");
+        logState(LAUNCH_FINISH);
     }
 
 

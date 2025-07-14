@@ -32,17 +32,17 @@
     <HBox spacing="12" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10">
         <CButton styleClass="profile-button" fx:id="btnWorlds">
             <tooltip>
-                <Tooltip text="%frame.title.worlds"/>
+                <Tooltip text="%world.worlds"/>
             </tooltip>
         </CButton>
         <CButton styleClass="profile-button" fx:id="btnMultipleBrowser">
             <tooltip>
-                <Tooltip text="%frame.title.multiplemod"/>
+                <Tooltip text="%mods.all.multiple"/>
             </tooltip>
         </CButton>
         <CButton styleClass="profile-button" fx:id="btnAddResource">
             <tooltip>
-                <Tooltip text="%frame.title.browser"/>
+                <Tooltip text="%mods.browser"/>
             </tooltip>
         </CButton>
         <CMenu fx:id="menu" />
