@@ -18,6 +18,7 @@ public class FloatDock {
     public static final String PLACE = "place";
     public static final String REPLACE = "replace";
     public static final String REMOVE = "remove";
+    public static final String REMOVE_ALL = "removeAll";
     public static final String UPDATE = "update";
     public static final String MOVEMENT = "movement";
 
@@ -203,6 +204,12 @@ public class FloatDock {
         getObjects().remove(obj);
         save();
         handler.execute(new KeyEvent(REMOVE).setSource(obj));
+    }
+
+    public void removeAll(List<FDObject> objects){
+        getObjects().removeAll(objects);
+        save();
+        handler.execute(new KeyEvent(REMOVE_ALL).setSource(objects));
     }
 
 }

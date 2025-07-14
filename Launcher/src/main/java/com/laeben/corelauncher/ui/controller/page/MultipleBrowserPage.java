@@ -158,7 +158,7 @@ public class MultipleBrowserPage extends HandlerController {
                 continue;
             }
 
-            if(mod.type() != type){
+            if(mod.type() != type && !(mod.type() == LoaderType.QUILT && type == LoaderType.FABRIC)){
                 invalid.add(mod);
                 continue;
             }

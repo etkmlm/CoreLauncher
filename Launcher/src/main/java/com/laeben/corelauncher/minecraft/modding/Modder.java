@@ -208,7 +208,7 @@ public class Modder {
         if (!p.getExtension().equals("jar"))
             return null;
 
-        var rd = p.tryReadZipEntry("mcmod.info", "META-INF/mods.toml", "fabric.mod.json");
+        var rd = p.tryReadZipEntry("mcmod.info", "META-INF/mods.toml", "fabric.mod.json", "META-INF/neoforge.mods.toml");
 
         if (rd == null)
             return null;
@@ -250,7 +250,7 @@ public class Modder {
 
             type = LoaderType.FORGE;
         }
-        else if (rd.getOrder() == 1){ // Minecraft Forge > 1.12.2
+        else if (rd.getOrder() == 1 || rd.getOrder() == 3){ // Minecraft Forge > 1.12.2  or NeoForge
             final var pattern = Pattern.compile(".*loaderVersion[^\"]*\"([^\"]*)\".*\\[\\s*\\[mods]\\s*](?=[^\\[]*displayName[^\"]*\"([^\"]*)\")(?=[^\\[]*version[^\"]*\"([^\"]*)\")?", Pattern.DOTALL);
             var matcher = pattern.matcher(rd.getValue());
             if (!matcher.find())
@@ -264,7 +264,7 @@ public class Modder {
                 version = null;
             if (name == null || name.startsWith("$"))
                 return null;
-            type = LoaderType.FORGE;
+            type = rd.getOrder() == 1 ? LoaderType.FORGE : LoaderType.NEOFORGE;
         }
         else if (rd.getOrder() == 2){ // Fabric
             var read = GsonUtil.DEFAULT_GSON.fromJson(rd.getValue(), JsonObject.class);

@@ -18,12 +18,16 @@ import com.laeben.corelauncher.ui.controller.page.EditProfilePage;
 import com.laeben.corelauncher.ui.controller.page.ProfilePage;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CMenu;
+import com.laeben.corelauncher.ui.entity.EventFilter;
+import com.laeben.corelauncher.ui.util.EventFilterManager;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -63,8 +67,15 @@ public abstract class CDockObject extends GridCell {
 
     private final BooleanProperty selected;
 
+    private boolean listenerRegistered = false;
+    private final ChangeListener<Boolean> onFocusChangeValue;
+
+    private final EventFilterManager efManager;
+
     public CDockObject(){
         setGraphic(gr = UI.getUI().load(CoreLauncherFX.class.getResource("layout/cells/cdobject.fxml"), this));
+
+        efManager = new EventFilterManager();
 
         hoverOpacity = new FadeTransition();
         hoverOpacity.setFromValue(1);
@@ -85,6 +96,21 @@ public abstract class CDockObject extends GridCell {
             else
                 setOpacity(1);
         });
+
+        onFocusChangeValue = this::onFocusChange;
+
+        sceneProperty().addListener((a, b, scene) -> {
+            if (listenerRegistered)
+                return;
+
+            efManager.addEventFilter(EventFilter.node(root, MouseEvent.DRAG_DETECTED, e -> drag()));
+            efManager.addEventFilter(EventFilter.node(root, MouseEvent.MOUSE_DRAGGED, this::onDragged));
+            efManager.addEventFilter(EventFilter.node(root, MouseEvent.MOUSE_PRESSED, this::onPressed));
+            efManager.addEventFilter(EventFilter.node(root, MouseEvent.MOUSE_RELEASED, this::onReleased));
+
+            scene.getWindow().focusedProperty().addListener(onFocusChangeValue);
+            listenerRegistered = true;
+        });
     }
 
     @FXML
@@ -97,10 +123,13 @@ public abstract class CDockObject extends GridCell {
     protected CButton btnSelect;
 
     protected boolean moving;
+    protected boolean exporting;
     protected boolean pressed;
     protected long pressTime;
-    protected double padX;
-    protected double padY;
+    protected double pressRelativeMouseX;
+    protected double pressRelativeMouseY;
+    protected double pressLayoutX;
+    protected double pressLayoutY;
 
     public static CDockObject get(FDObject item){
         return item.isSingle() ? new CProfile().set(item) : new CGroup().set(item);
@@ -142,21 +171,16 @@ public abstract class CDockObject extends GridCell {
             onMouseExited(a);
         });
 
-        root.setOnDragDetected(a -> drag());
-        btnSelect.setOnDragDetected(a -> drag());
-
-        root.setOnMouseDragged(this::onDragged);
-        btnSelect.setOnMouseDragged(this::onDragged);
-
-        root.setOnMousePressed(this::onPressed);
-        btnSelect.setOnMousePressed(this::onPressed);
-
-        root.setOnMouseReleased(this::onReleased);
-        btnSelect.setOnMouseReleased(this::onReleased);
-
         setGraphic(gr);
 
         return this;
+    }
+
+    private void onFocusChange(Observable o, Boolean v1, Boolean v2) {
+        if ((v2 == null || !v2) || (!moving && !exporting))
+            return;
+
+        onReleasedIn();
     }
 
     private void onReleased(MouseEvent a){
@@ -168,40 +192,89 @@ public abstract class CDockObject extends GridCell {
             setSelected(!getSelected());
             return;
         }
+
         onMouseReleased(a);
-        moving = false;
+        onReleasedIn();
+    }
+
+    private void onReleasedIn(){
         root.setScaleX(1);
         root.setScaleY(1);
 
         grabListener.accept(new KeyEvent(RELEASE).setSource(this));
+        moving = false;
+        exporting = false;
     }
 
     private void onPressed(MouseEvent a){
         pressed = true;
         pressTime = System.currentTimeMillis();
-        padX = a.getX();
-        padY = a.getY();
+        pressRelativeMouseX = a.getX();
+        pressRelativeMouseY = a.getY();
+        pressLayoutX = getLayoutX();
+        pressLayoutY = getLayoutY();
     }
     private void onDragged(MouseEvent a){
         a.setDragDetect(false);
         if (!pressed){
-            if (moving){
-                grabListener.accept(new ValueEvent(MOVE, new GrabVector(a.getSceneX(), a.getSceneY(), padX, padY)).setSource(this));
+            if (exporting)
+                return;
+
+            long millis = System.currentTimeMillis();
+
+            double x = getScene().getWindow().getX();
+            double y = getScene().getWindow().getY();
+            double w = getScene().getWindow().getWidth();
+            double h = getScene().getWindow().getHeight();
+
+            double mX = a.getScreenX();
+            double mY = a.getScreenY();
+
+            exporting = (mX < x || mX > x + w) || (mY < y || mY > y + h);
+
+            if (exporting){
+                moving = false;
+                onReleased(a);
+                a.setDragDetect(true);
+            }
+            else{
+                grabListener.accept(new ValueEvent(MOVE, new GrabVector(a.getSceneX(), a.getSceneY(), pressRelativeMouseX, pressRelativeMouseY)).setSource(this));
             }
             return;
         }
 
         pressed = false;
-        long millis = System.currentTimeMillis();
-        moving = millis > pressTime + 100;
 
-        if (!moving)
-            a.setDragDetect(true);
+        root.setScaleX(1.1);
+        root.setScaleY(1.1);
 
-        if (moving){
-            root.setScaleX(1.1);
-            root.setScaleY(1.1);
-        }
+        moving = true;
+
+        onDragged(a);
+    }
+
+    public boolean isMoving(){
+        return moving;
+    }
+
+    public boolean isExporting(){
+        return exporting;
+    }
+
+    public double getPressRelativeMouseX() {
+        return pressRelativeMouseX;
+    }
+
+    public double getPressRelativeMouseY() {
+        return pressRelativeMouseY;
+    }
+
+    public double getPressLayoutX() {
+        return pressLayoutX;
+    }
+
+    public double getPressLayoutY() {
+        return pressLayoutY;
     }
 
     public static void generateProfileMenu(CMenu menu, Profile profile, CButton menuButton, Predicate<String> onAction){
@@ -266,7 +339,7 @@ public abstract class CDockObject extends GridCell {
     }
 
     public void selectPrimary(){
-        if (moving || listener == null)
+        if (moving || exporting || listener == null)
             return;
         listener.accept((KeyEvent) new KeyEvent(SELECT).setSource(getPrimaryProfile()));
     }
@@ -305,5 +378,7 @@ public abstract class CDockObject extends GridCell {
     public void dispose(){
         listener = null;
         grabListener = null;
+        getScene().getWindow().focusedProperty().removeListener(onFocusChangeValue);
+        efManager.clear();
     }
 }

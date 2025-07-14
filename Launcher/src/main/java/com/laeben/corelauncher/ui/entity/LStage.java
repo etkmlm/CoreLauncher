@@ -29,6 +29,8 @@ public class LStage extends Stage {
     private String name;
 
     private boolean moving;
+    private boolean ownDragging;
+    private boolean dragging;
     private double mouseRelativeX;
     private double mouseRelativeY;
 
@@ -45,6 +47,8 @@ public class LStage extends Stage {
             if (c)
                 return;
             moving = false;
+            dragging = false;
+            ownDragging = false;
             cFinal = null;
             this.c = Cursor.DEFAULT;
             if (scene != null)
@@ -55,6 +59,8 @@ public class LStage extends Stage {
         addRegisteredEventFilter(MouseEvent.MOUSE_RELEASED, a -> {
             cFinal = null;
             moving = false;
+            dragging = false;
+            ownDragging = false;
         });
     }
 
@@ -167,14 +173,30 @@ public class LStage extends Stage {
             return;
 
         if (c == null || c == Cursor.DEFAULT){
+
+            if (!dragging){
+                dragging = true;
+
+                boolean isInBorders =
+                        e.getScreenX() < getX() + PADDING_MOVE_LEFT ||
+                        e.getScreenX() > getX() + getWidth() - PADDING_MOVE_RIGHT ||
+                        e.getScreenY() < getY() + PADDING_MOVE_TOP ||
+                        e.getScreenY() > getY() + getHeight() - PADDING_MOVE_BOTTOM;
+
+                if (!isInBorders){
+                    ownDragging = false;
+                    return;
+                }
+                ownDragging = true;
+            }
+            else if (!ownDragging)
+                return;
+
             if (moving){
                 setX(e.getScreenX() - mouseRelativeX);
                 setY(e.getScreenY() - mouseRelativeY);
             }
-            else if (e.getScreenX() < getX() + PADDING_MOVE_LEFT ||
-                    /*e.getScreenX() > getX() + getWidth() - PADDING_MOVE_RIGHT ||*/
-                    e.getScreenY() < getY() + PADDING_MOVE_TOP ||
-                    e.getScreenY() > getY() + getHeight() - PADDING_MOVE_BOTTOM) {
+            else {
                 mouseRelativeX = e.getScreenX() - getX();
                 mouseRelativeY = e.getScreenY() - getY();
                 moving = true;

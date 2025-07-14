@@ -12,6 +12,7 @@ import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -72,6 +73,8 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
     private CList<Profile> pList;
     @FXML
     private CButton btnClose;
+    @FXML
+    private ScrollPane scroll;
 
     private List<String> groups;
     private List<Profile> profiles;
@@ -167,6 +170,13 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
                     return true;
                 })
         );
+
+        pList.setLoadLimit(5);
+        scroll.vvalueProperty().addListener((a, b, c) -> {
+            if (b.equals(c) || scroll.getVmax() > c.doubleValue())
+                return;
+            pList.load(false);
+        });
 
         txtSearch.setFocusedAnimation(Duration.millis(200));
         txtSearch.textProperty().addListener(a -> pList.filter(txtSearch.getText()));
