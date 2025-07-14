@@ -41,7 +41,7 @@
 
         <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="1">
             <ListView GridPane.vgrow="ALWAYS" maxWidth="Infinity" maxHeight="Infinity" fx:id="lvResources" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0"/>
-            <Label fx:id="lblNotFound" visible="false" text="%mods.browse.notFound" alignment="CENTER" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="10"/>
+            <Label fx:id="lblNotFound" visible="false" text="%mods.browse.notFound" alignment="CENTER" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"/>
             <CPaginator fx:id="paginator" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10"/>
         </AnchorPane>
 

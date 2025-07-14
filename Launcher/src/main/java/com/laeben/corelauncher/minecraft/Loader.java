@@ -397,7 +397,7 @@ public abstract class Loader<H extends Version> {
                 String id = read.get("id").getAsString();
                 String inherits = read.has("inheritsFrom") ? read.get("inheritsFrom").getAsString() : null;
                 var ver = getVersionFromIdentifier(id, inherits);
-                if (ver != null)
+                if (ver != null )
                     all.add(ver);
             }
             catch (Exception e){

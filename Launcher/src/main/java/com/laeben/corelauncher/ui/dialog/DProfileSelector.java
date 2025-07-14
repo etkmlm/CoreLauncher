@@ -159,7 +159,11 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
                                     return false;
                                 }
                             }
-                            else if (a.getValue().equals(CDockObject.EDIT) || a.getValue().equals(CDockObject.COPY))
+                            else if (
+                                    a.getValue().equals(CDockObject.EDIT) ||
+                                    a.getValue().equals(CDockObject.COPY) ||
+                                    a.getValue().equals(CDockObject.PAGE)
+                            )
                                 close(null);
                             break;
                         default:

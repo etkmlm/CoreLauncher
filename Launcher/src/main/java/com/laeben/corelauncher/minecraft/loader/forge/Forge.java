@@ -42,9 +42,21 @@ public class Forge extends Loader<ForgeVersion> {
 
     @Override
     public ForgeVersion getVersionFromIdentifier(String identifier, String inherits){
+        if (!identifier.toLowerCase().contains("-" + getType().getIdentifier()))
+            return null;
+
+        var spl = identifier.split("-");
+
+        if (spl.length == 2) // For old versions like < 1.7
+            return new ForgeVersion(inherits == null ? spl[0] : inherits /* inherits will be probably null, so we are using the version from id*/, spl[1].substring(5) /* it is like 'Forge<version>' */);
+
+        if (spl.length != 3)
+            throw new UnsupportedOperationException("Identifier " + identifier + " is invalid");
+
         if (inherits == null)
             inherits = "*";
-        return identifier.toLowerCase().contains("-" + getType().getIdentifier()) ? new ForgeVersion(inherits, identifier.split("-")[2]) : null;
+
+        return new ForgeVersion(inherits, spl[0].equals(spl[2]) /* old versions like 1.7.* */ ? spl[1].substring(5) : spl[2]);
     }
 
     @Override

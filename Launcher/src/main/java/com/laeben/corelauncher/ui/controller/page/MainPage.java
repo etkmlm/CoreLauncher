@@ -123,55 +123,42 @@ public class MainPage extends HandlerController {
         registerHandler(FloatDock.getDock().getHandler(), a -> {
             if (a instanceof KeyEvent e){
                 if (e.getKey().equals(FloatDock.REMOVE_ALL)){
-                    var obj = (List<FDObject>)a.getSource();
-                    for (var c : root.getChildren().stream().toList()){
-                        if ((c instanceof CDockObject cd) && obj.contains(cd.getObject())){
-                            if (cd.getSelected())
-                                cd.setSelected(false);
-                            removeObj(cd.getObject());
-                        }
-                    }
+                    removeDockObjects((List<FDObject>)a.getSource());
                 }
                 else{
                     var obj = (FDObject)a.getSource();
-                    if (e.getKey().equals(FloatDock.PLACE)){
-                        var c = placeObj(obj);
-                        if (!transferMode){
+                    switch (e.getKey()) {
+                        case FloatDock.PLACE -> {
+                            var c = placeObj(obj);
+                            if (!transferMode) {
+                                showUpTransition.setNode(c);
+                                showUpTransition.playFromStart();
+                            }
+                        }
+                        case FloatDock.REPLACE -> {
+                            removeDockObject(obj);
+                            var c = placeObj(obj);
                             showUpTransition.setNode(c);
                             showUpTransition.playFromStart();
                         }
-                    }
-                    else if (e.getKey().equals(FloatDock.REPLACE)){
-                        removeObj(obj);
-                        var c = placeObj(obj);
-                        showUpTransition.setNode(c);
-                        showUpTransition.playFromStart();
-                    }
-                    else if (e.getKey().equals(FloatDock.REMOVE)){
-                        for (var c : root.getChildren()){
-                            if ((c instanceof CDockObject cd) && cd.getObject().equals(obj) && cd.getSelected()){
-                                cd.setSelected(false);
-                                break;
+                        case FloatDock.REMOVE -> removeDockObject(obj);
+                        case FloatDock.UPDATE -> {
+                            if (obj.type == FDObject.FDType.GROUP)
+                                root.getChildren().stream().filter(x -> x instanceof CGroup cg && cg.getObject().equals(obj)).findFirst().ifPresent(n -> {
+                                    var f = (CGroup) n;
+                                    f.reloadItems();
+                                    f.reloadMeta();
+                                });
+                            else {
+                                removeDockObject(obj);
+                                placeObj(obj);
                             }
                         }
-                        removeObj(obj);
-                    }
-                    else if (e.getKey().equals(FloatDock.UPDATE)){
-                        if (obj.type == FDObject.FDType.GROUP)
-                            root.getChildren().stream().filter(x -> x instanceof CGroup cg && cg.getObject().equals(obj)).findFirst().ifPresent(n -> {
-                                var f = (CGroup)n;
-                                f.reloadItems();
-                                f.reloadMeta();
-                            });
-                        else {
-                            removeObj(obj);
-                            placeObj(obj);
+                        case EventHandler.RELOAD -> {
+                            root.clearSelection();
+                            root.getChildren().removeIf(x -> x instanceof CDockObject);
+                            loadDock();
                         }
-                    }
-                    else if (e.getKey().equals(EventHandler.RELOAD)){
-                        root.clearSelection();
-                        root.getChildren().removeIf(x -> x instanceof CDockObject);
-                        reloadDock();
                     }
                 }
 
@@ -199,6 +186,9 @@ public class MainPage extends HandlerController {
         }, true);
     }
 
+    /**
+     * Converts the Float Dock Object to CDockObject which is the UI form usable in the dock.
+     */
     private CDockObject getCDObject(FDObject obj){
         var pr = CDockObject.get(obj);
         if (pr == null)
@@ -311,14 +301,49 @@ public class MainPage extends HandlerController {
         return pr;
     }
 
-    private void removeObj(FDObject obj){
-        var all = root.getChildren().stream().filter(b -> b instanceof CDockObject c && c.getObject().equals(obj)).toList();
+    /**
+     * Removes the given CDockObject from the dock.
+     * Also deselects and disposes it.
+     */
+    private void removeDockObject(FDObject obj){
+        /*var all = root.getChildren().stream().filter(b -> b instanceof CDockObject c && c.getObject().equals(obj)).toList();
         for (var a : all){
             ((CDockObject)a).dispose();
             root.getChildren().remove(a);
-        }
-        //root.getChildren().removeIf(b -> b instanceof CDockObject c && c.getObject().equals(obj));
+        }*/
+        root.getChildren().removeIf(b -> {
+            if (b instanceof CDockObject cd && cd.getObject().equals(obj)){
+                cd.setSelected(false);
+                cd.dispose();
+
+                return true;
+            }
+
+            return false;
+        });
     }
+
+    /**
+     * Removes all CDockObjects from the dock.
+     * Also deselects and disposes them.
+     */
+    private void removeDockObjects(List<FDObject> objects){
+        root.getChildren().removeIf(b -> {
+            if (b instanceof CDockObject cd && objects.contains(cd.getObject())){
+                cd.setSelected(false);
+                cd.dispose();
+
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    /**
+     * Places the Float Dock Object into the dock.
+     * @return placed object, or null if there is an invalid operation
+     */
     private CDockObject placeObj(FDObject obj){
         CDockObject p;
         if (obj.type == FDObject.FDType.SINGLE && obj.getProfiles().isEmpty())
@@ -352,7 +377,7 @@ public class MainPage extends HandlerController {
             dockContext.show();
         });
 
-        reloadDock();
+        loadDock();
 
         root.setOnDragOver(a -> {
             if (a.getDragboard().getContent(DataFormat.FILES) == null)
@@ -419,7 +444,10 @@ public class MainPage extends HandlerController {
         });
     }
 
-    private void reloadDock(){
+    /**
+     * Places all Float Dock Objects into the dock, then removes the invalid ones.
+     */
+    private void loadDock(){
         var invalid = new ArrayList<FDObject>();
         for (var obj : FloatDock.getDock().getObjects()){
             if (placeObj(obj) == null)
@@ -430,10 +458,16 @@ public class MainPage extends HandlerController {
             FloatDock.getDock().remove(i);
     }
 
+    /**
+     * Removes all selected objects from the dock.
+     */
     private void removeSelectedObjects(){
         FloatDock.getDock().removeAll(root.getSelectedItems().stream().map(CDockObject::getObject).toList());
     }
 
+    /**
+     * Deletes all selected objects from the dock.
+     */
     private void deleteSelectedObjects(){
         root.getSelectedItems().forEach(a -> {
             if (a instanceof CGroup)
@@ -466,6 +500,9 @@ public class MainPage extends HandlerController {
         }
     }
 
+    /**
+     * Selects all objects in the dock.
+     */
     private void selectAllObjects(){
         root.getChildren().forEach(n -> {
             if (n instanceof CDockObject c)
@@ -473,6 +510,9 @@ public class MainPage extends HandlerController {
         });
     }
 
+    /**
+     * Deselects all objects in the dock.
+     */
     private void deselectAllObjects(){
         root.getChildren().forEach(n -> {
             if (n instanceof CDockObject c)

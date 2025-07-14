@@ -17,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.*;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.IntBuffer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -42,7 +43,7 @@ public class ImageUtil {
     public static void getImageAsync(ImageTask task, Consumer<Image> onDone, boolean useDefault){
         task.setOnSucceeded(a -> onDone.accept(task.getValue()));
         task.setOnFailed(e -> {
-            if (!(e.getSource().getException() instanceof IIOException iio && iio.getCause() instanceof FileNotFoundException)){
+            if (!(e.getSource().getException() instanceof IIOException iio && (iio.getCause() instanceof FileNotFoundException || iio.getCause() instanceof UnknownHostException))){
                 Logger.getLogger().log(e.getSource().getException());
             }
 

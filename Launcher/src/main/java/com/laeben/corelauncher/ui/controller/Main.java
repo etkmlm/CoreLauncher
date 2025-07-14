@@ -454,7 +454,7 @@ public class Main extends HandlerController {
         prgTranslate.setNode(progress);
 
         cMenu.addItem(null, SETTINGS, Translator.translate("settings"), a -> addTab("pages/settings", Translator.translate("settings"), true, SettingsPage.class));
-        cMenu.addItem(null, ABOUT, Translator.translate("about"), a -> CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm", "https://discord.gg/MEJQtCvwqf", LauncherConfig.APPLICATION.getName())).execute());
+        cMenu.addItem(null, ABOUT, Translator.translate("about"), a -> CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm/CoreLauncher", "https://github.com/etkmlm", "https://discord.gg/MEJQtCvwqf", LauncherConfig.APPLICATION.getName())).execute());
         cMenu.addItem(null, FEEDBACK, Translator.translate("feedback"), a -> {
             try {
                 OSUtil.openURL("https://github.com/etkmlm/CoreLauncher/issues");

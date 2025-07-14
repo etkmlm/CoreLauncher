@@ -90,8 +90,8 @@ public abstract class CDockObject extends GridCell {
 
         selected = new SimpleBooleanProperty();
 
-        selected.addListener(a -> {
-            if (getSelected())
+        selected.addListener((a, os, ns) -> {
+            if (ns != null && ns)
                 setOpacity(0.8);
             else
                 setOpacity(1);
