@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 public class ForgeV3Installer implements ForgeInstaller{
@@ -16,8 +17,10 @@ public class ForgeV3Installer implements ForgeInstaller{
         var cls = loader.loadClass("net.minecraftforge.installer.actions.ClientInstall");
         var callbackInterface = loader.loadClass("net.minecraftforge.installer.actions.ProgressCallback");
         var monitor = Proxy.newProxyInstance(callbackInterface.getClassLoader(), new Class[]{callbackInterface}, (proxy, method, args) -> {
-            if (method.getName().equals("message") && args.length > 0)
-                logState.accept("," + args[0].toString() + ":." + "forge.state.install");
+            if (method.getName().equals("message") && args.length > 0){
+                System.out.println(String.join(",", Arrays.stream(args).map(x -> x == null ? "null" : x.toString()).toList()));
+                logState.accept(".!" + args[0].toString() + "$," + "forge.state.install");
+            }
             return null;
         });
         //var monitor = loader.loadClass("net.minecraftforge.installer.actions.ProgressCallback").getDeclaredField("TO_STD_OUT").get(null);

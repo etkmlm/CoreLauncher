@@ -1,7 +1,6 @@
 #root{
     -fx-background-color: #232323aa;
     -fx-background-radius: 16px;
-    -fx-border-radius: 16px;
     -fx-padding: 16px;
 }
 
@@ -20,6 +19,7 @@
     -fx-font-size: 40pt;
 }
 
+/*noinspection CssInvalidPseudoSelector*/
 #btnInstall:installed{
     -fx-font-size: 28pt;
 }

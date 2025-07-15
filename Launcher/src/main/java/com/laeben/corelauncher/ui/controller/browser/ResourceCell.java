@@ -58,7 +58,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
     public ResourceCell(){
         setGraphic(gr = UI.getUI().load(CoreLauncherFX.class.getResource("layout/cells/resource.fxml"), this));
         var rg = (Region)gr;
-        rg.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.SOLID, new CornerRadii(10), new BorderWidths(2))));
+        rg.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.SOLID, new CornerRadii(16), new BorderWidths(2))));
         animation = new ReverseBorderColorAnimation();
         animation.setNode(rg);
         animation.setDuration(Duration.millis(2000));
@@ -75,6 +75,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
     private void playAnimation(boolean isPositive){
         UI.runAsync(() -> {
+            System.out.println(isPositive);
             animation.setColor(Color.web(isPositive ? "#ababab" : "#7f32a8"));
 
             animation.playFromStart();

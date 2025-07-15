@@ -287,9 +287,124 @@ public class Main extends HandlerController {
         NetUtil.stop();
     }
 
-    private String dot(String f){
+    /**
+     * <h1>Syntax</h1>
+     * <h3>Rules</h3>
+     * <ul>
+     *     <li>Statement must start with dot '.'</li>
+     *     <li>All status' separated with dollar '$'</li>
+     *     <li>
+     *         <p>To specify status priority, status statement has to start with comma (,)</p>
+     *         <p>Comma count indicates the status priority (zero comma = primary, one comma = secondary etc.)</p>
+     *     </li>
+     *     <li>After indicators if there is an exclamation mark (!), value, otherwise translation key is written.</li>
+     *     <li>To use formatting, after the translation key or value, semicolon (;) is used to give variables and separate them.</li>
+     * </ul>
+     * <h3>Definitions</h3>
+     * <ul>
+     *     <li><code>.[statement]</code></li>
+     *     <li><code>.[status1]$[status2]$[status3]...</code></li>
+     *     <li>Primary, secondary, trinary status'$ <code>.[status1]$,[status2]$,,,[status3]...</code></li>
+     *     <li><code>.![value];[var1];[var2]$,[key2]$,,[key3];[var1]</code></li>
+     * </ul>
+     * <h1>Example</h1>
+     * <h3>Input</h3>
+     * <p><code>.,,test.a$test.format.b;value1;value2$,test.format.c;value1</code></p>
+     * <h3>Output</h3>
+     * <p>Primary Status: translateFormat(test.format.b, value1, value2)</p>
+     * <p>Secondary Status: translate(test.a)</p>
+     * <p>Trinary Status: translateFormat(test.format.c, value1)</p>
+     * @param text input text
+     */
+    @SuppressWarnings("StringConcatenationInLoop")
+    private void processDotFormStatus(String text){
+        boolean started = false;
+        boolean readingVariable = false;
+        boolean isKeyValue = false;
+
+        int commaCount = 0;
+        String buffer = "";
+        String key = "";
+        List<String> variables = new ArrayList<>();
+
+        int len = text.length();
+
+        for(int i = 0; i < len; i++){
+            char c = text.charAt(i);
+
+            if (!started){
+                started = c == '.';
+                continue;
+            }
+
+            if (c == '$' || i == len - 1){
+                if (i == len - 1)
+                    buffer += c;
+
+                if (readingVariable){
+                    variables.add(buffer);
+                    buffer = "";
+                    readingVariable = false;
+                }
+                else{
+                    key = buffer;
+                    buffer = "";
+                }
+
+                String trns;
+                if (isKeyValue)
+                    trns = key;
+                else if (variables.isEmpty())
+                    trns = Translator.translate(key);
+                else
+                    trns = Translator.translateFormat(key, variables);
+
+                System.out.println(trns);
+
+                if (commaCount == 0)
+                    setPrimaryStatus(trns);
+                else if (commaCount >= 1)
+                    setSecondaryStatus(trns);
+
+                key = "";
+                isKeyValue = false;
+                commaCount = 0;
+                variables.clear();
+
+                continue;
+            }
+
+            if (c == ';') {
+                if (readingVariable){
+                    variables.add(buffer);
+                    buffer = "";
+                }
+                else {
+                    key = buffer;
+                    buffer = "";
+                    readingVariable = true;
+                }
+            }
+            else if (c == ',')
+                commaCount++;
+            else if (c == '!' && !readingVariable && buffer.isEmpty()){
+                isKeyValue = true;
+            }
+            else {
+                buffer += c;
+            }
+        }
+
+        /*if (key.startsWith("."))
+            setPrimaryStatus(processDotFormStatus(key.substring(1)));
+        else if (key.startsWith(",")){
+            var s = key.split(":\\.");
+            setSecondaryStatus(processDotFormStatus(s[1]));
+            setPrimaryStatus(s[0].substring(1));
+        }
+
         String[] spl = f.split(";");
-        return spl.length == 1 ? Translator.translate(spl[0]) : Translator.getTranslator().getTranslateFormat(spl[0], Arrays.stream(spl).skip(1).map(x -> (Object) x).toList());
+        return spl.length == 1 ? Translator.translate(spl[0]) : Translator.translateFormat(spl[0], Arrays.stream(spl).skip(1).map(x -> (Object) x).toList());*/
     }
 
     public TabPane getTab(){
@@ -350,6 +465,12 @@ public class Main extends HandlerController {
         else if (e instanceof KeyEvent k){
             var key = k.getKey();
 
+            if (key.charAt(0) == '.'){
+                System.out.println(key);
+                processDotFormStatus(key);
+                return;
+            }
+
             if (key.startsWith(Launcher.SESSION_START)){
                 announcer.announce(new Announcement(Translator.translate("announce.game.started"), Translator.translateFormat("announce.misc.profile", k.getKey().substring(Launcher.SESSION_START.length())), Announcement.AnnouncementType.GAME), Duration.seconds(3));
                 refreshStates();
@@ -395,13 +516,6 @@ public class Main extends HandlerController {
             }
             else if (key.startsWith(Modder.RESOURCE_INSTALL)){
                 setPrimaryStatus(Translator.translateFormat("resource.install", key.substring(Modder.RESOURCE_INSTALL.length())));
-            }
-            else if (key.startsWith("."))
-                setPrimaryStatus(dot(key.substring(1)));
-            else if (key.startsWith(",")){
-                var s = key.split(":\\.");
-                setSecondaryStatus(dot(s[1]));
-                setPrimaryStatus(s[0].substring(1));
             }
             else
                 setPrimaryStatus(key);

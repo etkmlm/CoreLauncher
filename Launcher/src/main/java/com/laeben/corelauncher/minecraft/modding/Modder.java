@@ -135,7 +135,8 @@ public class Modder {
             if (stopRequested)
                 throw new StopException();
 
-            handler.execute(new KeyEvent("," + a.name + ":.resource.progress;" + (++i) + ";" + size));
+            //handler.execute(new KeyEvent(".!" + a.name + "$,resource.progress;" + (++i) + ";" + size));
+            handler.execute(new KeyEvent(String.format("%s %d/%d", a.name, ++i, size)));
 
             if (a.fileName == null){
                 Logger.getLogger().log(LogType.ERROR, "Cannot install mod '" + a.name + "' because it has no file name.");
@@ -302,7 +303,7 @@ public class Modder {
             if (stopRequested)
                 throw new StopException();
 
-            handler.execute(new KeyEvent("," + pack.name + ":.resource.progress;" + (++i) + ";" + size));
+            handler.execute(new KeyEvent(String.format("%s %d/%d", pack.name, ++i, size)));
 
             if (pack.fileName == null){
                 Logger.getLogger().log(LogType.ERROR, "Cannot install resourcepack '" + pack.name + "' because it has no file name.");
@@ -336,7 +337,7 @@ public class Modder {
             if (stopRequested)
                 throw new StopException();
 
-            handler.execute(new KeyEvent("," + w.name + ":.resource.progress;" + (++i) + ";" + size));
+            handler.execute(new KeyEvent(String.format("%s %d/%d", w.name, ++i, size)));
 
             if (w.fileName == null){
                 Logger.getLogger().log(LogType.ERROR, "Cannot install world '" + w.name + "' because it has no file name.");
@@ -476,7 +477,7 @@ public class Modder {
             if (stopRequested)
                 throw new StopException();
 
-            handler.execute(new KeyEvent("," + shader.name + ":.resource.progress;" + (++i) + ";" + size));
+            handler.execute(new KeyEvent(String.format("%s %d/%d", shader.name, ++i, size)));
 
             if (shader.fileName == null){
                 Logger.getLogger().log(LogType.ERROR, "Cannot install shader '" + shader.name + "' because it has no file name.");
