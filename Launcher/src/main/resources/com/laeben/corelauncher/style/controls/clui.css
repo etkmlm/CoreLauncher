@@ -52,6 +52,10 @@
     -fx-background-color: transparent;
 }
 
+.scroll-pane .corner{
+    -fx-background-color: transparent!important;
+}
+
 .list-view{
     -fx-background-color: -list-background;
     -fx-background-radius: 10px;

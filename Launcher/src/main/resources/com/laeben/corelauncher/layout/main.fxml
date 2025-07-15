@@ -12,7 +12,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.laeben.corelauncher.ui.controller.Main"
-            prefHeight="800" prefWidth="1300" fx:id="root" styleClass="main" stylesheets="@../style/main.css,@../style/controls/clui.css">
+            prefHeight="800" prefWidth="1300" minWidth="1024" fx:id="root" styleClass="main" stylesheets="@../style/main.css,@../style/controls/clui.css">
 
     <TabPane fx:id="tab" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15" AnchorPane.bottomAnchor="120" />
 

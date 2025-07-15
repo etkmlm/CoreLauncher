@@ -50,7 +50,12 @@
     -fx-font-size: 10pt;
 }
 
-#lblCategory{
+.text-area{
+    -fx-min-width: 1!important;
+    -fx-pref-width: 50px!important;
+}
+
+#txtCategory{
     -fx-font-size: 10pt;
     -fx-padding: 0 0 0 10px;
 }

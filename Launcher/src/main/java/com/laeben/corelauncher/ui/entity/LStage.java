@@ -58,19 +58,7 @@ public class LStage extends Stage {
         });
         addRegisteredEventFilter(MouseEvent.MOUSE_MOVED, this::onMouseMoved);
         addRegisteredEventFilter(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
-        addRegisteredEventFilter(MouseEvent.MOUSE_RELEASED, a -> {
-            if (cFinal != null){
-                UI.runAsync(() -> {
-                    Configurator.getConfig().setWindowSize(getWidth(), getHeight());
-                    Configurator.save();
-                });
-            }
-
-            cFinal = null;
-            moving = false;
-            dragging = false;
-            ownDragging = false;
-        });
+        addRegisteredEventFilter(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);
     }
 
     public static Image[] getIconSet(){
@@ -127,6 +115,20 @@ public class LStage extends Stage {
 
     public LScene getLScene(){
         return scene;
+    }
+
+    public void onMouseReleased(MouseEvent e){
+        if (cFinal != null && (getWidth() != Configurator.getConfig().getWindowWidth() || getHeight() != Configurator.getConfig().getWindowHeight())) {
+            UI.runAsync(() -> {
+                Configurator.getConfig().setWindowSize(getWidth(), getHeight());
+                Configurator.save();
+            });
+        }
+
+        cFinal = null;
+        moving = false;
+        dragging = false;
+        ownDragging = false;
     }
 
     public void onMouseMoved(MouseEvent e){
@@ -224,38 +226,87 @@ public class LStage extends Stage {
         double mX = e.getScreenX();
         double mY = e.getScreenY();
 
+        double w, h;
+
         if (cFinal == Cursor.E_RESIZE){
-            setWidth(mX - minX);
+            w = mX - minX;
+            if (w < getMinWidth()){
+                onMouseReleased(e);
+                return;
+            }
+            setWidth(w);
         }
         else if (cFinal == Cursor.NE_RESIZE){
-            setWidth(mX - minX);
-            setHeight(maxY - mY);
+            w = mX - minX;
+            h = maxY - mY;
+
+            if (h < getMinHeight() || w < getMinWidth()){
+                onMouseReleased(e);
+                return;
+            }
+
+            setWidth(w);
+            setHeight(h);
             setY(mY);
         }
         else if (cFinal == Cursor.SE_RESIZE){
-            setWidth(mX - minX);
-            setHeight(mY - minY);
+            w = mX - minX;
+            h = mY - minY;
+            if (h < getMinHeight() || w < getMinWidth()){
+                onMouseReleased(e);
+                return;
+            }
+
+            setWidth(w);
+            setHeight(h);
         }
         else if (cFinal == Cursor.W_RESIZE){
-            setWidth(maxX - mX);
+            w = maxX - mX;
+            if (w < getMinWidth()){
+                onMouseReleased(e);
+                return;
+            }
+            setWidth(w);
             setX(mX);
         }
         else if (cFinal == Cursor.N_RESIZE){
-            setHeight(maxY - mY);
+            h = maxY - mY;
+            if (h < getMinHeight()){
+                onMouseReleased(e);
+                return;
+            }
+            setHeight(h);
             setY(mY);
         }
         else if (cFinal == Cursor.S_RESIZE){
-            setHeight(mY - minY);
+            h = mY - minY;
+            if (h < getMinHeight()){
+                onMouseReleased(e);
+                return;
+            }
+            setHeight(h);
         }
         else if (cFinal == Cursor.NW_RESIZE){
-            setHeight(maxY - mY);
+            w = maxX - mX;
+            h = maxY - mY;
+            if (h < getMinHeight() || w < getMinWidth()){
+                onMouseReleased(e);
+                return;
+            }
+            setHeight(h);
             setY(mY);
-            setWidth(maxX - mX);
+            setWidth(w);
             setX(mX);
         }
         else if (cFinal == Cursor.SW_RESIZE){
-            setHeight(mY - minY);
-            setWidth(maxX - mX);
+            w = maxX - mX;
+            h = mY - minY;
+            if (h < getMinHeight() || w < getMinWidth()){
+                onMouseReleased(e);
+                return;
+            }
+            setHeight(h);
+            setWidth(w);
             setX(mX);
         }
     }

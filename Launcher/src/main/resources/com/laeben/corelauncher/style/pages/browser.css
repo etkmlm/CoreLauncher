@@ -39,6 +39,7 @@
 
 #lvResources{
     -fx-background-color: -control-fill-secondary;
+    -fx-hbar-policy: never;
     -fx-fill-width: true;
     -fx-padding: 8px;
 

@@ -87,6 +87,9 @@ public class Main extends HandlerController {
     public static final String EXTENSIONS = "exts";
     public static final String TUTORIALS = "tuts";
 
+    public static final double MIN_HEIGHT = 600;
+    public static final double MIN_WIDTH = 1024;
+
     private static Main instance;
 
     @FXML
@@ -217,7 +220,7 @@ public class Main extends HandlerController {
         Launcher.getLauncher().setOnAuthFail(v -> {
             var task = new Task<Boolean>() {
                 @Override
-                protected Boolean call() throws Exception {
+                protected Boolean call() {
                     var msg = CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth", v.getValue()))
                             .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                             .executeForResult();
@@ -358,8 +361,6 @@ public class Main extends HandlerController {
                     trns = Translator.translate(key);
                 else
                     trns = Translator.translateFormat(key, variables);
-
-                System.out.println(trns);
 
                 if (commaCount == 0)
                     setPrimaryStatus(trns);
@@ -709,6 +710,9 @@ public class Main extends HandlerController {
             createDefaultProfile = true;
         }
 
+        getStage().setMinWidth(MIN_WIDTH);
+        getStage().setMinHeight(MIN_HEIGHT);
+
         double w = Configurator.getConfig().getWindowWidth();
         double h = Configurator.getConfig().getWindowHeight();
         if (w > 0 && h > 0){
@@ -1031,7 +1035,8 @@ public class Main extends HandlerController {
                 announceLater(Translator.translate("error.oops"), Translator.translateFormat("error.noVersion", e.getMessage()), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
                 //UI.runAsync(() -> setPrimaryStatus());
             }
-            else if (f instanceof StopException){
+            else //noinspection StatementWithEmptyBody
+                if (f instanceof StopException){
                 //
             }
             else if (f instanceof PerformException pe){

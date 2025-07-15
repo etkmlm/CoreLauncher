@@ -41,6 +41,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class ResourceCell extends ListCell<ResourceCell.Link> {
+    public static final double CELL_HORIZONTAL_PADDING = 60;
     public static final PseudoClass INSTALLED =  PseudoClass.getPseudoClass("installed");
 
     public record Link(ResourcePreferences preferences, ModResource resource){}
@@ -75,7 +76,6 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
     private void playAnimation(boolean isPositive){
         UI.runAsync(() -> {
-            System.out.println(isPositive);
             animation.setColor(Color.web(isPositive ? "#ababab" : "#7f32a8"));
 
             animation.playFromStart();
@@ -89,7 +89,9 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
     @FXML
     public Label lblAuthor;
     @FXML
-    public Label lblCategory;
+    public TextArea txtCategory;
+    @FXML
+    public HBox header;
     @FXML
     public TextArea txtDesc;
     @FXML
@@ -116,7 +118,9 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
         lblName.setText(i.getName());
         lblAuthor.setText(i.getAuthors() != null && i.getAuthors().length != 0 ? i.getAuthors()[0] : null);
-        lblCategory.setText(Translator.translateFormat("mods.category", i.getCategories() != null ? String.join(",", i.getCategories()) : ""));
+
+        prefWidthProperty().bind(getListView().widthProperty().subtract(CELL_HORIZONTAL_PADDING));
+        txtCategory.setText(Translator.translateFormat("mods.category", i.getCategories() != null ? String.join(",", i.getCategories()) : ""));
         txtDesc.setText((i.getDescription() != null ? i.getDescription() + "\n\n" : "") + DateUtil.toString(i.getCreationDate(), Configurator.getConfig().getLanguage()));
         if (i.getIcon() != null && !i.getIcon().isEmpty()){
             if (i.getIcon().startsWith("http"))
@@ -142,7 +146,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
         if (i instanceof ResourceOpti){
             btnMore.setVisible(false);
-            lblCategory.setVisible(false);
+            txtCategory.setVisible(false);
         }
 
         exists.set(prefs.getProfile() == null ? null : prefs.getProfile().getResource(i.getId()));
