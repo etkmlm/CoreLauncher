@@ -33,7 +33,7 @@ public class SelectionPane<T> extends Pane {
         selectedItems = FXCollections.observableArrayList();
 
         selectRect = new Rectangle();
-        selectRect.setViewOrder(-2);
+        selectRect.setViewOrder(-1);
         selectRect.getStyleClass().add("select-rect");
 
         getChildren().add(selectRect);
@@ -41,7 +41,7 @@ public class SelectionPane<T> extends Pane {
         navMaster = new Pane();
 
         nav = new CNav();
-        nav.setViewOrder(-3);
+        nav.setViewOrder(-1000);
         nav.addItem("X " + Translator.translate("option.cancel"), a -> {
             if (onSelectCancel != null)
                 onSelectCancel.run();
@@ -95,7 +95,7 @@ public class SelectionPane<T> extends Pane {
             }
         });
 
-        nav.widthProperty().addListener(this::onWidthChanged);
+        navMaster.widthProperty().addListener(this::onWidthChanged);
         widthProperty().addListener(this::onWidthChanged);
 
         navMaster.visibleProperty().bind(nav.enabledProperty());

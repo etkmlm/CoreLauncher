@@ -34,6 +34,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import javafx.stage.Popup;
 import javafx.util.Duration;
 import org.controlsfx.control.GridCell;
 
@@ -222,15 +223,24 @@ public abstract class CDockObject extends GridCell {
 
             long millis = System.currentTimeMillis();
 
-            double x = getScene().getWindow().getX();
-            double y = getScene().getWindow().getY();
-            double w = getScene().getWindow().getWidth();
-            double h = getScene().getWindow().getHeight();
+            var wnd = getScene().getWindow();
 
-            double mX = a.getScreenX();
-            double mY = a.getScreenY();
+            if (wnd instanceof Popup){
+                exporting = false;
+            }
+            else{
+                double x = wnd.getX();
+                double y = wnd.getY();
+                double w = wnd.getWidth();
+                double h = wnd.getHeight();
 
-            exporting = (mX < x || mX > x + w) || (mY < y || mY > y + h);
+                double mX = a.getScreenX();
+                double mY = a.getScreenY();
+
+                exporting = (mX < x || mX > x + w) || (mY < y || mY > y + h);
+            }
+
+
 
             if (exporting){
                 moving = false;

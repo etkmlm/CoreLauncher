@@ -140,15 +140,15 @@ public class Profile {
         return allResources;
     }
 
-    public <T extends CResource> List<T> getResources(Class<T> clz){
+    public <T extends CResource> List<T> getResources(Class<T> clz, boolean onlyEnabled){
         return getAllResources().stream()
-                .filter(a -> a.getClass().equals(clz))
+                .filter(a -> a.getClass().equals(clz) && (!onlyEnabled || !a.disabled))
                 .map(a -> (T) a)
                 .toList();
     }
 
-    public List<World> getOnlineWorlds(){
-        return getResources(World.class);
+    public List<World> getOnlineWorlds(boolean onlyEnabled){
+        return getResources(World.class, onlyEnabled);
     }
 
     public List<World> getLocalWorlds(){
@@ -194,20 +194,20 @@ public class Profile {
         return java;
     }
 
-    public List<Resourcepack> getResourcepacks(){
-        return getResources(Resourcepack.class);
+    public List<Resourcepack> getResourcepacks(boolean onlyEnabled){
+        return getResources(Resourcepack.class, onlyEnabled);
     }
 
-    public List<Mod> getMods(){
-        return getResources(Mod.class);
+    public List<Mod> getMods(boolean onlyEnabled){
+        return getResources(Mod.class, onlyEnabled);
     }
 
-    public List<Shader> getShaders(){
-        return getResources(Shader.class);
+    public List<Shader> getShaders(boolean onlyEnabled){
+        return getResources(Shader.class, onlyEnabled);
     }
 
-    public List<Modpack> getModpacks(){
-        return getResources(Modpack.class);
+    public List<Modpack> getModpacks(boolean onlyEnabled){
+        return getResources(Modpack.class, onlyEnabled);
     }
 
     public CResource getResource(Object id){

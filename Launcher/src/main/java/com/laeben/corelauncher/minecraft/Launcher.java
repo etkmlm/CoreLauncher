@@ -75,13 +75,13 @@ public class Launcher {
         profile.getLoader().install(version);
 
         if (!profile.getLoader().getType().isNative()){
-            Modder.getModder().installModpacks(profile, profile.getModpacks());
-            Modder.getModder().installMods(profile, profile.getMods());
+            Modder.getModder().installModpacks(profile, profile.getModpacks(true));
+            Modder.getModder().installMods(profile, profile.getMods(true));
         }
 
-        Modder.getModder().installWorlds(profile, profile.getOnlineWorlds());
-        Modder.getModder().installResourcepacks(profile, profile.getResourcepacks());
-        Modder.getModder().installShaders(profile, profile.getShaders());
+        Modder.getModder().installWorlds(profile, profile.getOnlineWorlds(true));
+        Modder.getModder().installResourcepacks(profile, profile.getResourcepacks(true));
+        Modder.getModder().installShaders(profile, profile.getShaders(true));
 
         var op1 = Configurator.getConfig().getLauncherPath().to("options.txt");
         var op2 = profile.getPath().to("options.txt");

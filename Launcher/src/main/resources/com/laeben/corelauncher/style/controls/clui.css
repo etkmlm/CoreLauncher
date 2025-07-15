@@ -1,5 +1,18 @@
+@font-face {
+    font-family: 'Rubik';
+    src: url(../../fonts/Rubik/Rubik-Regular.ttf);
+}
+
+@font-face {
+    font-family: 'Rubik';
+    font-weight: bold;
+    src: url(../../fonts/Rubik/Rubik-Bold.ttf);
+}
+
 *{
     -tab-fill: #151515aa;
+
+    -dock-default-fill: #202020;
 
     -control-fill: #303033;
     -control-focused-border-fill: #5151bd;
@@ -15,33 +28,141 @@
 
     -button-fill: #333840;
     -list-background: #282828;
+    -pane-fill: #282830;
 
     -scroll-thumb-fill: #264545AA;
     -slider-thumb-fill: #008080;
-    -pane-fill: #282830;
-
     -progress-track-fill: transparent;
     -progress-bar-fill: #007777;
 
-    -dock-default-fill: #202020;
-    
-    -text-fill: #ffffff;
+    -toggle-area-fill: #232325aa;
+    -toggle-area-selected-fill: #242426dd;
+    -toggle-thumb-fill: #3e3e50;
 
     -fx-focused-mark-color: transparent;
-
-    -fx-font-family: 'Segoe UI', 'Calibri';
-
-
-    -icon-shop: "M3.111 23H8.667a1 1 0 001-1V19.9a1.316 1.316 0 011.009-1.323 1.224 1.224 0 011.435 1.2V22a1 1 0 001 1h3.334a2.113 2.113 0 002.111-2.111V17.444h1.222a3.224 3.224 0 003.179-3.756A3.314 3.314 0 0019.659 11h-1.1V7.555a2.113 2.113 0 00-2.111-2.111H13V4.34a3.313 3.313 0 00-2.688-3.3A3.222 3.222 0 006.556 4.222V5.444H3.111A2.113 2.113 0 001 7.555V12a1 1 0 001 1H4.1a1.317 1.317 0 011.323 1.01 1.223 1.223 0 01-1.2 1.434H2a1 1 0 00-1 1v4.445A2.113 2.113 0 003.111 23ZM3 17.444H4.222A3.224 3.224 0 007.4 13.688 3.313 3.313 0 004.1 11H3V7.555a.111.111 0 01.111-.111H7.556a1 1 0 001-1V4.222A1.223 1.223 0 019.99 3.017 1.316 1.316 0 0111 4.34v2.1a1 1 0 001 1h4.445a.111.111 0 01.111.111V12a1 1 0 001 1h2.1a1.317 1.317 0 011.324 1.01 1.225 1.225 0 01-1.205 1.434H17.556a1 1 0 00-1 1v4.445a.111.111 0 01-.111.111H14.111V19.778A3.222 3.222 0 0010.355 16.6a3.313 3.313 0 00-2.688 3.3V21H3.111A.111.111 0 013 20.889Z";
+    
+    -text-fill: #ffffff;
+    -fx-font-family: 'Rubik';
 }
 
 .root{
     -fx-background-color: transparent;
 }
 
-/*
-    Listing
-*/
+/* * * * * * * * * * * * * * * *
+
+    Contextful Controls
+
+* * * * * * * * * * * * * * * */
+
+.searchable-combo-box .combo-box-popup .scroll-bar:vertical{
+    -fx-padding: 0 -8px 0 12px;
+}
+
+.combo-box,
+.ccombo{
+    -fx-background-color: -control-fill;
+    -fx-font-size: 12pt;
+}
+
+.combo-box .list-cell,
+.ccombo .list-cell{
+    -fx-border-width: 0;
+}
+
+.combo-box .text-input,
+.ccombo .text-input{
+    -fx-border-width: 0;
+    -fx-text-fill: -text-fill;
+}
+
+.context-menu,
+.combo-box-popup .list-view,
+.ccombo-list {
+    -fx-padding: 8px 16px 8px 8px;
+}
+
+.context-menu{
+    -fx-background-color: -control-popup-fill;
+    -fx-background-radius: 8px;
+}
+
+.context-menu .radio{
+    -fx-opacity: 0;
+}
+
+.context-menu .menu-item,
+.combo-box-popup .list-cell:filled,
+.ccombo-list .list-cell:filled {
+    -fx-background-radius: 8px;
+    -fx-padding: 14px 4px 14px -4px;
+    -fx-background-insets: 4px 0;
+}
+
+.cmenu{
+    -fx-min-width: 120px;
+    -fx-background-color: -control-popup-fill;
+    -fx-background-radius: 16px;
+    -fx-padding: 4px;
+}
+
+.cmenu .cmenu-item{
+    -fx-background-color:transparent;
+    -fx-font-size: 16pt;
+    -fx-pref-height: 50px;
+    -fx-padding: 4px 30px;
+}
+
+.combo-box-popup .list-cell:filled,
+.ccombo-list .list-cell:filled{
+    -fx-padding: 14px 20px;
+}
+
+.context-menu .menu-item:focused,
+.combo-box-popup .list-cell:filled:focused {
+    -fx-background-color: transparent;
+}
+
+.context-menu .menu-item:hover,
+.combo-box-popup .list-cell:filled:hover,
+.ccombo-list .list-cell:filled:hover{
+    -fx-background-color: -control-popup-hover-fill;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.context-menu .menu-item:checked,
+.combo-box-popup .list-cell:filled:selected,
+.ccombo-list .list-cell:filled:selected {
+    -fx-background-color: -control-popup-selected-fill;
+}
+
+.ccombo-list {
+    -fx-background-radius: 8px;
+}
+
+.combo-box-popup .list-view{
+    -fx-background-radius: 8px;
+}
+
+.combo-box-search:focused{
+    -fx-border-width: 1px!important;
+    -fx-border-style: solid!important;
+}
+
+.combo-box-popup .list-view,
+.ccombo-list {
+    -fx-background-color: -control-popup-fill;
+    -fx-effect: none;
+    -fx-vgap: 4px;
+    -fx-font-size: 15pt;
+}
+
+/* * * * * * * * * * * * * * * *
+
+    List Controls
+
+* * * * * * * * * * * * * * * */
+
 
 .cnav .cnav-button{
     -fx-font-size: 13pt;
@@ -86,10 +207,6 @@
     -fx-padding: 0 0 0 12px;
 }
 
-.searchable-combo-box .combo-box-popup .scroll-bar:vertical{
-    -fx-padding: 0 -8px 0 12px;
-}
-
 .scroll-bar .thumb{
     -fx-background-color: -scroll-thumb-fill;
     -fx-pref-width: 4px!important;
@@ -100,88 +217,11 @@
     -fx-background-color: transparent;
 }
 
-.combo-box, .ccombo{
-    -fx-background-color: -control-fill;
-    -fx-font-size: 12pt;
-}
+/* * * * * * * * * * * * * * * *
 
-.combo-box .list-cell, .lvlv .list-cell, .ccombo .list-cell{
-    -fx-border-width: 0;
-}
-
-.combo-box .text-input, .ccombo .text-input{
-    -fx-border-width: 0;
-    -fx-text-fill: -text-fill;
-}
-.context-menu, .combo-box-popup .list-view, .ccombo-list {
-    -fx-padding: 8px 16px 8px 8px;
-}
-
-.context-menu .menu-item, .combo-box-popup .list-cell:filled, .ccombo-list .list-cell:filled {
-    -fx-background-radius: 8px;
-    -fx-padding: 14px 4px 14px -4px;
-    -fx-background-insets: 4px 0;
-}
-
-.cmenu{
-    -fx-min-width: 120px;
-    -fx-background-color: -control-popup-fill;
-    -fx-background-radius: 16px;
-    -fx-padding: 4px;
-}
-
-.cmenu .cmenu-item{
-    -fx-background-color:transparent;
-    -fx-font-size: 16pt;
-    -fx-pref-height: 50px;
-    -fx-padding: 4px 30px;
-}
-
-.combo-box-popup .list-cell:filled, .ccombo-list .list-cell:filled{
-    -fx-padding: 14px 20px;
-}
-
-.context-menu .radio{
-    -fx-opacity: 0;
-}
-
-.context-menu .menu-item:focused, .combo-box-popup .list-cell:filled:focused {
-    -fx-background-color: transparent;
-}
-
-.context-menu .menu-item:hover, .combo-box-popup .list-cell:filled:hover, .ccombo-list .list-cell:filled:hover{
-    -fx-background-color: -control-popup-hover-fill;
-}
-
-/*noinspection CssInvalidPseudoSelector*/
-.context-menu .menu-item:checked, .combo-box-popup .list-cell:filled:selected, .ccombo-list .list-cell:filled:selected {
-    -fx-background-color: -control-popup-selected-fill;
-}
-
-.ccombo-list {
-    -fx-background-radius: 8px;
-}
-
-.combo-box-popup .list-view{
-    -fx-background-radius: 8px;
-}
-
-
-.combo-box-popup .list-view, .ccombo-list {
-    -fx-background-color: -control-popup-fill;
-    -fx-effect: none;
-    -fx-vgap: 4px;
-    -fx-font-size: 15pt;
-}
-
-.context-menu{
-    -fx-background-color: -control-popup-fill;
-    -fx-background-radius: 8px;
-}
-
-/*
     Controls
-*/
+
+* * * * * * * * * * * * * * * */
 
 .cdialog .dialog-content{
     -fx-background-color: -dialog-overlay-fill;
@@ -297,11 +337,6 @@
     -fx-border-color: transparent;
 }
 
-.combo-box-search:focused{
-    -fx-border-width: 1px!important;
-    -fx-border-style: solid!important;
-}
-
 /*noinspection CssInvalidPseudoSelector*/
 .combo-box:focused,
 .combo-box-search:focused,
@@ -312,7 +347,6 @@
 .ccombo:opened,
 .spinner:focused{
     -fx-border-color: -control-focused-border-fill!important;
-
 }
 
 .spinner .text-field:focused{
@@ -332,10 +366,6 @@
     -fx-font-size: 14pt;
 }
 
-.text-input{
-    -fx-background-radius: 8px;
-}
-
 .combo-box-base .arrow-button,
 .combo-box, .searchable-combo-box,
 .text-field,
@@ -345,17 +375,6 @@
     -fx-pref-height: 45px;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
-}
-
-.spinner .increment-arrow-button,
-.spinner .decrement-arrow-button {
-    -fx-border-radius: 0 8px 8px 0;
-    -fx-background-radius: 0 8px 8px 0;
-}
-
-.spinner .text-field{
-    -fx-border-radius: 8px 0 0 8px;
-    -fx-background-radius: 8px 0 0 8px;
 }
 
 .spinner .increment-arrow-button,
@@ -370,6 +389,21 @@
     -fx-min-height: 45px;
     -fx-pref-height: 45px;
     -fx-border-color: transparent;
+}
+
+.text-input{
+    -fx-background-radius: 8px;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-border-radius: 0 8px 8px 0;
+    -fx-background-radius: 0 8px 8px 0;
+}
+
+.spinner .text-field{
+    -fx-border-radius: 8px 0 0 8px;
+    -fx-background-radius: 8px 0 0 8px;
 }
 
 .underline-text-field{
@@ -497,4 +531,29 @@
     -fx-font-weight: bolder;
     -fx-font-size: 14pt;
     -fx-padding: 8px 0 0 0;
+}
+
+.toggle-switch {
+    -thumb-move-animation-time: 100;
+}
+
+.toggle-switch .thumb {
+    -fx-background-color: -toggle-thumb-fill;
+    -fx-background-insets: 0;
+}
+
+.toggle-switch .thumb-area {
+    -fx-background-color: -toggle-area-fill;
+}
+
+.toggle-switch:selected .thumb-area {
+    -fx-background-color: -toggle-area-selected-fill;
+}
+
+.toggle-on{
+    -fx-background-color: -button-fill;
+}
+
+.toggle-off{
+    -fx-background-color: -control-fill-secondary;
 }

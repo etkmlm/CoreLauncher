@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.api.entity;
 
+import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.core.entity.Path;
@@ -91,7 +92,7 @@ public class Logger {
     public void logDebug(LogType type, String content){
         if (Configurator.getConfig() != null && Configurator.getConfig().getDebugLogMode())
             log(type, content);
-        else
+        else if (LauncherConfig.USE_DETAILED_LOGGING)
             System.out.println(generate(type, content));
     }
 

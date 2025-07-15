@@ -4,10 +4,12 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ValueEvent;
+import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.Modder;
+import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.Main;
@@ -20,7 +22,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.function.Consumer;
@@ -32,6 +33,7 @@ public class CPRCell<T extends CResource> extends CCell<T> {
     public static final String REMOVE = "remove";
 
     private T item;
+    private boolean autoChanged;
 
     private final Profile profile;
 
@@ -48,6 +50,17 @@ public class CPRCell<T extends CResource> extends CCell<T> {
             fade.stop();
         });
 
+        toggle = new CButton();
+        toggle.setTooltip(new Tooltip());
+        toggle.setStyle("-fx-padding: 0 8px 0 0; -fx-min-width: 24px; -fx-pref-width: 24px; -fx-pref-height: 24px");
+        toggle.setOnMouseClicked(a -> {
+            if (item == null)
+                return;
+
+            Profiler.setResourceDisabled(profile, item, !item.disabled);
+            invalidateToggle();
+        });
+
         btnRemove = new CButton();
         btnRemove.setText("—");
         btnRemove.setStyle("-fx-background-color: transparent; -fx-font-size: 13pt");
@@ -55,11 +68,12 @@ public class CPRCell<T extends CResource> extends CCell<T> {
 
         btnUpdate = new CButton();
         btnUpdate.setText("⟳");
-        btnUpdate.setStyle("-fx-background-color: transparent");
+        btnUpdate.setStyle("-fx-background-color: transparent;-fx-font-size: 18pt;-fx-font-weight: bolder;-fx-padding: 8px 16px 10px 16px");
         btnUpdate.enableTransparentAnimation();
 
         box.setAlignment(Pos.CENTER);
-        box.getChildren().addAll(btnUpdate, new Rectangle(10, 0), btnRemove);
+        box.setSpacing(8);
+        box.getChildren().addAll(toggle, btnUpdate, btnRemove);
     }
 
     @FXML
@@ -70,6 +84,7 @@ public class CPRCell<T extends CResource> extends CCell<T> {
     @FXML
     private HBox box;
 
+    private final CButton toggle;
     private final CButton btnRemove;
     private final CButton btnUpdate;
 
@@ -90,6 +105,14 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         this.item = item;
 
         image.setImageAsync(item.getIcon(32, 32));
+
+        if (item.getType() == ResourceType.WORLD || item.getType() == ResourceType.MODPACK){
+            toggle.setVisible(false);
+        }
+        else{
+            toggle.setVisible(true);
+            invalidateToggle();
+        }
 
         lblName.setText(item.name);
 
@@ -131,6 +154,19 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         super.getChildren().add(node);
 
         return this;
+    }
+
+    private void invalidateToggle(){
+        if (item == null || item.disabled){
+            toggle.getTooltip().setText(Translator.translate("option.enable"));
+            toggle.getStyleClass().add("toggle-off");
+            toggle.getStyleClass().remove("toggle-on");
+        }
+        else{
+            toggle.getTooltip().setText(Translator.translate("option.disable"));
+            toggle.getStyleClass().add("toggle-on");
+            toggle.getStyleClass().remove("toggle-off");
+        }
     }
 
     @Override

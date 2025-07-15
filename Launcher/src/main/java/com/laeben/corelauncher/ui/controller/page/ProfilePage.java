@@ -164,19 +164,19 @@ public class ProfilePage extends HandlerController {
         lblGameVersion.setText(p.getVersionId());
 
         lvMods.setLoadLimit(10);
-        lvMods.getItems().setAll(p.getMods());
+        lvMods.getItems().setAll(p.getMods(false));
         lvMods.load();
 
-        lvModpacks.getItems().setAll(p.getModpacks());
+        lvModpacks.getItems().setAll(p.getModpacks(false));
         lvModpacks.load();
 
-        lvWorlds.getItems().setAll(p.getOnlineWorlds());
+        lvWorlds.getItems().setAll(p.getOnlineWorlds(false));
         lvWorlds.load();
 
-        lvResources.getItems().setAll(p.getResourcepacks());
+        lvResources.getItems().setAll(p.getResourcepacks(false));
         lvResources.load();
 
-        lvShaders.getItems().setAll(p.getShaders());
+        lvShaders.getItems().setAll(p.getShaders(false));
         lvShaders.load();
 
         var btnMenu = new CButton();
@@ -291,7 +291,7 @@ public class ProfilePage extends HandlerController {
     private void updateAll(){
         try {
             UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.multiple", profile.getName()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
-            var all = new ArrayList<CResource>(Modder.getModder().getModpackUpdates(profile, profile.getModpacks()));
+            var all = new ArrayList<CResource>(Modder.getModder().getModpackUpdates(profile, profile.getModpacks(false)));
 
             //var allStream = Stream.of(p.getMods().stream(), p.getResourcepacks().stream(), p.getShaders().stream()).flatMap(n -> n).map(x -> (CResource)x).toList();
 

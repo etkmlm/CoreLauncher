@@ -1035,8 +1035,7 @@ public class Main extends HandlerController {
                 announceLater(Translator.translate("error.oops"), Translator.translateFormat("error.noVersion", e.getMessage()), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
                 //UI.runAsync(() -> setPrimaryStatus());
             }
-            else //noinspection StatementWithEmptyBody
-                if (f instanceof StopException){
+            else if (f instanceof StopException){
                 //
             }
             else if (f instanceof PerformException pe){

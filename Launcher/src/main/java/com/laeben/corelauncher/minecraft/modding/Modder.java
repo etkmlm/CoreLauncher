@@ -398,7 +398,7 @@ public class Modder {
     public int includeModpack(Profile p, Modpack mp) throws NoConnectionException, HttpException, StopException {
         var path = p.getPath();
 
-        var oldMp = p.getModpacks().stream().filter(a -> a.isSameResource(mp)).findFirst();
+        var oldMp = p.getAllResources().stream().filter(a -> a.isSameResource(mp)).findFirst();
         oldMp.ifPresent(a -> remove(p, a));
 
         mp.getSource().applyModpack(mp, path, ModSource.Options.create(p));
@@ -557,11 +557,11 @@ public class Modder {
 
         if (r instanceof Modpack mp){
             if (useExistingResource){
-                var found = profile.getModpacks().stream().filter(a -> a.isSameResource(r)).findFirst();
+                var found = profile.getAllResources().stream().filter(a -> a.isSameResource(r)).findFirst();
                 if (found.isEmpty())
                     return;
                 else
-                    mp = found.get();
+                    mp = (Modpack) found.get();
             }
             finalR = mp;
 

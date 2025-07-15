@@ -238,7 +238,7 @@ public class CGroup extends CDockObject {
 
         reloadItems();
 
-        lvProfiles.setPrefWidth(480);
+        lvProfiles.setPrefWidth(520);
         lvProfiles.setMinHeight(100);
         lvProfiles.setPadding(new Insets(16, 16, 32, 16));
         var scroll = new ScrollPane();
@@ -436,7 +436,7 @@ public class CGroup extends CDockObject {
         for (int i = 0; i < object.getProfiles().size(); i++)
             lvProfiles.getChildren().add(new CProfile()
                     .setOnMenuClick(a -> {
-                        if (a.equals(CDockObject.EDIT) || a.equals(CDockObject.COPY))
+                        if (a.equals(CDockObject.EDIT) || a.equals(CDockObject.PAGE) || a.equals(CDockObject.COPY))
                             close();
                         return true;
                     })

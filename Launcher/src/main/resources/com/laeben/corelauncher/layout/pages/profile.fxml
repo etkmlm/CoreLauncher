@@ -48,7 +48,7 @@
         <CMenu fx:id="menu" />
     </HBox>
 
-    <CField promptText="%search" fx:id="txtSearch" maxWidth="Infinity" maxHeight="Infinity" AnchorPane.topAnchor="260" AnchorPane.rightAnchor="10"/>
+    <CField promptText="%search" fx:id="txtSearch" maxWidth="Infinity" maxHeight="Infinity" AnchorPane.topAnchor="220" AnchorPane.rightAnchor="10"/>
     <GridPane fx:id="grid" hgap="24" vgap="40" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="310" AnchorPane.bottomAnchor="10">
         <columnConstraints>
             <ColumnConstraints percentWidth="50"/>

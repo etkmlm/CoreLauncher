@@ -67,6 +67,8 @@ public class CResource implements Comparable<CResource> {
     public Object fileId;
     public String fileUrl;
     public String fileName;
+    public boolean disabled;
+
     public transient String targetVersionId;
     public transient String targetLoader;
     public transient String resourceUrl;

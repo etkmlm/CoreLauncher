@@ -6,8 +6,11 @@ import com.laeben.corelauncher.api.entity.ImageEntity;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
+import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
+import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
+import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.util.StrUtil;
@@ -135,6 +138,24 @@ public class Profiler {
         jsPath.write(json);
         path.zip(to);
         jsPath.write(first);
+    }
+
+    public static void setResourceDisabled(Profile p, CResource resource, boolean disabled){
+        if (resource.getType() == ResourceType.MODPACK || resource.getType() == ResourceType.WORLD) // not for these :)
+            return;
+
+        resource.disabled = disabled;
+        var path = p.getPath().to(resource.getType().getStoringFolder(), resource.fileName);
+        var disabledPath = p.getPath().to(resource.getType().getStoringFolder(), resource.fileName + ".dis");
+        if (disabled){
+            if (path.exists())
+                path.move(disabledPath);
+        }
+        else{
+            if (disabledPath.exists())
+                disabledPath.move(path);
+        }
+        UI.runAsync(p::save);
     }
 
     private Profile importFromBackup(Path p){

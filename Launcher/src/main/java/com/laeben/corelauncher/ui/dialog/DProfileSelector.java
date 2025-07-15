@@ -15,6 +15,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import org.controlsfx.control.SearchableComboBox;
@@ -245,6 +246,7 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
         this.groups = groups;
         this.profiles = profiles;
 
+        cGroups.setMinHeight(Region.USE_COMPUTED_SIZE);
         cGroups.setValue(null);
         cGroups.getSelectionModel().clearSelection();
 

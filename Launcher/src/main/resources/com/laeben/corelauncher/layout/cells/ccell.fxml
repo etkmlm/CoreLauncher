@@ -12,7 +12,7 @@
     <Rectangle width="15"/>
     <Label maxHeight="Infinity" textAlignment="CENTER" fx:id="lblName"/>
     <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-    <Rectangle width="5"/>
+    <Rectangle width="8"/>
     <HBox alignment="CENTER_RIGHT" fx:id="box">
 
     </HBox>
