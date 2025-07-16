@@ -98,6 +98,8 @@ public class FloatDock {
     }
 
     public void removeFromGroup(FDObject group, Profile profile){
+        if (profile == null)
+            return;
         group.remove(profile);
         save();
         handler.execute(new KeyEvent(UPDATE).setSource(group));

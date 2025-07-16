@@ -31,6 +31,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.awt.*;
+import java.io.InvalidObjectException;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
@@ -127,7 +128,7 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
                 try {
                     profile = ResourcePreferences.createProfileFromPreferences(preferences, a.getItem().targetVersionId, LoaderType.fromIdentifier(a.getItem().targetLoader), null);
                     isNewProfile = true;
-                } catch (PerformException e) {
+                } catch (PerformException | InvalidObjectException e) {
                     Logger.getLogger().log(e);
                     return;
                 }

@@ -296,7 +296,7 @@ public class CGroup extends CDockObject {
     }
 
     private List<CDockObject> getSelectedItems(){
-        return lvProfiles.getChildren().stream().map(a -> (CDockObject)a).filter(CDockObject::getSelected).toList();
+        return lvProfiles.getChildren().stream().map(a -> (CDockObject)a).filter(x -> x.getPrimaryProfile() != null && x.getSelected()).toList();
     }
 
     private void onProfileEvent(KeyEvent e){
@@ -320,7 +320,7 @@ public class CGroup extends CDockObject {
 
     private void onProfileDragEvent(BaseEvent e){
         var cdo = (CDockObject)e.getSource();
-        if (!(e instanceof KeyEvent ke))
+        if (!(e instanceof KeyEvent ke) || cdo.getPrimaryProfile() == null)
             return;
         if (ke.getKey().equals(CDockObject.RELEASE)){
             setMiniatureImage(null);

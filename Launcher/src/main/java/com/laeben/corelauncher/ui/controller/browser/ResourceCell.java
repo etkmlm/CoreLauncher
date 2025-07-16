@@ -35,6 +35,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
+import java.io.InvalidObjectException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -205,7 +206,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
                     if (profile == null)
                         return;
-                } catch (PerformException e) {
+                } catch (PerformException | InvalidObjectException e) {
                     Logger.getLogger().log(LogType.ERROR, e.getMessage());
                     return;
                 }

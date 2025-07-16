@@ -222,6 +222,11 @@ public class ProfileUtil {
 
                 var oldProfile = Profiler.getProfiler().getProfile(p.getName());
 
+                if (oldProfile == null){
+                    Logger.getLogger().log(LogType.ERROR, "Profile '" + p.getName() + "' could not be found.");
+                    return false;
+                }
+
                 var added = new ArrayList<String>();
                 var removed = oldProfile.getAllResources().stream().map(a -> a.fileName != null ? a.fileName : a.name).collect(Collectors.toList());
 

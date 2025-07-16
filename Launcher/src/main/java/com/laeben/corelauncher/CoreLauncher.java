@@ -226,7 +226,7 @@ public class CoreLauncher {
             profileName = listArgs.get(indexLaunch + 1);
             if (!Configurator.getConfig().useNonGUIShortcut()){
                 var profile = Profiler.getProfiler().getProfile(profileName);
-                if (!profile.isEmpty())
+                if (profile != null)
                     CoreLauncherFX.fromArgs = profile;
                 confProfile = false;
             }
@@ -239,13 +239,18 @@ public class CoreLauncher {
                 profileName = listArgs.get(indexProfile + 1);
             var profile = Profiler.getProfiler().getProfile(profileName);
 
-            try{
-                Launcher.getLauncher().prepare(profile);
-                Launcher.getLauncher().launch(ExecutionInfo.fromProfile(profile));
+            if (profile != null){
+                try{
+                    Launcher.getLauncher().prepare(profile);
+                    Launcher.getLauncher().launch(ExecutionInfo.fromProfile(profile));
+                }
+                catch (Throwable e){
+                    Logger.getLogger().log(LogType.INFO, "No version...");
+                }
             }
-            catch (Throwable e){
-                Logger.getLogger().log(LogType.INFO, "No version...");
-            }
+            else
+                Logger.getLogger().log(LogType.INFO, String.format("No profile with name '%s'", profileName));
+
 
             System.exit(0);
         }

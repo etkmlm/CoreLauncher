@@ -219,7 +219,10 @@ public class MainPage extends HandlerController {
                         if (agreedMove){
                             ps = root.getSelectedItems().stream().map(CDockObject::getPrimaryProfile).collect(Collectors.toList());
                             ps.add(cp.getPrimaryProfile());
-                            root.getSelectedItems().forEach(x -> FloatDock.getDock().remove(x.getObject()));
+                            root.getSelectedItems().forEach(x -> {
+                                if (x != null)
+                                    FloatDock.getDock().remove(x.getObject());
+                            });
                         }
                         else{
                             ps = List.of(c.getPrimaryProfile(), cp.getPrimaryProfile());
@@ -523,7 +526,12 @@ public class MainPage extends HandlerController {
         if (!e.getKey().equals(CDockObject.SELECT))
             return;
 
-        Main.getMain().selectProfile((Profile) e.getSource());
+        var p = (Profile) e.getSource();
+
+        if (p == null)
+            return;
+
+        Main.getMain().selectProfile(p);
 
         if (Configurator.getConfig().isEnabledSelectAndPlayDock()){
             boolean v1 = Main.getMain().launchClick(false);

@@ -2,6 +2,7 @@ package com.laeben.corelauncher.api;
 
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
+import com.laeben.corelauncher.api.annotation.ReturnsNull;
 import com.laeben.corelauncher.api.entity.ImageEntity;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.entity.Profile;
@@ -22,6 +23,7 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -119,8 +121,9 @@ public class Profiler {
         return profiles;
     }
 
+    @ReturnsNull
     public Profile getProfile(String name){
-        return profiles.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(Profile.empty());
+        return profiles.stream().filter(x -> x.getName().equals(name)).findFirst().orElse(null);
     }
 
     /**
@@ -315,6 +318,8 @@ public class Profiler {
      */
     public void setProfile(String name, Consumer<Profile> set){
         var profile = getProfile(name);
+        if (profile == null)
+            profile = Profile.create();
         setProfile(profile, set);
     }
 
@@ -348,8 +353,11 @@ public class Profiler {
 
     public void reload(){
         try{
-            profiles = profilesDir.getFiles().stream().map(Profile::fromFolder).collect(Collectors.toList());
-            profiles.removeIf(a -> a == null || a.isEmpty());
+            profiles = profilesDir.getFiles().stream()
+                    .map(Profile::fromFolder)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
             handler.execute(new ChangeEvent(EventHandler.RELOAD, null, null));
         }
         catch (Exception e){
@@ -358,45 +366,52 @@ public class Profiler {
     }
 
     public Profile copyProfile(Profile p){
-        var p2 = Profile.empty().cloneFrom(p);
+        var p2 = Profile.create().cloneFrom(p);
         p2.setName(generateName(p2.getName())).save();
         profiles.add(p2);
         handler.execute(new ChangeEvent(PROFILE_CREATE, null, List.of(p2)));
         return p2;
     }
 
-    public Profile createProfile(String name) {
-        try{
-            if (profilesDir.getFiles().stream().anyMatch(x -> x.getName().equals(name)))
-                return Profile.empty();
+    @ReturnsNull
+    public Profile createProfile(String name) throws InvalidObjectException {
+        if (profilesDir.getFiles().stream().anyMatch(x -> x.getName().equals(name)))
+            return null;
 
-            var profile = Profile.fromFolder(profilesDir.to(StrUtil.pure(name)));
-            profiles.add(profile);
-            handler.execute(new ChangeEvent(PROFILE_CREATE, null, List.of(profile)));
-            return profile;
-        }
-        catch (Exception e){
-            Logger.getLogger().log(e);
-            return Profile.empty();
-        }
+        var profile = Profile.fromFolder(profilesDir.to(StrUtil.pure(name)));
+        if (profile == null)
+            throw new InvalidObjectException("Profile path was invalid.");
+        profiles.add(profile.save());
+        handler.execute(new ChangeEvent(PROFILE_CREATE, null, List.of(profile)));
+        return profile;
     }
 
-    public Profile createAndSetProfile(String name, Consumer<Profile> set){
+    /**
+     * Creates a profile or gets existing profile and updates it.
+     * @return the profile
+     * @throws UnsupportedOperationException if the profile was existing first but then disappeared??
+     */
+    public Profile createAndSetProfile(String name, Consumer<Profile> set) throws InvalidObjectException {
         var profile = createProfile(name);
-        if (profile.isEmpty())
-            return getProfile(name);
+        if (profile == null)
+            profile = getProfile(name);
+        if (profile == null)
+            throw new InvalidObjectException("Profile was ambigious. Name='" + name + "'");
         setProfile(profile, set);
         return profile;
     }
 
     public void deleteProfile(Profile p){
+        if (p == null)
+            return;
+
         profilesDir.to(p.getName()).delete();
         profiles.remove(p);
 
         handler.execute(new ChangeEvent(PROFILE_DELETE, p, null));
     }
 
-    public Profile generateDefaultProfile(){
+    public Profile generateDefaultProfile() throws InvalidObjectException {
         var release = Vanilla.getVanilla().getLatestRelease();
         if (release == null)
             Logger.getLogger().log(LogType.WARN, "Latest release is null!");

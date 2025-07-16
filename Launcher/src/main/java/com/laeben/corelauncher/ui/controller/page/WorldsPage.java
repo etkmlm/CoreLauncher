@@ -66,7 +66,7 @@ public class WorldsPage extends HandlerController {
         worlds.clear();
         select(null);
 
-        if (profile == null || profile.isEmpty())
+        if (profile == null)
             return;
 
         lblProfileName.setText(profile.getName());

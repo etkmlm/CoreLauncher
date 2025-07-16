@@ -124,6 +124,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
     private Profile profile;
     private Profile tempProfile;
+    private boolean isNew;
 
     /**
      * NTS Info
@@ -154,7 +155,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         nts.setOnSet(a -> {
             boolean f = nts.needsToSave();
             boolean k = nts.calcNts();
-            if (k && !profile.isEmpty())
+            if (k && profile != null)
                 Main.getMain().setFocusLimiter(this);
             else
                 Main.getMain().setFocusLimiter(null);
@@ -277,7 +278,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
             tempProfile.setJava(java);
 
-            if (profile == null || profile.isEmpty())
+            if (profile == null)
                 return;
             if (profile.getJava() == null && java == null)
                 nts.set(5, false);
@@ -450,14 +451,17 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
     private void reload(){
         if (profile == null){
-            tempProfile = Profile.empty();
-            profile = Profile.empty();
+            tempProfile = Profile.create();
+            profile = Profile.create();
+            isNew = true;
         }
-        else
-            tempProfile = Profile.empty().cloneFrom(profile);
+        else{
+            isNew = false;
+            tempProfile = Profile.create().cloneFrom(profile);
+        }
 
         try{
-            btnBack.setVisible(!profile.isEmpty());
+            btnBack.setVisible(profile != null);
 
             txtName.setText(tempProfile.getName());
             reloadTitle(tempProfile);
@@ -542,9 +546,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             return;
         }
 
-        boolean isNew = profile.isEmpty();
-
-        if (!name.equals(profile.getName()) && !Profiler.getProfiler().getProfile(name).isEmpty()) {
+        if (!name.equals(profile.getName()) && Profiler.getProfiler().getProfile(name) != null) {
             Main.getMain().getAnnouncer().announce(new Announcement(
                     Translator.translate("error.oops"),
                     Translator.translate("profile.edit.error.contains"),
@@ -556,6 +558,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             if (isNew){
                 var p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
                 setProfile(p);
+                isNew = false;
             }
             else
                 Profiler.getProfiler().setProfile(profile.getName(), b -> b.cloneFrom(tempProfile));

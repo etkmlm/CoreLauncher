@@ -24,6 +24,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 public class CProfile extends CDockObject{
@@ -92,8 +93,10 @@ public class CProfile extends CDockObject{
 
     @Override
     protected void onMouseReleased(MouseEvent e){
-        if (e.getButton() == MouseButton.MIDDLE)
-            OSUtil.open(getPrimaryProfile().getPath().toFile());
+        if (e.getButton() == MouseButton.MIDDLE){
+            if (getPrimaryProfile() != null)
+                OSUtil.open(getPrimaryProfile().getPath().toFile());
+        }
         else{
             btnSelect.setText("♥");
             btnSelect.setStyle("-fx-text-fill: #e30e0e");
@@ -106,10 +109,11 @@ public class CProfile extends CDockObject{
         var profile = item
                 .getProfiles()
                 .stream()
+                .filter(Objects::nonNull)
                 .findFirst()
-                .orElse(Profile.empty());
+                .orElse(null);
 
-        if (profile.isEmpty())
+        if (profile == null)
             return false;
 
         p1 = profile.getPath().to("profile.json");
@@ -164,7 +168,7 @@ public class CProfile extends CDockObject{
     @Override
     protected void drag() {
         var p = getPrimaryProfile();
-        if (p.isEmpty())
+        if (p == null)
             return;
 
         var board = root.startDragAndDrop(TransferMode.MOVE);

@@ -11,6 +11,7 @@ import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.entity.LoaderVersion;
 
+import java.io.InvalidObjectException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -120,7 +121,7 @@ public class ResourcePreferences {
         return profile == null ? null : profile.get();
     }
 
-    public static Profile createProfileFromPreferences(ResourcePreferences prefs, ModResource res) throws PerformException {
+    public static Profile createProfileFromPreferences(ResourcePreferences prefs, ModResource res) throws PerformException, InvalidObjectException {
         String versionId = null;
         if (prefs.hasGameVersions())
             versionId = prefs.getGameVersions().stream().max(Version.VersionIdComparator.INSTANCE).orElse(null);
@@ -145,7 +146,7 @@ public class ResourcePreferences {
         return createProfileFromPreferences(prefs, versionId, loader, name);
     }
 
-    public static Profile createProfileFromPreferences(ResourcePreferences prefs, String versionId, LoaderType loader, String name) throws PerformException {
+    public static Profile createProfileFromPreferences(ResourcePreferences prefs, String versionId, LoaderType loader, String name) throws PerformException, InvalidObjectException {
         if (loader == null)
             loader = LoaderType.VANILLA;
 

@@ -70,6 +70,7 @@ import javafx.util.Duration;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
@@ -1075,7 +1076,13 @@ public class Main extends HandlerController {
         createDefaultProfile = false;
 
         UI.runAsync(() -> {
-            var p = Profiler.getProfiler().generateDefaultProfile();
+            Profile p;
+            try {
+                p = Profiler.getProfiler().generateDefaultProfile();
+            } catch (InvalidObjectException e) {
+                Logger.getLogger().log(e);
+                return;
+            }
             var size = tab.getBoundsInLocal();
             var tab1 = (Region)tab.getTabs().get(0).getContent();
             var obj = FDObject.createSingle(p, tab1.getWidth() / 2 - 64, tab1.getHeight() / 2 - 64);

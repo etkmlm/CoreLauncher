@@ -5,6 +5,7 @@ import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.annotation.ReturnsNull;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.GrabVector;
@@ -344,8 +345,10 @@ public abstract class CDockObject extends GridCell {
     public FDObject getObject(){
         return object;
     }
+
+    @ReturnsNull
     public Profile getPrimaryProfile(){
-        return object.getProfiles().stream().findFirst().orElse(Profile.empty());
+        return object.getProfiles().stream().findFirst().orElse(null);
     }
 
     public void selectPrimary(){

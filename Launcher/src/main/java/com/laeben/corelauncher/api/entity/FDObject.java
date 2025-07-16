@@ -55,7 +55,7 @@ public class FDObject {
         if (name != null)
             return name;
         if (isSingle())
-            name = getProfiles().stream().findFirst().orElse(Profile.empty()).getName();
+            name = getProfiles().stream().findFirst().map(Profile::getName).orElse("");
         return name;
     }
 
@@ -63,6 +63,6 @@ public class FDObject {
         return type == FDType.SINGLE;
     }
     public Profile primary(){
-        return getProfiles().stream().findFirst().orElse(Profile.empty());
+        return getProfiles().stream().findFirst().orElse(Profile.create());
     }
 }

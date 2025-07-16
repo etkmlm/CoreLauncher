@@ -2,6 +2,7 @@ package com.laeben.corelauncher.api.entity;
 
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
+import com.laeben.corelauncher.api.annotation.ReturnsNull;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
@@ -21,12 +22,12 @@ public class Profile {
         @Override
         public Profile deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
             //return Profiler.getProfiler() == null ? Profile.empty().rename(jsonElement.getAsString()) : Profile.get(Profiler.profilesDir().to(jsonElement.getAsString()));
-            return Profiler.getProfiler() == null ? Profile.empty().setName(jsonElement.getAsString()) : Profiler.getProfiler().getProfile(jsonElement.getAsString());
+            return Profiler.getProfiler() == null ? Profile.create().setName(jsonElement.getAsString()) : Profiler.getProfiler().getProfile(jsonElement.getAsString());
         }
 
         @Override
         public JsonElement serialize(Profile p, Type type, JsonSerializationContext jsonSerializationContext) {
-            return p.isEmpty() ? null : new JsonPrimitive(p.name);
+            return p == null ? null : new JsonPrimitive(p.name);
         }
     }
 
@@ -64,7 +65,6 @@ public class Profile {
             .create();
 
     /* Fields */
-    private transient boolean isEmpty;
     private ImageEntity icon;
     private String name;
     private String versionId;
@@ -89,27 +89,26 @@ public class Profile {
         wrapper = new Vanilla();
     }
 
+    /**
+     * Creates a profile instance or reads it from the given path.
+     * @param profilePath profile's folder path
+     * @return null if the given folder's name starts with dot (.)
+     */
+    @ReturnsNull
     public static Profile fromFolder(Path profilePath) {
-        try{
-            var file = profilePath.to("profile.json");
-            return (file.exists() ? PROFILE_GSON.fromJson(file.read(), Profile.class) : new Profile())
-                    .setName(profilePath.getName()).save();
-        }
-        catch (Exception e){
-            Logger.getLogger().logHyph("CORRUPT PROFILE: " + profilePath);
-            Logger.getLogger().log(e);
-            return Profile.empty();
-        }
+        if (profilePath.getName().startsWith("."))
+            return null;
+
+        var file = profilePath.to("profile.json");
+        return file.exists() ? PROFILE_GSON.fromJson(file.read(), Profile.class).setName(profilePath.getName()) : null;
     }
 
-    public static Profile empty(){
-        var p = new Profile();
-        p.isEmpty = true;
-        return p;
+    public static Profile create(){
+        return new Profile();
     }
 
     public static Profile fromName(String name){
-        return Profile.empty().setName(name);
+        return Profile.create().setName(name);
     }
 
     /* Getters */
@@ -158,12 +157,8 @@ public class Profile {
         return path.getFiles().stream().map(x -> World.fromGzip(null, x.to("level.dat"))).filter(x -> x.levelName != null).toList();
     }
 
-    public boolean isEmpty(){
-        return isEmpty;
-    }
-
     public boolean isValid(){
-        return !isEmpty() && versionId != null;
+        return versionId != null;
     }
 
     public String[] getJvmArgs() {
@@ -323,8 +318,9 @@ public class Profile {
     }
 
     public Profile cloneFrom(Profile p){
-        if (this.isEmpty)
-            this.isEmpty = false;
+        if (p == null)
+            throw new IllegalStateException("Cannot clone from a null profile.");
+
         if (p.getPath() != null){
             this.name = p.name;
         }
@@ -365,9 +361,6 @@ public class Profile {
     }
 
     public Profile save() {
-        if (isEmpty)
-            return null;
-
         try {
             String json = PROFILE_GSON.toJson(this);
 
