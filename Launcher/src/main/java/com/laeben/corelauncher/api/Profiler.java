@@ -23,7 +23,6 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -355,7 +354,7 @@ public class Profiler {
         try{
             profiles = profilesDir.getFiles().stream()
                     .map(Profile::fromFolder)
-                    .filter(Objects::nonNull)
+                    .filter(x -> x != null && !x.isMeta()) // folders without profile.json ignored
                     .collect(Collectors.toList());
 
             handler.execute(new ChangeEvent(EventHandler.RELOAD, null, null));

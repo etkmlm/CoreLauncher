@@ -57,7 +57,7 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
     @FXML
     public HBox box;
 
-    public CButton btnPlay;
+    public CShapefulButton btnPlay;
     public CButton btnMenu;
 
     private Predicate<ValueEvent> onClick;
@@ -89,12 +89,11 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
             }
         });
 
-        btnPlay = new CButton();
+        btnPlay = new CShapefulButton();
         btnPlay.setPrefWidth(72);
         btnPlay.setPrefHeight(72);
-        btnPlay.setText("⯈");
         btnPlay.enableTransparentAnimation();
-        btnPlay.setStyle("-fx-background-color: transparent; -fx-font-size: 24pt;");
+        btnPlay.setStyle("-fx-background-color: transparent; -fx-spacing: 0!important; -shape-height: 24px; -shape-width: 24px; -shape: -shape-play;");
 
         btnMenu = new CButton();
         btnMenu.setPrefWidth(72);

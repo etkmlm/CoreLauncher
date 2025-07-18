@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller.cell;
 
+import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.util.DateUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
@@ -7,6 +8,7 @@ import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
@@ -19,6 +21,8 @@ import java.util.function.Predicate;
 // Mod Cell
 public class CMCell extends CCell<CResource>{
 
+    public static final PseudoClass INSTALLED =  PseudoClass.getPseudoClass("installed");
+
     private CResource item;
 
     private final CButton btnInstall;
@@ -29,14 +33,20 @@ public class CMCell extends CCell<CResource>{
 
     public CMCell() {
         super("layout/cells/ccell.fxml");
+        var res = CoreLauncherFX.class.getResource("style/cells/cmcell.css");
+        assert res != null;
+        getStylesheets().add(res.toExternalForm());
 
         btnInstall = new CButton();
-        btnInstall.setText("⭳");
-        btnInstall.setStyle("-fx-font-size: 14pt;-fx-background-color: transparent;-fx-min-width: 45px;-fx-pref-width: 45px;");
+        btnInstall.setId("btnInstall");
+        btnInstall.setText("+");
         btnInstall.enableTransparentAnimation();
 
         installed = new SimpleBooleanProperty();
-        installed.addListener(a -> btnInstall.setText(isInstalled() ? "—" : "⭳"));
+        installed.addListener((a, b, isInstalled) -> {
+            btnInstall.setText(isInstalled ? "—" : "+");
+            btnInstall.pseudoClassStateChanged(INSTALLED, isInstalled);
+        });
 
         box.getChildren().add(btnInstall);
     }

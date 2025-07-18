@@ -12,6 +12,7 @@ import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.ui.control.CMsgBox;
+import com.laeben.corelauncher.ui.control.CShapefulButton;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
@@ -22,6 +23,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.function.Consumer;
@@ -51,7 +53,6 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         });
 
         toggle = new CButton();
-        toggle.setTooltip(new Tooltip());
         toggle.setStyle("-fx-padding: 0 8px 0 0; -fx-min-width: 24px; -fx-pref-width: 24px; -fx-pref-height: 24px");
         toggle.setOnMouseClicked(a -> {
             if (item == null)
@@ -66,14 +67,13 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         btnRemove.setStyle("-fx-background-color: transparent; -fx-font-size: 13pt");
         btnRemove.enableTransparentAnimation();
 
-        btnUpdate = new CButton();
-        btnUpdate.setText("⟳");
-        btnUpdate.setStyle("-fx-background-color: transparent;-fx-font-size: 18pt;-fx-font-weight: bolder;-fx-padding: 8px 16px 10px 16px");
+        btnUpdate = new CShapefulButton();
+        btnUpdate.setStyle("-fx-background-color: transparent; -shape: -shape-update; -shape-width:12px;-shape-height:12px;-fx-spacing: 0");
         btnUpdate.enableTransparentAnimation();
 
         box.setAlignment(Pos.CENTER);
-        box.setSpacing(8);
-        box.getChildren().addAll(toggle, btnUpdate, btnRemove);
+        box.setSpacing(4);
+        box.getChildren().addAll(toggle, new Rectangle(10, 0), btnUpdate, btnRemove);
     }
 
     @FXML
@@ -86,7 +86,7 @@ public class CPRCell<T extends CResource> extends CCell<T> {
 
     private final CButton toggle;
     private final CButton btnRemove;
-    private final CButton btnUpdate;
+    private final CShapefulButton btnUpdate;
 
     private Consumer<ValueEvent> onAction;
 
@@ -158,12 +158,12 @@ public class CPRCell<T extends CResource> extends CCell<T> {
 
     private void invalidateToggle(){
         if (item == null || item.disabled){
-            toggle.getTooltip().setText(Translator.translate("option.enable"));
+            toggle.setTooltip(Translator.translate("option.enable"));
             toggle.getStyleClass().add("toggle-off");
             toggle.getStyleClass().remove("toggle-on");
         }
         else{
-            toggle.getTooltip().setText(Translator.translate("option.disable"));
+            toggle.setTooltip(Translator.translate("option.disable"));
             toggle.getStyleClass().add("toggle-on");
             toggle.getStyleClass().remove("toggle-off");
         }

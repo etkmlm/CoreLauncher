@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.laeben.corelauncher.ui.control.CButton?>
 <?import com.laeben.corelauncher.ui.control.CMenu?>
+<?import com.laeben.corelauncher.ui.control.CShapefulButton?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Rectangle?>
@@ -23,7 +23,7 @@
 
             <!--<CButton fx:id="btnMenu" text="…" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"/>-->
             <CMenu fx:id="menu" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0"/>
-            <CButton fx:id="btnSelect" text="⯈" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" translateY="90" AnchorPane.leftAnchor="0" alignment="CENTER" AnchorPane.rightAnchor="0"/>
+            <CShapefulButton fx:id="btnSelect" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" translateY="90" AnchorPane.leftAnchor="0" alignment="CENTER" AnchorPane.rightAnchor="0"/>
         </AnchorPane>
     </Pane>
     <Rectangle height="8"/>

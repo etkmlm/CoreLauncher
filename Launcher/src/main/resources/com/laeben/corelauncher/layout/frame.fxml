@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.laeben.corelauncher.ui.control.CButton?>
 <?import javafx.scene.layout.*?>
+<?import com.laeben.corelauncher.ui.control.CShapefulButton?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.laeben.corelauncher.ui.controller.Frame" style="-fx-background-radius: 10px; -fx-border-radius: 10px; -fx-background-color: #101010;" minWidth="200">
+            fx:controller="com.laeben.corelauncher.ui.controller.Frame" stylesheets="@../style/frame.css" style="-fx-background-radius: 10px; -fx-border-radius: 10px; -fx-background-color: #101010;" minWidth="200">
     <StackPane fx:id="content" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0"/>
     <HBox AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" alignment="TOP_CENTER">
-        <CButton style="-fx-background-color: transparent;-fx-background-radius:10px;-fx-font-size: 13pt;" fx:id="btnMinimize" text="—" prefWidth="50" prefHeight="50"/>
-        <CButton style="-fx-background-color: transparent;-fx-background-radius:10px; -fx-font-size: 18pt; -fx-padding: -5px 0 0 0;" fx:id="btnMaximize" text="□" prefWidth="50" prefHeight="50"/>
-        <CButton style="-fx-background-color: transparent;-fx-background-radius:10px;-fx-font-size: 13pt;" fx:id="btnClose" text="X" prefWidth="50" prefHeight="50"/>
+        <CShapefulButton styleClass="window-button" fx:id="btnMinimize"/>
+        <CShapefulButton styleClass="window-button" fx:id="btnMaximize"/>
+        <CShapefulButton styleClass="window-button" fx:id="btnClose"/>
     </HBox>
 </AnchorPane>

@@ -23,7 +23,7 @@
 
                 <Label styleClass="property-key" text="%settings.customBackground" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <TextField fx:id="txtCustomBackground" maxWidth="Infinity" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                <CButton styleClass="transparent" fx:id="btnSelectBackground" text="..."  GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                <CButton styleClass="transparent" fx:id="btnSelectBackground" text="..." GridPane.columnIndex="3" GridPane.rowIndex="1"/>
 
                 <Label styleClass="property-key" text="%settings.language" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 <ChoiceBox fx:id="cbLanguage" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="2" />

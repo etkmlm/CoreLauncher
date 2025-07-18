@@ -20,7 +20,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
@@ -162,7 +161,7 @@ public class WorldsPage extends HandlerController {
             UI.runAsync(this::reload);
         });
 
-        btnBackup.setTooltip(new Tooltip(Translator.translate("profile.menu.backup")));
+        btnBackup.setTooltip(Translator.translate("profile.menu.backup"));
         btnBackup.setOnMouseClicked(a -> {
             if (selectedWorld == null)
                 return;

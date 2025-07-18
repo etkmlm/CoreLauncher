@@ -11,7 +11,10 @@
 
 #btnSelect{
     -fx-background-color: transparent;
-    -fx-font-size: 40pt;
+    -shape-width: 32px;
+    -shape-height: 36px;
+    -fx-spacing: 0;
+    -shape: -shape-play;
 }
 
 #folderRoot{

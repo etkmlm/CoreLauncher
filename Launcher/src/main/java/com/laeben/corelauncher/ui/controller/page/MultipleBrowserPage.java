@@ -212,7 +212,13 @@ public class MultipleBrowserPage extends HandlerController {
 
                     var res = x.get(0).resource();
 
-                    list.addAll(res.getSourceType().getSource().getCoreResource(res, ModSource.Options.create(profile).dependencies(true)));
+                    var resources = res.getSourceType().getSource().getCoreResource(res, ModSource.Options.create(profile).dependencies(true));
+                    if (resources == null || resources.isEmpty()){
+                        secondary.add(line);
+                        continue;
+                    }
+
+                    list.addAll(resources);
                 }
 
                 return new Result(list, secondary);

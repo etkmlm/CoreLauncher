@@ -110,7 +110,7 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
                 }
             });
 
-            pList.getNav().addItem("☐ " + Translator.translate("dock.menu.group"), a -> {
+            pList.getNav().addItem(Translator.translate("dock.menu.group"), "-shape-group", a -> {
                 cGroups.setLayoutX(a.getSceneX());
                 cGroups.setLayoutY(a.getSceneY());
                 cGroups.setValue(null);
@@ -124,9 +124,9 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
             //pList.setSelectionMode(true);
         }
 
-        pList.getNav().addItem("⤤ " + Translator.translate("profile.menu.export"), a -> exportSelectedProfiles(), 1);
-        pList.getNav().addItem("\uD83D\uDDD1 " + Translator.translate("option.delete"),a -> deleteSelectedProfiles(), 1);
-        pList.getNav().addItem("✓ " + Translator.translate("option.done"), a -> close(new Result(pList.getSelectedItems())), 1);
+        pList.getNav().addItem(Translator.translate("profile.menu.export"), "-shape-export", a -> exportSelectedProfiles(), 1);
+        pList.getNav().addItem(Translator.translate("option.delete"), "-shape-delete", a -> deleteSelectedProfiles(), 1);
+        pList.getNav().addItem(Translator.translate("option.done"), "-shape-done", a -> close(new Result(pList.getSelectedItems())), 1);
 
         pList.setFilterFactory(a -> a.input().getName().toLowerCase(Locale.getDefault()).contains(a.query().toLowerCase(Locale.getDefault())));
         pList.setCellFactory(() -> new CPLCell()

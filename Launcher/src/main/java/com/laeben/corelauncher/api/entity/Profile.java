@@ -83,14 +83,21 @@ public class Profile {
     private int type;
     private Loader wrapper;
 
+    private transient boolean meta;
+
     /* Generation */
+
+    private Profile meta(){
+        this.meta = true;
+        return this;
+    }
 
     protected Profile(){
         wrapper = new Vanilla();
     }
 
     /**
-     * Creates a profile instance or reads it from the given path.
+     * Creates a meta profile instance or reads it from the given path.
      * @param profilePath profile's folder path
      * @return null if the given folder's name starts with dot (.)
      */
@@ -100,14 +107,17 @@ public class Profile {
             return null;
 
         var file = profilePath.to("profile.json");
-        return file.exists() ? PROFILE_GSON.fromJson(file.read(), Profile.class).setName(profilePath.getName()) : null;
+        return (file.exists() ? PROFILE_GSON.fromJson(file.read(), Profile.class) : Profile.create()).setName(profilePath.getName());
     }
 
     public static Profile create(){
-        return new Profile();
+        return new Profile().meta();
     }
 
     public static Profile fromName(String name){
+        if (name.startsWith("."))
+            throw new IllegalArgumentException("Profile name cannot start with '.'");
+
         return Profile.create().setName(name);
     }
 
@@ -115,6 +125,10 @@ public class Profile {
 
     public String getName() {
         return name;
+    }
+
+    public boolean isEmpty(){
+        return getName() == null;
     }
 
     public String getLoaderVersion(){
@@ -159,6 +173,10 @@ public class Profile {
 
     public boolean isValid(){
         return versionId != null;
+    }
+
+    public boolean isMeta(){
+        return meta;
     }
 
     public String[] getJvmArgs() {
@@ -365,6 +383,7 @@ public class Profile {
             String json = PROFILE_GSON.toJson(this);
 
             getPath().to("profile.json").write(json);
+            meta = false;
         }
         catch (Exception e){
             Logger.getLogger().log(e);

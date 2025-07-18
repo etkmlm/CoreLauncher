@@ -17,7 +17,13 @@ import java.util.List;
 import java.util.Objects;
 
 public class CoreLauncherFX extends Application {
-    public static final String CLUI_CSS = CoreLauncherFX.class.getResource("/com/laeben/corelauncher/style/controls/clui.css").toExternalForm();
+    public static final String CLUI_CSS;
+
+    static {
+        var clui = CoreLauncherFX.class.getResource("/com/laeben/corelauncher/style/controls/clui.css");
+        assert clui != null;
+        CLUI_CSS = clui.toExternalForm();
+    }
 
     static Profile fromArgs;
 

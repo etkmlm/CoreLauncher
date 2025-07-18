@@ -65,7 +65,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.FileNotFoundException;
@@ -188,14 +187,6 @@ public class Main extends HandlerController {
                     ImageCacheManager.remove(oldProfile);
                 }
                 case EventHandler.RELOAD -> selectProfile(null);
-            }
-        }, true);
-        registerHandler(UI.getUI().getHandler(), a -> {
-            if (a instanceof KeyEvent ke && ke.getKey().equals(UI.WINDOW_CLOSE)){
-                var stage = (Stage)a.getSource();
-                if (stage.isMaximized())
-                    Configurator.getConfig().setWindowSize(-1, -1);
-                Configurator.save();
             }
         }, true);
         registerHandler(JavaManager.getManager().getHandler(), a -> {
@@ -711,6 +702,20 @@ public class Main extends HandlerController {
             createDefaultProfile = true;
         }
 
+        getStage().setOnWindowSizeChanged(a -> UI.runAsync(() -> {
+            if (a.oldMax() != a.newMax()){
+                if (a.newMax())
+                    Configurator.getConfig().setWindowSize(-1, -1);
+                else
+                    Configurator.getConfig().setWindowSize(getWidth(), getHeight());
+                Configurator.save();
+            }
+            else if ((getWidth() != Configurator.getConfig().getWindowWidth() || getHeight() != Configurator.getConfig().getWindowHeight())){
+                Configurator.getConfig().setWindowSize(getWidth(), getHeight());
+                Configurator.save();
+            }
+        }));
+
         getStage().setMinWidth(MIN_WIDTH);
         getStage().setMinHeight(MIN_HEIGHT);
 
@@ -1100,5 +1105,6 @@ public class Main extends HandlerController {
         stepPopup.dispose();
         Launcher.getLauncher().setOnAuthFail(null);
         super.dispose();
+        getStage().setOnWindowSizeChanged(null);
     }
 }

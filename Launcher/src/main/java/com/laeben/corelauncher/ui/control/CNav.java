@@ -72,21 +72,27 @@ public class CNav extends VBox {
         return getChildren().size() < row + 1 ? generateRow() : (HBox) getChildren().get(row);
     }
 
-    private CButton getButton(String text, EventHandler<?super MouseEvent> click){
-        var btn = new CButton();
+    private CShapefulButton getButton(String text, EventHandler<?super MouseEvent> click){
+        var btn = new CShapefulButton();
         btn.setText(text);
         btn.getStyleClass().add("cnav-button");
         btn.setOnMouseClicked(click);
-        btn.enableTransparentAnimation();
+        //btn.enableTransparentAnimation();
         //btn.setStyle("-fx-background-color: transparent;-fx-font-size: 11.5pt");
         return btn;
     }
 
-    public void addItem(String text, EventHandler<? super MouseEvent> onClick, int row){
-        getBox(row).getChildren().add(getButton(text, onClick));
+    public void addItem(String text, String shape, EventHandler<? super MouseEvent> onClick, int row){
+        var btn = getButton(text, onClick);
+        if (shape != null)
+            btn.setStyle("-shape: " + shape);
+        getBox(row).getChildren().add(btn);
     }
-    public void setItem(String text, EventHandler<? super MouseEvent> onClick, int row, int col){
-        getBox(row).getChildren().set(col, getButton(text, onClick));
+    public void setItem(String text, String shape, EventHandler<? super MouseEvent> onClick, int row, int col){
+        var btn = getButton(text, onClick);
+        if (shape != null)
+            btn.setStyle("-shape: " + shape);
+        getBox(row).getChildren().set(col, btn);
     }
     public void delItem(int row, int col){
         getBox(row).getChildren().remove(col);

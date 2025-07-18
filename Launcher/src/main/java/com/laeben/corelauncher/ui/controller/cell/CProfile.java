@@ -5,10 +5,10 @@ import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
-import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.core.util.StrUtil;
+import com.laeben.corelauncher.ui.control.CShapefulButton;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import javafx.animation.FadeTransition;
@@ -34,7 +34,7 @@ public class CProfile extends CDockObject{
     @FXML
     private AnchorPane imgRoot;
     @FXML
-    private CButton btnSelect;
+    private CShapefulButton btnSelect;
 
     private Path p1, p2;
     private Image img;
@@ -63,7 +63,7 @@ public class CProfile extends CDockObject{
         hover.playFromStart();
         trns.playFromStart();
 
-        btnSelect.setStyle("-fx-text-fill: white");
+        btnSelect.setStyle("-shape-fill: white");
     }
 
     @Override
@@ -75,7 +75,7 @@ public class CProfile extends CDockObject{
         hover.stop();
         trns.stop();
 
-        btnSelect.setText("⯈");
+        btnSelect.setStyle("-shape: -shape-play");
     }
 
     @Override
@@ -98,8 +98,7 @@ public class CProfile extends CDockObject{
                 OSUtil.open(getPrimaryProfile().getPath().toFile());
         }
         else{
-            btnSelect.setText("♥");
-            btnSelect.setStyle("-fx-text-fill: #e30e0e");
+            btnSelect.setStyle("-shape-fill: #e30e0e;-shape: -shape-heart");
             selectPrimary();
         }
     }

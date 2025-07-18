@@ -1,0 +1,15 @@
+#btnInstall{
+    -fx-font-size: 18pt;
+    -fx-font-weight: bolder;
+    -fx-background-color: transparent;
+    -fx-min-width: 56px;
+    -fx-pref-width: 56px;
+}
+
+#btnInstall:installed{
+    -fx-font-size: 14pt;
+}
+
+#lblName{
+    -fx-text-fill: derive(-text-fill, -15%);
+}

@@ -62,9 +62,9 @@ public class CList<T> extends VBox {
         selectionMode = new SimpleBooleanProperty(false);
 
         nav = new CNav();
-        nav.addItem("X " + Translator.translate("option.cancel"), a -> setSelectionMode(false), 0);
-        nav.addItem("☑ " + Translator.translate("option.selectAll"), a -> selectAll(), 0);
-        nav.addItem("☐ " + Translator.translate("option.deselectAll"), a -> deselectAll(), 0);
+        nav.addItem(Translator.translate("option.cancel"), "-shape-cancel", a -> setSelectionMode(false), 0);
+        nav.addItem(Translator.translate("option.selectAll"), "-shape-check", a -> selectAll(), 0);
+        nav.addItem(Translator.translate("option.deselectAll"), "-shape-uncheck", a -> deselectAll(), 0);
 
         //var r = nav.generateRow();
         //r.setAlignment(Pos.CENTER_RIGHT);

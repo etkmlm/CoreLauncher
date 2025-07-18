@@ -1,8 +1,6 @@
 package com.laeben.corelauncher.ui.entity;
 
 import com.laeben.corelauncher.CoreLauncherFX;
-import com.laeben.corelauncher.api.Configurator;
-import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Frame;
 import com.laeben.corelauncher.ui.util.EventFilterManager;
 import javafx.event.Event;
@@ -16,6 +14,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class LStage extends Stage {
     private static final double PADDING_RESIZE = 5;
@@ -23,6 +22,10 @@ public class LStage extends Stage {
     private static final double PADDING_MOVE_RIGHT = 15;
     private static final double PADDING_MOVE_BOTTOM = 15;
     private static final double PADDING_MOVE_LEFT = 15;
+
+    public record WindowSizeChangedEventArgs(double width, double height, boolean oldMax, boolean newMax) {
+
+    }
 
 
     private Frame frame;
@@ -37,6 +40,8 @@ public class LStage extends Stage {
     private double mouseRelativeY;
 
     private Cursor c, cFinal;
+
+    private Consumer<WindowSizeChangedEventArgs> onWindowSizeChanged;
 
     private final EventFilterManager efManager;
 
@@ -59,6 +64,10 @@ public class LStage extends Stage {
         addRegisteredEventFilter(MouseEvent.MOUSE_MOVED, this::onMouseMoved);
         addRegisteredEventFilter(MouseEvent.MOUSE_DRAGGED, this::onMouseDragged);
         addRegisteredEventFilter(MouseEvent.MOUSE_RELEASED, this::onMouseReleased);
+        maximizedProperty().addListener((a, b, c) -> {
+            if (onWindowSizeChanged != null)
+                onWindowSizeChanged.accept(new WindowSizeChangedEventArgs(getWidth(), getHeight(), b, c));
+        });
     }
 
     public static Image[] getIconSet(){
@@ -117,12 +126,13 @@ public class LStage extends Stage {
         return scene;
     }
 
+    public void setOnWindowSizeChanged(Consumer<WindowSizeChangedEventArgs> onWindowSizeChanged){
+        this.onWindowSizeChanged = onWindowSizeChanged;
+    }
+
     public void onMouseReleased(MouseEvent e){
-        if (cFinal != null && (getWidth() != Configurator.getConfig().getWindowWidth() || getHeight() != Configurator.getConfig().getWindowHeight())) {
-            UI.runAsync(() -> {
-                Configurator.getConfig().setWindowSize(getWidth(), getHeight());
-                Configurator.save();
-            });
+        if (cFinal != null && onWindowSizeChanged != null) {
+            onWindowSizeChanged.accept(new WindowSizeChangedEventArgs(getWidth(), getHeight(), isMaximized(), isMaximized()));
         }
 
         cFinal = null;

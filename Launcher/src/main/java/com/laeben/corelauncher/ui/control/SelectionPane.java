@@ -42,7 +42,7 @@ public class SelectionPane<T> extends Pane {
 
         nav = new CNav();
         nav.setViewOrder(-1000);
-        nav.addItem("X " + Translator.translate("option.cancel"), a -> {
+        nav.addItem(Translator.translate("option.cancel"), "-shape-cancel", a -> {
             if (onSelectCancel != null)
                 onSelectCancel.run();
         }, 0);

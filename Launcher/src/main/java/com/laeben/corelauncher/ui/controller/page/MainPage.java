@@ -421,13 +421,15 @@ public class MainPage extends HandlerController {
 
 
         root.getNav().addItem(
-                "\uD83D\uDDD1 " + Translator.translate("option.remove"),
+                Translator.translate("option.remove"),
+                "-shape-remove",
                 a -> removeSelectedObjects(),
                 0
         );
 
         root.getNav().addItem(
-                "\uD83D\uDDD1 " + Translator.translate("option.delete"),
+                Translator.translate("option.delete"),
+                "-shape-delete",
                 a -> deleteSelectedObjects(),
                 0
         );

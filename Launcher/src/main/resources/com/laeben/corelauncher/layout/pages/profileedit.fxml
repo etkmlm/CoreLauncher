@@ -83,7 +83,7 @@
 
                 <Label styleClass="property-key" text="Java" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
                 <ChoiceBox fx:id="cbJavaVersion" maxWidth="Infinity" prefHeight="30"  GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <CButton styleClass="transparent" fx:id="btnJavaManager" text="..."  GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                <CButton styleClass="transparent" fx:id="btnJavaManager" text="..." GridPane.columnIndex="2" GridPane.rowIndex="3" />
 
                 <Label styleClass="property-key" text="%java.args" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                 <TextField fx:id="txtArgs" maxWidth="Infinity" prefHeight="30" styleClass="field" GridPane.columnIndex="1" GridPane.rowIndex="4" />

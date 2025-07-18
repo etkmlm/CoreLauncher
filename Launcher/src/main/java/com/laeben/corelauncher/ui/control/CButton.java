@@ -4,8 +4,8 @@ import com.laeben.corelauncher.ui.entity.animation.BackgroundColorAnimation;
 import com.laeben.corelauncher.ui.entity.animation.ColorAnimation;
 import javafx.animation.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.util.Duration;
 
 public class CButton extends Button {
@@ -17,13 +17,19 @@ public class CButton extends Button {
     private final ColorAnimation backgroundAnimation;
 
     private boolean trns;
+    private Tooltip tip;
+    public void setTooltip(String text){
+        if (tip == null){
+            super.setTooltip(tip = new Tooltip(text));
+        }
+        else
+            tip.setText(text);
+    }
 
     // no transparent animation
     private boolean nta = true;
 
     public CButton(){
-        setTextFill(Paint.valueOf("white"));
-
         getStyleClass().add("cbutton");
 
         fade = new FadeTransition();
