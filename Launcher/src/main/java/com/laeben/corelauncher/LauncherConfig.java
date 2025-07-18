@@ -26,7 +26,7 @@ public final class LauncherConfig {
     public static final Library[] LAUNCHER_LIBRARIES = { new Library()
     {
         {
-            name = "com.laeben:clpatcher:1.0";
+            name = "com.laeben:clpatcher:1.1";
             isAgent = true;
         }
     }};
