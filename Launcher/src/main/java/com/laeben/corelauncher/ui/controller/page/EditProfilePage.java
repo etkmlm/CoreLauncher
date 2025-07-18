@@ -557,24 +557,30 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         try{
             if (isNew){
                 var p = Profiler.getProfiler().createAndSetProfile(txtName.getText(), b -> b.cloneFrom(tempProfile));
-                setProfile(p);
-                isNew = false;
+                setProfile(p); // isNew will be set to false
+                isNew = true;
             }
             else
                 Profiler.getProfiler().setProfile(profile.getName(), b -> b.cloneFrom(tempProfile));
         }
         catch (Exception e){
             Logger.getLogger().log(e);
+            Main.getMain().announceLater(Translator.translate("error.oops"), Translator.translate("error.unknown"), Announcement.AnnouncementType.ERROR, Duration.seconds(2));
+            return;
         }
 
         Main.getMain().setFocusLimiter(null);
 
-        if (isNew && Configurator.getConfig().shouldPlaceNewProfileToDock()){
-            Main.getMain().closeTab((CTab)getParentObject());
-            Main.getMain().getTab().getSelectionModel().select(0);
+        if (isNew){
+            if (Configurator.getConfig().shouldPlaceNewProfileToDock()){
+                Main.getMain().closeTab((CTab)getParentObject());
+                Main.getMain().getTab().getSelectionModel().select(0);
+            }
+            else
+                Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
+
+            isNew = false;
         }
-        else if (isNew)
-            Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile);
         else{
             nts.clear();
             Main.getMain().announceLater(Translator.translate("announce.successful"), Translator.translate("announce.info.profile.save"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
