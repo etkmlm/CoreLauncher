@@ -11,6 +11,32 @@ Lightweight, useful, fabulously customizable launcher for Minecraft.
 
 [Reddit](https://www.reddit.com/r/corelauncher/)
 
+## Screenshots ★
+
+### Main Page and Dock
+![Main Page and Dock](images/screenshots/main_noback.png)
+
+### Main Page and Dock [Custom Background]
+![Main Page and Dock / Custom Background](images/screenshots/main_back.png)
+
+### Settings [Custom Background]
+![Settings / Custom Background](images/screenshots/settings_back.png)
+
+### General Resource Browser
+![General Resource Browser](images/screenshots/resource_browser.png)
+
+### Detailed Modpack Dialog
+![Detailed Modpack Dialog](images/screenshots/detailed_modpack.png)
+
+### Multiple Browser
+![Multiple Browser](images/screenshots/multiple_browser.png)
+
+### Profile Page
+![Profile Page](images/screenshots/profile.png)
+
+### Edit Profile Page
+![Edit Profile Page](images/screenshots/edit_profile.png)
+
 ## Installation Tutorial Video ▶
 
 [![Tutorial](https://img.youtube.com/vi/t_RVLlCXcdA/0.jpg)](https://www.youtube.com/watch?v=t_RVLlCXcdA)
@@ -44,6 +70,6 @@ Create a profile, select your loader (wrapper), customize your resources, and pl
 
 You can find the detailed guide [here](https://github.com/etkmlm/CoreLauncher/wiki).
 
-## Beta Source
+## Source
 
-You can find the newest source code on [beta branch](https://github.com/etkmlm/CoreLauncher/tree/beta).
+You can find the dev (newest but experimental) source code on [dev branch](https://github.com/etkmlm/CoreLauncher/tree/dev), the beta source code on [beta branch](https://github.com/etkmlm/CoreLauncher/tree/beta).
