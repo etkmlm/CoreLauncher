@@ -100,9 +100,10 @@ a{
 }
 
 .head-sec .one{
-    background-image: url('../images/back.png');
+    background-image: url('../images/back_new.png');
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     background-blend-mode: difference;
 }
 
@@ -125,7 +126,8 @@ a{
 
 }
 
-.head-sec .two .badges img{
+.head-sec .two .badges a{
+    padding: 0;
     width: 60px;
     height: 60px;
     margin: 0 8px 0 8px;
@@ -133,6 +135,11 @@ a{
     border: none;
     border-radius: 50%;
     box-shadow: 5px 5px 5px 0 #000;
+}
+
+.head-sec .two .badges a img{
+    width: 60px;
+    height: 60px;
 }
 
 .head-sec .two > img{
