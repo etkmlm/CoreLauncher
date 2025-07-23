@@ -7,8 +7,9 @@ import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.GsonUtil;
+import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 
-public class AzulJavaManager extends JavaManager {
+public class AzulJavaManager implements JavaSource {
     private static final String ZULU = "https://api.azul.com/metadata/v1/zulu/packages/";
 
     private static String getZuluOS(OS os) {
@@ -21,7 +22,7 @@ public class AzulJavaManager extends JavaManager {
 
     @Override
     public JavaDownloadInfo getJavaInfo(Java j, OS os, boolean is64Bit) throws NoConnectionException, HttpException {
-        String url = String.format("%s?java_version=%s&os=%s&arch=%s&java_package_type=jdk&javafx_bundled=true&availability_types=CA&release_status=ga&certifications=tck", ZULU, j.majorVersion, getZuluOS(os), is64Bit ? "x64" : "x86");
+        String url = String.format("%s?java_version=%s&os=%s&arch=%s&java_package_type=jre&javafx_bundled=true&availability_types=CA&release_status=ga&certifications=tck&page_size=1&archive_type=%s", ZULU, j.majorVersion, getZuluOS(os), is64Bit ? "x64" : "x86", os == OS.WINDOWS ? "zip" : "tar_gz");
 
         var arr = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(url), JsonArray.class);
         if (arr == null || arr.isEmpty())

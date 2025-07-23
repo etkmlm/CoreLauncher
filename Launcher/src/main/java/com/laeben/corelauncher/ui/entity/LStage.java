@@ -244,7 +244,10 @@ public class LStage extends Stage {
                 onMouseReleased(e);
                 return;
             }
+            setHeight(getHeight());
             setWidth(w);
+            setY(getY());
+            setX(getX());
         }
         else if (cFinal == Cursor.NE_RESIZE){
             w = mX - minX;
@@ -258,6 +261,7 @@ public class LStage extends Stage {
             setWidth(w);
             setHeight(h);
             setY(mY);
+            setX(getX());
         }
         else if (cFinal == Cursor.SE_RESIZE){
             w = mX - minX;
@@ -269,6 +273,8 @@ public class LStage extends Stage {
 
             setWidth(w);
             setHeight(h);
+            setY(getY());
+            setX(getX());
         }
         else if (cFinal == Cursor.W_RESIZE){
             w = maxX - mX;
@@ -276,8 +282,10 @@ public class LStage extends Stage {
                 onMouseReleased(e);
                 return;
             }
+            setHeight(getHeight());
             setWidth(w);
             setX(mX);
+            setY(getY());
         }
         else if (cFinal == Cursor.N_RESIZE){
             h = maxY - mY;
@@ -285,8 +293,10 @@ public class LStage extends Stage {
                 onMouseReleased(e);
                 return;
             }
+            setWidth(getWidth());
             setHeight(h);
             setY(mY);
+            setX(getX());
         }
         else if (cFinal == Cursor.S_RESIZE){
             h = mY - minY;
@@ -294,7 +304,10 @@ public class LStage extends Stage {
                 onMouseReleased(e);
                 return;
             }
+            setWidth(getWidth());
             setHeight(h);
+            setY(getY());
+            setX(getX());
         }
         else if (cFinal == Cursor.NW_RESIZE){
             w = maxX - mX;
@@ -318,6 +331,7 @@ public class LStage extends Stage {
             setHeight(h);
             setWidth(w);
             setX(mX);
+            setY(getY());
         }
     }
 

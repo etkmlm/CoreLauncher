@@ -1,13 +1,11 @@
 package com.laeben.corelauncher.util.java;
 
-import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -17,11 +15,13 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.EventHandler;
+import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
+import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class JavaManager {
+public class JavaManager {
     public static final String KEY = "jvman";
 
     public static final String ADD = "add";
@@ -29,9 +29,8 @@ public abstract class JavaManager {
     public static final String UPDATE = "update";
     public static final String DOWNLOAD_COMPLETE = "down";
 
-    public record JavaDownloadInfo(String name, String url, String displayName, int major){
+    private JavaSource source;
 
-    }
 
     private static JavaManager instance;
 
@@ -44,16 +43,19 @@ public abstract class JavaManager {
         javaDir = javaDir();
 
         Configurator.getConfigurator().getHandler().addHandler(KEY, (a) -> {
-            if (!a.getKey().equals(Configurator.GAME_PATH_CHANGE))
-                return;
+            if (a.getKey().equals(Configurator.GAME_PATH_CHANGE)){
+                javaDir = javaDir();
 
-            javaDir = javaDir();
-
-            reload();
+                reload();
+            }
+            else if (a.getKey().equals(Configurator.JAVA_SOURCE_CHANGE)){
+                setSourceType((JavaSourceType) a.getNewValue());
+            }
         }, false);
 
         handler = new EventHandler<>();
 
+        setSourceType(Configurator.getConfig().getJavaSourceType());
         instance = this;
     }
 
@@ -100,14 +102,12 @@ public abstract class JavaManager {
         return new Java(Path.begin(OSUtil.getRunningJavaDir()));
     }
 
-    public abstract JavaDownloadInfo getJavaInfo(Java j, OS os, boolean is64Bit) throws NoConnectionException, HttpException;
-
     public JavaDownloadInfo getJavaInfo(Java j, boolean is64Bit) throws NoConnectionException {
         if (j.majorVersion == 0)
             return null;
 
         try{
-            return getJavaInfo(j, CoreLauncher.SYSTEM_OS, is64Bit);
+            return source.getJavaInfo(j, CoreLauncher.SYSTEM_OS, is64Bit);
         }
         catch (NoConnectionException e){
             throw e;
@@ -122,6 +122,9 @@ public abstract class JavaManager {
         return javaVersions.stream().filter(x -> x.getName().equals(j.getName()) || x.majorVersion == j.majorVersion).findFirst().orElse(null);
     }
 
+    public void setSourceType(JavaSourceType type){
+        source = JavaSource.SOURCES.get(type);
+    }
 
     /**
      * Download and include the Java from the network.
@@ -144,14 +147,14 @@ public abstract class JavaManager {
             return null;
 
         try{
-            Main.getMain().setPrimaryStatus(Translator.translateFormat("java.downloading", info.name));
-            var file = NetUtil.download(info.url, javaDir, true, true);
+            Main.getMain().setPrimaryStatus(Translator.translateFormat("java.downloading", info.name()));
+            var file = NetUtil.download(info.url(), javaDir, true, true);
             file.extract(null, null);
             file.delete();
 
             handler.execute(new KeyEvent(DOWNLOAD_COMPLETE));
 
-            return new Java(info.displayName, javaDir.to(info.name));
+            return new Java(info.displayName(), javaDir.to(info.name()));
         }
         catch (NoConnectionException | StopException e){
             throw e;

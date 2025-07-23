@@ -20,7 +20,7 @@ import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
-import com.laeben.corelauncher.util.entity.JavaSource;
+import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.Java;
@@ -120,7 +120,7 @@ public class SettingsPage extends HandlerController {
     @FXML
     private CheckBox chkGuiShortcut;
     @FXML
-    private CCombo<JavaSource> cbJavaSource;
+    private CCombo<JavaSourceType> cbJavaSource;
     /*@FXML
     private Spinner txtCommPort;*/
 
@@ -229,8 +229,8 @@ public class SettingsPage extends HandlerController {
 
     @Override
     public void preInit(){
-        cbJavaSource.setValueFactory(JavaSource::getDisplayName);
-        cbJavaSource.getItems().setAll(JavaSource.values());
+        cbJavaSource.setValueFactory(JavaSourceType::getDisplayName);
+        cbJavaSource.getItems().setAll(JavaSourceType.values());
 
         reload();
 
@@ -358,10 +358,7 @@ public class SettingsPage extends HandlerController {
             Configurator.save();
         });
 
-        cbJavaSource.setOnItemChanged(a -> {
-            Configurator.getConfig().setJavaSource(a);
-            Configurator.save();
-        });
+        cbJavaSource.setOnItemChanged(a -> Configurator.getConfigurator().setJavaSourceType(a));
 
         btnJavaMan.enableTransparentAnimation();
         btnJavaMan.setOnMouseClicked((a) -> Main.getMain().addTab("pages/java", Translator.translate("java.manager"), true, JavaPage.class));
@@ -555,7 +552,7 @@ public class SettingsPage extends HandlerController {
             else
                 cbJava.setValue("...");
 
-            cbJavaSource.setValue(c.getJavaSource());
+            cbJavaSource.setValue(c.getJavaSourceType());
 
             if (c.getUser() != null){
                 txtAccount.setText(c.getUser().getUsername());

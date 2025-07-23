@@ -84,4 +84,5 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.ui.entity.filter;
     opens com.laeben.corelauncher.minecraft.modding.entity.resource;
     opens com.laeben.corelauncher.util.java;
+    opens com.laeben.corelauncher.util.java.entity;
 }

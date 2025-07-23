@@ -9,6 +9,7 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.util.java.JavaManager;
+import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -21,7 +22,7 @@ import java.util.Optional;
 
 public class DJavaSelector extends CDialog<DJavaSelector.Result> {
 
-    public record Result(Java local, JavaManager.JavaDownloadInfo info){
+    public record Result(Java local, JavaDownloadInfo info){
         public boolean isLocal(){
             return local != null;
         }
@@ -40,7 +41,7 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
     @FXML
     private TextField txtPath;
     @FXML
-    private CWorker<JavaManager.JavaDownloadInfo, Void> worker;
+    private CWorker<JavaDownloadInfo, Void> worker;
     @FXML
     private RadioButton rbLocal;
     @FXML
@@ -64,7 +65,7 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
 
         worker.begin().withTask(a -> new Task<>() {
             @Override
-            protected JavaManager.JavaDownloadInfo call() throws Exception {
+            protected JavaDownloadInfo call() throws Exception {
                 return JavaManager.getManager().getJavaInfo(Java.fromVersion(spnMajor.getValue()), CoreLauncher.OS_64);
             }
         }).onDone(a -> {

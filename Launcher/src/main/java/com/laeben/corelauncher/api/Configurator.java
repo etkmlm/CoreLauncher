@@ -11,6 +11,7 @@ import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.entity.Path;
 import com.google.gson.Gson;
 import com.laeben.corelauncher.util.entity.LogType;
+import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 
 import java.io.InputStreamReader;
 import java.util.Locale;
@@ -20,6 +21,7 @@ public class Configurator {
     public static final String LANGUAGE_CHANGE = "langChange";
     public static final String USER_CHANGE = "userChange";
     public static final String GAME_PATH_CHANGE = "gamePathChange";
+    public static final String JAVA_SOURCE_CHANGE = "javaSourceChange";
 
     private static Configurator instance;
     private final EventHandler<ChangeEvent> handler;
@@ -113,6 +115,14 @@ public class Configurator {
         save();
 
         handler.execute(new ChangeEvent(LANGUAGE_CHANGE, oldLang, l));
+    }
+
+    public void setJavaSourceType(JavaSourceType type){
+        var oldType = config.getJavaSourceType();
+        config.setJavaSourceType(type);
+        save();
+
+        handler.execute(new ChangeEvent(JAVA_SOURCE_CHANGE, oldType, type));
     }
 
     public static Configurator getConfigurator(){

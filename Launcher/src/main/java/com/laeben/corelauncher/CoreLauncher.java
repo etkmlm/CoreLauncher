@@ -152,9 +152,7 @@ public class CoreLauncher {
         new Vanilla().asInstance().getAllVersions();
         new OptiFine().asInstance();
         new Launcher();
-
-        new AzulJavaManager().reload();
-
+        new JavaManager().reload();
         new CurseForge().reload();
         new Modrinth().reload();
         new Modder();

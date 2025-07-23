@@ -7,8 +7,9 @@ import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.GsonUtil;
+import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 
-public class AdoptiumJavaManager extends JavaManager{
+public class AdoptiumJavaManager implements JavaSource {
     private static final String ADOPTIUM = "https://api.adoptium.net/v3/assets/latest/";
 
     @Override
