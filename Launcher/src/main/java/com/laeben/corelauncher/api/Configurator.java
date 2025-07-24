@@ -2,18 +2,16 @@ package com.laeben.corelauncher.api;
 
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
-import com.laeben.corelauncher.api.entity.Account;
-import com.laeben.corelauncher.api.entity.Config;
-import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.GsonUtil;
-import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.entity.Path;
 import com.google.gson.Gson;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Locale;
 
 public class Configurator {
@@ -123,6 +121,12 @@ public class Configurator {
         save();
 
         handler.execute(new ChangeEvent(JAVA_SOURCE_CHANGE, oldType, type));
+    }
+
+    public List<Java> verifyAndGetCustomJavaVersions(){
+        var vers = getConfig().getCustomJavaVersions();
+        vers.removeIf(a -> !a.isLoaded());
+        return vers;
     }
 
     public static Configurator getConfigurator(){

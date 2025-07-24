@@ -18,3 +18,8 @@
 #btnSelect{
     -fx-font-size: 18pt;
 }
+
+#spnMajor{
+    -fx-pref-width: 120px;
+    -fx-max-width: 120px;
+}

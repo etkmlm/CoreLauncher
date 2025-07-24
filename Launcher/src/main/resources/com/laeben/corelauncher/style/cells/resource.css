@@ -7,6 +7,8 @@
 .cbutton{
     -fx-background-radius: 50%;
     -fx-font-weight: bolder;
+    -fx-min-width: 84px;
+    -fx-min-height: 84px;
     -fx-pref-width: 84px;
     -fx-pref-height: 84px;
 }

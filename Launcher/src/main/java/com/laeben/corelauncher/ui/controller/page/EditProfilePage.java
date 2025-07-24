@@ -461,7 +461,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         }
 
         try{
-            btnBack.setVisible(profile != null);
+            btnBack.setVisible(!isNew);
 
             txtName.setText(tempProfile.getName());
             reloadTitle(tempProfile);

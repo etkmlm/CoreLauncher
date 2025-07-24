@@ -27,7 +27,7 @@ public class OSUtil {
         return Path.of(System.getProperty("java.home"));
     }
 
-    public static boolean is64BitOS(Java defaultJava){
+    public static boolean is64BitJava(Java defaultJava){
         return defaultJava.identify() && defaultJava.arch == 64;
     }
 

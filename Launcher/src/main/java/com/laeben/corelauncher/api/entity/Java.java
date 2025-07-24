@@ -179,7 +179,7 @@ public class Java {
     }
 
     public String getName(){
-        return name == null ? "JDK " + majorVersion : name;
+        return name == null ? "Java " + majorVersion : name;
     }
 
     public Java setName(String name){

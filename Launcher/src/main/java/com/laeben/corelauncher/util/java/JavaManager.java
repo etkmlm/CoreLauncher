@@ -15,6 +15,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.EventHandler;
+import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 
@@ -71,25 +72,23 @@ public class JavaManager {
 
     private List<Java> getAll(){
         var files = javaDir.getFiles();
-        var lst = new ArrayList<Java>();
+        var lst = new ArrayList<>(Configurator.getConfigurator().verifyAndGetCustomJavaVersions());
         for (var file : files){
             if (!file.isDirectory())
                 continue;
 
             try {
                 var j = new Java(file);
-                lst.add(j);
+                if (j.isLoaded())
+                    lst.add(j);
+                else{
+                    Logger.getLogger().log(LogType.WARN, "Ignoring invalid Java: " + j.getPath());
+                }
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
             }
         }
-
-        var cst = Configurator.getConfig().getCustomJavaVersions();
-        if (cst != null)
-            lst.addAll(cst);
-
-        lst.removeIf(x -> !x.isLoaded());
 
         return lst;
     }
@@ -102,12 +101,12 @@ public class JavaManager {
         return new Java(Path.begin(OSUtil.getRunningJavaDir()));
     }
 
-    public JavaDownloadInfo getJavaInfo(Java j, boolean is64Bit) throws NoConnectionException {
+    public JavaDownloadInfo getJavaInfo(Java j, String arch) throws NoConnectionException {
         if (j.majorVersion == 0)
             return null;
 
         try{
-            return source.getJavaInfo(j, CoreLauncher.SYSTEM_OS, is64Bit);
+            return source.getJavaInfo(j, CoreLauncher.SYSTEM_OS, arch);
         }
         catch (NoConnectionException e){
             throw e;
@@ -134,21 +133,51 @@ public class JavaManager {
      */
     public void downloadAndInclude(Java java, JavaDownloadInfo info) throws NoConnectionException, StopException {
         if (info == null)
-            info = getJavaInfo(java, CoreLauncher.OS_64);
-        var j = download(info);
+            info = getJavaInfo(java, CoreLauncher.SYSTEM_OS_ARCH);
+
+        final String name = info.name();
+
+        Path existsPath = null;
+        for (var ver : javaVersions){
+            var path = ver.getPath();
+            if (!path.getName().equals(name))
+                continue;
+
+            if (!ver.isLoaded()){
+                path.delete();
+            }
+            else{
+                existsPath = path;
+            }
+            break;
+        }
+
+        var j = downloadAndExtract(info, existsPath);
         if (j == null)
             return;
         javaVersions.add(j);
-        handler.execute(new ChangeEvent(ADD, null, j));
+
+        if (existsPath == null) // not necessary to call this in case it was overwritten on an existing java folder
+            handler.execute(new ChangeEvent(ADD, null, j));
     }
 
-    public Java download(JavaDownloadInfo info) throws NoConnectionException, StopException {
+    /**
+     * Downloads and extracts the Java instance.
+     * @param info java info to download
+     * @param existsPath possible existing instance to delete after download completed
+     * @return downloaded instance
+     */
+    public Java downloadAndExtract(JavaDownloadInfo info, Path existsPath) throws NoConnectionException, StopException {
         if (info == null)
             return null;
 
         try{
             Main.getMain().setPrimaryStatus(Translator.translateFormat("java.downloading", info.name()));
             var file = NetUtil.download(info.url(), javaDir, true, true);
+
+            if (existsPath != null) // handling existing java version before extracting the file
+                existsPath.delete();
+
             file.extract(null, null);
             file.delete();
 

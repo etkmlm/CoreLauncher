@@ -6,9 +6,9 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            prefHeight="300.0" prefWidth="650.0" fx:id="root" styleClass="dialog-content" stylesheets="@../../style/controls/jselector.css">
+            prefHeight="400.0" prefWidth="650.0" fx:id="root" styleClass="dialog-content" stylesheets="@../../style/controls/jselector.css">
 
-    <GridPane AnchorPane.leftAnchor="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="50" alignment="CENTER" VBox.vgrow="ALWAYS" maxHeight="Infinity" maxWidth="Infinity" hgap="10" vgap="15">
+    <GridPane AnchorPane.leftAnchor="10" AnchorPane.topAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="36" alignment="CENTER" VBox.vgrow="ALWAYS" maxHeight="Infinity" maxWidth="Infinity" hgap="10" vgap="15">
         <columnConstraints>
             <ColumnConstraints maxWidth="200" hgrow="ALWAYS" halignment="RIGHT"/>
             <ColumnConstraints/>
@@ -24,7 +24,7 @@
         </HBox>
 
         <Label styleClass="group-network" GridPane.columnIndex="0" GridPane.rowIndex="2" text="Major Version:"/>
-        <Spinner styleClass="group-network" editable="true" fx:id="spnMajor" prefWidth="80" maxWidth="80" min="8" max="30" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        <Spinner styleClass="group-network" editable="true" fx:id="spnMajor" min="8" max="30" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
         <Label styleClass="group-local" text="Path:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
         <HBox alignment="CENTER" styleClass="group-local" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="2">

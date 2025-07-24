@@ -23,7 +23,7 @@ public class Rule {
         return action.equals("allow");
     }
     public boolean checkOS(OS os){
-        return this.os.name == os || (this.os.is64BitOS() && CoreLauncher.OS_64);
+        return this.os.name == os || (this.os.is64BitOS() && CoreLauncher.SYSTEM_OS_64);
     }
     public boolean checkFeature(String feature){
         if (features == null)

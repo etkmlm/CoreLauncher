@@ -74,12 +74,36 @@
 .combo-box,
 .ccombo{
     -fx-background-color: -control-fill;
-    -fx-font-size: 12pt;
+    -fx-font-size: 14pt!important;
 }
 
 .combo-box .list-cell,
 .ccombo .list-cell{
     -fx-border-width: 0;
+}
+
+.combo-box-popup .list-cell:filled,
+.ccombo-list .list-cell:filled{
+    -fx-padding: 14px 20px!important;
+    -fx-font-size: 14pt!important;
+}
+
+.context-menu .menu-item:focused,
+.combo-box-popup .list-cell:filled:focused {
+    -fx-background-color: transparent;
+}
+
+.context-menu .menu-item:hover,
+.combo-box-popup .list-cell:filled:hover,
+.ccombo-list .list-cell:filled:hover{
+    -fx-background-color: -control-popup-hover-fill;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+.context-menu .menu-item:checked,
+.combo-box-popup .list-cell:filled:selected,
+.ccombo-list .list-cell:filled:selected {
+    -fx-background-color: -control-popup-selected-fill;
 }
 
 .combo-box .text-input,
@@ -125,37 +149,6 @@
     -fx-padding: 4px 30px;
 }
 
-.combo-box-popup .list-cell:filled,
-.ccombo-list .list-cell:filled{
-    -fx-padding: 14px 20px;
-}
-
-.context-menu .menu-item:focused,
-.combo-box-popup .list-cell:filled:focused {
-    -fx-background-color: transparent;
-}
-
-.context-menu .menu-item:hover,
-.combo-box-popup .list-cell:filled:hover,
-.ccombo-list .list-cell:filled:hover{
-    -fx-background-color: -control-popup-hover-fill;
-}
-
-/*noinspection CssInvalidPseudoSelector*/
-.context-menu .menu-item:checked,
-.combo-box-popup .list-cell:filled:selected,
-.ccombo-list .list-cell:filled:selected {
-    -fx-background-color: -control-popup-selected-fill;
-}
-
-.ccombo-list {
-    -fx-background-radius: 8px;
-}
-
-.combo-box-popup .list-view{
-    -fx-background-radius: 8px;
-}
-
 .combo-box-search:focused{
     -fx-border-width: 1px!important;
     -fx-border-style: solid!important;
@@ -163,10 +156,10 @@
 
 .combo-box-popup .list-view,
 .ccombo-list {
-    -fx-background-color: -control-popup-fill;
+    -fx-background-color: -control-popup-fill!important;
     -fx-effect: none;
     -fx-vgap: 4px;
-    -fx-font-size: 15pt;
+    -fx-background-radius: 8px;
 }
 
 /* * * * * * * * * * * * * * * *

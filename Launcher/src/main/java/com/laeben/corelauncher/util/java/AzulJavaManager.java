@@ -21,8 +21,8 @@ public class AzulJavaManager implements JavaSource {
     }
 
     @Override
-    public JavaDownloadInfo getJavaInfo(Java j, OS os, boolean is64Bit) throws NoConnectionException, HttpException {
-        String url = String.format("%s?java_version=%s&os=%s&arch=%s&java_package_type=jre&javafx_bundled=true&availability_types=CA&release_status=ga&certifications=tck&page_size=1&archive_type=%s", ZULU, j.majorVersion, getZuluOS(os), is64Bit ? "x64" : "x86", os == OS.WINDOWS ? "zip" : "tar_gz");
+    public JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException {
+        String url = String.format("%s?java_version=%s&os=%s&arch=%s&java_package_type=jre&javafx_bundled=false&availability_types=CA&release_status=ga&certifications=tck&page_size=1&archive_type=%s", ZULU, j.majorVersion, getZuluOS(os), arch, os == OS.WINDOWS ? "zip" : "tar_gz");
 
         var arr = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(url), JsonArray.class);
         if (arr == null || arr.isEmpty())
@@ -36,7 +36,7 @@ public class AzulJavaManager implements JavaSource {
                         .replace(".tar.gz", "")
                         .replace(".zip", ""),
                 obj.get("download_url").getAsString(),
-                "Zulu JDK " + j.majorVersion,
+                "Zulu JRE " + j.majorVersion,
                 j.majorVersion
         );
     }

@@ -23,7 +23,6 @@ import com.laeben.corelauncher.minecraft.loader.optifine.OptiFine;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.util.APIListener;
-import com.laeben.corelauncher.util.java.AzulJavaManager;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -51,7 +50,8 @@ public class CoreLauncher {
     public static final Path LAUNCHER_PATH = Path.begin(java.nio.file.Path.of(System.getProperty("user.dir")));
     public static final Path LAUNCHER_EXECUTE_PATH;
 
-    public static boolean OS_64;
+    public static boolean SYSTEM_OS_64;
+    public static String SYSTEM_OS_ARCH;
     public static boolean GUI_INIT = false;
 
     static {
@@ -130,6 +130,14 @@ public class CoreLauncher {
         System.setProperty("com.sun.net.ssl.checkRevocation", "false");
         System.setProperty("sun.jnu.encoding", "UTF-8");
 
+        // OS Identification
+        var bitModel = System.getProperty("sun.arch.data.model");
+        var arch = System.getProperty("os.arch");
+
+        SYSTEM_OS_64 = bitModel == null ? OSUtil.is64BitJava(JavaManager.getDefault()) : bitModel.equals("64");
+        SYSTEM_OS_ARCH = arch == null ? (SYSTEM_OS_64 ? "x64" : "x86") : arch;
+        // ------------------
+
         NetUtil.patchSSL();
 
         if (listArgs.contains("--offline"))
@@ -159,8 +167,6 @@ public class CoreLauncher {
         new Authenticator();
         new Discord().startDiscordThread();
         new ExtensionWrapper().reload();
-        OS_64 = OSUtil.is64BitOS(JavaManager.getDefault());
-
 
         // Launcher Web API Listener
         APIListener.start();

@@ -120,7 +120,8 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
         lblName.setText(i.getName());
         lblAuthor.setText(i.getAuthors() != null && i.getAuthors().length != 0 ? i.getAuthors()[0] : null);
 
-        prefWidthProperty().bind(getListView().widthProperty().subtract(CELL_HORIZONTAL_PADDING));
+        setPrefWidth(0);
+        //prefWidthProperty().bind(getListView().widthProperty().subtract(CELL_HORIZONTAL_PADDING));
         txtCategory.setText(Translator.translateFormat("mods.category", i.getCategories() != null ? String.join(",", i.getCategories()) : ""));
         txtDesc.setText((i.getDescription() != null ? i.getDescription() + "\n\n" : "") + DateUtil.toString(i.getCreationDate(), Configurator.getConfig().getLanguage()));
         if (i.getIcon() != null && !i.getIcon().isEmpty()){

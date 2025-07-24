@@ -19,6 +19,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
@@ -121,7 +122,17 @@ public class WorldsPage extends HandlerController {
         profileIcon.setCornerRadius(30, 30, 8);
 
         lvWorlds.setItems(worlds);
+        lvWorlds.setCellFactory(a -> new ListCell<>() {
+            {
+                setPrefWidth(0);
+            }
 
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(item);
+            }
+        });
         lvWorlds.getSelectionModel().selectedItemProperty().addListener(a -> {
             if (local == null)
                 return;

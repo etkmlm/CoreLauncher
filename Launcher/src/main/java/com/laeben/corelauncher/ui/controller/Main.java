@@ -7,6 +7,7 @@ import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.Cat;
 import com.laeben.core.util.NetUtils;
 import com.laeben.core.util.events.*;
+import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.*;
@@ -412,22 +413,31 @@ public class Main extends HandlerController {
         return announcer;
     }
 
-    public void announceLater(String title, String content, Announcement.AnnouncementType type, Duration d){
-        UI.runAsync(() -> announcer.announce(new Announcement(title, content, type), d));
+    /**
+     * Makes a regular announcement.
+     */
+    public void announceLater(String title, String content, Announcement.AnnouncementType type, Duration duration){
+        UI.runAsync(() -> announcer.announce(new Announcement(title, content, type), duration));
     }
 
-    public boolean announceLater(Throwable ex, Duration d){
+    /**
+     * Makes an announcement of a throwable with the given duration.
+     * @param exception target exception
+     * @param duration announcement duration
+     * @return false if the exception was unkown
+     */
+    public boolean announceLater(Throwable exception, Duration duration){
         String msg;
 
         boolean state = true;
 
-        if (ex instanceof StopException)
+        if (exception instanceof StopException)
             return state;
-        else if (state = ex instanceof NoConnectionException)
+        else if (state = exception instanceof NoConnectionException)
             msg = Translator.translate("error.connection");
         else
             msg = Translator.translate("error.unknown");
-        UI.runAsync(() -> announcer.announce(new Announcement(Translator.translate("error.oops"), msg, Announcement.AnnouncementType.ERROR), d));
+        UI.runAsync(() -> announcer.announce(new Announcement(Translator.translate("error.oops"), msg, Announcement.AnnouncementType.ERROR), duration));
         return state;
     }
 
@@ -571,7 +581,7 @@ public class Main extends HandlerController {
         prgTranslate.setNode(progress);
 
         cMenu.addItem(null, SETTINGS, Translator.translate("settings"), a -> addTab("pages/settings", Translator.translate("settings"), true, SettingsPage.class));
-        cMenu.addItem(null, ABOUT, Translator.translate("about"), a -> CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm/CoreLauncher", "https://github.com/etkmlm", "https://discord.gg/MEJQtCvwqf", LauncherConfig.APPLICATION.getName())).execute());
+        cMenu.addItem(null, ABOUT, Translator.translate("about"), a -> CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm/CoreLauncher", "https://github.com/etkmlm", "https://discord.gg/MEJQtCvwqf", CoreLauncher.SYSTEM_OS_64 ? "+" : "-", CoreLauncher.SYSTEM_OS_ARCH, LauncherConfig.APPLICATION.getName())).execute());
         cMenu.addItem(null, FEEDBACK, Translator.translate("feedback"), a -> {
             try {
                 OSUtil.openURL("https://github.com/etkmlm/CoreLauncher/issues");

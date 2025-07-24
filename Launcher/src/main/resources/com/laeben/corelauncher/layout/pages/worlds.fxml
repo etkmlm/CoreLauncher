@@ -9,11 +9,10 @@
           fx:controller="com.laeben.corelauncher.ui.controller.page.WorldsPage"
           stylesheets="@../../style/pages/worlds.css,@../../style/controls/clui.css"
           maxHeight="Infinity" maxWidth="Infinity" hgap="16" vgap="16"
-          style="-fx-padding: 10px"
->
+          style="-fx-padding: 10px">
 
     <columnConstraints>
-        <ColumnConstraints prefWidth="275"/>
+        <ColumnConstraints percentWidth="20" minWidth="275"/>
         <ColumnConstraints hgrow="ALWAYS" />
     </columnConstraints>
     <rowConstraints>

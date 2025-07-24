@@ -13,8 +13,15 @@ public class AdoptiumJavaManager implements JavaSource {
     private static final String ADOPTIUM = "https://api.adoptium.net/v3/assets/latest/";
 
     @Override
-    public JavaDownloadInfo getJavaInfo(Java j, OS os, boolean is64Bit) throws NoConnectionException, HttpException {
-        String url = ADOPTIUM + j.majorVersion + "/hotspot?os=" + os.getName() + "&image_type=jdk&architecture=" + (is64Bit ? "x64" : "x86");
+    public JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException {
+        if (arch != null){
+            if (arch.equals("amd64"))
+                arch = "x64";
+            else if (arch.equals("i686"))
+                arch = "x86";
+        }
+
+        String url = String.format("%s%d/hotspot?os=%s&image_type=jre&architecture=%s", ADOPTIUM, j.majorVersion, os.getName(), arch);
 
         var arr = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(url), JsonArray.class);
         if (arr == null || arr.isEmpty())
@@ -24,12 +31,12 @@ public class AdoptiumJavaManager implements JavaSource {
             return null;
         var obj = object.getAsJsonObject();
         return new JavaDownloadInfo(
-                obj.get("release_name").getAsString(),
+                obj.get("release_name").getAsString() + "-jre",
                 obj.getAsJsonObject("binary")
                         .getAsJsonObject("package")
                         .get("link")
                         .getAsString(),
-                "Adoptium JDK " + j.majorVersion,
+                "Adoptium JRE " + j.majorVersion,
                 j.majorVersion);
     }
 }

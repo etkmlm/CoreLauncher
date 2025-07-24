@@ -143,6 +143,7 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
         this.item = item;
 
         btnPlay.setOnMouseClicked(a -> {
+            a.consume();
             Main.getMain().selectProfile(item);
             if (onClick != null)
                 onClick.test((ValueEvent) new ValueEvent(PLAY, null).setSource(this));

@@ -66,7 +66,7 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
         worker.begin().withTask(a -> new Task<>() {
             @Override
             protected JavaDownloadInfo call() throws Exception {
-                return JavaManager.getManager().getJavaInfo(Java.fromVersion(spnMajor.getValue()), CoreLauncher.OS_64);
+                return JavaManager.getManager().getJavaInfo(Java.fromVersion(spnMajor.getValue()), CoreLauncher.SYSTEM_OS_ARCH);
             }
         }).onDone(a -> {
             if (a.getValue() != null)

@@ -16,5 +16,5 @@ public interface JavaSource {
         put(JavaSourceType.ADOPTIUM, new AdoptiumJavaManager());
     }};
 
-    JavaDownloadInfo getJavaInfo(Java j, OS os, boolean is64Bit) throws NoConnectionException, HttpException;
+    JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException;
 }
