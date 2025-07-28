@@ -6,7 +6,7 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.laeben.corelauncher.ui.controller.Frame" stylesheets="@../style/frame.css" style="-fx-background-radius: 10px; -fx-border-radius: 10px; -fx-background-color: #101010;" minWidth="200">
     <StackPane fx:id="content" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0"/>
-    <HBox AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" alignment="TOP_CENTER">
+    <HBox AnchorPane.rightAnchor="4" AnchorPane.topAnchor="4" alignment="TOP_CENTER">
         <CShapefulButton styleClass="window-button" fx:id="btnMinimize"/>
         <CShapefulButton styleClass="window-button" fx:id="btnMaximize"/>
         <CShapefulButton styleClass="window-button" fx:id="btnClose"/>

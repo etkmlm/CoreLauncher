@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.util.java;
 
 import com.google.gson.JsonArray;
+import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.api.entity.Java;
@@ -9,7 +10,7 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 
-public class AdoptiumJavaManager implements JavaSource {
+public class AdoptiumJavaSource implements JavaSource {
     private static final String ADOPTIUM = "https://api.adoptium.net/v3/assets/latest/";
 
     @Override
@@ -21,7 +22,7 @@ public class AdoptiumJavaManager implements JavaSource {
                 arch = "x86";
         }
 
-        String url = String.format("%s%d/hotspot?os=%s&image_type=jre&architecture=%s", ADOPTIUM, j.majorVersion, os.getName(), arch);
+        String url = String.format("%s%d/hotspot?os=%s&image_type=%s&architecture=%s", ADOPTIUM, j.majorVersion, os.getName(), JavaManager.PACKAGE_TYPE, arch);
 
         var arr = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(url), JsonArray.class);
         if (arr == null || arr.isEmpty())
@@ -36,7 +37,21 @@ public class AdoptiumJavaManager implements JavaSource {
                         .getAsJsonObject("package")
                         .get("link")
                         .getAsString(),
-                "Adoptium JRE " + j.majorVersion,
-                j.majorVersion);
+                String.format("Adoptium %s %d", JavaManager.PACKAGE_TYPE.toUpperCase(), j.majorVersion),
+                j.majorVersion, os);
+    }
+
+    @Override
+    public void extract(Path archive, JavaDownloadInfo info){
+        archive.extract(null, null);
+        if (info.os() != OS.OSX)
+            return;
+
+        var folder = archive.parent().to(info.name());
+        var home = folder.to("Contents", "Home");
+        var temp = folder.parent().to("temp");
+        home.move(temp);
+        folder.delete();
+        temp.move(folder);
     }
 }

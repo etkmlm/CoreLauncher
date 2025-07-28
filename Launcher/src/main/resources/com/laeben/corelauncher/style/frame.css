@@ -8,8 +8,8 @@
 
     -enable-transparent-animation: true;
 
-    -fx-pref-width: 48px;
-    -fx-pref-height: 48px;
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
 
     -fx-spacing: 0;
 }

@@ -5,7 +5,7 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.minecraft.entity.Library;
 
 public final class LauncherConfig {
-    public static final double VERSION = 1.19;
+    public static final double VERSION = 1.191;
     private static final String APP_ID = "clauncher";
     public static final boolean USE_DETAILED_LOGGING = false;
     public static final LaebenApp APPLICATION;

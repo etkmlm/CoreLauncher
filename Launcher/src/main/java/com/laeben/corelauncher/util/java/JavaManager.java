@@ -6,6 +6,7 @@ import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -29,6 +30,8 @@ public class JavaManager {
     public static final String DELETE = "delete";
     public static final String UPDATE = "update";
     public static final String DOWNLOAD_COMPLETE = "down";
+
+    public static final String PACKAGE_TYPE = "jre";
 
     private JavaSource source;
 
@@ -101,12 +104,12 @@ public class JavaManager {
         return new Java(Path.begin(OSUtil.getRunningJavaDir()));
     }
 
-    public JavaDownloadInfo getJavaInfo(Java j, String arch) throws NoConnectionException {
+    public JavaDownloadInfo getJavaInfo(Java j, String arch, OS os) throws NoConnectionException {
         if (j.majorVersion == 0)
             return null;
 
         try{
-            return source.getJavaInfo(j, CoreLauncher.SYSTEM_OS, arch);
+            return source.getJavaInfo(j, os, arch);
         }
         catch (NoConnectionException e){
             throw e;
@@ -133,7 +136,7 @@ public class JavaManager {
      */
     public void downloadAndInclude(Java java, JavaDownloadInfo info) throws NoConnectionException, StopException {
         if (info == null)
-            info = getJavaInfo(java, CoreLauncher.SYSTEM_OS_ARCH);
+            info = getJavaInfo(java, CoreLauncher.SYSTEM_OS_ARCH, CoreLauncher.SYSTEM_OS);
 
         final String name = info.name();
 
@@ -152,7 +155,7 @@ public class JavaManager {
             break;
         }
 
-        var j = downloadAndExtract(info, existsPath);
+        var j = downloadAndExtract(info, javaDir, existsPath);
         if (j == null)
             return;
         javaVersions.add(j);
@@ -167,23 +170,25 @@ public class JavaManager {
      * @param existsPath possible existing instance to delete after download completed
      * @return downloaded instance
      */
-    public Java downloadAndExtract(JavaDownloadInfo info, Path existsPath) throws NoConnectionException, StopException {
+    public Java downloadAndExtract(JavaDownloadInfo info, Path targetDir, Path existsPath) throws NoConnectionException, StopException {
         if (info == null)
             return null;
 
         try{
-            Main.getMain().setPrimaryStatus(Translator.translateFormat("java.downloading", info.name()));
-            var file = NetUtil.download(info.url(), javaDir, true, true);
+            if (Main.getMain() != null)
+                Main.getMain().setPrimaryStatus(Translator.translateFormat("java.downloading", info.name()));
+
+            var file = NetUtil.download(info.url(), targetDir, true, true);
 
             if (existsPath != null) // handling existing java version before extracting the file
                 existsPath.delete();
 
-            file.extract(null, null);
+            source.extract(file, info);
             file.delete();
 
             handler.execute(new KeyEvent(DOWNLOAD_COMPLETE));
 
-            return new Java(info.displayName(), javaDir.to(info.name()));
+            return new Java(info.displayName(), targetDir.to(info.name()));
         }
         catch (NoConnectionException | StopException e){
             throw e;
