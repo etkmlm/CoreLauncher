@@ -25,11 +25,17 @@ jobs:
     permissions: write-all
     outputs:
       version: ${{ steps.iver.outputs.version }}
+      stableVersion: ${{ steps.iver.outputs.stableVersion }}
       packageName: ${{ steps.ipkg.outputs.name }}
     steps:
       - name: Identify Version
         id: iver
-        run: tag="${{github.event.release.tag_name}}" && echo "version=${tag##*[a-zA-Z]}" >> $GITHUB_OUTPUT
+        run: >
+          tag="${{github.event.release.tag_name}}" && 
+          rawVersion=${tag##*[a-zA-Z]} && 
+          echo "version=$rawVersion" >> $GITHUB_OUTPUT && 
+          stVersion=$(echo "$rawVersion" | awk -F. '{printf "%s.%s.%s", $1, $2, $3; for (i=4; i<=NF; i++) printf "%s", $i; print ""}') && 
+          echo "stableVersion=$stVersion" >> $GITHUB_OUTPUT
       - name: Identify Package Name
         id: ipkg
         run: echo "name=${{github.event.repository.name}}-${{steps.iver.outputs.version}}.jar" >> $GITHUB_OUTPUT
@@ -251,7 +257,7 @@ jobs:
           --input "${{env.appDir}}"
           --main-jar main.jar
           --runtime-image "${{steps.jre-clone.outputs.path}}"
-          --app-version "${{needs.build.outputs.version}}"
+          --app-version "${{needs.build.outputs.stableVersion}}"
           --vendor "${{env.vendor}}"
           --java-options "'-Duser.dir=\$APPDIR'"
           --mac-package-name "${{env.appName}}"
@@ -307,7 +313,7 @@ jobs:
           --icon "target/favicon.icns"
           --main-jar main.jar
           --runtime-image "${{steps.jre-clone.outputs.path}}"
-          --app-version "${{needs.build.outputs.version}}"
+          --app-version "${{needs.build.outputs.stableVersion}}"
           --vendor "${{env.vendor}}"
           --java-options "'-Duser.dir=\$APPDIR'"
           --mac-package-name "${{env.appName}}"
