@@ -152,6 +152,9 @@ public class OptiFine extends Loader<OptiVersion> {
 
             var profileInfo = generateProfileInfo(gameDir);
             var path = Configurator.getConfig().getTemporaryFolder();
+
+            refreshUrl(v); // We need to refresh it
+
             path = NetUtil.download(v.url, path.to(clientPath.getName()), false, false);
 
             if (stopRequested)
