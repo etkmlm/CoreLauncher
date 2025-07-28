@@ -11,9 +11,9 @@
             fetch("https://laeben-update-default-rtdb.europe-west1.firebasedatabase.app/apps/clauncher.json")
                 .then(a => a.json().then(app => {
                     var jarbtn = document.getElementById("jar");
-                    var installer = document.getElementById("installer");
+                    //var installer = document.getElementById("installer");
                     jarbtn.href = app.latestFile;
-					installer.href = app.installer;
+					//installer.href = app.installer;
             }));
         };
     </script>
@@ -24,8 +24,9 @@
         <div class="one flex-xcenter flex-ycenter">
             <div class="precious-pane">
                 <h1>Open, customize, play.</h1>
-                <a style="background: #33b2f533;" id="installer" href="https://github.com/etkmlm/CoreLauncherInstaller/releases/download/1.01/CoreLauncherInstaller.exe" class="center">Installer</a>
-                <br/>
+                <!--<a style="background: #33b2f533;" id="installer" href="https://github.com/etkmlm/CoreLauncherInstaller/releases/download/1.01/CoreLauncherInstaller.exe" class="center">Installer</a>-->
+                <a style="background: #33b2f533;" id="releases" href="https://github.com/etkmlm/CoreLauncher/releases" class="center">Releases</a>
+				<br/>
                 <a style="background: #33b2f533;" id="jar" href="https://github.com/etkmlm/CoreLauncher/releases/download/beta1.1.9/CoreLauncher-1.1.9.jar" class="center">Portable</a>
                 <br/>
                 <a style="background: #33b2b533;" href="https://github.com/etkmlm/CoreLauncher" class="center">Wiki and Source</a>
