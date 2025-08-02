@@ -42,6 +42,25 @@
         };
         const learnSvg = '<svg preserveAspectRatio="none" width="150" height="20" viewBox="0 0 22.36 13.66"><path d="M10.01,13.19L.4,2.89C-.16,2.29-.13,1.34.48.77h0c.61-.57,1.55-.53,2.12.07l7.39,7.92c.6.64,1.61.63,2.2-.01L19.75.49c.56-.61,1.51-.65,2.12-.09h0c.61.56.65,1.51.09,2.12l-9.75,10.66c-.59.65-1.61.65-2.2.01Z" /></svg>';
 
+        function getOSString() {
+            const agent = navigator.userAgent;
+            if (agent.includes("Windows"))
+                return "windows.msi";
+            else if (agent.includes("OS X")) {
+                var w = document.createElement("canvas").getContext("webgl");
+                var d = w.getExtension('WEBGL_debug_renderer_info');
+                var g = d && w.getParameter(d.UNMASKED_RENDERER_WEBGL) || "";
+                if (g.match('/Apple/') && !g.match('/Apple GPU/') || confirm("Do you have Apple Silicon (M Processor) Mac?")) {
+                    return "macos-arm.dmg";
+                }
+                else {
+                    return "macos.dmg";
+                }
+            }
+            else
+                return "linux.deb";
+        }
+
         async function refreshLinks() {
             const resp = await fetch("https://api.github.com/repos/etkmlm/CoreLauncher/releases?page=1&per_page=1");
             const releases = await resp.json();
@@ -49,9 +68,10 @@
             if (releases.length === 0)
                 return;
 
+            const osString = getOSString();
 
             releases[0].assets.forEach(element => {
-                if (!element.name.endsWith('.jar'))
+                if (!element.name.endsWith(osString))
                     return;
                 var btn = document.getElementById("btnDownload");
                 btn.href = element.browser_download_url;
