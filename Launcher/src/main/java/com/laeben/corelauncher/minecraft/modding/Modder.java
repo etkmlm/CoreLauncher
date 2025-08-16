@@ -533,7 +533,7 @@ public class Modder {
             }
 
             if (r.getType() != ResourceType.WORLD){
-                remove(p, r, true, false);
+                removeAll(p, List.of(r), true, false);
             }
             else if (p.getAllResources().stream().anyMatch(a -> a instanceof World w && w.equals(r)))
                 continue;
@@ -547,56 +547,62 @@ public class Modder {
         return count;
     }
 
-    public void remove(Profile profile, CResource r){
-        remove(profile, r, false, true);
+    public void removeAll(Profile profile, List<CResource> resources){
+        removeAll(profile, resources, false, true);
     }
-    public void remove(Profile profile, CResource r, boolean useExistingResource, boolean triggerSet){
+
+    public void remove(Profile profile, CResource resource){
+        removeAll(profile, List.of(resource));
+    }
+
+    public void removeAll(Profile profile, List<CResource> resources, boolean useExistingResource, boolean triggerSet){
         var path = profile.getPath();
+        for (var r : resources){
+            CResource finalR;
 
-        CResource finalR;
+            if (r instanceof Modpack mp){
+                if (useExistingResource){
+                    var found = profile.getAllResources().stream().filter(a -> a.isSameResource(r)).findFirst();
+                    if (found.isEmpty())
+                        return;
+                    else
+                        mp = (Modpack) found.get();
+                }
+                finalR = mp;
 
-        if (r instanceof Modpack mp){
-            if (useExistingResource){
-                var found = profile.getAllResources().stream().filter(a -> a.isSameResource(r)).findFirst();
-                if (found.isEmpty())
-                    return;
-                else
-                    mp = (Modpack) found.get();
+                for (var res : profile.getAllResources().stream().filter(x -> x instanceof ModpackContent mpc && mpc.belongs((Modpack) finalR)).toList()){
+                    if (res.fileName == null)
+                        continue;
+
+                    path.to(res.getType().getStoringFolder(), res.fileName).delete();
+                }
+                var manifest = path.to("manifest-" + finalR.name + ".json");
+                manifest.delete();
             }
-            finalR = mp;
+            else{
+                var res = r;
 
-            for (var res : profile.getAllResources().stream().filter(x -> x instanceof ModpackContent mpc && mpc.belongs((Modpack) finalR)).toList()){
-                if (res.fileName == null)
-                    continue;
+                if (useExistingResource){
+                    var found = profile.getAllResources().stream().filter(a -> a.isSameResource(r)).findFirst();
+                    if (found.isEmpty())
+                        return;
+                    else
+                        res = found.get();
+                }
 
-                path.to(res.getType().getStoringFolder(), res.fileName).delete();
-            }
-            var manifest = path.to("manifest-" + finalR.name + ".json");
-            manifest.delete();
-        }
-        else{
-            var res = r;
+                finalR = res;
 
-            if (useExistingResource){
-                var found = profile.getAllResources().stream().filter(a -> a.isSameResource(r)).findFirst();
-                if (found.isEmpty())
-                    return;
-                else
-                    res = found.get();
+                if (finalR.getType() == ResourceType.WORLD) {
+                    //path.to(finalR.getType().getStoringFolder(), finalR.name).delete();
+                } else if (finalR.fileName != null)
+                    path.to(finalR.getType().getStoringFolder(), finalR.fileName).delete();
             }
 
-            finalR = res;
-
-            if (finalR.getType() == ResourceType.WORLD) {
-                //path.to(finalR.getType().getStoringFolder(), finalR.name).delete();
-            } else if (finalR.fileName != null)
-                path.to(finalR.getType().getStoringFolder(), finalR.fileName).delete();
+            profile.removeResource(finalR);
         }
 
         if (triggerSet)
-            Profiler.getProfiler().setProfile(profile.getName(), a -> a.removeResource(finalR));
-        else
-            profile.removeResource(finalR);
+            Profiler.getProfiler().setProfile(profile.getName(), null);
     }
 
     public void setDisableCache(boolean mode){

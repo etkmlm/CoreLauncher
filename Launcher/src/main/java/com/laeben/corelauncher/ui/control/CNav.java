@@ -4,6 +4,7 @@ import javafx.animation.ScaleTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -42,7 +43,7 @@ public class CNav extends VBox {
         setAlignment(Pos.CENTER);
         setEnabled(false);
         getStyleClass().add("cnav");
-        setStyle("-fx-background-radius: 8px;-fx-background-color: #00808010;");
+        //setStyle("-fx-background-radius: 8px;-fx-background-color: #00808010;");
     }
 
     public Node getItem(int row, int col){

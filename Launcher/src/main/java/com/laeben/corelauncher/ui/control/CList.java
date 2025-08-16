@@ -61,6 +61,8 @@ public class CList<T> extends VBox {
 
         selectionMode = new SimpleBooleanProperty(false);
 
+        getStyleClass().add("clist");
+
         nav = new CNav();
         nav.addItem(Translator.translate("option.cancel"), "-shape-cancel", a -> setSelectionMode(false), 0);
         nav.addItem(Translator.translate("option.selectAll"), "-shape-check", a -> selectAll(), 0);
@@ -203,7 +205,7 @@ public class CList<T> extends VBox {
 
     private CCell<T> getCell(T item){
         var cell = cellFactory.get().setItem(item).setList(this);
-        if (selectionEnabled && cell instanceof CLSelectable cls){
+        if (selectionEnabled && cell instanceof CLSelectable cls && cls.isSelectable()){
             if (selectedItems.contains(item))
                 cls.setSelected(true);
             cls.setSelectionListener(a -> {
@@ -332,7 +334,7 @@ public class CList<T> extends VBox {
 
     public void selectAll(){
         list.getChildren().forEach(a -> {
-            if (a instanceof CLSelectable cls)
+            if (a instanceof CLSelectable cls && cls.isSelectable())
                 cls.setSelected(true);
         });
         if (items.size() != selectedItems.size())
@@ -349,7 +351,7 @@ public class CList<T> extends VBox {
 
     public void deselectAll(){
         list.getChildren().forEach(a -> {
-            if (a instanceof CLSelectable cls)
+            if (a instanceof CLSelectable cls && cls.isSelectable())
                 cls.setSelected(false);
         });
         if (!selectedItems.isEmpty())

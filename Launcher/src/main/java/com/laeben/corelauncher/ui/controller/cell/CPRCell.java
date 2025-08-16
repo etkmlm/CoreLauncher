@@ -17,6 +17,8 @@ import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.ui.entity.CLSelectable;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -27,22 +29,27 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 // Profile Resource Cell
-public class CPRCell<T extends CResource> extends CCell<T> {
+public class CPRCell<T extends CResource> extends CCell<T> implements CLSelectable {
 
     public static final String UPDATE = "update";
     public static final String REMOVE = "remove";
 
     private T item;
     private boolean autoChanged;
+    private boolean selected;
+    private Consumer<Boolean> onSelected;
 
     private final Profile profile;
+    private final boolean selectable;
 
-    public CPRCell(Profile profile){
+    public CPRCell(Profile profile, boolean selectable){
         super("layout/cells/ccell.fxml");
 
         this.profile = profile;
+        this.selectable = selectable;
 
         node.setOnMouseEntered(a -> fade.playFromStart());
 
@@ -55,11 +62,8 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         toggle = new CButton();
         toggle.setStyle("-fx-padding: 0 8px 0 0; -fx-min-width: 24px; -fx-pref-width: 24px; -fx-pref-height: 24px");
         toggle.setOnMouseClicked(a -> {
-            if (item == null)
-                return;
-
-            Profiler.setResourceDisabled(profile, item, !item.disabled);
-            invalidateToggle();
+            a.consume();
+            toggleEnableButton();
         });
 
         btnRemove = new CButton();
@@ -88,14 +92,44 @@ public class CPRCell<T extends CResource> extends CCell<T> {
     private final CButton btnRemove;
     private final CShapefulButton btnUpdate;
 
-    private Consumer<ValueEvent> onAction;
+    private Predicate<ValueEvent> onAction;
+
+
+    public void toggleEnableButton(){
+        if (item == null)
+            return;
+
+        Profiler.setResourceDisabled(profile, item, !item.disabled, true);
+        invalidateToggle();
+    }
+
+    public static <T extends CResource> boolean toggleUpdate(Profile profile, T item){
+        try {
+            Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.single", item.name), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+            var upResources = Modder.getModder().getUpdate(profile, item);
+            if (upResources != null){
+                var res = upResources.stream().filter(k -> k.isSameResource(item)).findFirst().orElse(item);
+                Modder.getModder().include(profile, upResources);
+                Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.single", res.name, res.fileName), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+                return true;
+            }
+            else{
+                Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.mpcontent", item.name), Announcement.AnnouncementType.ERROR, Duration.seconds(4));
+            }
+
+        } catch (NoConnectionException | HttpException | StopException ignored) {
+            int m = 0;
+        }
+
+        return false;
+    }
 
     @FXML
     public void initialize(){
-
+        setOnMouseClicked(a -> setSelected(!isSelected()));
     }
 
-    public CPRCell<T> setOnAction(Consumer<ValueEvent> onAction){
+    public CPRCell<T> setOnAction(Predicate<ValueEvent> onAction){
         this.onAction = onAction;
         return this;
     }
@@ -119,35 +153,21 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         lblName.setTooltip(new Tooltip(item.fileName));
         //btnUpdate.setTooltip(new Tooltip(Translator.translate("update")));
 
-        btnUpdate.setOnMouseClicked(a -> new Thread(() -> {
-            try {
-                Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.search.single", item.name), Announcement.AnnouncementType.INFO, Duration.seconds(2));
-                var upResources = Modder.getModder().getUpdate(profile, item);
-                if (upResources != null){
-                    var res = upResources.stream().filter(k -> k.isSameResource(item)).findFirst().orElse(item);
-                    Modder.getModder().include(profile, upResources);
-                    Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.ok.single", res.name, res.fileName), Announcement.AnnouncementType.INFO, Duration.seconds(2));
-                    if (onAction != null)
-                        UI.runAsync(() -> onAction.accept((ValueEvent) new ValueEvent(UPDATE, res).setSource(this)));
-                }
-                else{
-                    Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.mpcontent", item.name), Announcement.AnnouncementType.ERROR, Duration.seconds(4));
-                }
-
-            } catch (NoConnectionException | HttpException | StopException ignored) {
-                int m = 0;
-            }
-        }).start());
+        btnUpdate.setOnMouseClicked(a -> {
+            a.consume();
+            if (onAction == null || onAction.test((ValueEvent) new ValueEvent(UPDATE, item).setSource(this)))
+                new Thread(() -> toggleUpdate(profile, item)).start();
+        });
         btnRemove.setOnMouseClicked(a -> {
+            a.consume();
             var x = CMsgBox
                     .msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
                     .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                     .executeForResult();
             if (x.isEmpty() || x.get().result() != CMsgBox.ResultType.YES)
                 return;
-            Modder.getModder().remove(profile, item);
-            if (onAction != null)
-                onAction.accept((ValueEvent) new ValueEvent(REMOVE, item).setSource(this));
+            if (onAction == null || onAction.test((ValueEvent) new ValueEvent(REMOVE, item).setSource(this)))
+                Modder.getModder().remove(profile, item);
         });
 
         super.getChildren().clear();
@@ -156,7 +176,7 @@ public class CPRCell<T extends CResource> extends CCell<T> {
         return this;
     }
 
-    private void invalidateToggle(){
+    public void invalidateToggle(){
         if (item == null || item.disabled){
             toggle.setTooltip(Translator.translate("option.enable"));
             toggle.getStyleClass().add("toggle-off");
@@ -172,5 +192,33 @@ public class CPRCell<T extends CResource> extends CCell<T> {
     @Override
     public T getItem() {
         return item;
+    }
+
+    @Override
+    public boolean isSelectable(){
+        return selectable;
+    }
+
+    @Override
+    public boolean isSelected() {
+        return selected;
+    }
+
+    @Override
+    public void setSelectionListener(Consumer<Boolean> consumer) {
+        this.onSelected = consumer;
+    }
+
+    @Override
+    public void setSelected(boolean v) {
+        if (!isSelectable())
+            return;
+
+        selected = v;
+
+        setOpacity(selected ? 0.5 : 1);
+
+        if (onSelected != null)
+            onSelected.accept(selected);
     }
 }

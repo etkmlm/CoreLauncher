@@ -23,12 +23,18 @@ import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.controller.cell.CProfile;
 import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.dialog.DResourceSelector;
+import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.ImageUtil;
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.DataFormat;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
@@ -42,6 +48,24 @@ public class ProfilePage extends HandlerController {
 
     public static final String COPYSET = "copyset";
     public static final String UPDATE_ALL = "upall";
+    public static final String SELECT_ALL = "selall";
+    public static final String DESELECT_ALL = "deselall";
+
+    private class ResourceSelectionModeListener implements ChangeListener<Boolean> {
+        private final CList<?> list;
+        public ResourceSelectionModeListener(CList<?> list){
+            this.list = list;
+        }
+
+
+        @Override
+        public void changed(ObservableValue<? extends Boolean> observableValue, Boolean o, Boolean n) {
+            if (n != null && n)
+                lastActiveList = list;
+        }
+    }
+
+    public GridPane grid;
 
     private Profile profile;
 
@@ -115,11 +139,20 @@ public class ProfilePage extends HandlerController {
     @FXML
     private Label lblMods;
 
+    @FXML
+    private CButton btnMenuResources;
+    @FXML
+    private CButton btnMenuShaders;
+    @FXML
+    private CButton btnMenuMods;
+
     private final CList<CResource> lvMods;
     private final CList<CResource> lvModpacks;
     private final CList<CResource> lvWorlds;
     private final CList<CResource> lvResources;
     private final CList<CResource> lvShaders;
+
+    private CList<?> lastActiveList;
 
     @FXML
     public Label lblUsername;
@@ -347,8 +380,40 @@ public class ProfilePage extends HandlerController {
         }
     }
 
+    private <T extends CResource> void setSelectedResourcesDisabled(CList<T> list, boolean disabled){
+        for (var x : list.getSelectedItems()){
+            Profiler.setResourceDisabled(profile, x, disabled, false);
+            for (var a : list.getList().getChildren()){
+                if (a instanceof CPRCell<?> cpr && x.equals(cpr.getItem())){
+                    cpr.invalidateToggle();
+                    break;
+                }
+            }
+        }
+
+        UI.runAsync(profile::save);
+        list.setSelectionMode(false);
+    }
+
+    private <T extends CResource> void updateSelectedResources(CList<T> list){
+
+    }
+
+    private <T extends CResource> void removeSelectedResources(CList<T> list){
+        var items = list.getSelectedItems();
+        Modder.getModder().removeAll(profile, (ObservableList<CResource>)items);
+        list.getItems().removeAll(items);
+        list.setSelectionMode(false);
+    }
+
     @Override
     public void preInit() {
+        lvModpacks.setSelectionEnabled(false);
+        btnMenuMods.setOnMouseClicked(a -> lvMods.setSelectionMode(true));
+        lvWorlds.setSelectionEnabled(false);
+        btnMenuResources.setOnMouseClicked(a -> lvResources.setSelectionMode(true));
+        btnMenuShaders.setOnMouseClicked(a -> lvShaders.setSelectionMode(true));
+
         vMods.getChildren().add(lvMods);
         vModpacks.getChildren().add(lvModpacks);
         vWorlds.getChildren().add(lvWorlds);
@@ -360,11 +425,15 @@ public class ProfilePage extends HandlerController {
         lvWorlds.setCellFactory(this::cellFactory);
         lvResources.setCellFactory(this::cellFactory);
         lvShaders.setCellFactory(this::cellFactory);*/
-        lvMods.setCellFactory(() -> cellFactory(lvMods));
-        lvModpacks.setCellFactory(() -> cellFactory(lvModpacks));
-        lvWorlds.setCellFactory(() -> cellFactory(lvWorlds));
-        lvResources.setCellFactory(() -> cellFactory(lvResources));
-        lvShaders.setCellFactory(() -> cellFactory(lvShaders));
+        lvMods.setCellFactory(() -> cellFactory(lvMods, true));
+        lvModpacks.setCellFactory(() -> cellFactory(lvModpacks, false));
+        lvWorlds.setCellFactory(() -> cellFactory(lvWorlds, false));
+        lvResources.setCellFactory(() -> cellFactory(lvResources, true));
+        lvShaders.setCellFactory(() -> cellFactory(lvShaders, true));
+
+        lvMods.selectionModeProperty().addListener(this.new ResourceSelectionModeListener(lvMods));
+        lvResources.selectionModeProperty().addListener(this.new ResourceSelectionModeListener(lvResources));
+        lvShaders.selectionModeProperty().addListener(this.new ResourceSelectionModeListener(lvShaders));
 
         /*lvMods.setItemEqualsFactory(CResource::isSameResource);
         lvModpacks.setItemEqualsFactory(CResource::isSameResource);
@@ -386,6 +455,10 @@ public class ProfilePage extends HandlerController {
         lvResources.setOnVisibleCountChanged( c -> invalidateCount(c, lblResources, "mods.type.resources"));
         lvShaders.setOnVisibleCountChanged( c -> invalidateCount(c, lblShaders, "mods.type.shaders"));
 
+        prepareListNavigation(lvMods);
+        prepareListNavigation(lvResources);
+        prepareListNavigation(lvShaders);
+
         txtSearch.textProperty().addListener(a -> {
             String text = txtSearch.getText();
             lvMods.filter(text);
@@ -399,6 +472,19 @@ public class ProfilePage extends HandlerController {
         imgUserHead.setCornerRadius(32, 32, 16);
 
         txtSearch.setFocusedAnimation(Duration.millis(200));
+
+
+    }
+
+    @Override
+    public void init(){
+        addRegisteredEventFilter(EventFilter.node(getRootNode(), KeyEvent.KEY_RELEASED, a -> {
+            if (a.getTarget().equals(txtSearch))
+                return;
+
+            if (lastActiveList != null && lastActiveList.onKeyEvent(a))
+                return;
+        }));
     }
 
     private void invalidateCount(int size, Label lbl, String translateKey){
@@ -409,25 +495,60 @@ public class ProfilePage extends HandlerController {
         lbl.setText(str);
     }
 
-    private <T extends CResource> CPRCell<T> cellFactory(CList<T> list){
-        return new CPRCell<T>(profile).setOnAction(k -> {
+    private void prepareListNavigation(CList list){
+        list.getNav().addItem(Translator.translate("option.enable"), "-shape-check", a -> {
+            setSelectedResourcesDisabled(list, false);
+        }, 1);
+        list.getNav().addItem(Translator.translate("option.disable"), "-shape-uncheck", a -> {
+            setSelectedResourcesDisabled(list, true);
+        }, 1);
+        /*list.getNav().addItem(Translator.translate("option.update"), "-shape-update", a -> {
+            updateSelectedResources(list);
+        }, 1);*/
+        list.getNav().addItem(Translator.translate("option.remove"), "-shape-remove", a -> {
+            var x = CMsgBox
+                    .msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
+                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                    .executeForResult();
+            if (x.isEmpty() || x.get().result() != CMsgBox.ResultType.YES)
+                return;
+            removeSelectedResources(list);
+        }, 1);
+    }
+
+    private <T extends CResource> CPRCell<T> cellFactory(CList<T> list, boolean selectable){
+        return new CPRCell<T>(profile, selectable).setOnAction(k -> {
             var cell = (CPRCell<T>)k.getSource();
             var item = (T)k.getValue();
+
+            ignoreReload = true;
+
             if (k.getKey().equals(CPRCell.UPDATE)){
                 /*int index = list.getItems().indexOf(cell.getItem());
                 if (index != -1)
                     list.getItems().set(index, item);*/
 
-                // profile update method implemented, these lines are not necessary
+                // profile update method implemented, above lines are not necessary
+
+                if (list.getSelectionMode() && list.getSelectedItems().contains(item)){
+                    updateSelectedResources(list);
+                    return false;
+                }
             }
             else if (k.getKey().equals(CPRCell.REMOVE)){
                 if (item instanceof Modpack)
                     setProfile(profile);
-                else
-                    list.getItems().remove(item);
+                else{
+                    if (list.getSelectionMode() && list.getSelectedItems().contains(item)){
+                        removeSelectedResources(list);
+                        return false;
+                    }
+                    else
+                        list.getItems().remove(item);
+                }
             }
 
-            ignoreReload = true;
+            return true;
         });
     }
 }

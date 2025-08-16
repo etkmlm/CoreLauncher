@@ -38,6 +38,18 @@
     -fx-background-position: center;
 }
 
+.resource-menu{
+    -fx-pref-width: 64px;
+    -fx-pref-height: 64px;
+
+    -enable-transparent-animation: true;
+    -fx-background-color: transparent;
+    -fx-background-image: url(../../images/menu_mini.png);
+    -fx-background-size: 32px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+}
+
 #btnMenu{
     -fx-font-size: 24pt;
     -fx-background-image: url(../../images/menu_mini.png);
@@ -56,4 +68,13 @@
 #btnMultipleBrowser{
     -fx-background-image: url(../../images/search.png);
     -fx-padding: 16px 18px;
+}
+
+.cnav {
+    -fx-background-color: -control-fill-secondary!important;
+    -fx-background-radius: 16px;
+}
+
+.clist{
+    -fx-spacing: 8px;
 }

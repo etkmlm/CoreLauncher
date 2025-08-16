@@ -142,7 +142,7 @@ public class Profiler {
         jsPath.write(first);
     }
 
-    public static void setResourceDisabled(Profile p, CResource resource, boolean disabled){
+    public static void setResourceDisabled(Profile p, CResource resource, boolean disabled, boolean save){
         if (resource.getType() == ResourceType.MODPACK || resource.getType() == ResourceType.WORLD) // not for these :)
             return;
 
@@ -157,7 +157,8 @@ public class Profiler {
             if (disabledPath.exists())
                 disabledPath.move(path);
         }
-        UI.runAsync(p::save);
+        if (save)
+            UI.runAsync(p::save);
     }
 
     private Profile importFromBackup(Path p){

@@ -17,6 +17,7 @@
     -control-fill: #303033;
     -control-focused-border-fill: #5151bd;
     -control-fill-bluish: #1042497F;
+    -control-fill-bluish-light: #00808010;
     -control-fill-secondary: #232325aa;
     -dialog-overlay-fill: #232325dd;
     -control-popup-selected-fill: #6b93c8;
@@ -321,7 +322,7 @@
     -fx-opacity: 0;
 }
 
-.selection-menu{
+.selection-menu, .cnav{
     -fx-background-color: -control-fill-bluish;
     -fx-background-radius: 8px;
 }

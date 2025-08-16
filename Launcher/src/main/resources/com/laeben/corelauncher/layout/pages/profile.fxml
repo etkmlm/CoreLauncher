@@ -60,22 +60,32 @@
             <!--<CVerticalList fx:id="lvModpacks"/>-->
         </VBox>
         <VBox fx:id="vResources" GridPane.columnIndex="1" GridPane.rowIndex="0">
-            <Label fx:id="lblResources" styleClass="header" text="%mods.type.resources"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label fx:id="lblResources" styleClass="header" text="%mods.type.resources"/>
+                <CButton fx:id="btnMenuResources" styleClass="resource-menu"/>
+            </HBox>
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvResources"/>-->
         </VBox>
         <VBox fx:id="vShaders" GridPane.columnIndex="0" GridPane.rowIndex="1">
-            <Label fx:id="lblShaders" styleClass="header" text="%mods.type.shaders"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label fx:id="lblShaders" styleClass="header" text="%mods.type.shaders"/>
+                <CButton fx:id="btnMenuShaders" styleClass="resource-menu"/>
+            </HBox>
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvShaders"/>-->
         </VBox>
         <VBox fx:id="vWorlds" GridPane.columnIndex="1" GridPane.rowIndex="1">
             <Label fx:id="lblWorlds" styleClass="header" text="%mods.type.worlds"/>
+
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvWorlds"/>-->
         </VBox>
         <VBox fx:id="vMods" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
-            <Label fx:id="lblMods" styleClass="header" text="%mods.type.mods"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label fx:id="lblMods" styleClass="header" text="%mods.type.mods"/>
+                <CButton fx:id="btnMenuMods" styleClass="resource-menu"/>
+            </HBox>
             <Rectangle height="10"/>
             <!--<CVerticalList fx:id="lvMods"/>-->
         </VBox>

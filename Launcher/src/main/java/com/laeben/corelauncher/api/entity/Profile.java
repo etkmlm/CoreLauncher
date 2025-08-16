@@ -309,6 +309,25 @@ public class Profile {
 
     /* Utils */
 
+    public void removeResources(List<CResource> resources){
+        var toRemove = new ArrayList<CResource>();
+        for (var res : resources){
+            if (res instanceof Modpack mp){
+                for (var oRes : getAllResources()){
+                    if (oRes.isSameResource(res) || (oRes instanceof ModpackContent mpc && mpc.belongs(mp)))
+                        toRemove.add(oRes);
+                }
+            }
+            else {
+                for (var oRes : getAllResources()){
+                    if (oRes.isSameResource(res))
+                        toRemove.add(oRes);
+                }
+            }
+        }
+        getAllResources().removeAll(toRemove);
+    }
+
     public void removeResource(CResource r){
         if (r instanceof Modpack mp){
             getAllResources().removeIf(x -> (x instanceof ModpackContent mpc && mpc.belongs(mp)) || x.isSameResource(mp));
