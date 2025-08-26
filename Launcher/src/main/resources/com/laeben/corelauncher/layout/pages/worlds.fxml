@@ -45,28 +45,33 @@
                 <ColumnConstraints percentWidth="70"/>
             </columnConstraints>
 
-            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.seed" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.dirName" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
             <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                <Label fx:id="lblDirName"/>
+            </HBox>
+
+            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.seed" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="1">
                 <Label fx:id="lblSeed"/>
             </HBox>
 
-            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.difficulty" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="1">
+            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.difficulty" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="2">
                 <Label fx:id="lblDifficulty"/>
             </HBox>
 
-            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.gameType" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.gameType" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="3">
                 <Label fx:id="lblGameType"/>
             </HBox>
 
-            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.spawn" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="3">
+            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.spawn" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="4">
                 <Label fx:id="lblSpawn"/>
             </HBox>
 
-            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.allowCheats" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
-            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="4">
+            <Label maxWidth="Infinity" styleClass="prop-label" alignment="CENTER" text="%world.allowCheats" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+            <HBox alignment="CENTER" maxWidth="Infinity" styleClass="prop" GridPane.columnIndex="1" GridPane.rowIndex="5">
                 <Label fx:id="lblCheats"/>
             </HBox>
         </GridPane>

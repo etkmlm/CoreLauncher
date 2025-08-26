@@ -7,6 +7,7 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.World;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
@@ -29,17 +30,15 @@ import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 public class WorldsPage extends HandlerController {
     public static final String KEY = "pgworlds";
 
     private Profile profile;
-    private final ObservableList<String> worlds;
-    private List<World> local;
+    private final ObservableList<World> worlds;
 
     public WorldsPage(){
         super(KEY);
@@ -77,14 +76,15 @@ public class WorldsPage extends HandlerController {
         btnBack.setOnMouseClicked(a -> Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile));
         btnBack.setText("⤶ " + Translator.translate("option.back"));
 
-        local = profile.getLocalWorlds();
-        worlds.addAll(local.stream().map(x -> x.levelName).toList());
+        worlds.addAll(profile.getLocalWorlds());
     }
 
     @FXML
-    private ListView<String> lvWorlds;
+    private ListView<World> lvWorlds;
     @FXML
     private Label lblLevelName;
+    @FXML
+    private Label lblDirName;
     @FXML
     private Label lblSeed;
     @FXML
@@ -123,23 +123,33 @@ public class WorldsPage extends HandlerController {
 
         lvWorlds.setItems(worlds);
         lvWorlds.setCellFactory(a -> new ListCell<>() {
+            private World item;
             {
                 setPrefWidth(0);
+                setOnMouseEntered(a -> {
+                    if (item != null)
+                        setText(item.dirName);
+                });
+                setOnMouseExited(a -> {
+                    if (item != null)
+                        setText(item.levelName);
+                });
             }
 
             @Override
-            protected void updateItem(String item, boolean empty) {
+            protected void updateItem(World item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(item);
+                this.item = item;
+                setText(item == null ? null : item.levelName);
             }
         });
-        lvWorlds.getSelectionModel().selectedItemProperty().addListener(a -> {
-            if (local == null)
+        lvWorlds.getSelectionModel().selectedItemProperty().addListener((a, o, n) -> select(n));
+
+        lblDirName.setOnMouseClicked(a -> {
+            if (selectedWorld == null)
                 return;
 
-            var s = local.get(lvWorlds.getSelectionModel().getSelectedIndex());
-
-            select(s);
+            OSUtil.open(profile.getPath().to("saves").to(selectedWorld.dirName).toFile());
         });
 
         lblSeed.setOnMouseClicked(a -> {
@@ -178,7 +188,7 @@ public class WorldsPage extends HandlerController {
                 return;
 
             var worlds = profile.getPath().to("saves");
-            var worldFolder = worlds.to(selectedWorld.levelName);
+            var worldFolder = worlds.to(selectedWorld.dirName);
             if (!worldFolder.exists())
                 return;
 
@@ -222,32 +232,74 @@ public class WorldsPage extends HandlerController {
                 var saves = profile.getPath().to("saves");
                 var arr = new ArrayList<String>();
                 for (var path : paths){
-                    var temp = Configurator.getConfig().getTemporaryFolder().to(path.getNameWithoutExtension());
+                    String dirName = path.getNameWithoutExtension();
+                    var temp = Configurator.getConfig().getTemporaryFolder().to(dirName);
                     {
                         path.extract(temp, null);
 
                         var files = temp.getFiles();
-                        if (files.size() == 1 && files.get(0).isDirectory())
-                            temp = files.get(0);
+                        if (files.size() == 1 && files.get(0).isDirectory()){
+                            dirName = files.get(0).getName();
+                            files.get(0).move(temp);
+                        }
                     }
 
                     var world = World.fromGzip(null, temp.to("level.dat"));
 
                     String name = world.levelName;
+                    final String finalDirName = dirName;
 
-                    if (name == null || saves.getFiles().stream().anyMatch(x -> x.getName().equals(name))){
+                    if (name == null){
                         temp.delete();
                         continue;
                     }
 
+                    if (saves.getFiles().stream().anyMatch(x -> x.getName().equals(finalDirName))){
+                        var task = new Task<CMsgBox.ResultType>(){
+
+                            @Override
+                            protected CMsgBox.ResultType call() {
+                                return CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translateFormat("world.ask.overwrite", finalDirName))
+                                        .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
+                                        .executeForResult()
+                                        .map(CMsgBox.Result::result)
+                                        .orElse(null);
+                            }
+                        };
+
+                        UI.runAsync(task);
+                        CMsgBox.ResultType confirmation;
+                        try {
+                            confirmation = task.get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            temp.delete();
+                            continue;
+                        }
+
+
+                        if (confirmation == null || confirmation == CMsgBox.ResultType.CANCEL){
+                            temp.delete();
+                            continue;
+                        }
+                        else if (confirmation.isPositive()){
+                            saves.to(finalDirName).delete();
+                        }
+                        else{
+                            String salt = String.valueOf(Instant.now().toEpochMilli());
+                            dirName = finalDirName + salt;
+                        }
+                    }
+
                     arr.add(name);
-                    temp.move(saves.to(StrUtil.pure(name)));
+                    temp.move(saves.to(StrUtil.pure(dirName)));
                 }
 
-                UI.runAsync(this::reload);
+
                 //Profiler.getProfiler().setProfile(profile.getName(), null);
-                if (!arr.isEmpty())
+                if (!arr.isEmpty()){
+                    UI.runAsync(this::reload);
                     Main.getMain().announceLater(Translator.translate("world.title"), Translator.translateFormat("world.import.end", String.join(",", arr)), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+                }
             }).start();
         });
     }
@@ -261,6 +313,7 @@ public class WorldsPage extends HandlerController {
 
         if (w == null){
             lblLevelName.setText(null);
+            lblDirName.setText(null);
             lblSeed.setText(null);
             lblDifficulty.setText(null);
             lblGameType.setText(null);
@@ -280,6 +333,7 @@ public class WorldsPage extends HandlerController {
         }
 
         lblLevelName.setText(w.levelName);
+        lblDirName.setText(w.dirName);
         lblSeed.setText(String.valueOf(w.seed));
         lblDifficulty.setText(Translator.translate("world.difficulty." + w.difficulty.name().toLowerCase(Locale.US)));
         lblGameType.setText(Translator.translate("world.type." + w.gameType.name().toLowerCase(Locale.US)));

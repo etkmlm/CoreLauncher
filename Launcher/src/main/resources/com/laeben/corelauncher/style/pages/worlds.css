@@ -23,7 +23,7 @@
     -fx-font-weight: bold;
 }
 
-#lblSpawn,#lblSeed{
+#lblSpawn,#lblSeed,#lblDirName{
     -fx-cursor: hand;
 }
 
