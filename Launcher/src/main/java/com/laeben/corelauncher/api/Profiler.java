@@ -36,7 +36,7 @@ public class Profiler {
 
     private static Profiler instance;
     private Path profilesDir;
-    private List<Profile> profiles;
+    private ArrayList<Profile> profiles;
     private final EventHandler<ChangeEvent> handler;
 
     public Profiler() {
@@ -116,7 +116,7 @@ public class Profiler {
         Shortcut.create(destination, javaPath, targetPath.parent(), iconPath, args, OS.getSystemOS());
     }
 
-    public List<Profile> getAllProfiles(){
+    public ArrayList<Profile> getAllProfiles(){
         return profiles;
     }
 
@@ -353,7 +353,8 @@ public class Profiler {
 
     public void reload(){
         try{
-            profiles = profilesDir.getFiles().stream()
+            profiles = (ArrayList<Profile>) profilesDir.getFiles().stream()
+                    //.sorted(Comparator.comparingLong(a -> a.toFile().lastModified()))
                     .map(Profile::fromFolder)
                     .filter(x -> x != null && !x.isMeta()) // folders without profile.json ignored
                     .collect(Collectors.toList());

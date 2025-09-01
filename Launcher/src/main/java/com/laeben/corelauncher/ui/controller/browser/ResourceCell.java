@@ -131,7 +131,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
                 icon.setImage(ImageUtil.getLocalImage(i.getIcon()));
         }
 
-        var loaders = i.getLoaders();
+        var loaders = i.getLoaders(prefs.getGameVersions());
         if (loaders != null && prefs.getProfile() == null){
             badges.getChildren().clear();
             for (var l : loaders){
@@ -227,7 +227,8 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
                     }
                     else{
                         var opt = ModSource.Options
-                                .create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(res.getResourceType(), profile.getLoader().getType()));
+                                .create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(res.getResourceType(), profile.getLoader().getType()))
+                                .allowOverwrite(isNewProfile && !prefs.hasGameVersions());
                         if (res.getResourceType() != ResourceType.MODPACK)
                             opt.dependencies(true);
 
@@ -246,7 +247,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
                                 all = Stream.concat(all.stream(), rrrr.stream()).distinct().toList();
                         }
 
-                        if (Modder.getModder().include(profile, all) == 0)
+                        if (Modder.getModder().include(profile, all, isNewProfile ? Modder.IncludeMode.OVERWRITE_PROFILE : Modder.IncludeMode.DEFAULT) == 0)
                             return;
                     }
 

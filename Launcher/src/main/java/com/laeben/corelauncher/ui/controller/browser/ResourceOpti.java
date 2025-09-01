@@ -5,6 +5,7 @@ import com.laeben.corelauncher.minecraft.modding.entity.resource.Mod;
 import com.laeben.corelauncher.minecraft.loader.optifine.entity.OptiVersion;
 
 import java.util.Date;
+import java.util.List;
 
 public class ResourceOpti implements ModResource {
 
@@ -79,7 +80,7 @@ public class ResourceOpti implements ModResource {
     }
 
     @Override
-    public LoaderType[] getLoaders() {
+    public LoaderType[] getLoaders(List<String> gameVersions) {
         return new LoaderType[]{LoaderType.FORGE};
     }
 

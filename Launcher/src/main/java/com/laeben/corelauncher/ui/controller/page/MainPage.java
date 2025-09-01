@@ -75,7 +75,12 @@ public class MainPage extends HandlerController {
 
             var result = selector.show(
                     root.getChildren().stream().filter(x -> x instanceof CGroup).map(x -> ((CGroup)x).getObject().getName()).toList(),
-                    Profiler.getProfiler().getAllProfiles());
+                    Profiler.getProfiler()
+                            .getAllProfiles()
+                            .stream()
+                            .sorted(Comparator.comparingLong(x -> -x.getCreatedAt()))
+                            .toList()
+                    );
 
             if (result.isEmpty())
                 return;

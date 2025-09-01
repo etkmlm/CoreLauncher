@@ -13,13 +13,12 @@ import com.laeben.corelauncher.minecraft.modding.entity.resource.Modpack;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.ui.controller.browser.Search;
 
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.Supplier;
 
 public interface ModSource {
 
-    class Options implements Cloneable{
+    class Options {
         private final List<String> versionIds;
         private final List<LoaderType> loaders;
 
@@ -27,6 +26,7 @@ public interface ModSource {
         private boolean useMeta;
         private boolean incSelf = true;
         private boolean applyMp;
+        private boolean allowOverwrite;
         private Options(final String versionId, final LoaderType loader){
             this.versionIds = versionId == null ? null : List.of(versionId);
             this.loaders = loader == null ? null : List.of(loader);
@@ -63,11 +63,31 @@ public interface ModSource {
             return this;
         }
 
-        @Override
-        public Options clone() {
+        public Options allowOverwrite(boolean value){
+            allowOverwrite = value;
+            return this;
+        }
+
+        /**
+         * Creates a new instance with the same version ids and loaders.
+         */
+        public Options cloneFromPlatform() {
             //return super.clone();
 
             return new Options(versionIds == null ? null : List.copyOf(versionIds), loaders == null ? null : List.copyOf(loaders));
+        }
+
+        /**
+         * Creates a new instance with the same properties but different platform preferences.
+         */
+        public Options cloneFromProperties(List<String> versionIds, List<LoaderType> loaders) {
+            var opt = new Options(versionIds, loaders);
+            opt.incSelf = incSelf;
+            opt.incDeps = incDeps;
+            opt.applyMp = applyMp;
+            opt.allowOverwrite = allowOverwrite;
+            opt.useMeta = useMeta;
+            return opt;
         }
 
         public Options aggregateModpack(){
@@ -115,6 +135,10 @@ public interface ModSource {
         public boolean hasLoaderType(){
             var loaders = getLoaders();
             return loaders != null && !loaders.isEmpty();
+        }
+
+        public boolean doesAllowOverwrite(){
+            return allowOverwrite;
         }
 
         public boolean getIncludeDependencies() {

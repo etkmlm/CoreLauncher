@@ -12,6 +12,7 @@ import com.laeben.core.entity.Path;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -84,6 +85,7 @@ public class Profile {
     private Loader wrapper;
 
     private transient boolean meta;
+    private transient long createdAt;
 
     /* Generation */
 
@@ -94,6 +96,7 @@ public class Profile {
 
     protected Profile(){
         wrapper = new Vanilla();
+        createdAt = Instant.now().toEpochMilli();
     }
 
     /**
@@ -107,7 +110,13 @@ public class Profile {
             return null;
 
         var file = profilePath.to("profile.json");
-        return (file.exists() ? PROFILE_GSON.fromJson(file.read(), Profile.class) : Profile.create()).setName(profilePath.getName());
+        if (file.exists()){
+            var p = PROFILE_GSON.fromJson(file.read(), Profile.class).setName(profilePath.getName());
+            p.createdAt = profilePath.toFile().lastModified();
+            return p;
+        }
+        else
+            return Profile.create().setName(profilePath.getName());
     }
 
     public static Profile create(){
@@ -122,6 +131,10 @@ public class Profile {
     }
 
     /* Getters */
+
+    public long getCreatedAt(){
+        return createdAt;
+    }
 
     public String getName() {
         return name;

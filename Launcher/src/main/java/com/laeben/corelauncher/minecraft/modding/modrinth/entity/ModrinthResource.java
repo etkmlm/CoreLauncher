@@ -85,9 +85,11 @@ public class ModrinthResource implements ModResource {
     }
 
     @Override
-    public LoaderType[] getLoaders() {
+    public LoaderType[] getLoaders(List<String> gameVersions) {
         if (categories == null)
             return null;
+
+        // Modrinth does not support loader filter by version ids
 
         var arr = new ArrayList<LoaderType>();
         for (var c : categories){
@@ -95,7 +97,7 @@ public class ModrinthResource implements ModResource {
                 arr.add(LoaderType.TYPES.get(c));
             }
         }
-        return arr.stream().distinct().toArray(LoaderType[]::new);
+        return arr.isEmpty() ? new LoaderType[] { LoaderType.VANILLA } : arr.stream().distinct().toArray(LoaderType[]::new);
     }
 
     @Override

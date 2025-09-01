@@ -136,10 +136,13 @@ public class ResourcePreferences {
 
         if (prefs.hasLoaderTypes())
             loader = prefs.getLoaderTypes().get(0);
-        else if (res.getLoaders() != null && res.getLoaders().length > 0)
-            loader = res.getLoaders()[0];
-        else
-            return null;
+        else{
+            var availableLoaders = res.getLoaders(List.of(versionId));
+            if (availableLoaders != null && availableLoaders.length > 0)
+                loader = availableLoaders[0];
+            else
+                return null;
+        }
 
         String name = res.getResourceType() == ResourceType.MODPACK ? Tool.beautifyString(res.getName(), Tool.ValidityDegree.HIGH) : null;
 
@@ -151,18 +154,18 @@ public class ResourcePreferences {
             loader = LoaderType.VANILLA;
 
         var wr = Loader.getLoader(loader.getIdentifier());
-        String wrId = null;
+        String loaderVersion = null;
         if (loader != LoaderType.VANILLA){
-            var wrVers = ((Loader<LoaderVersion>)wr).getVersions(versionId);
-            if (wrVers != null && !wrVers.isEmpty())
-                wrId = wrVers.get(0).getLoaderVersion();
+            var versions = ((Loader<LoaderVersion>)wr).getVersions(versionId);
+            if (versions != null && !versions.isEmpty())
+                loaderVersion = versions.get(0).getLoaderVersion();
 
-            if (wrId == null){
-                throw new PerformException("Loader identifier " + loader + " could not be found.");
+            if (loaderVersion == null){
+                throw new PerformException("There are no versions found for loader with identifier '" + loader + "'");
             }
         }
 
-        String finalWrId = wrId;
+        String finalLoaderVersion = loaderVersion;
 
         if (name == null)
             name = StrUtil.toUpperFirst(loader.getIdentifier()) + " " + Translator.translate("profile");
@@ -170,7 +173,7 @@ public class ResourcePreferences {
         return Profiler.getProfiler().createAndSetProfile(Profiler.getProfiler().generateName(name), p ->
                 p.setVersionId(versionId)
                         .setLoader(wr)
-                        .setLoaderVersion(finalWrId)
+                        .setLoaderVersion(finalLoaderVersion)
         );
     }
 }

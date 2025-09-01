@@ -92,7 +92,7 @@ public class CurseForgeResource implements ModResource {
         String version = null;
 
         for (var v : file.gameVersions){
-            if ((noSupportedLoaders || filterLoaderMatch) && filterVersionMatch)
+            if (filterLoaderMatch && filterVersionMatch)
                 break;
 
             if (v.indexOf('.') > 0){ // get the newest version (only main versions)
@@ -105,7 +105,7 @@ public class CurseForgeResource implements ModResource {
 
             v = v.toLowerCase();
 
-            if (!filterVersionMatch && filterVersions != null && filterVersions.contains(v)){
+            if (!filterVersionMatch && (filterVersions == null || filterVersions.contains(v))){
                 filterVersionMatch = true;
                 continue;
             }
@@ -121,6 +121,9 @@ public class CurseForgeResource implements ModResource {
                             break;
                         }
                     }
+                }
+                else{
+                    filterLoaderMatch = true;
                 }
 
                 if (file.mainLoader == null)
@@ -186,22 +189,34 @@ public class CurseForgeResource implements ModResource {
         }
         return versions.stream().distinct().toArray(String[]::new);
     }
-
     @Override
-    public LoaderType[] getLoaders() {
+    public LoaderType[] getLoaders(List<String> gameVersions) {
         if (latestFiles == null)
             return null;
 
+        boolean versionMatch = false;
+
         var lst = new ArrayList<LoaderType>();
+        var tempLoaders = new ArrayList<LoaderType>();
         for (var f : latestFiles){
             if (f.gameVersions == null)
                 continue;
+            tempLoaders.clear();
             for (var v : f.gameVersions){
                 var k = v.toLowerCase(Locale.US);
                 if (LoaderType.TYPES.containsKey(k)){
-                    lst.add(LoaderType.TYPES.get(k));
+                    tempLoaders.add(LoaderType.TYPES.get(k));
                 }
+                else if (gameVersions != null && !gameVersions.isEmpty() && gameVersions.contains(k))
+                    versionMatch = true;
             }
+
+            if (!tempLoaders.isEmpty()){
+                if (versionMatch || gameVersions == null || gameVersions.isEmpty())
+                    lst.addAll(tempLoaders);
+            }
+            else
+                lst.add(LoaderType.VANILLA);
         }
 
         return lst.stream().distinct().toArray(LoaderType[]::new);

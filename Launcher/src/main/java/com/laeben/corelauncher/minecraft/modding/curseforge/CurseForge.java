@@ -9,6 +9,7 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.RequesterFactory;
+import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.core.entity.Path;
@@ -76,15 +77,18 @@ public class CurseForge implements ModSource {
     }
     public void fillResource(CurseForgeResource r, Options opt) throws NoConnectionException, HttpException {
         var params = new ArrayList<RequestParameter>();
-        if (opt.hasGameVersion())
+
+        // curse forge does not support multiple file searching
+        /*if (opt.hasGameVersion())
             params.add(new RequestParameter("gameVersions", String.join(",", opt.getVersionIds())));
 
         if (opt.hasLoaderType())
-            params.add(new RequestParameter("modLoaderTypes", String.join(",", opt.getLoaders())));
+            params.add(new RequestParameter("modLoaderTypes", String.join(",", opt.getLoaders())));*/
 
-        /*params.add(new RequestParameter("gameVersion", opt.getVersionId()));
+        if (opt.hasGameVersion())
+            params.add(new RequestParameter("gameVersion", opt.getVersionIds().size() == 1 ? opt.getVersionId() : opt.getVersionIds().stream().max(Version.VersionIdComparator.INSTANCE).get()));
         if (opt.hasLoaderType())
-            params.add(new RequestParameter("modLoaderType", opt.getLoaderType().getIdentifier()));*/
+            params.add(new RequestParameter("modLoaderType",  opt.getLoaders().size() == 1 ? opt.getLoaderType().getIdentifier() : opt.getLoaders().get(0)));
 
         String g = get("/v1/mods/" + r.id + "/files", params);
         var rs = gson.fromJson(g, JsonObject.class);
@@ -184,10 +188,14 @@ public class CurseForge implements ModSource {
 
             }
 
-            var files = x.searchGame(opt.getVersionIds(), loaders);
+            var files = opt.doesAllowOverwrite() ? x.searchGame((List<String>) null, (List<String>) null) : x.searchGame(opt.getVersionIds(), loaders);
 
             if (files == null || files.isEmpty())
                 continue;
+
+            // allow overwriting for only one resource, other resources will follow the preferences
+            if (opt.doesAllowOverwrite() && !x.getResourceType().isGlobal())
+                opt.allowOverwrite(false);
 
             var f = files.get(0);
 
@@ -209,7 +217,7 @@ public class CurseForge implements ModSource {
         }
 
         if (opt.getIncludeDependencies())
-            all.addAll(getDependencies(all, opt.clone().self(false)));
+            all.addAll(getDependencies(all, opt.cloneFromPlatform().allowOverwrite(opt.doesAllowOverwrite()).self(false)));
 
         /*return data.asList().stream().map(x -> {
             var res = gson.fromJson(x, ResourceForge.class);

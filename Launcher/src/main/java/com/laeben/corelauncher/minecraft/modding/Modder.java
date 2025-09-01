@@ -13,6 +13,8 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.minecraft.Loader;
+import com.laeben.corelauncher.minecraft.loader.entity.LoaderVersion;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
@@ -41,6 +43,22 @@ import java.util.stream.Collectors;
 public class Modder {
     public static final String RESOURCE_INSTALL = "resIns";
 
+    public enum IncludeMode{
+        /**
+         * Restrictions will be applied, all safety rules are considered.
+         */
+        DEFAULT,
+        /**
+         * Ignore the mismatching between the resources and the profile's game version, loader type and loader version.
+         * All resources will be included without any restriction.
+         */
+        IGNORE_PROFILE,
+        /**
+         * Only works with single configuration.
+         * Allow to change the profile's game version, loader type and loader version if any mismatching occurs with the resources being included.
+         */
+        OVERWRITE_PROFILE
+    }
     public record ModInfo(String name, LoaderType type, String versionId, String loaderVer, String version){}
 
     private static Modder instance;
@@ -395,6 +413,12 @@ public class Modder {
                 Modrinth.getModrinth().extractModpack(p.getPath(), mp);*/
         }
     }
+
+    /**
+     * Extracts the modpack and configures the profile.
+     * <br/><br/>
+     * <b>Profile have to be saved after this function.</b>
+     */
     public int includeModpack(Profile p, Modpack mp) throws NoConnectionException, HttpException, StopException {
         var path = p.getPath();
 
@@ -409,27 +433,25 @@ public class Modder {
 
         int total = 0;
 
-        total += include(p, mp.mods, true);
-        total += include(p, mp.resources, true);
-        total += include(p, mp.shaders, true);
+        total += include(p, mp.mods, IncludeMode.IGNORE_PROFILE);
+        total += include(p, mp.resources, IncludeMode.IGNORE_PROFILE);
+        total += include(p, mp.shaders, IncludeMode.IGNORE_PROFILE);
 
         EventHandler.enable();
 
         handler.execute(new KeyEvent(EventHandler.STOP));
 
-        Profiler.getProfiler().setProfile(p.getName(), pxt -> {
-            if (mp.logoUrl != null && !mp.logoUrl.isEmpty() && pxt.getIcon() == null){
-                ImageCacheManager.remove(pxt);
-                pxt.setIcon(NetUtil.downloadImage(Configurator.getConfig().getImagePath(), mp.logoUrl).setUrl(mp.logoUrl));
-            }
+        if (mp.logoUrl != null && !mp.logoUrl.isEmpty() && p.getIcon() == null){
+            ImageCacheManager.remove(p);
+            p.setIcon(NetUtil.downloadImage(Configurator.getConfig().getImagePath(), mp.logoUrl).setUrl(mp.logoUrl));
+        }
 
-            if (check){
-                pxt.setVersionId(mp.targetVersionId);
-                pxt.setLoader(mp.wr);
-                pxt.setLoaderVersion(mp.wrId);
-            }
-            pxt.getAllResources().add(mp);
-        });
+        if (check){
+            p.setVersionId(mp.targetVersionId);
+            p.setLoader(mp.wr);
+            p.setLoaderVersion(mp.wrId);
+        }
+        p.getAllResources().add(mp);
         return total + 1;
     }
     private boolean checkModpackOverride(Profile profile, Modpack modpack) throws StopException {
@@ -510,21 +532,26 @@ public class Modder {
      * @return count of included resources
      */
     public <T extends CResource> int include(Profile p, List<T> resources) throws NoConnectionException, HttpException, StopException{
-        return include(p, resources, false);
+        return include(p, resources, IncludeMode.DEFAULT);
     }
 
     /**
      * Includes the given resources into the profile.
      * @param p target profile
      * @param resources resources to be included
-     * @param forceInclude ignores filtering while importing
+     * @param mode include behavior
      * @return count of included resources
      */
-    public <T extends CResource> int include(Profile p, List<T> resources, boolean forceInclude) throws NoConnectionException, HttpException, StopException {
+    public <T extends CResource> int include(Profile p, List<T> resources, IncludeMode mode) throws NoConnectionException, HttpException, StopException {
         int count = 0;
 
+        String newVersionId = null;
+        LoaderType newLoaderType = null;
+        boolean newPropertiesAreValid = false;
+        boolean ignoreNewProperties = false;
+
         for (var r : resources){
-            if (!forceInclude && (r.isMeta() || (p.getLoader().getType().isNative() && !r.getType().isGlobal())))
+            if (mode == IncludeMode.DEFAULT && (r.isMeta() || (p.getLoader().getType().isNative() && !r.getType().isGlobal())))
                 continue;
 
             if (r.getType() == ResourceType.MODPACK){
@@ -538,8 +565,41 @@ public class Modder {
             else if (p.getAllResources().stream().anyMatch(a -> a instanceof World w && w.equals(r)))
                 continue;
 
+            // if more than one resource is mismatching with the profile, only apply the first one
+            if (
+                    !newPropertiesAreValid &&
+                    mode == IncludeMode.OVERWRITE_PROFILE &&
+                    !r.isMeta() &&
+                    !r.getType().isGlobal() &&
+                    !ignoreNewProperties &&
+                    (!p.getVersionId().equals(r.targetVersionId) || !p.getLoader().getType().getIdentifier().equals(r.targetLoader))
+            ) {
+                newVersionId = r.targetVersionId;
+                newLoaderType = LoaderType.fromIdentifier(r.targetLoader);
+
+                newPropertiesAreValid = true;
+            }
+
             count++;
             p.getAllResources().add(r);
+        }
+
+        if (newPropertiesAreValid){
+            p.setVersionId(newVersionId);
+            var loader = Loader.getLoader(newLoaderType.getIdentifier());
+            p.setLoader(loader);
+            if (!newLoaderType.isNative()){
+                String loaderVersion = null;
+                var versions = ((Loader<LoaderVersion>)loader).getVersions(newVersionId);
+                if (versions != null && !versions.isEmpty())
+                    loaderVersion = versions.get(0).getLoaderVersion();
+
+                if (loaderVersion == null){
+                    throw new RuntimeException("There are no versions found for loader with identifier '" + newLoaderType + "'");
+                }
+
+                p.setLoaderVersion(loaderVersion);
+            }
         }
 
         Profiler.getProfiler().setProfile(p.getName(), null);

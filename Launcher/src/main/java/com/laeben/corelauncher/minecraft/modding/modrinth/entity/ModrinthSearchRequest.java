@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.modrinth.entity;
 
+import com.google.gson.annotations.SerializedName;
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.util.StrUtil;
 
@@ -11,7 +12,8 @@ import java.util.List;
 public class ModrinthSearchRequest {
     public String query;
     public String index;
-    public FacetBuilder facets;
+    @SerializedName("facets")
+    public FacetBuilder builder;
     public int offset;
     public int limit;
 
@@ -23,6 +25,10 @@ public class ModrinthSearchRequest {
         return Index.fromId(index);
     }
 
+    public ModrinthSearchRequest(){
+        builder = new FacetBuilder();
+    }
+
     public List<RequestParameter> getParams(){
         var list = new ArrayList<RequestParameter>();
 
@@ -30,7 +36,7 @@ public class ModrinthSearchRequest {
             list.add(new RequestParameter("query", query));
         if (index != null)
             list.add(new RequestParameter("index", index));
-        var build = facets.build();
+        var build = builder.build();
         if (!build.isEmpty()){
             var facets = build.stream().filter(Facet::isPresent).map(Facet::toString).toList();
             if (!facets.isEmpty())

@@ -26,7 +26,6 @@ import com.laeben.corelauncher.ui.dialog.DResourceSelector;
 import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.ImageUtil;
-import javafx.beans.Observable;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;

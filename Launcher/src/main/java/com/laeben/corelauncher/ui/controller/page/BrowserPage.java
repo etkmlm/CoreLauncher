@@ -59,7 +59,7 @@ public class BrowserPage extends HandlerController {
 
     /**
      * Sets the profile and behavior of the browser.
-     * Full mode will be activated if the given profile is null.
+     * General browser mode will be activated if the given profile is null.
      */
     public BrowserPage setProfile(Profile profile){
         this.profile = profile;
@@ -101,13 +101,14 @@ public class BrowserPage extends HandlerController {
             filterPane.getPreset("curseforge").getSection("maincat").defaultChoice(defCat);
         }
 
+        topBar.setVisible(profile != null);
+        topBar.setManaged(profile != null);
+
         var pinned = filterPane.getPreset("pinned");
         var versionSect = pinned.getSection("version");
         var loaderSect = pinned.getSection("loader");
         versionSect.setVisible(profile == null);
         loaderSect.setVisible(profile == null);
-        topBar.setVisible(profile != null);
-        topBar.setManaged(profile != null);
 
         if (profile == null){
             versionSect.resetChoices();
@@ -268,7 +269,9 @@ public class BrowserPage extends HandlerController {
     }
 
     private void onProfileCreated(Profile profile) {
-        Main.getMain().replaceTab(this, "pages/browser", Translator.translate("mods.browser"), true, BrowserPage.class).setProfile(profile);
+        Main.getMain()
+                .replaceTab(this, "pages/browser", Translator.translate("mods.browser"), true, BrowserPage.class)
+                .setProfile(profile);
     }
 
     private void search(String query){

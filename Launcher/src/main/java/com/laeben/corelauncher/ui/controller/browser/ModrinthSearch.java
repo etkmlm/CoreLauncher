@@ -13,7 +13,6 @@ import java.util.List;
 
 public class ModrinthSearch implements Search<Index> {
     private ModrinthSearchRequest request;
-    public FacetBuilder builder;
 
     private final Profile profile;
 
@@ -24,17 +23,17 @@ public class ModrinthSearch implements Search<Index> {
     }
 
     public void setMainType(ResourceType type){
-        builder.add(Facet.get("project_type", type.getName()).setId("type"));
+        request.builder.add(Facet.get("project_type", type.getName()).setId("type"));
         if (profile != null){
-            builder.setLoader(profile.getLoaderIdentifier(type));
+            request.builder.setLoader(profile.getLoaderIdentifier(type));
             if (profile.getLoader().getType().isNative())
-                builder.add(Facet.not("categories", List.of("modded")).setId("modded"));
+                request.builder.add(Facet.not("categories", List.of("modded")).setId("modded"));
             else
-                builder.remove("modded");
+                request.builder.remove("modded");
         }
         else{
-            builder.setLoader(null);
-            builder.remove("modded");
+            request.builder.setLoader(null);
+            request.builder.remove("modded");
         }
     }
 
@@ -52,62 +51,61 @@ public class ModrinthSearch implements Search<Index> {
     }
 
     public void setCategory(String name){
-        builder.add(Facet.get("categories", name).setId("category"));
+        request.builder.add(Facet.get("categories", name).setId("category"));
     }
 
     public void setCategories(List<String> names){
-        builder.add(Facet.and("categories", names.stream().toList()).setId("category"));
-        //builder.add(Facet.or("categories", names.stream().map(Object::toString).toList()).setId("category"));
+        request.builder.add(Facet.and("categories", names.stream().toList()).setId("category"));
+        //request.builder.add(Facet.or("categories", names.stream().map(Object::toString).toList()).setId("category"));
     }
 
     public void setGameVersions(List<String> versions){
-        //builder.setGameVersion(null);
+        //request.builder.setGameVersion(null);
 
         if (profile != null)
             return;
 
         if (versions != null)
-            builder.add(Facet
+            request.builder.add(Facet
                     .or("versions", versions)
                     .setId("versions")
             );
         else
-            builder.remove("versions");
+            request.builder.remove("versions");
     }
 
     @Override
     public void setLoaders(List<LoaderType> loaders) {
-        //builder.setLoader(null);
+        //request.builder.setLoader(null);
         if (profile != null)
             return;
 
         if (loaders != null)
-            builder.add(Facet
+            request.builder.add(Facet
                     .or("categories", loaders.stream().map(LoaderType::getIdentifier).toList())
                     .setId("loaders")
             );
         else
-            builder.remove("loaders");
+            request.builder.remove("loaders");
     }
 
     public void reset(){
         request = new ModrinthSearchRequest();
         request.limit = 50;
-        request.facets = builder = new FacetBuilder();
 
         if (profile != null){
-            builder.setGameVersion(profile.getVersionId());
-            builder.setLoader(profile.getLoader().getType().getIdentifier());
+            request.builder.setGameVersion(profile.getVersionId());
+            request.builder.setLoader(profile.getLoader().getType().getIdentifier());
         }
         else{
-            builder.setGameVersion(null);
-            builder.setLoader(null);
+            request.builder.setGameVersion(null);
+            request.builder.setLoader(null);
         }
         // remove multiple game versions
-        builder.remove("versions");
+        request.builder.remove("versions");
 
         // remove multiple loaders
-        builder.remove("loaders");
+        request.builder.remove("loaders");
     }
 
 
@@ -137,15 +135,15 @@ public class ModrinthSearch implements Search<Index> {
         else {
             prefs = ResourcePreferences.empty();
 
-            var loader = request.facets.get("loader");
-            var loaders = loader == null ? request.facets.get("loaders") : loader;
+            var loader = request.builder.get("loader");
+            var loaders = loader == null ? request.builder.get("loaders") : loader;
 
             if (loaders != null && loaders.values != null && !loaders.values.isEmpty()){
                 prefs.includeLoaderTypes(loaders.values.stream().map(LoaderType.TYPES::get).toList());
             }
 
-            var ver = request.facets.get("version");
-            var vers = ver == null ? request.facets.get("versions") : ver;
+            var ver = request.builder.get("version");
+            var vers = ver == null ? request.builder.get("versions") : ver;
 
             if (vers != null && vers.values != null && !vers.values.isEmpty()){
                 prefs.includeGameVersions(vers.values);

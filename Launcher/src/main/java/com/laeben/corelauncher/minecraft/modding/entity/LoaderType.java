@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.entity;
 
+import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.loader.Custom;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.fabric.Fabric;
@@ -48,7 +49,7 @@ public enum LoaderType implements CharSequence {
         return identifier;
     }
 
-    public Class getCls(){
+    public Class<Loader<?>> getCls(){
         return cls;
     }
 

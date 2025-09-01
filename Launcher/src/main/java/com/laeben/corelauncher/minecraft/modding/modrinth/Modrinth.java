@@ -144,8 +144,11 @@ public class Modrinth implements ModSource {
         if (opt.getIncludeSelf())
             all.add(CResource.fromRinthResourceGeneric(res, v));
 
+        if (opt.doesAllowOverwrite() && !res.getResourceType().isGlobal()) // disable overwrite to force other dependencies to obey the first preferences
+            opt = opt.cloneFromPlatform().allowOverwrite(false);
+
         if (!projects.isEmpty())
-            all.addAll(getCoreResources(projects, res.getResourceType() == ResourceType.MODPACK ? opt.clone().dependencies(false) : opt));
+            all.addAll(getCoreResources(projects, res.getResourceType() == ResourceType.MODPACK ? opt.cloneFromPlatform().dependencies(false) : opt));
 
         if (versions.isEmpty())
             return all;
@@ -288,9 +291,13 @@ public class Modrinth implements ModSource {
                 /*var v = vers.stream().filter(a -> a.projectId.equals(r.getId())).findFirst();
                 if (v.isEmpty())
                     continue;*/
-                var v = getNewestVersionOfProject(r, opt.getVersionIds(), opt.getLoaders());
+                var v = opt.doesAllowOverwrite() ? getNewestVersionOfProject(r, null, null) : getNewestVersionOfProject(r, opt.getVersionIds(), opt.getLoaders());
                 if (v == null)
                     continue;
+
+                // allow overwriting for only one resource, other resources will follow the preferences
+                if (opt.doesAllowOverwrite() && !r.getResourceType().isGlobal())
+                    opt = modifyOptionsByVersion(v, opt);
 
                 if (opt.getIncludeDependencies() || (opt.getAggregateModpack() && r.getResourceType() == ResourceType.MODPACK))
                     all.addAll(getDependenciesFromVersion(v, r, opt.self(true)));
@@ -331,12 +338,49 @@ public class Modrinth implements ModSource {
         return versions.stream().map(a -> (CResource)CResource.fromRinthResourceGeneric((ModrinthResource) res, a)).toList();
     }
 
+    /**
+     * Modifies the source options entity by the indicator version.
+     * Disables overwrite mode and alters the target versions and loaders to those of the indicator.
+     * @param v indicator version
+     * @param opt source options
+     * @return a modified <b>new</b> options instance
+     */
+    private Options modifyOptionsByVersion(Version v, Options opt){
+        String latestVersion = v.gameVersions == null || v.gameVersions.isEmpty() ? null : v.gameVersions.stream().max(com.laeben.corelauncher.minecraft.entity.Version.VersionIdComparator.INSTANCE).orElse(null);
+        LoaderType loader = null;
+
+        if (latestVersion != null && v.loaders != null && !v.loaders.isEmpty()){
+            for (var l : v.loaders){
+                LoaderType type;
+                if ((type = LoaderType.TYPES.getOrDefault(l, null)) == null)
+                    continue;
+                loader = type;
+                break;
+            }
+        }
+
+        if (loader != null){ // latest version is not null since loader variable is not null too
+            return opt.cloneFromProperties(List.of(latestVersion), List.of(loader)).allowOverwrite(false);
+        }
+
+        return opt;
+    }
+
     @Override
     public List<CResource> getCoreResource(ModResource res, Options opt) throws NoConnectionException, HttpException {
         if (!(res instanceof ModrinthResource r))
             return null;
 
-        var v = opt.useMeta() ? null : getNewestVersionOfProject(r, opt.getVersionIds(), opt.getLoaders());
+        Version v;
+        if (opt.useMeta())
+            v = null;
+        else if (opt.doesAllowOverwrite() && !res.getResourceType().isGlobal()){
+            v = getNewestVersionOfProject(r, null, null);
+            if (v != null)
+                opt = modifyOptionsByVersion(v, opt); // fit the options to the newest version
+        }
+        else
+            v = getNewestVersionOfProject(r, opt.getVersionIds(), opt.getLoaders());
 
         return ((opt.getAggregateModpack() && res.getResourceType() == ResourceType.MODPACK) || opt.getIncludeDependencies()) && v != null ? getDependenciesFromVersion(v, r, opt) : List.of(CResource.fromRinthResourceGeneric(r, v));
     }
