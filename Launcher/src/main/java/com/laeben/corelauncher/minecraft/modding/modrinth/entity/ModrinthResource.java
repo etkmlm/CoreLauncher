@@ -30,6 +30,11 @@ public class ModrinthResource implements ModResource {
     @SerializedName("game_versions")
     public List<String> gameVersions;
 
+    @SerializedName("client_side")
+    public String clientSide;
+    @SerializedName("server_side")
+    public String serverSide;
+
     @Override
     public String getId(){
         return id == null ? pId : id;

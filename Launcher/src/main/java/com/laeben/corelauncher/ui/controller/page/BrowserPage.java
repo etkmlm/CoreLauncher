@@ -7,6 +7,7 @@ import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ModsSearchSortField;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
+import com.laeben.corelauncher.minecraft.modding.entity.ModSide;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourcePreferences;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
@@ -195,6 +196,12 @@ public class BrowserPage extends HandlerController {
                         .setSingleton(true)
                         .defaultChoice("mod"),
                 FilterSection.create(Translator.translate("mods.browse.categories"), "cat", FilterSection.FilterType.MULTIPLE_CHECKBOX),
+                FilterSection.<ModSide>create(Translator.translate("mods.browse.side"), "side", FilterSection.FilterType.SINGLE_RADIO)
+                        .setOnAction(a -> search.setSide(a.state()))
+                        .addChoice(Translator.translate("mods.side.client"), "client", ModSide.CLIENT)
+                        .addChoice(Translator.translate("mods.side.server"), "server", ModSide.SERVER)
+                        .addChoice(Translator.translate("mods.side.both"), "both", ModSide.BOTH)
+                        .defaultChoice("both"),
                 FilterSection.<Index>create(Translator.translate("mods.browse.sortBy"), "sortby", FilterSection.FilterType.SINGLE_RADIO)
                         .setOnAction(a -> search.setSortField(a.state()))
                         .addChoice(Translator.translate("mods.sort.relevance"), "relevance", Index.RELEVANCE)

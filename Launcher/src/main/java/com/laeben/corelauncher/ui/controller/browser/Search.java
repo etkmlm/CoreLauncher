@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.ui.controller.browser;
 
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
+import com.laeben.corelauncher.minecraft.modding.entity.ModSide;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public interface Search<T extends Enum> {
     void setCategories(List<String> cats);
     void setPageIndex(int index);
     void setGameVersions(List<String> gameVersions);
+    void setSide(ModSide side);
     void setLoaders(List<LoaderType> loaders);
     void reset();
     int getTotalPages();

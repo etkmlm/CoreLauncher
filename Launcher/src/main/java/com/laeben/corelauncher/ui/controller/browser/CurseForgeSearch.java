@@ -8,10 +8,7 @@ import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeLoa
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ModsSearchSortField;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeSearchRequest;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeSearchResponse;
-import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
-import com.laeben.corelauncher.minecraft.modding.entity.ModResource;
-import com.laeben.corelauncher.minecraft.modding.entity.ResourcePreferences;
-import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
+import com.laeben.corelauncher.minecraft.modding.entity.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,6 +60,11 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
     public void setGameVersions(List<String> gameVersions) {
         //request.gameVersion = null;
         request.gameVersions = gameVersions == null ? null : Collections.unmodifiableList(gameVersions);
+    }
+
+    @Override
+    public void setSide(ModSide side) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

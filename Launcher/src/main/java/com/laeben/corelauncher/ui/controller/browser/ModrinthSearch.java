@@ -4,6 +4,7 @@ import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
+import com.laeben.corelauncher.minecraft.modding.entity.ModSide;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourcePreferences;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
@@ -72,6 +73,18 @@ public class ModrinthSearch implements Search<Index> {
             );
         else
             request.builder.remove("versions");
+    }
+
+    private static final List<String> SELECTED_SIDE = List.of("optional", "required");
+    private static final List<String> UNSELECTED_SIDE = List.of("optional", "unsupported");
+    private static final List<String> BOTH_SIDES = List.of("required");
+
+    @Override
+    public void setSide(ModSide side) {
+        boolean isClient = side == ModSide.CLIENT || side == ModSide.BOTH;
+        boolean isServer = side == ModSide.SERVER || side == ModSide.BOTH;
+        request.builder.add(Facet.or("client_side", isClient && isServer ? BOTH_SIDES : (isClient ? SELECTED_SIDE : UNSELECTED_SIDE)).setId("client_side"));
+        request.builder.add(Facet.or("server_side", isClient && isServer ? BOTH_SIDES : (isServer ? SELECTED_SIDE : UNSELECTED_SIDE)).setId("server_side"));
     }
 
     @Override
