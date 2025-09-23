@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
@@ -67,6 +68,11 @@ public class CPLCell extends CCell<Profile> implements CLSelectable {
         lblName.setStyle("-fx-text-fill: white;-fx-font-size: 13pt;");
 
         root.setOnMouseClicked(a -> {
+            if (a.getButton() == MouseButton.SECONDARY){
+                menu.show();
+                return;
+            }
+
             if ((list.selectionModeProperty().get() || a.isControlDown()) && !selectionDisabled){
                 list.selectionModeProperty().set(true);
                 setSelected(!isSelected());

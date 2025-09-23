@@ -924,7 +924,7 @@ public class Main extends HandlerController {
             stat = s1;
 
         if (s2 != null && !s2.isBlank())
-            stat = stat == null ? s2 : stat + " | " + s2;
+            stat = stat == null ? s2 : stat + "\n" + s2;
 
         lblStatus.setText(stat);
         progress.setProgress(percentage);

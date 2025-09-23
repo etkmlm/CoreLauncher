@@ -133,4 +133,5 @@
 
 #lblStatus{
     -fx-font-size: 11pt;
+    -fx-line-spacing: 10px;
 }
