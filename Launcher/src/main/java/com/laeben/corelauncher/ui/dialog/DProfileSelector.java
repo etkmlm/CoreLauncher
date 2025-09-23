@@ -239,6 +239,7 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
     private void close(Result res){
         setResult(res);
         getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        txtSearch.clear();
         close();
     }
 

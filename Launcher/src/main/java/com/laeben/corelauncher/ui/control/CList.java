@@ -18,9 +18,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class CList<T> extends VBox {
     public record Filter<T>(T input, String query){
@@ -45,7 +48,9 @@ public class CList<T> extends VBox {
     private Supplier<CCell<T>> cellFactory;
     private Predicate<Filter<T>> filterFactory;
 
+    private final ArrayList<T> filteredItems;
     private boolean inFilterMode;
+    private int filteredSize;
     private Consumer<Integer> onVisibleCountChanged;
 
     //private Equator<T> itemEqualsFactory;
@@ -58,6 +63,7 @@ public class CList<T> extends VBox {
     public CList() {
         items = FXCollections.observableArrayList();
         selectedItems = FXCollections.observableArrayList();
+        filteredItems = new ArrayList<>();
 
         selectionMode = new SimpleBooleanProperty(false);
 
@@ -144,6 +150,8 @@ public class CList<T> extends VBox {
                 }
                 else if (a.wasRemoved()){
                     selectedItems.removeAll(a.getRemoved());
+                    if (inFilterMode && !filteredItems.isEmpty())
+                        filteredItems.removeAll(a.getRemoved());
                     var remove = new ArrayList<CCell<T>>();
                     for (int i = 0; i < list.getChildren().size(); i++){
                         var f = (CCell<T>) list.getChildren().get(i);
@@ -250,21 +258,26 @@ public class CList<T> extends VBox {
             return;
         }
 
-        if (lastLoadedIndex >= items.size()){
+        var finalItems = inFilterMode ? filteredItems : items;
+
+        if (inFilterMode && filteredSize < loadLimit * 2) // no need to load again / see filter()
+            return;
+
+        if (lastLoadedIndex >= finalItems.size()){
             if (allowReload)
                 reload(false);
             return;
         }
 
-        var it = new ArrayList<CCell<T>>();
+        var it = new LinkedHashSet<CCell<T>>();
         int i;
-        for (i = lastLoadedIndex + 1; i < lastLoadedIndex + 1 + loadLimit && i < items.size(); i++){
-            it.add(getCell(items.get(i)));
+        for (i = lastLoadedIndex + 1; i < lastLoadedIndex + 1 + loadLimit && i < finalItems.size(); i++){
+            it.add(getCell(finalItems.get(i)));
         }
 
         lastLoadedIndex = i - 1;
 
-        UI.runAsync(() ->{
+        UI.runAsync(() -> {
             list.getChildren().addAll(it);
             nullMode(list.getChildren().isEmpty());
         });
@@ -290,6 +303,8 @@ public class CList<T> extends VBox {
             list.getChildren().clear();
             inFilterMode = false;
             lastLoadedIndex = -1;
+            filteredSize = 0;
+            filteredItems.clear();
             load();
             return;
         }
@@ -297,7 +312,20 @@ public class CList<T> extends VBox {
         inFilterMode = true;
 
         UI.runAsync(() -> {
-            list.getChildren().setAll(items.stream().filter(a -> filterFactory.test(new Filter<>(a, text))).map(this::getCell).toList());
+            var tempList = items.stream().filter(a -> filterFactory.test(new Filter<>(a, text))).toList();
+            filteredSize = tempList.size();
+            if (filteredSize < loadLimit * 2){ // load them all directly
+                list.getChildren().setAll(tempList.stream().map(this::getCell).toList());
+            }
+            else{
+                lastLoadedIndex = -1;
+                list.getChildren().clear();
+
+                filteredItems.clear();
+                filteredItems.addAll(tempList);
+                load(false);
+            }
+
             if (onVisibleCountChanged != null)
                 onVisibleCountChanged.accept(list.getChildren().size());
             nullMode(list.getChildren().isEmpty());
