@@ -13,6 +13,7 @@ import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import javafx.scene.image.Image;
 
+import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.Base64;
 import java.util.List;
@@ -47,6 +48,7 @@ public class Account{
     private String skin;
     private String cape;
     private Image head;
+    private Image decoration;
     private boolean isReloaded;
     private boolean isOnline;
 
@@ -209,7 +211,11 @@ public class Account{
         try{
             Image img = new Image(skin);
 
-            head = ImageUtil.resizeImage(img, 8, 8, 8, 8, 32);
+            var originalHead = ImageUtil.resizeImage(img, 8, 8, 8, 8, 32);
+            var decorationHead = ImageUtil.resizeImage(img, 40, 8, 8, 8, 32);
+
+            head = originalHead;
+            decoration = decorationHead;
         }
         catch (Exception e){
             head = null;
@@ -218,6 +224,9 @@ public class Account{
 
     public Image getHead(){
         return head;
+    }
+    public Image getHeadDecoration(){
+        return decoration;
     }
     public String getUuid(){
         return uuid;

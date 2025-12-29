@@ -96,8 +96,10 @@ public class Main extends HandlerController {
     private AnchorPane menu;
     @FXML
     private Pane menuBackground;
+    /*@FXML
+    private CView head;*/
     @FXML
-    private CView head;
+    private CHeadView head;
     @FXML
     private TabPane tab;
     @FXML
@@ -556,7 +558,9 @@ public class Main extends HandlerController {
     }
 
     private void setUser(Account account) {
-        head.setImage(account.getHead());
+        //head.setImage(account.getHead());
+        head.setHead(account.getHead());
+        head.setDecoration(account.getHeadDecoration());
         Tooltip.install(head, new Tooltip(account.getUsername()));
     }
 

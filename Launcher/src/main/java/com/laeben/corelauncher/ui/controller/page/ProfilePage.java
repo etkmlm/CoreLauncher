@@ -109,8 +109,10 @@ public class ProfilePage extends HandlerController {
     private Label lblProfileName;
     @FXML
     private HBox badges;
+    /*@FXML
+    private CView imgUserHead;*/
     @FXML
-    private CView imgUserHead;
+    private CHeadView imgUserHead;
     @FXML
     private CView imgProfile;
     @FXML
@@ -173,7 +175,9 @@ public class ProfilePage extends HandlerController {
 
     private void setUser(){
         var user = profile.tryGetUser().reload();
-        imgUserHead.setImage(user.getHead());
+        //imgUserHead.setImage(user.getHead());
+        imgUserHead.setHead(user.getHead());
+        imgUserHead.setDecoration(user.getHeadDecoration());
         lblUsername.setText(user.getUsername());
     }
 

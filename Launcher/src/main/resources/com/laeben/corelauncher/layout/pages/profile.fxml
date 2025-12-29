@@ -23,7 +23,8 @@
         </HBox>
         <HBox fx:id="boxUser" spacing="6">
             <Rectangle width="4"/>
-            <CView fitWidth="32" fitHeight="32" fx:id="imgUserHead"/>
+            <!--<CView fitWidth="32" fitHeight="32" fx:id="imgUserHead"/>-->
+            <CHeadView fitWidth="32" fitHeight="32" fx:id="imgUserHead"/>
             <VBox alignment="CENTER">
                 <Label fx:id="lblUsername" text="Username"/>
             </VBox>
