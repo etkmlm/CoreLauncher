@@ -3,6 +3,7 @@ package com.laeben.corelauncher.minecraft.modding.modrinth.entity;
 import com.google.gson.annotations.SerializedName;
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.util.StrUtil;
+import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +39,16 @@ public class ModrinthSearchRequest {
             list.add(new RequestParameter("index", index));
         var build = builder.build();
         if (!build.isEmpty()){
-            var facets = build.stream().filter(Facet::isPresent).map(Facet::toString).toList();
+            var facets = new ArrayList<String>();
+            var type = builder.get("type");
+            boolean global = type != null && type.isPresent() && ResourceType.areGlobals(type.values);
+            for (Facet f : build){
+                if (f.isEmpty())
+                    continue;
+                if (!global || !f.key.equals("client_side") && !f.key.equals("server_side"))
+                    facets.add(f.toString());
+            }
+            //var facets = build.stream().filter(Facet::isPresent).map(Facet::toString).toList();
             if (!facets.isEmpty())
                 list.add(new RequestParameter("facets", StrUtil.jsArray(facets)).markAsEscapable());
         }

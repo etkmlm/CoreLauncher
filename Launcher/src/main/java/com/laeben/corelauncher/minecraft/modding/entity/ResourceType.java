@@ -3,6 +3,7 @@ package com.laeben.corelauncher.minecraft.modding.entity;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 public enum ResourceType {
     MOD(6, "mod", Mod.class, "mods"),
@@ -62,6 +63,25 @@ public enum ResourceType {
 
     public static boolean isGlobal(String name){
         return Arrays.stream(GLOBAL).anyMatch(x -> x.name.equals(name));
+    }
+
+    public static boolean areGlobals(List<String> names){
+        boolean check = true;
+        for (String name : names){
+            boolean match = false;
+            for (var g : GLOBAL){
+                if(g.getName().equals(name)){
+                    match = true;
+                    break;
+                }
+            }
+            if (!match){
+                check = false;
+                break;
+            }
+        }
+
+        return check;
     }
 
     public static boolean isGlobal(int id){
