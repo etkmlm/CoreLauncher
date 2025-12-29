@@ -47,13 +47,15 @@ public class Asset {
     }
 
     private static int calculateVersionInteger(String version){
+        final int maxDecimalCount = 4;
+
         var spl = version.split("\\.");
         int sum = 0;
-        for (int i = 1; i <= spl.length; i++){
-            var val = spl[i - 1];
+        for (int i = 0; i < spl.length; i++){
+            var val = spl[i];
             if (val == null || val.isBlank())
                 continue;
-            sum += (int) (Math.pow(10, spl.length - i) * Integer.parseInt(val));
+            sum += (int) (Math.pow(100, maxDecimalCount - i - 1) * Integer.parseInt(val));
         }
 
         return sum;
