@@ -47,6 +47,7 @@ public class Config {
     private boolean enableInGameRPC;
     private boolean useNonGuiShortcut;
     private boolean overwriteImported;
+    private boolean disableSelectNewProfile;
 
     private boolean useExternalAuth;
     private boolean useEmbeddedBrowser;
@@ -91,6 +92,13 @@ public class Config {
     public Path getLastBackupPath() { return lastBackupPath; }
     public void setLastBackupPath(Path path){
         this.lastBackupPath = path;
+    }
+
+    public boolean disableSelectNewProfile() {
+        return disableSelectNewProfile;
+    }
+    public void setDisableSelectNewProfile(boolean disableSelectNewProfile) {
+        this.disableSelectNewProfile = disableSelectNewProfile;
     }
 
     public JavaSourceType getJavaSourceType() { return javaSource == null ? JavaSourceType.AZUL : javaSource; }

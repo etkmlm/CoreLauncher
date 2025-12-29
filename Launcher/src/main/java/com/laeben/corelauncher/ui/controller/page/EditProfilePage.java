@@ -572,6 +572,11 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         Main.getMain().setFocusLimiter(null);
 
         if (isNew){
+
+            if (!Configurator.getConfig().disableSelectNewProfile()){
+                Main.getMain().selectProfile(profile);
+            }
+
             if (Configurator.getConfig().shouldPlaceNewProfileToDock()){
                 Main.getMain().closeTab((CTab)getParentObject());
                 Main.getMain().getTab().getSelectionModel().select(0);
