@@ -187,15 +187,21 @@ public class Authenticator {
                     OSUtil.openURL(CODE_URL.replace("$", redirect));
                 else{
                     // auth with embedded browser
+                    Logger.getLogger().logDebug("Authentication Browser: Starting...");
                     UI.runAsync(() ->
                             EmbeddedBrowser.getInstance()
-                                    .getWebComplex()
+                                    .getWebComplex(10000)
+                                    .onTimeoutReached(event -> {
+                                        if (event.location() != null && event.location().equals(codeUrl))
+                                            WebPage.open(Translator.translate("browser.title.auhenticate")).reload(event.complex());
+                                    })
                                     .onLocationChanged(event -> {
+                                        Logger.getLogger().logDebug("Authentication Browser: Location changed.");
                                         if (event.location() == null)
                                             return;
 
                                         if (event.location().startsWith(finalRedirect)){
-                                            Logger.getLogger().log(LogType.INFO, "Authentication done - client side!");
+                                            Logger.getLogger().log(LogType.INFO, "Authentication Browser: Done.");
                                             if (event.complex().getAttachedPage() != null)
                                                 Main.getMain().closeTab((Tab) event.complex().getAttachedPage().getParentObject());
                                         }

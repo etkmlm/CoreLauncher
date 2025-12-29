@@ -468,7 +468,6 @@ public class Main extends HandlerController {
             var key = k.getKey();
 
             if (key.charAt(0) == '.'){
-                System.out.println(key);
                 processDotFormStatus(key);
                 return;
             }

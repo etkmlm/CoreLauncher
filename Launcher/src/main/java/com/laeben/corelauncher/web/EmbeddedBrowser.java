@@ -23,4 +23,8 @@ public record EmbeddedBrowser(CookieStore cookieStore) {
     public WebComplex getWebComplex() {
         return new WebComplex(cookieStore);
     }
+
+    public WebComplex getWebComplex(long timeout) {
+        return new WebComplex(cookieStore, timeout);
+    }
 }
