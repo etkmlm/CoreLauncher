@@ -33,11 +33,8 @@ import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.util.ServerHandshake;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
-import com.laeben.corelauncher.ui.controller.page.ExtensionsPage;
-import com.laeben.corelauncher.ui.controller.page.MainPage;
-import com.laeben.corelauncher.ui.controller.page.SettingsPage;
+import com.laeben.corelauncher.ui.controller.page.*;
 import com.laeben.corelauncher.ui.control.*;
-import com.laeben.corelauncher.ui.controller.page.TutorialsPage;
 import com.laeben.corelauncher.ui.dialog.DStartupConfigurator;
 import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.ui.tutorial.Instructor;
@@ -50,7 +47,6 @@ import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
-import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -67,6 +63,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import javafx.animation.ScaleTransition;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -583,10 +580,14 @@ public class Main extends HandlerController {
         cMenu.addItem(null, SETTINGS, Translator.translate("settings"), a -> addTab("pages/settings", Translator.translate("settings"), true, SettingsPage.class));
         cMenu.addItem(null, ABOUT, Translator.translate("about"), a -> CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("about.title"), Translator.translateFormat("about.content", LauncherConfig.VERSION, "https://github.com/etkmlm/CoreLauncher", "https://github.com/etkmlm", "https://discord.gg/MEJQtCvwqf", CoreLauncher.SYSTEM_OS_64 ? "+" : "-", CoreLauncher.SYSTEM_OS_ARCH, LauncherConfig.APPLICATION.getName())).execute());
         cMenu.addItem(null, FEEDBACK, Translator.translate("feedback"), a -> {
-            try {
-                OSUtil.openURL("https://github.com/etkmlm/CoreLauncher/issues");
-            } catch (IOException ignored) {
+            if (Configurator.getConfig().useEmbeddedBrowser())
+                WebPage.open(Translator.translate("browser.title.feedback")).navigate("https://github.com/etkmlm/CoreLauncher/issues");
+            else{
+                try {
+                    OSUtil.openURL("https://github.com/etkmlm/CoreLauncher/issues");
+                } catch (IOException ignored) {
 
+                }
             }
         });
         cMenu.addItem(null, EXTENSIONS, Translator.translate("extensions"), a -> addTab("pages/extensions", Translator.translate("extensions"), true, ExtensionsPage.class));

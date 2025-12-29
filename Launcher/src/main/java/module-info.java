@@ -14,6 +14,7 @@ module com.laeben.corelauncher {
     requires java.management;
     requires java.sql;
     requires org.apache.commons.lang3;
+    requires javafx.web;
 
     opens com.laeben.corelauncher.ui.tutorial to javafx.fxml, com.google.gson;
     opens com.laeben.corelauncher.ui.tutorial.entity to com.google.gson;

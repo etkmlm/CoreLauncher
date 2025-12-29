@@ -209,7 +209,7 @@ public class BrowserPage extends HandlerController {
                         .addChoice(Translator.translate("mods.sort.follows"), "follows", Index.FOLLOWS)
                         .addChoice(Translator.translate("mods.sort.lastUpdated"), "lastup", Index.UPDATED)
                         .addChoice(Translator.translate("mods.sort.totalDownload"), "totaldown", Index.DOWNLOADS)
-                        .defaultChoice("relevance"),
+                        .defaultChoice("totalDownload"),
                 FilterSection.<Boolean>create(Translator.translate("mods.browse.sortmode"), "smode", FilterSection.FilterType.SINGLE_RADIO)
                         .setOnAction(a -> search.setSortOrder(a.state()))
                         .addChoice(Translator.translate("ascending"), "asc", true)

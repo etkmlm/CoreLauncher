@@ -2,17 +2,23 @@ package com.laeben.corelauncher.minecraft.util;
 
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.exception.PerformException;
+import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.util.OSUtil;
+import com.laeben.corelauncher.ui.controller.Main;
+import com.laeben.corelauncher.ui.controller.page.WebPage;
 import com.laeben.corelauncher.util.APIListener;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.laeben.corelauncher.util.entity.LogType;
+import com.laeben.corelauncher.web.EmbeddedBrowser;
+import javafx.scene.control.Tab;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -63,14 +69,14 @@ public class Authenticator {
 
     public String listen(String parameter, int port) {
         String regex = ".*" + parameter + "=(.*) HTTP.*";
-        Pattern p = Pattern.compile(regex, Pattern.DOTALL);
+        Pattern p = Pattern.compile(regex);
         String r = APIListener.createClosePageRequest();
 
         String s = NetUtil.listenServer(port, r);
         if (s == null)
             return null;
         var m = p.matcher(s);
-        return m.matches() ? m.group(1) : null;
+        return m.find() ? m.group(1) : null;
     }
 
     public XblInfo refreshXbl(String refreshToken) throws NoConnectionException {
@@ -175,7 +181,30 @@ public class Authenticator {
 
             do{
                 redirect = "http://localhost:" + port;
-                OSUtil.openURL(CODE_URL.replace("$", redirect));
+                final String finalRedirect = redirect;
+                final String codeUrl = CODE_URL.replace("$", finalRedirect);
+                if (Configurator.getConfig().useExternalAuth())
+                    OSUtil.openURL(CODE_URL.replace("$", redirect));
+                else{
+                    // auth with embedded browser
+                    UI.runAsync(() ->
+                            EmbeddedBrowser.getInstance()
+                                    .getWebComplex()
+                                    .onLocationChanged(event -> {
+                                        if (event.location() == null)
+                                            return;
+
+                                        if (event.location().startsWith(finalRedirect)){
+                                            Logger.getLogger().log(LogType.INFO, "Authentication done - client side!");
+                                            if (event.complex().getAttachedPage() != null)
+                                                Main.getMain().closeTab((Tab) event.complex().getAttachedPage().getParentObject());
+                                        }
+                                        else{
+                                            WebPage.open(Translator.translate("browser.title.auhenticate")).reload(event.complex());
+                                        }
+                                    }).navigate(codeUrl)
+                    );
+                }
                 code = listen("code", port);
 
                 if (code != null)
@@ -195,7 +224,7 @@ public class Authenticator {
             var info = getATokenFromToken(xbl.xbl);
 
             return new Tokener(xbl, info);
-        } catch (IOException | NoConnectionException e){
+        } catch (NoConnectionException e){
             return Tokener.empty(username);
         }
         catch (Exception e){

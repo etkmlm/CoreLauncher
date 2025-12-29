@@ -48,6 +48,8 @@ public class CurseForgeResource implements ModResource {
                 var spl = vid.split("\\.");
                 if (spl.length == 3)
                     versions.add(spl[0] + "." + spl[1]);
+                else if (spl.length == 2)
+                    versions.add(vid);
             }
             versions.addAll(versionIds);
         }

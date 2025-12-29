@@ -29,6 +29,8 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.core.entity.Path;
+import com.laeben.corelauncher.web.EmbeddedBrowser;
+import com.laeben.corelauncher.web.cache.JSONCacheStore;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import com.laeben.corelauncher.api.ui.UI;
 import javafx.scene.control.Alert;
@@ -167,6 +169,7 @@ public class CoreLauncher {
         new Authenticator();
         new Discord().startDiscordThread();
         new ExtensionWrapper().reload();
+        new EmbeddedBrowser(new JSONCacheStore()); // use json cache store by default
 
         // Launcher Web API Listener
         APIListener.start();

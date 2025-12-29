@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.laeben.corelauncher.ui.controller.page.WebPage"
+            prefWidth="900.0" fx:id="root" styleClass="root" stylesheets="@../../style/pages/profile.css,@../../style/controls/clui.css">
+    <!--<WebView AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" fx:id="web"/-->
+</AnchorPane>

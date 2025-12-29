@@ -89,6 +89,10 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkAutoLoader;
     @FXML
     private CheckBox chkOverwriteImportDefault;
+    @FXML
+    private CheckBox chkUseExternalAuth;
+    @FXML
+    private CheckBox chkUseEmbeddedBrowser;
     /*@FXML
     private CButton btnSaveRAM;
     @FXML
@@ -427,6 +431,15 @@ public class SettingsPage extends HandlerController {
             Configurator.save();
         });
 
+        chkUseExternalAuth.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setUseExternalAuth(chkUseExternalAuth.isSelected());
+            Configurator.save();
+        });
+        chkUseEmbeddedBrowser.selectedProperty().addListener(x -> {
+            Configurator.getConfig().setUseEmbeddedBrowser(chkUseEmbeddedBrowser.isSelected());
+            Configurator.save();
+        });
+
         btnSelectGamePath.enableTransparentAnimation();
         btnSelectGamePath.setOnMouseClicked(x -> {
             DirectoryChooser chooser = new DirectoryChooser();
@@ -584,6 +597,8 @@ public class SettingsPage extends HandlerController {
             chkGuiShortcut.setSelected(c.useNonGUIShortcut());
             chkAutoLoader.setSelected(c.isAutoChangeLoader());
             chkOverwriteImportDefault.setSelected(c.isOverwriteImportedEnabled());
+            chkUseExternalAuth.setSelected(c.useExternalAuth());
+            chkUseEmbeddedBrowser.setSelected(c.useEmbeddedBrowser());
 
             chkInGameRPC.setDisable(c.isDisabledRPC());
             //txtCommPort.setDisable(c.isDisabledRPC());

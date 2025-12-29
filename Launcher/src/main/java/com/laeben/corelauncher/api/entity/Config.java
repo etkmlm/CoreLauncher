@@ -48,6 +48,9 @@ public class Config {
     private boolean useNonGuiShortcut;
     private boolean overwriteImported;
 
+    private boolean useExternalAuth;
+    private boolean useEmbeddedBrowser;
+
     public Path getGamePath(){
         return (gamePath == null ? DEFAULT_GAME_PATH : gamePath).forceSetDir(true);
     }
@@ -114,6 +117,20 @@ public class Config {
     }
     public void setDefaultMaxRAM(int maxRAM){
         defaultMaxRAM = maxRAM;
+    }
+
+    public boolean useExternalAuth(){
+        return useExternalAuth;
+    }
+    public void setUseExternalAuth(boolean val){
+        useExternalAuth = val;
+    }
+
+    public boolean useEmbeddedBrowser(){
+        return useEmbeddedBrowser;
+    }
+    public void setUseEmbeddedBrowser(boolean val){
+        useEmbeddedBrowser = val;
     }
 
     public boolean useNonGUIShortcut(){
