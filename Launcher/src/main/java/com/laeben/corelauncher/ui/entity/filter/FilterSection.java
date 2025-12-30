@@ -68,10 +68,11 @@ public class FilterSection<T> extends VBox {
                 chk.selectedProperty().addListener((observable, oldValue, newValue) -> {
                     if (newValue != null && newValue){
                         section.selected.add(id);
-                        section.fireActionEvent(chk);
+                        section.fireActionEvent(chk, true);
                     }
                     else{
                         section.selected.remove(id);
+                        section.fireActionEvent(chk, false);
                     }
 
                 });
@@ -91,11 +92,12 @@ public class FilterSection<T> extends VBox {
                 if (value){
                     section.selected.add(c.getId());
                     section.vbChoices.getChildren().add(c);
-                    section.fireActionEvent(c.getId());
+                    section.fireActionEvent(c.getId(), true);
                 }
                 else{
                     section.selected.remove(c.getId());
                     section.vbChoices.getChildren().remove(c);
+                    section.fireActionEvent(null, c.getId(), false);
                 }
             }
 
@@ -147,7 +149,7 @@ public class FilterSection<T> extends VBox {
         }
     }
 
-    public record ActionEventArgs<T>(FilterPreset preset, FilterSection section, String choiceId, T state){
+    public record ActionEventArgs<T>(FilterPreset preset, FilterSection section, String choiceId, T state, boolean isAdded){
 
     }
 
@@ -226,7 +228,7 @@ public class FilterSection<T> extends VBox {
 
             if (c instanceof RadioButton rb){
                 selected.add(rb.getId());
-                fireActionEvent(rb);
+                fireActionEvent(rb, true);
             }
         });
     }
@@ -318,34 +320,47 @@ public class FilterSection<T> extends VBox {
         return this;
     }
 
-    private void fireActionEvent(Node node){
-        if (onAction != null && preset.isEnabledEventListening())
-            onAction.accept(new ActionEventArgs<>(preset, this, node.getId(), usesState ? states.get(vbChoices.getChildren().indexOf(node)) : null));
+    private void fireActionEvent(Node node, boolean isAdded){
+        boolean e1 = onAction != null && preset.isEnabledEventListening();
+        boolean e2 = preset.getOnAction() != null && preset.isEnabledEventListening();
+        var args = e1 || e2 ? new ActionEventArgs<>(preset, this, node.getId(), usesState && isAdded ? states.get(vbChoices.getChildren().indexOf(node)) : null, isAdded) : null;
+
+        if (e1)
+            onAction.accept(args);
+        if (e2)
+            preset.getOnAction().accept(args);
     }
 
-    private void fireActionEvent(String choiceId, T state){
-        if (onAction != null && preset.isEnabledEventListening())
-            onAction.accept(new ActionEventArgs<>(preset, this, choiceId, state));
+    private void fireActionEvent(T state, String choiceId, boolean isAdded){
+        boolean e1 = onAction != null && preset.isEnabledEventListening();
+        boolean e2 = preset.getOnAction() != null && preset.isEnabledEventListening();
+        var args = e1 || e2 ? new ActionEventArgs<>(preset, this, choiceId, state, isAdded) : null;
+
+        if (e1)
+            onAction.accept(args);
+
+        if (e2)
+            preset.getOnAction().accept(args);
     }
 
-    private void fireActionEvent(String choiceId){
+    private void fireActionEvent(String choiceId, boolean isAdded){
         T state = null;
 
         if (usesState){
             state = getState(choiceId);
         }
 
-        fireActionEvent(choiceId, state);
+        fireActionEvent(state, choiceId, isAdded);
     }
 
-    private void fireActionEvent(int choiceIndex){
+    private void fireActionEvent(int choiceIndex, boolean isAdded){
         String choiceId;
         if (!type.getScheme().doesExistanceMeansChecked())
             choiceId = vbChoices.getChildren().get(choiceIndex).getId();
         else
             choiceId = comboIds.get(choiceIndex);
 
-        fireActionEvent(choiceId, usesState ? states.get(choiceIndex) : null);
+        fireActionEvent(usesState && isAdded ? states.get(choiceIndex) : null, choiceId, isAdded);
     }
 
     public void resetChoices(){
@@ -375,7 +390,7 @@ public class FilterSection<T> extends VBox {
         if (selected.isEmpty())
             return;
         for (var c : selected){
-            fireActionEvent(c);
+            fireActionEvent(c, true);
         }
     }
 

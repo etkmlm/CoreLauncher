@@ -48,6 +48,7 @@ public class Config {
     private boolean useNonGuiShortcut;
     private boolean overwriteImported;
     private boolean disableSelectNewProfile;
+    private boolean searchBrowserManually;
 
     private boolean useExternalAuth;
     private boolean useEmbeddedBrowser;
@@ -125,6 +126,13 @@ public class Config {
     }
     public void setDefaultMaxRAM(int maxRAM){
         defaultMaxRAM = maxRAM;
+    }
+
+    public boolean doSearchBrowserManually() {
+        return searchBrowserManually;
+    }
+    public void setSearchBrowserManually(boolean searchBrowserManually) {
+        this.searchBrowserManually = searchBrowserManually;
     }
 
     public boolean useExternalAuth(){

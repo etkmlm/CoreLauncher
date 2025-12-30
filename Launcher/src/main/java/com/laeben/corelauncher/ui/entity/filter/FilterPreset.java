@@ -3,6 +3,7 @@ package com.laeben.corelauncher.ui.entity.filter;
 import javafx.scene.Node;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class FilterPreset {
 
@@ -11,9 +12,19 @@ public class FilterPreset {
     private final String id;
     private final List<FilterSection> sections;
 
+    private Consumer<FilterSection.ActionEventArgs> onAction;
+
     public FilterPreset(String id, List<FilterSection> sections){
         this.id = id;
         this.sections = sections;
+    }
+
+    public void setOnAction(Consumer<FilterSection.ActionEventArgs> onAction){
+        this.onAction = onAction;
+    }
+
+    Consumer<FilterSection.ActionEventArgs> getOnAction(){
+        return onAction;
     }
 
     public FilterSection getSection(String id) {
@@ -43,6 +54,7 @@ public class FilterPreset {
     public void dispose(){
         sections.forEach(a -> {
             a.setOnAction(null);
+            setOnAction(null);
             a.resetChoices();
         });
     }

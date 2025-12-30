@@ -95,6 +95,8 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkUseEmbeddedBrowser;
     @FXML
     private CheckBox chkDisableSelectNewProfile;
+    @FXML
+    private CheckBox chkSearchBrowserManually;
     /*@FXML
     private CButton btnSaveRAM;
     @FXML
@@ -445,6 +447,10 @@ public class SettingsPage extends HandlerController {
             Configurator.getConfig().setDisableSelectNewProfile(chkDisableSelectNewProfile.isSelected());
             Configurator.save();
         });
+        chkSearchBrowserManually.selectedProperty().addListener(x -> {
+           Configurator.getConfig().setSearchBrowserManually(chkSearchBrowserManually.isSelected());
+           Configurator.save();
+        });
 
         btnSelectGamePath.enableTransparentAnimation();
         btnSelectGamePath.setOnMouseClicked(x -> {
@@ -606,6 +612,7 @@ public class SettingsPage extends HandlerController {
             chkUseExternalAuth.setSelected(c.useExternalAuth());
             chkUseEmbeddedBrowser.setSelected(c.useEmbeddedBrowser());
             chkDisableSelectNewProfile.setSelected(c.disableSelectNewProfile());
+            chkSearchBrowserManually.setSelected(c.doSearchBrowserManually());
 
             chkInGameRPC.setDisable(c.isDisabledRPC());
             //txtCommPort.setDisable(c.isDisabledRPC());

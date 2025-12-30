@@ -7,12 +7,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class CFilterPane extends VBox {
     private final List<FilterPreset> presets;
 
     private String loadedPreset;
     private String pinnedPreset;
+
+    private Consumer<FilterSection.ActionEventArgs> onAction;
 
     public CFilterPane() {
         presets = new ArrayList<>();
@@ -22,6 +25,11 @@ public class CFilterPane extends VBox {
 
     public String getLoadedPreset(){
         return loadedPreset;
+    }
+
+    public void setOnAction(Consumer<FilterSection.ActionEventArgs> onAction){
+        this.onAction = onAction;
+        presets.forEach(a -> a.setOnAction(onAction));
     }
 
     public void setPreset(String id){
@@ -77,6 +85,8 @@ public class CFilterPane extends VBox {
     public void addPreset(String id, FilterSection... sections){
         var ss = List.of(sections);
         var preset = new FilterPreset(id, ss);
+        if (onAction != null)
+            preset.setOnAction(onAction);
         ss.forEach(a -> a.setPreset(preset));
         presets.add(preset);
     }
@@ -84,6 +94,7 @@ public class CFilterPane extends VBox {
     public void dispose(){
         presets.forEach(FilterPreset::dispose);
         presets.clear();
+        setOnAction(null);
         getChildren().clear();
     }
 }

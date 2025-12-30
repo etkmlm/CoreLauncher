@@ -1,9 +1,11 @@
 package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.util.StrUtil;
+import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ModsSearchSortField;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
@@ -34,10 +36,13 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Stream;
 
 public class BrowserPage extends HandlerController {
     public static final String KEY = "pgbrowser";
+    public final static long SEARCH_REFRESH_RATE = 500;
 
     private Search search;
 
@@ -48,10 +53,13 @@ public class BrowserPage extends HandlerController {
     private ResourceType mainType;
 
     private final ObservableList<ResourceCell.Link> resources;
+    private final Timer searchTimer;
 
     public BrowserPage(){
         super(KEY);
         resources = FXCollections.observableArrayList();
+
+        searchTimer = new Timer();
     }
 
     private void reloadTitle(Profile p){
@@ -156,10 +164,55 @@ public class BrowserPage extends HandlerController {
     @FXML
     private Label lblNotFound;
 
+    private boolean didFiltersChange = false;
+    private long lastFilterChangeTime = 0;
+
+    private boolean didQueryChange = false;
+    private long lastQueryChangeTime = 0;
+
+    /**
+     * Timer callback to check whether the search should be accomplished or not.
+     */
+    private void onSearchTimerTick(){
+        if (Configurator.getConfig().doSearchBrowserManually())
+            return;
+
+        long current = System.currentTimeMillis();
+
+        boolean doSearch = false;
+
+        if (didFiltersChange && current - lastFilterChangeTime > SEARCH_REFRESH_RATE){
+            didFiltersChange = false;
+            lastFilterChangeTime = 0;
+            doSearch = true;
+        }
+
+        if (didQueryChange && current - lastQueryChangeTime > SEARCH_REFRESH_RATE){
+            didQueryChange = false;
+            lastQueryChangeTime = 0;
+            doSearch = true;
+        }
+
+        if (doSearch)
+            UI.runAsync(() -> search(txtQuery.getText()));
+    }
+
     @Override
     public void preInit() {
         lvResources.setItems(resources);
         icon.setCornerRadius(30, 30, 8);
+
+        filterPane.setOnAction(event -> {
+            didFiltersChange = true;
+            lastFilterChangeTime = System.currentTimeMillis();
+        });
+
+        searchTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                onSearchTimerTick();
+            }
+        }, 0, 100);
 
         filterPane.addPreset("pinned",
                 FilterSection.create(Translator.translate("profile.edit.gameVersion"), "version", FilterSection.FilterType.MULTIPLE_COMBO),
@@ -255,10 +308,13 @@ public class BrowserPage extends HandlerController {
         lvResources.setCellFactory(a -> new ResourceCell().setOnNewProfileCreated(this::onProfileCreated));
 
         txtQuery.setOnKeyPressed(a -> {
-            if (a.getCode() != KeyCode.ENTER)
+            if (a.getCode() == KeyCode.ENTER){
+                search(txtQuery.getText());
                 return;
+            }
 
-            search(txtQuery.getText());
+            didQueryChange = true;
+            lastQueryChangeTime = System.currentTimeMillis();
         });
         txtQuery.setFocusedAnimation(Duration.millis(200));
 
@@ -271,7 +327,7 @@ public class BrowserPage extends HandlerController {
 
         paginator.setOnPageChange(a -> {
             search.setPageIndex(paginator.getPage());
-            search(txtQuery.getText());
+            UI.runAsync(() -> search(txtQuery.getText()));
         });
     }
 
@@ -282,6 +338,9 @@ public class BrowserPage extends HandlerController {
     }
 
     private void search(String query){
+        if (search == null)
+            return;
+
         var preset = filterPane.getPreset(filterPane.getLoadedPreset());
         List<String> vers = profile != null ? null : filterPane.getPreset("pinned").getSection("version").getSelectedChoices();
 
