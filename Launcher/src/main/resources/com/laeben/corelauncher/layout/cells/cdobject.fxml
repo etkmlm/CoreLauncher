@@ -8,8 +8,8 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:id="root" stylesheets="@../../style/cells/cdobject.css" >
-    <Pane prefHeight="128" prefWidth="128" >
-        <GridPane visible="false" managed="false" vgap="8" hgap="8" prefHeight="128" prefWidth="128" fx:id="folderRoot" >
+    <Pane fx:id="innerPane">
+        <GridPane visible="false" managed="false" vgap="8" hgap="8" fx:id="folderRoot" >
             <columnConstraints>
                 <ColumnConstraints percentWidth="50"/>
                 <ColumnConstraints percentWidth="50"/>
@@ -19,8 +19,7 @@
                 <RowConstraints percentHeight="50"/>
             </rowConstraints>
         </GridPane>
-        <AnchorPane visible="false" managed="false" prefHeight="128" prefWidth="128" fx:id="imgRoot">
-
+        <AnchorPane visible="false" managed="false" fx:id="imgRoot">
             <!--<CButton fx:id="btnMenu" text="…" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"/>-->
             <CMenu fx:id="menu" AnchorPane.leftAnchor="0" AnchorPane.topAnchor="0"/>
             <CShapefulButton fx:id="btnSelect" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" translateY="90" AnchorPane.leftAnchor="0" alignment="CENTER" AnchorPane.rightAnchor="0"/>

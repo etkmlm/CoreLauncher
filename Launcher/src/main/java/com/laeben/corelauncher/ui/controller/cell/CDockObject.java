@@ -59,6 +59,9 @@ public abstract class CDockObject extends GridCell {
     public static final DataFormat dataFormat = new DataFormat("profile");
     public static final Duration animationDuration = Duration.seconds(0.8);
 
+    public static final int PREF_HEIGHT = 128;
+    public static final int PREF_WIDTH = 128;
+
     private final Node gr;
     protected FDObject object;
     protected FDObject parent;
@@ -123,6 +126,8 @@ public abstract class CDockObject extends GridCell {
     @FXML
     protected Label lblName;
     @FXML
+    private Pane innerPane;
+    @FXML
     protected CShapefulButton btnSelect;
 
     protected boolean moving;
@@ -154,6 +159,9 @@ public abstract class CDockObject extends GridCell {
 
         hoverOpacity.setNode(root);
         disappear.setNode(root);
+
+        innerPane.setPrefHeight(PREF_HEIGHT);
+        innerPane.setPrefWidth(PREF_WIDTH);
 
         if (!onSet(item))
             return null;

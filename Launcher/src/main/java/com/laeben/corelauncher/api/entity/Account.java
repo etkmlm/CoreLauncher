@@ -13,7 +13,6 @@ import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import javafx.scene.image.Image;
 
-import java.awt.image.BufferedImage;
 import java.lang.reflect.Type;
 import java.util.Base64;
 import java.util.List;

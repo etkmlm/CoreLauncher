@@ -175,6 +175,42 @@ public class FloatDock {
         return getObjects().stream().filter(a -> obj.isSingle() ? (a.isSingle() && obj.primary().getName().equals(a.getName())) : obj.getName().equals(a.getName())).findFirst().orElse(null);
     }
 
+    /**
+     * Sorts all Float Dock Objects as grid according to given boundaries.
+     * <br/>
+     * Grows vertically.
+     * @param x min x
+     * @param y min y
+     * @param maxWidth max x
+     * @param itemSizeX item size on x-axis
+     * @param space horizontal and vertical space between each item
+     */
+    public void sortObjects(double x, double y, double maxWidth, double itemSizeX, double space){
+        int maxItemX = (int) ((maxWidth - x + space) / (itemSizeX + space));
+        int countX = 0;
+
+        double currentX = x;
+        double currentY = y;
+
+        for (FDObject obj : getObjects()) {
+            obj.layoutX = currentX;
+            obj.layoutY = currentY;
+            countX++;
+
+            if (countX >= maxItemX) {
+                currentX = x;
+                currentY += space + itemSizeX;
+
+                countX = 0;
+            } else {
+                currentX += space + itemSizeX;
+            }
+        }
+
+        save();
+        handler.execute(new KeyEvent(EventHandler.RELOAD));
+    }
+
     public String generateName(final String identifier){
         int num = 1;
         while (true){

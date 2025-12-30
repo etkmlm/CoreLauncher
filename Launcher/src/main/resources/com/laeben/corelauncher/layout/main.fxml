@@ -2,14 +2,12 @@
 
 <?import com.laeben.corelauncher.ui.control.CAnnouncer?>
 <?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CHeadView?>
 <?import com.laeben.corelauncher.ui.control.CMenu?>
-<?import com.laeben.corelauncher.ui.control.CView?>
 <?import com.laeben.corelauncher.ui.tutorial.StepPopup?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.effect.BoxBlur?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.*?>
-<?import com.laeben.corelauncher.ui.control.CHeadView?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.laeben.corelauncher.ui.controller.Main"

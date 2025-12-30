@@ -145,6 +145,8 @@ public class CProfile extends CDockObject{
 
         var bg = new Background(new BackgroundImage(img_128, null, null, null, null));
         imgRoot.setBackground(bg);
+        imgRoot.setPrefHeight(CDockObject.PREF_HEIGHT);
+        imgRoot.setPrefWidth(CDockObject.PREF_WIDTH);
 
         imgRoot.widthProperty().addListener(a -> {
             double pad = (root.getWidth() - 128)/2;

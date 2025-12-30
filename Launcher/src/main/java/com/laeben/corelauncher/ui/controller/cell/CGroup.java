@@ -254,6 +254,8 @@ public class CGroup extends CDockObject {
 
         folderRoot.setVisible(true);
         folderRoot.setManaged(true);
+        folderRoot.setPrefHeight(CDockObject.PREF_HEIGHT);
+        folderRoot.setPrefWidth(CDockObject.PREF_WIDTH);
 
 
         reloadMeta();

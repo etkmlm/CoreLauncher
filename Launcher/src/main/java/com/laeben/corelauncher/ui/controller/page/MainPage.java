@@ -40,6 +40,7 @@ public class MainPage extends HandlerController {
     public static final String NEW_GROUP = "ngrp";
     public static final String PROFILE = "prof";
     public static final String BROWSER = "mods.browser";
+    public static final String SORT = "srt";
 
     @FXML
     public SelectionPane<CDockObject> root;
@@ -117,6 +118,9 @@ public class MainPage extends HandlerController {
             lY = a.event().getScreenY() - f.getMinY();
 
             Main.getMain().addTab("pages/browser", Translator.translate("mods.browser"), true, BrowserPage.class).setProfile(null);
+        });
+        dockContext.addItem(null, SORT, Translator.translate("dock.menu.sort"), a -> {
+            FloatDock.getDock().sortObjects(16, 16, root.getWidth(), CDockObject.PREF_WIDTH, 64);
         });
 
         dockGhost = new CButton();
