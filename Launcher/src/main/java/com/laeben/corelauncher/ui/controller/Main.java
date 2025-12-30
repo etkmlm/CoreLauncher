@@ -676,7 +676,7 @@ public class Main extends HandlerController {
 
             if (a.getButton() == MouseButton.MIDDLE && a.getEventType() == MouseEvent.MOUSE_PRESSED && Configurator.getConfig().isEnabledMiddlePaste()) {
                 var tf = ControlUtil.getTextFieldParent(a.getTarget());
-                if (tf != null) tf.paste();
+                if (tf != null && tf.isEditable()) tf.paste();
             }
         }));
 

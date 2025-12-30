@@ -65,7 +65,7 @@ public class CDialog<T> extends Dialog<T> {
         getDialogPane().getScene().getWindow().addEventFilter(MouseEvent.MOUSE_PRESSED, a -> {
             if (a.getButton() == MouseButton.MIDDLE && Configurator.getConfig().isEnabledMiddlePaste()) {
                 var tf = ControlUtil.getTextFieldParent(a.getTarget());
-                if (tf != null) tf.paste();
+                if (tf != null && tf.isEditable()) tf.paste();
             }
         });
 
