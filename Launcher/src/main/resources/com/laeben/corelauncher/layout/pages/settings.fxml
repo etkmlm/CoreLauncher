@@ -50,6 +50,8 @@
                     <CButton fx:id="btnOpenDefaultOptions" text="%profile.options.open"/>
                 </HBox>
 
+                <Label styleClass="property-key" text="%settings.middlePaste" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                <CheckBox fx:id="chkMiddlePaste" GridPane.columnIndex="2" GridPane.rowIndex="8"/>
             </GridPane>
         </VBox>
         <VBox>

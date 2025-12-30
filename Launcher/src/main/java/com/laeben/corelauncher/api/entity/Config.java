@@ -49,6 +49,7 @@ public class Config {
     private boolean overwriteImported;
     private boolean disableSelectNewProfile;
     private boolean searchBrowserManually;
+    private boolean middlePaste;
 
     private boolean useExternalAuth;
     private boolean useEmbeddedBrowser;
@@ -189,6 +190,13 @@ public class Config {
     }
     public void setOverwriteImported(boolean v){
         this.overwriteImported = v;
+    }
+
+    public boolean isEnabledMiddlePaste(){
+        return middlePaste;
+    }
+    public void setEnabledMiddlePaste(boolean v){
+        this.middlePaste = v;
     }
 
     public double getWindowWidth(){

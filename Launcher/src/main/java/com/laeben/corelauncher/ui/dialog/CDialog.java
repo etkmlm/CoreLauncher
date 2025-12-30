@@ -2,15 +2,18 @@ package com.laeben.corelauncher.ui.dialog;
 
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.entity.LStage;
+import com.laeben.corelauncher.ui.util.ControlUtil;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.TranslateTransition;
-import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Dialog;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -48,16 +51,21 @@ public class CDialog<T> extends Dialog<T> {
 
         setResultConverter(a -> null);
 
-        getDialogPane().getScene().getWindow().addEventFilter(EventType.ROOT, x -> {
-            if (x instanceof WindowEvent we && we.getEventType() == WindowEvent.WINDOW_SHOWN){
-                if (Main.getMain() == null)
-                    return;
-                var parentBounds = Main.getMain().getTabBounds();
+        getDialogPane().getScene().getWindow().addEventFilter(WindowEvent.WINDOW_SHOWN, x -> {
+            if (Main.getMain() == null)
+                return;
+            var parentBounds = Main.getMain().getTabBounds();
 
-                var window = (Window)we.getSource();
+            var window = (Window)x.getSource();
 
-                window.setX(parentBounds.getMinX() + (parentBounds.getWidth() - window.getWidth()) / 2);
-                window.setY(parentBounds.getMinY() + (parentBounds.getHeight() - window.getHeight()) / 2);
+            window.setX(parentBounds.getMinX() + (parentBounds.getWidth() - window.getWidth()) / 2);
+            window.setY(parentBounds.getMinY() + (parentBounds.getHeight() - window.getHeight()) / 2);
+        });
+
+        getDialogPane().getScene().getWindow().addEventFilter(MouseEvent.MOUSE_PRESSED, a -> {
+            if (a.getButton() == MouseButton.MIDDLE && Configurator.getConfig().isEnabledMiddlePaste()) {
+                var tf = ControlUtil.getTextFieldParent(a.getTarget());
+                if (tf != null) tf.paste();
             }
         });
 

@@ -58,6 +58,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
@@ -659,20 +660,24 @@ public class Main extends HandlerController {
     @Override
     public void init() {
         addRegisteredEventFilter(EventFilter.node(root, MouseEvent.ANY, (a) -> {
-            if (focusLimiter == null)
-                return;
+            if (focusLimiter != null){
+                var node = (Node) a.getTarget();
 
-            var node = (Node) a.getTarget();
+                if (!focusLimiter.verify(a.getSceneX(), a.getSceneY())){
+                    if (a.getEventType() == MouseEvent.MOUSE_CLICKED){
+                        focusLimiter.focus();
+                        focusLimiter.onFocusLimitIgnored(Tool.findNodeController(node), node);
+                    }
 
-            if (focusLimiter.verify(a.getSceneX(), a.getSceneY()))
-                return;
-
-            if (a.getEventType() == MouseEvent.MOUSE_CLICKED){
-                focusLimiter.focus();
-                focusLimiter.onFocusLimitIgnored(Tool.findNodeController(node), node);
+                    a.consume();
+                    return;
+                }
             }
 
-            a.consume();
+            if (a.getButton() == MouseButton.MIDDLE && a.getEventType() == MouseEvent.MOUSE_PRESSED && Configurator.getConfig().isEnabledMiddlePaste()) {
+                var tf = ControlUtil.getTextFieldParent(a.getTarget());
+                if (tf != null) tf.paste();
+            }
         }));
 
         addRegisteredEventFilter(EventFilter.window(getStage(), javafx.scene.input.KeyEvent.KEY_PRESSED, x -> {

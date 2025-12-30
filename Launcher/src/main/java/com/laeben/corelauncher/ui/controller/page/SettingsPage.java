@@ -97,6 +97,8 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkDisableSelectNewProfile;
     @FXML
     private CheckBox chkSearchBrowserManually;
+    @FXML
+    private CheckBox chkMiddlePaste;
     /*@FXML
     private CButton btnSaveRAM;
     @FXML
@@ -451,6 +453,10 @@ public class SettingsPage extends HandlerController {
            Configurator.getConfig().setSearchBrowserManually(chkSearchBrowserManually.isSelected());
            Configurator.save();
         });
+        chkMiddlePaste.selectedProperty().addListener(x -> {
+           Configurator.getConfig().setEnabledMiddlePaste(chkMiddlePaste.isSelected());
+           Configurator.save();
+        });
 
         btnSelectGamePath.enableTransparentAnimation();
         btnSelectGamePath.setOnMouseClicked(x -> {
@@ -613,6 +619,7 @@ public class SettingsPage extends HandlerController {
             chkUseEmbeddedBrowser.setSelected(c.useEmbeddedBrowser());
             chkDisableSelectNewProfile.setSelected(c.disableSelectNewProfile());
             chkSearchBrowserManually.setSelected(c.doSearchBrowserManually());
+            chkMiddlePaste.setSelected(c.isEnabledMiddlePaste());
 
             chkInGameRPC.setDisable(c.isDisabledRPC());
             //txtCommPort.setDisable(c.isDisabledRPC());
