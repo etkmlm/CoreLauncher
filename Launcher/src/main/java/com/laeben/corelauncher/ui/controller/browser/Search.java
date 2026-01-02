@@ -13,7 +13,7 @@ public interface Search<T extends Enum> {
     void setCategories(List<String> cats);
     void setPageIndex(int index);
     void setGameVersions(List<String> gameVersions);
-    void setSide(ModSide side);
+    void setSides(List<ModSide> sides);
     void setLoaders(List<LoaderType> loaders);
     void reset();
     int getTotalPages();

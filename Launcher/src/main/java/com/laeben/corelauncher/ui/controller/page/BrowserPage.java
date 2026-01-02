@@ -249,12 +249,13 @@ public class BrowserPage extends HandlerController {
                         .setSingleton(true)
                         .defaultChoice("mod"),
                 FilterSection.create(Translator.translate("mods.browse.categories"), "cat", FilterSection.FilterType.MULTIPLE_CHECKBOX),
-                FilterSection.<ModSide>create(Translator.translate("mods.browse.side"), "side", FilterSection.FilterType.SINGLE_RADIO)
-                        .setOnAction(a -> search.setSide(a.state()))
+                FilterSection.<ModSide>create(Translator.translate("mods.browse.side"), "side", FilterSection.FilterType.MULTIPLE_CHECKBOX)
+                        //.setOnAction(a -> search.setSide(a.state()))
                         .addChoice(Translator.translate("mods.side.client"), "client", ModSide.CLIENT)
                         .addChoice(Translator.translate("mods.side.server"), "server", ModSide.SERVER)
-                        .addChoice(Translator.translate("mods.side.both"), "both", ModSide.BOTH)
-                        .defaultChoice("both"),
+                        //.addChoice(Translator.translate("mods.side.both"), "both", ModSide.BOTH)
+                        //.defaultChoice("both")
+                ,
                 FilterSection.<Index>create(Translator.translate("mods.browse.sortBy"), "sortby", FilterSection.FilterType.SINGLE_RADIO)
                         .setOnAction(a -> search.setSortField(a.state()))
                         .addChoice(Translator.translate("mods.sort.relevance"), "relevance", Index.RELEVANCE)
@@ -375,6 +376,7 @@ public class BrowserPage extends HandlerController {
         List<String> selectedCats = preset.getSection("cat").getSelectedChoices();
 
         search.setCategories(selectedCats);
+        search.setSides(preset.getSection("side").getSelectedChoices());
 
         search.setGameVersions(vers);
 

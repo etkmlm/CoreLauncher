@@ -80,9 +80,15 @@ public class ModrinthSearch implements Search<Index> {
     private static final List<String> BOTH_SIDES = List.of("required");
 
     @Override
-    public void setSide(ModSide side) {
-        boolean isClient = side == ModSide.CLIENT || side == ModSide.BOTH;
-        boolean isServer = side == ModSide.SERVER || side == ModSide.BOTH;
+    public void setSides(List<ModSide> sides) {
+        if (sides == null || sides.isEmpty()){
+            request.builder.remove("client_side");
+            request.builder.remove("server_side");
+            return;
+        }
+
+        boolean isClient = sides.contains(ModSide.CLIENT);
+        boolean isServer = sides.contains(ModSide.SERVER);
         request.builder.add(Facet.or("client_side", isClient && isServer ? BOTH_SIDES : (isClient ? SELECTED_SIDE : UNSELECTED_SIDE)).setId("client_side"));
         request.builder.add(Facet.or("server_side", isClient && isServer ? BOTH_SIDES : (isServer ? SELECTED_SIDE : UNSELECTED_SIDE)).setId("server_side"));
     }

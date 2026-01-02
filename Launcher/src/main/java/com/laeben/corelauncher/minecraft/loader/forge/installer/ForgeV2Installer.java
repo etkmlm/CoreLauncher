@@ -32,7 +32,7 @@ public class ForgeV2Installer implements ForgeInstaller{
 
     private Object onProgress(Object proxy, Method method, Object[] args, Consumer<String> logState) throws Throwable {
         if (method.getName().equals("message") && args.length > 0)
-            logState.accept("," + args[0].toString() + ":." + "forge.state.install");
+            logState.accept(".!" + args[0].toString() + "$," + "forge.state.install");
         if (method.getName().equals("getCurrentStep"))
             return step;
         if (method.getName().equals("setCurrentStep"))

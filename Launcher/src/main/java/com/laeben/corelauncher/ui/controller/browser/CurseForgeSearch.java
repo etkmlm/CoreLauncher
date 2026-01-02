@@ -63,7 +63,7 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
     }
 
     @Override
-    public void setSide(ModSide side) {
+    public void setSides(List<ModSide> side) {
         throw new UnsupportedOperationException();
     }
 
