@@ -218,7 +218,7 @@ jobs:
     needs: [build]
     if: true
     name: Pack JAR For MacOS Non Apple Silicon
-    runs-on: macos-latest-large
+    runs-on: macos-15-intel
     permissions: write-all
     steps:
       - name: Get Cache
