@@ -16,7 +16,6 @@ import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.util.entity.LogType;
-import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -27,7 +26,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class ProfileUtil {

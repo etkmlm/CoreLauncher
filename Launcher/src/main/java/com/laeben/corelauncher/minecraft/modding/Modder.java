@@ -27,7 +27,6 @@ import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.api.ui.UI;
-import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 
 import java.io.FileNotFoundException;
@@ -36,7 +35,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 

@@ -32,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 public class WorldsPage extends HandlerController {
     public static final String KEY = "pgworlds";
