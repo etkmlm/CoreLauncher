@@ -48,7 +48,6 @@ import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
@@ -214,13 +213,13 @@ public class Main extends HandlerController {
             var task = new Task<Boolean>() {
                 @Override
                 protected Boolean call() {
-                    var msg = CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth", v.getValue()))
+                    var msg = CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth.api", v.getValue()))
                             .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                             .executeForResult();
                     return msg.isPresent() && msg.get().result() != CMsgBox.ResultType.NO;
                 }
             };
-            Platform.runLater(task);
+            UI.runAsync(task);
             try {
                 return task.get();
             } catch (InterruptedException | ExecutionException ex) {

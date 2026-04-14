@@ -1,10 +1,19 @@
 package com.laeben.corelauncher.ui.controller.page;
 
+import com.laeben.core.entity.exception.HttpException;
+import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
+import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.web.EmbeddedBrowser;
 import com.laeben.corelauncher.web.WebComplex;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Tab;
 import javafx.scene.layout.AnchorPane;
 
 import java.util.function.Consumer;
@@ -26,14 +35,35 @@ public class WebPage extends HandlerController {
     }
 
     public WebPage reload(){
-        complex = EmbeddedBrowser.getInstance().getWebComplex();
-        tryToAttachComplex();
-        return this;
+        return reload(EmbeddedBrowser.getInstance().getWebComplex());
     }
 
     public WebPage reload(WebComplex complex){
-        this.complex = complex;
-        tryToAttachComplex();
+        boolean shouldClose = complex.getState() != WebComplex.State.OK;
+        if (shouldClose && complex.getState() == WebComplex.State.MISSING_LIBRARIES){
+            var result = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("browser.embedded.library"))
+                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                    .executeForResult();
+            if (result.isPresent() && result.get().result().isPositive()){
+                Logger.getLogger().log(LogType.INFO, "Web Page: Downloading necessary libraries...");
+                try {
+                    EmbeddedBrowser.downloadNativeLibraries();
+                } catch (NoConnectionException | StopException ignored) {
+
+                } catch (HttpException e) {
+                    Logger.getLogger().log(e);
+
+                }
+            }
+        }
+
+        if (shouldClose){
+            if (getParentObject() instanceof Tab t) Main.getMain().closeTab(t);
+        }
+        else {
+            this.complex = complex;
+            tryToAttachComplex();
+        }
         return this;
     }
 
@@ -85,6 +115,7 @@ public class WebPage extends HandlerController {
         if (complex != null){
             complex.attachPage(null);
             complex.getView().getEngine().load("about:blank");
+            root.getChildren().remove(complex.getView());
         }
     }
 }

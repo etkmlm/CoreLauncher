@@ -12,8 +12,23 @@ import java.net.CookieStore;
 import java.util.function.Consumer;
 
 public class WebComplex {
-    public record LocationChangedEvent(WebComplex complex, String oldLocation, String location){}
+    public static final int NO_TIMEOUT = -1;
+
+    public enum State{
+        OK, MISSING_LIBRARIES, UNKNOWN_ERROR, LOADING
+    }
+
+    public static final WebComplex UNKNOWN_ERROR = new WebComplex(State.UNKNOWN_ERROR);
+    public static final WebComplex MISSING_LIBRARIES = new WebComplex(State.MISSING_LIBRARIES);
+
+    public record LocationChangedEvent(WebComplex complex, String oldLocation, String location){
+        public boolean isLocationBlank(){
+            return location == null || location.equals("about:blank");
+        }
+    }
     public record TimeoutReachedEvent(WebComplex complex, String location){}
+
+    private State state = State.LOADING;
 
     private final WebView view;
     private WebPage attachedPage;
@@ -21,8 +36,13 @@ public class WebComplex {
     private Consumer<LocationChangedEvent> onLocationChanged;
     private Consumer<TimeoutReachedEvent> onTimeoutReached;
 
+    public WebComplex(State state){
+        this.state = state;
+        view = null;
+    }
+
     public WebComplex(CookieStore cookieStore) {
-        this(cookieStore, -1);
+        this(cookieStore, NO_TIMEOUT);
     }
 
     public WebComplex(CookieStore cookieStore, long timeout){
@@ -44,6 +64,8 @@ public class WebComplex {
                 jcs.save();
             }
         });
+
+        state = State.OK;
     }
 
     /**
@@ -52,13 +74,15 @@ public class WebComplex {
      */
     private PauseTransition getPauseTransition(long timeout) {
         var t = new PauseTransition(Duration.millis(timeout));
-        t.setOnFinished(e -> {
-            if (view.getEngine().getLoadWorker().getState() == Worker.State.RUNNING) {
-                Logger.getLogger().logDebug("Timeout reached for a web complex. (URL: '%s')".formatted(view.getEngine().getLocation()));
-                if (onTimeoutReached != null)
-                    onTimeoutReached.accept(new TimeoutReachedEvent(this, view.getEngine().getLocation()));
-            }
-        });
+        if (view != null){
+            t.setOnFinished(e -> {
+                if (view.getEngine().getLoadWorker().getState() == Worker.State.RUNNING) {
+                    Logger.getLogger().logDebug("Timeout reached for a web complex. (URL: '%s')".formatted(view.getEngine().getLocation()));
+                    if (onTimeoutReached != null)
+                        onTimeoutReached.accept(new TimeoutReachedEvent(this, view.getEngine().getLocation()));
+                }
+            });
+        }
         return t;
     }
 
@@ -73,9 +97,14 @@ public class WebComplex {
     }
 
     public WebComplex navigate(String url){
-        Logger.getLogger().logDebug("Web Complex: Loading URL...");
-        view.getEngine().load(url);
-        Logger.getLogger().logDebug("Web Complex: Loaded URL.");
+        if (view != null){
+            Logger.getLogger().logDebug("Web Complex: Loading URL...");
+            view.getEngine().load(url);
+            Logger.getLogger().logDebug("Web Complex: Loaded URL.");
+        }
+        else{
+            Logger.getLogger().logDebug("Web Complex: Cannot load URL (not loaded).");
+        }
         return this;
     }
 
@@ -89,5 +118,9 @@ public class WebComplex {
 
     public WebView getView(){
         return view;
+    }
+
+    public State getState(){
+        return state;
     }
 }

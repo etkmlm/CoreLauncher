@@ -32,16 +32,17 @@ import com.laeben.core.entity.Path;
 import com.laeben.corelauncher.web.EmbeddedBrowser;
 import com.laeben.corelauncher.web.cache.JSONCacheStore;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
-import com.laeben.corelauncher.api.ui.UI;
 import javafx.scene.control.Alert;
 import javafx.util.Duration;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -149,7 +150,37 @@ public class CoreLauncher {
 
         if (!cfg.reloadConfig()){
             Logger.getLogger().log(LogType.ERROR,"FATAL: Couldn't load configuration file, launcher will close...");
-            UI.shutdown();
+            System.exit(-1);
+            return;
+        }
+
+        var natives = Configurator.getConfig().getNativesPath();
+        if (natives.exists() && !listArgs.contains("--natives")){
+            final String nativesPath = natives.toString();
+            final String finalNativesPath = System.getProperty("java.library.path") + File.pathSeparator + nativesPath;
+
+            var j = OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString(), true);
+
+            var arr = new ArrayList<String>();
+            arr.add(j.toString());
+            arr.add("-Djava.library.path=" + finalNativesPath);
+            arr.add("-jar");
+            arr.add(LAUNCHER_EXECUTE_PATH.getName());
+            arr.addAll(listArgs);
+            arr.add("--natives");
+
+            try{
+                var process = new ProcessBuilder()
+                        .command(arr)
+                        .inheritIO()
+                        .start();
+
+                process.waitFor();
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
+            System.exit(0);
             return;
         }
 
@@ -362,6 +393,6 @@ public class CoreLauncher {
         } catch (IOException | URISyntaxException e) {
             Logger.getLogger().log(e);
         }
-        UI.shutdown();
+        System.exit(0);
     }
 }

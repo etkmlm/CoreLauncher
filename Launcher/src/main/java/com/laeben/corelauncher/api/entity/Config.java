@@ -66,6 +66,9 @@ public class Config {
     public Path getImagePath(){
         return getLauncherPath().to("images");
     }
+    public Path getNativesPath(){
+        return getLauncherPath().to("natives");
+    }
 
     public void setGamePath(Path gamePath){
         this.gamePath = gamePath;

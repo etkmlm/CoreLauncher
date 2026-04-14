@@ -3,6 +3,7 @@ package com.laeben.corelauncher.api.entity;
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.minecraft.util.Authenticator;
 import com.laeben.corelauncher.minecraft.util.Tokener;
@@ -68,7 +69,7 @@ public class Account{
      * Authenticate the account with Mojang.
      * @return the account
      */
-    public Account authenticate() throws PerformException {
+    public Account authenticate() throws PerformException, StopException {
         if (!isOnline || !NetUtil.check())
             return this;
         if (tokener == null)
@@ -76,7 +77,7 @@ public class Account{
         return this;
     }
 
-    public void cacheToken() throws PerformException {
+    public void cacheToken() throws PerformException, StopException {
         _token = isOnline() ? authenticate().getTokener().getAccessToken() : "null";
     }
 

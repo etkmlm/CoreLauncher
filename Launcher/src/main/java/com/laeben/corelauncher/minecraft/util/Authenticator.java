@@ -1,13 +1,16 @@
 package com.laeben.corelauncher.minecraft.util;
 
 import com.laeben.core.entity.RequestParameter;
+import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.util.OSUtil;
+import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.page.WebPage;
 import com.laeben.corelauncher.util.APIListener;
@@ -17,10 +20,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.web.EmbeddedBrowser;
+import com.laeben.corelauncher.web.WebComplex;
+import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class Authenticator {
@@ -174,7 +181,7 @@ public class Authenticator {
         return new AuthInfo(name, mcAccessToken, expiresIn);
     }
 
-    public Tokener authenticate(String username) throws PerformException {
+    public Tokener authenticate(String username) throws PerformException, StopException {
         try{
             int port = LOCALHOST_START_PORT;
             String redirect, code;
@@ -183,13 +190,17 @@ public class Authenticator {
                 redirect = "http://localhost:" + port;
                 final String finalRedirect = redirect;
                 final String codeUrl = CODE_URL.replace("$", finalRedirect);
+                Boolean cont = true;
+
                 if (Configurator.getConfig().useExternalAuth())
                     OSUtil.openURL(CODE_URL.replace("$", redirect));
                 else{
                     // auth with embedded browser
                     Logger.getLogger().logDebug("Authentication Browser: Starting...");
-                    UI.runAsync(() ->
-                            EmbeddedBrowser.getInstance()
+                    var task = new Task<Boolean>(){
+                        @Override
+                        protected Boolean call() throws Exception {
+                            final var state = EmbeddedBrowser.getInstance()
                                     .getWebComplex(10000)
                                     .onTimeoutReached(event -> {
                                         if (event.location() != null && event.location().equals(codeUrl))
@@ -197,8 +208,14 @@ public class Authenticator {
                                     })
                                     .onLocationChanged(event -> {
                                         Logger.getLogger().logDebug("Authentication Browser: Location changed.");
-                                        if (event.location() == null)
+                                        if (event.isLocationBlank()){
+                                            try {
+                                                NetUtil.urlToString(finalRedirect + "?code=");
+                                            } catch (NoConnectionException | HttpException ignored) {
+
+                                            }
                                             return;
+                                        }
 
                                         if (event.location().startsWith(finalRedirect)){
                                             Logger.getLogger().log(LogType.INFO, "Authentication Browser: Done.");
@@ -208,10 +225,41 @@ public class Authenticator {
                                         else{
                                             WebPage.open(Translator.translate("browser.title.auhenticate")).reload(event.complex());
                                         }
-                                    }).navigate(codeUrl)
-                    );
+                                    }).navigate(codeUrl).getState();
+                            if (state == WebComplex.State.OK)
+                                return true;
+
+                            if (state != WebComplex.State.MISSING_LIBRARIES)
+                                return false;
+
+                            var result = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("browser.embedded.library"))
+                                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                                    .executeForResult();
+                            if (result.isEmpty() || !result.get().result().isPositive())
+                                return false;
+
+                            Logger.getLogger().log(LogType.INFO, "Authentication Browser: Downloading necessary libraries...");
+                            EmbeddedBrowser.downloadNativeLibraries();
+                            return null; // stop the launching process entirely
+                        }
+                    };
+                    UI.runAsync(task);
+                    try {
+                        cont = task.get();
+                    }
+                    catch (ExecutionException ex) {
+                        Logger.getLogger().log(ex);
+                        cont = false;
+                    }
+                    catch (InterruptedException intr) {
+                        cont = false;
+                    }
                 }
-                code = listen("code", port);
+
+                if (cont == null)
+                    throw new StopException();
+
+                code = cont ? listen("code", port) : null;
 
                 if (code != null)
                     break;
@@ -220,7 +268,7 @@ public class Authenticator {
             }
             while (port <= LOCALHOST_END_PORT);
 
-            if (code == null){
+            if (code == null || code.isBlank()){
                 Logger.getLogger().log(LogType.ERROR, "Authentication Failed: code was null");
                 return Tokener.empty(username);
             }
@@ -232,6 +280,9 @@ public class Authenticator {
             return new Tokener(xbl, info);
         } catch (NoConnectionException e){
             return Tokener.empty(username);
+        }
+        catch (StopException e){
+            throw e;
         }
         catch (Exception e){
             throw new PerformException("authFail", e);
