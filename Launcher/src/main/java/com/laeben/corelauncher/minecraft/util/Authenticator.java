@@ -21,13 +21,11 @@ import com.google.gson.JsonObject;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.web.EmbeddedBrowser;
 import com.laeben.corelauncher.web.WebComplex;
-import javafx.concurrent.Task;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
 
 import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class Authenticator {
@@ -57,6 +55,9 @@ public class Authenticator {
     private static Authenticator instance;
 
     private boolean listenPortBindFail = false;
+
+    private static final String CODE_STOP = "$";
+    private static final String CODE_EMPTY = "";
 
     private final Gson gson;
 
@@ -181,6 +182,77 @@ public class Authenticator {
         return new AuthInfo(name, mcAccessToken, expiresIn);
     }
 
+    private void imitateCodeRedirect(String redirect, String code){
+        try {
+            NetUtil.urlToString(redirect + "?code=" + code);
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    private boolean startEmbeddedAuthentication(String redirect, String codeUrl) throws StopException {
+        final var state = UI.runSync(() -> EmbeddedBrowser.getInstance()
+                .getWebComplex(10000)
+                .onTimeoutReached(event -> {
+                    if (event.location() != null && event.location().equals(codeUrl))
+                        WebPage.open(Translator.translate("browser.title.auhenticate")).reload(event.complex());
+                })
+                .onLocationChanged(event -> {
+                    Logger.getLogger().logDebug("Authentication Browser: Location changed.");
+                    if (event.isLocationEmpty()) return;
+                    if (event.isLocationBlank()) {
+                        imitateCodeRedirect(redirect, null);
+                        return;
+                    }
+
+                    if (event.location().startsWith(redirect)){
+                        Logger.getLogger().log(LogType.INFO, "Authentication Browser: Done.");
+                        if (event.complex().getAttachedPage() != null)
+                            Main.getMain().closeTab((Tab) event.complex().getAttachedPage().getParentObject());
+                    }
+                    else{
+                        WebPage.open(Translator.translate("browser.title.auhenticate")).reload(event.complex());
+                    }
+                }).navigate(codeUrl).getState());
+
+        if (state == WebComplex.State.OK)
+            return true;
+
+        boolean download = state == WebComplex.State.MISSING_LIBRARIES;
+
+        final boolean enableListening = !download;
+
+        if (download){
+            var result = UI.runSync(() -> CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("browser.embedded.library"))
+                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                    .executeForResult());
+            download = result.isPresent() && result.get().result().isPositive();
+        }
+
+        if (download){
+            new Thread(() -> {
+                String c = null;
+
+                try {
+                    Logger.getLogger().log(LogType.INFO, "Authentication Browser: Downloading necessary libraries...");
+                    EmbeddedBrowser.downloadNativeLibraries();
+                    c = CODE_STOP;
+                }
+                catch (NoConnectionException ignored) {
+
+                } catch (HttpException e) {
+                    Logger.getLogger().log(e);
+                } catch (StopException ignored) {
+                    c = CODE_STOP;
+                }
+                imitateCodeRedirect(redirect, c);
+            }).start();
+            throw new StopException();
+        }
+
+        return enableListening;
+    }
+
     public Tokener authenticate(String username) throws PerformException, StopException {
         try{
             int port = LOCALHOST_START_PORT;
@@ -188,78 +260,23 @@ public class Authenticator {
 
             do{
                 redirect = "http://localhost:" + port;
-                final String finalRedirect = redirect;
-                final String codeUrl = CODE_URL.replace("$", finalRedirect);
-                Boolean cont = true;
+                final String codeUrl = CODE_URL.replace("$", redirect);
+
+                boolean doListen = true;
 
                 if (Configurator.getConfig().useExternalAuth())
                     OSUtil.openURL(CODE_URL.replace("$", redirect));
                 else{
                     // auth with embedded browser
                     Logger.getLogger().logDebug("Authentication Browser: Starting...");
-                    var task = new Task<Boolean>(){
-                        @Override
-                        protected Boolean call() throws Exception {
-                            final var state = EmbeddedBrowser.getInstance()
-                                    .getWebComplex(10000)
-                                    .onTimeoutReached(event -> {
-                                        if (event.location() != null && event.location().equals(codeUrl))
-                                            WebPage.open(Translator.translate("browser.title.auhenticate")).reload(event.complex());
-                                    })
-                                    .onLocationChanged(event -> {
-                                        Logger.getLogger().logDebug("Authentication Browser: Location changed.");
-                                        if (event.isLocationBlank()){
-                                            try {
-                                                NetUtil.urlToString(finalRedirect + "?code=");
-                                            } catch (NoConnectionException | HttpException ignored) {
-
-                                            }
-                                            return;
-                                        }
-
-                                        if (event.location().startsWith(finalRedirect)){
-                                            Logger.getLogger().log(LogType.INFO, "Authentication Browser: Done.");
-                                            if (event.complex().getAttachedPage() != null)
-                                                Main.getMain().closeTab((Tab) event.complex().getAttachedPage().getParentObject());
-                                        }
-                                        else{
-                                            WebPage.open(Translator.translate("browser.title.auhenticate")).reload(event.complex());
-                                        }
-                                    }).navigate(codeUrl).getState();
-                            if (state == WebComplex.State.OK)
-                                return true;
-
-                            if (state != WebComplex.State.MISSING_LIBRARIES)
-                                return false;
-
-                            var result = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("browser.embedded.library"))
-                                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
-                                    .executeForResult();
-                            if (result.isEmpty() || !result.get().result().isPositive())
-                                return false;
-
-                            Logger.getLogger().log(LogType.INFO, "Authentication Browser: Downloading necessary libraries...");
-                            EmbeddedBrowser.downloadNativeLibraries();
-                            return null; // stop the launching process entirely
-                        }
-                    };
-                    UI.runAsync(task);
-                    try {
-                        cont = task.get();
-                    }
-                    catch (ExecutionException ex) {
-                        Logger.getLogger().log(ex);
-                        cont = false;
-                    }
-                    catch (InterruptedException intr) {
-                        cont = false;
-                    }
+                    doListen = startEmbeddedAuthentication(redirect, codeUrl);
                 }
 
-                if (cont == null)
-                    throw new StopException();
-
-                code = cont ? listen("code", port) : null;
+                if (!doListen){
+                    code = null;
+                    break;
+                }
+                code = listen("code", port);
 
                 if (code != null)
                     break;
@@ -272,6 +289,8 @@ public class Authenticator {
                 Logger.getLogger().log(LogType.ERROR, "Authentication Failed: code was null");
                 return Tokener.empty(username);
             }
+
+            if (code.equals(CODE_STOP)) throw new StopException();
 
             var xbl = getXbl(code, redirect);
 

@@ -255,27 +255,16 @@ public class WorldsPage extends HandlerController {
                     }
 
                     if (saves.getFiles().stream().anyMatch(x -> x.getName().equals(finalDirName))){
-                        var task = new Task<CMsgBox.ResultType>(){
+                        final var result = UI.runSync(() -> CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translateFormat("world.ask.overwrite", finalDirName))
+                                .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
+                                .executeForResult()
+                                .map(CMsgBox.Result::result));
 
-                            @Override
-                            protected CMsgBox.ResultType call() {
-                                return CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translateFormat("world.ask.overwrite", finalDirName))
-                                        .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
-                                        .executeForResult()
-                                        .map(CMsgBox.Result::result)
-                                        .orElse(null);
-                            }
-                        };
-
-                        UI.runAsync(task);
-                        CMsgBox.ResultType confirmation;
-                        try {
-                            confirmation = task.get();
-                        } catch (InterruptedException | ExecutionException e) {
+                        if (result == null){
                             temp.delete();
                             continue;
                         }
-
+                        final var confirmation = result.orElse(null);
 
                         if (confirmation == null || confirmation == CMsgBox.ResultType.CANCEL){
                             temp.delete();

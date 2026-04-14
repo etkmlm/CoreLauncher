@@ -155,7 +155,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         nts.setOnSet(a -> {
             boolean f = nts.needsToSave();
             boolean k = nts.calcNts();
-            if (k && profile != null)
+            if (k && !isNew)
                 Main.getMain().setFocusLimiter(this);
             else
                 Main.getMain().setFocusLimiter(null);

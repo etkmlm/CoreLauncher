@@ -210,21 +210,11 @@ public class Main extends HandlerController {
             }
         }, true);
         Launcher.getLauncher().setOnAuthFail(v -> {
-            var task = new Task<Boolean>() {
-                @Override
-                protected Boolean call() {
-                    var msg = CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth.api", v.getValue()))
-                            .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
-                            .executeForResult();
-                    return msg.isPresent() && msg.get().result() != CMsgBox.ResultType.NO;
-                }
-            };
-            UI.runAsync(task);
-            try {
-                return task.get();
-            } catch (InterruptedException | ExecutionException ex) {
-                return false;
-            }
+            final var result = UI.runSync(() -> CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth.api", v.getValue()))
+                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                    .executeForResult());
+
+            return result != null && result.isPresent() && result.get().result() != CMsgBox.ResultType.NO;
         });
 
         menuTranslate = new TranslateTransition();

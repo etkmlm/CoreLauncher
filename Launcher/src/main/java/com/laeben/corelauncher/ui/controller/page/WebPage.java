@@ -46,14 +46,16 @@ public class WebPage extends HandlerController {
                     .executeForResult();
             if (result.isPresent() && result.get().result().isPositive()){
                 Logger.getLogger().log(LogType.INFO, "Web Page: Downloading necessary libraries...");
-                try {
-                    EmbeddedBrowser.downloadNativeLibraries();
-                } catch (NoConnectionException | StopException ignored) {
+                new Thread(() -> {
+                    try {
+                        EmbeddedBrowser.downloadNativeLibraries();
+                    } catch (NoConnectionException | StopException ignored) {
 
-                } catch (HttpException e) {
-                    Logger.getLogger().log(e);
+                    } catch (HttpException e) {
+                        Logger.getLogger().log(e);
 
-                }
+                    }
+                }).start();
             }
         }
 

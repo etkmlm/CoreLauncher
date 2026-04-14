@@ -216,61 +216,55 @@ public class ProfileUtil {
         if (Configurator.getConfig().isOverwriteImportedEnabled())
             return true;
 
-        var task = new Task<Boolean>() {
-            @Override
-            protected Boolean call() {
+        final var r = UI.runSync(() -> {
+            var oldProfile = Profiler.getProfiler().getProfile(p.getName());
 
-                var oldProfile = Profiler.getProfiler().getProfile(p.getName());
-
-                if (oldProfile == null){
-                    Logger.getLogger().log(LogType.ERROR, "Profile '" + p.getName() + "' could not be found.");
-                    return false;
-                }
-
-                var added = new ArrayList<String>();
-                var removed = oldProfile.getAllResources().stream().map(a -> a.fileName != null ? a.fileName : a.name).collect(Collectors.toList());
-
-                for(var n : p.getAllResources()){
-                    removed.remove(n.fileName == null ? n.name : n.fileName);
-                    var find = oldProfile.getAllResources().stream().filter(a -> a.isSameResource(n)).findFirst();
-                    if (find.isPresent()){
-                        if (n.fileName != null && !n.fileName.equals(find.get().fileName)){
-                            added.add(n.fileName);
-                        }
-                    }
-                    else {
-                        added.add(n.fileName == null ? n.name : n.fileName);
-                    }
-                }
-
-                String translate = Translator.translateFormat("import.ask.overwrite",
-                        p.getName(),
-                        String.join(",", removed),
-                        String.join(",", added)
-                        );
-
-                var result = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), translate)
-                        .setButtons(CMsgBox.ResultType.ALWAYS_YES, CMsgBox.ResultType.YES, CMsgBox.ResultType.NO,  CMsgBox.ResultType.CANCEL)
-                        .executeForResult();
-                if (result.isEmpty() || result.get().result() == CMsgBox.ResultType.CANCEL)
-                    throw new CancellationException();
-
-                if (result.get().result() == CMsgBox.ResultType.ALWAYS_YES){
-                    Configurator.getConfig().setOverwriteImported(true);
-                    Configurator.save();
-                }
-
-                return result.get().result().isPositive();
+            if (oldProfile == null){
+                Logger.getLogger().log(LogType.ERROR, "Profile '" + p.getName() + "' could not be found.");
+                return false;
             }
-        };
 
-        UI.runAsync(task);
-        try{
-            return task.get();
-        }
-        catch (InterruptedException | ExecutionException e){
+            var added = new ArrayList<String>();
+            var removed = oldProfile.getAllResources().stream().map(a -> a.fileName != null ? a.fileName : a.name).collect(Collectors.toList());
+
+            for(var n : p.getAllResources()){
+                removed.remove(n.fileName == null ? n.name : n.fileName);
+                var find = oldProfile.getAllResources().stream().filter(a -> a.isSameResource(n)).findFirst();
+                if (find.isPresent()){
+                    if (n.fileName != null && !n.fileName.equals(find.get().fileName)){
+                        added.add(n.fileName);
+                    }
+                }
+                else {
+                    added.add(n.fileName == null ? n.name : n.fileName);
+                }
+            }
+
+            String translate = Translator.translateFormat("import.ask.overwrite",
+                    p.getName(),
+                    String.join(",", removed),
+                    String.join(",", added)
+            );
+
+            var result = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), translate)
+                    .setButtons(CMsgBox.ResultType.ALWAYS_YES, CMsgBox.ResultType.YES, CMsgBox.ResultType.NO,  CMsgBox.ResultType.CANCEL)
+                    .executeForResult();
+            if (result.isEmpty() || result.get().result() == CMsgBox.ResultType.CANCEL)
+                //throw new CancellationException();
+                return null;
+
+            if (result.get().result() == CMsgBox.ResultType.ALWAYS_YES){
+                Configurator.getConfig().setOverwriteImported(true);
+                Configurator.save();
+            }
+
+            return result.get().result().isPositive();
+        });
+
+        if (r == null)
             throw new CancellationException();
-        }
+
+        return r;
     }
 
     public static void createShortcut(Profile p, Window w){

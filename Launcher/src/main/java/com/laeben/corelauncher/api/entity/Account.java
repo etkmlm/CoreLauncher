@@ -62,6 +62,7 @@ public class Account{
         var account = new Account(username);
         account.tokener = tokener;
         account.isOnline = isOnline;
+        account._token = _token;
         return account;
     }
 

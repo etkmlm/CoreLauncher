@@ -12,6 +12,7 @@ import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -26,7 +27,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 public class UI {
     public static final String WINDOW_OPEN = "wndOpen";
@@ -229,5 +233,24 @@ public class UI {
 
     public static void runAsync(Runnable runnable){
         Platform.runLater(runnable);
+    }
+    public static <T> T runSync(Task<T> task){
+        runAsync(task);
+        try{
+            return task.get();
+        } catch (ExecutionException e) {
+            Logger.getLogger().log(e);
+            return null;
+        } catch (InterruptedException ignored) {
+            return null;
+        }
+    }
+    public static <T> T runSync(Supplier<T> supplier){
+        return runSync(new Task<>() {
+            @Override
+            protected T call() {
+                return supplier.get();
+            }
+        });
     }
 }

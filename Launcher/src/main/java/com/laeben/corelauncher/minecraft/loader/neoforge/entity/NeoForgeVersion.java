@@ -26,6 +26,9 @@ public class NeoForgeVersion extends LoaderVersion {
             if (c < 26){
                 id = "1." + id;
             }
+            else if (a.length > 3){ // 26.1.2.0-beta -> version 26.1.2
+                id += "." + a[2];
+            }
         }
         else id = "*";
 

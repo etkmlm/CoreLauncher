@@ -455,40 +455,35 @@ public class Modder {
         return total + 1;
     }
     private boolean checkModpackOverride(Profile profile, Modpack modpack) throws StopException {
-        var task = new Task<Boolean>() {
-            @Override
-            protected Boolean call() throws Exception {
-                if (modpack.targetVersionId != null && !modpack.targetVersionId.equals(profile.getVersionId())){
-                    var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.version"))
-                            .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
-                            .executeForResult();
+        final var result = UI.runSync(() -> {
+            if (modpack.targetVersionId != null && !modpack.targetVersionId.equals(profile.getVersionId())){
+                var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.version"))
+                        .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
+                        .executeForResult();
 
-                    if (k.isEmpty() || k.get().result() == CMsgBox.ResultType.CANCEL)
-                        throw new StopException();
+                if (k.isEmpty() || k.get().result() == CMsgBox.ResultType.CANCEL)
+                    return null;
 
-                    return k.get().result() == CMsgBox.ResultType.YES;
-                } else if (!Configurator.getConfig().isAutoChangeLoader() && (modpack.wr.getType() != profile.getLoader().getType() || !modpack.wrId.equals(profile.getLoaderVersion()))){
-                    var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.loader"))
-                            .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
-                            .executeForResult();
+                return k.get().result() == CMsgBox.ResultType.YES;
+            } else if (!Configurator.getConfig().isAutoChangeLoader() && (modpack.wr.getType() != profile.getLoader().getType() || !modpack.wrId.equals(profile.getLoaderVersion()))){
+                var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.loader"))
+                        .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
+                        .executeForResult();
 
-                    if (k.isEmpty() || k.get().result() == CMsgBox.ResultType.CANCEL)
-                        throw new StopException();
+                if (k.isEmpty() || k.get().result() == CMsgBox.ResultType.CANCEL)
+                    return null;
 
-                    return k.get().result() == CMsgBox.ResultType.YES;
-                }
-
-                return true;
+                return k.get().result() == CMsgBox.ResultType.YES;
             }
-        };
 
-        UI.runAsync(task);
-        try {
-            return task.get();
-        } catch (InterruptedException | ExecutionException e) {
+            return true;
+        });
+        if (result == null){
             handler.execute(new KeyEvent(EventHandler.STOP));
             throw new StopException();
         }
+
+        return result;
     }
 
     public void installShaders(Profile p, List<Shader> shs) throws NoConnectionException, FileNotFoundException, HttpException, StopException {
@@ -565,7 +560,7 @@ public class Modder {
             else if (p.getAllResources().stream().anyMatch(a -> a instanceof World w && w.equals(r)))
                 continue;
 
-            // if more than one resource is mismatching with the profile, only apply the first one
+            // if more than one resources are mismatching with the profile, only apply the first one
             if (
                     !newPropertiesAreValid &&
                     mode == IncludeMode.OVERWRITE_PROFILE &&

@@ -22,8 +22,11 @@ public class WebComplex {
     public static final WebComplex MISSING_LIBRARIES = new WebComplex(State.MISSING_LIBRARIES);
 
     public record LocationChangedEvent(WebComplex complex, String oldLocation, String location){
+        public boolean isLocationEmpty(){
+            return location == null;
+        }
         public boolean isLocationBlank(){
-            return location == null || location.equals("about:blank");
+            return "about:blank".equals(location);
         }
     }
     public record TimeoutReachedEvent(WebComplex complex, String location){}
