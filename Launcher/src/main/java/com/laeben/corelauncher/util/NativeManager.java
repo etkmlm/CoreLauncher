@@ -45,10 +45,15 @@ public class NativeManager {
         final Path jarPath = Configurator.getConfig().getTemporaryFolder().to(module + version + ".jar");
         final Path exDir = Configurator.getConfig().getTemporaryFolder().to(module + version);
 
-        String os = OS.getSystemOS().getName();
-        if (OS.getSystemOS() == OS.OSX && (CoreLauncher.SYSTEM_OS_ARCH.equals("aarch64") || CoreLauncher.SYSTEM_OS_ARCH.equals("arm64"))){
-            os += "-aarch64";
-        }
+        String os = switch (OS.getSystemOS()){
+            case WINDOWS -> "win";
+            case OSX -> {
+                if ((CoreLauncher.SYSTEM_OS_ARCH.equals("aarch64") || CoreLauncher.SYSTEM_OS_ARCH.equals("arm64")))
+                    yield "mac";
+                else yield "mac-aarch64";
+            }
+            default -> "linux";
+        };
 
         String url = getModuleURL(pkg, module, version, os);
 

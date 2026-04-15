@@ -56,6 +56,19 @@
             </configuration>
           </execution>
         </executions>
+        <configuration>
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>jfxmedia.dll</exclude>
+                <exclude>jfxwebkit.dll</exclude>
+                <exclude>libjfxmedia.so</exclude>
+                <exclude>libjfxwebkit.so</exclude>
+              </excludes>
+            </filter>
+          </filters>
+        </configuration>
       </plugin>
     </plugins>
   </build>

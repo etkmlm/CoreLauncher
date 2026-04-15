@@ -11,7 +11,7 @@
 
     <groupId>com.laeben.corelauncher</groupId>
     <artifactId>Launcher</artifactId>
-    <version>1.1.9.3</version>
+    <version>1.1.9.3+1</version>
 
     <repositories>
         <repository>
@@ -142,6 +142,19 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.4</version>
+                <configuration>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>jfxmedia.dll</exclude>
+                                <exclude>jfxwebkit.dll</exclude>
+                                <exclude>libjfxmedia.so</exclude>
+                                <exclude>libjfxwebkit.so</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
