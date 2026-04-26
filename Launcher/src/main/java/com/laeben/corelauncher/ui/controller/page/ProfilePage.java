@@ -412,10 +412,10 @@ public class ProfilePage extends HandlerController {
     @Override
     public void preInit() {
         lvModpacks.setSelectionEnabled(false);
-        btnMenuMods.setOnMouseClicked(a -> lvMods.setSelectionMode(true));
+        btnMenuMods.setOnMouseClicked(a -> lvMods.setSelectionMode(!lvMods.getSelectionMode()));
         lvWorlds.setSelectionEnabled(false);
-        btnMenuResources.setOnMouseClicked(a -> lvResources.setSelectionMode(true));
-        btnMenuShaders.setOnMouseClicked(a -> lvShaders.setSelectionMode(true));
+        btnMenuResources.setOnMouseClicked(a -> lvResources.setSelectionMode(!lvResources.getSelectionMode()));
+        btnMenuShaders.setOnMouseClicked(a -> lvShaders.setSelectionMode(!lvShaders.getSelectionMode()));
 
         vMods.getChildren().add(lvMods);
         vModpacks.getChildren().add(lvModpacks);

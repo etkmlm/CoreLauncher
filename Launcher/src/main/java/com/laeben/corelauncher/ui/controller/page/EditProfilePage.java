@@ -43,6 +43,8 @@ import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 import org.controlsfx.control.SearchableComboBox;
 
+import java.util.List;
+
 public class EditProfilePage extends HandlerController implements FocusLimiter {
     public static final String KEY = "pgedit";
 
@@ -437,9 +439,11 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             pLoader.setVisible(false);
             cbLoaderVersion.setVisible(true);
             if (!(wr instanceof Vanilla)){
-                var m = tempProfile.getLoader().getVersions(versionId).stream().map(x -> ((LoaderVersion)x).getLoaderVersion()).toList();
+                List<String> m = tempProfile.getLoader().getVersions(versionId).stream().map(x -> ((LoaderVersion)x).getLoaderVersion()).toList();
                 //cbWrapperVersion.getItems().addAll(m);
                 loaderVersions.addAll(m);
+                if (!m.isEmpty())
+                    cbLoaderVersion.setValue(m.get(0)); // select latest version
             }
 
         }

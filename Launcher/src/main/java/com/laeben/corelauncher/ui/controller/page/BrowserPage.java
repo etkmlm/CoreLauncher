@@ -341,6 +341,7 @@ public class BrowserPage extends HandlerController {
     private void search(String query){
         if (search == null)
             return;
+        lvResources.scrollTo(0);
 
         var preset = filterPane.getPreset(filterPane.getLoadedPreset());
         List<String> vers = profile != null ? null : filterPane.getPreset("pinned").getSection("version").getSelectedChoices();
@@ -376,7 +377,9 @@ public class BrowserPage extends HandlerController {
         List<String> selectedCats = preset.getSection("cat").getSelectedChoices();
 
         search.setCategories(selectedCats);
-        search.setSides(preset.getSection("side").getSelectedChoices());
+        var side = preset.getSection("side");
+        if (side != null)
+            search.setSides(side.getSelectedChoices());
 
         search.setGameVersions(vers);
 
