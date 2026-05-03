@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.ui.control;
 
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.dialog.CDialog;
 import com.laeben.corelauncher.util.ImageUtil;
 import javafx.fxml.FXML;
@@ -10,6 +11,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextBoundsType;
+import javafx.stage.Window;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +40,12 @@ public class CMsgBox extends CDialog<CMsgBox.Result> {
     private final List<ResultType> resultTypes;
 
     private boolean enableKeys = true;
+    public CMsgBox(Alert.AlertType type){
+        this(type, null);
+    }
 
-    public CMsgBox(Alert.AlertType type) {
-        super("layout/dialog/messagebox.fxml", false);
+    public CMsgBox(Alert.AlertType type, Window owner) {
+        super("layout/dialog/messagebox.fxml", false, owner);
 
         resultTypes = new ArrayList<>();
 
@@ -66,8 +71,15 @@ public class CMsgBox extends CDialog<CMsgBox.Result> {
         icon.setImage(ImageUtil.getLocalImage("dialog/dialog-" + type.name().toLowerCase(Locale.US) + ".png"));
     }
 
+    /**
+     * Create a message box whose default owner is the main window.
+     */
     public static CMsgBox msg(Alert.AlertType type, String title, String desc){
-        return new CMsgBox(type).setInfo(title, desc);
+        return new CMsgBox(type, Main.getMain() != null ? Main.getMain().getStage() : null).setInfo(title, desc);
+    }
+
+    public static CMsgBox msg(Alert.AlertType type, String title, String desc, Window owner){
+        return new CMsgBox(type, owner).setInfo(title, desc);
     }
 
     public CMsgBox setButtons(ResultType... types){

@@ -4,6 +4,7 @@ import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.entity.LStage;
 import com.laeben.corelauncher.ui.util.ControlUtil;
@@ -11,6 +12,7 @@ import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Dialog;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -18,7 +20,6 @@ import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
-import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.util.Optional;
@@ -34,7 +35,14 @@ public class CDialog<T> extends Dialog<T> {
     private final boolean enableAnimation;
 
     public CDialog(String fxml, boolean enableAnimation){
+        this(fxml, enableAnimation, null);
+    }
+
+    public CDialog(String fxml, boolean enableAnimation, Window owner){
         this.enableAnimation = enableAnimation;
+
+        if (owner != null)
+            initOwner(owner);
 
         setGraphic(node = UI.getUI().load(CoreLauncherFX.class.getResource(fxml), this));
         initStyle(StageStyle.TRANSPARENT);
@@ -51,12 +59,12 @@ public class CDialog<T> extends Dialog<T> {
 
         setResultConverter(a -> null);
 
-        getDialogPane().getScene().getWindow().addEventFilter(WindowEvent.WINDOW_SHOWN, x -> {
+        setOnShown(x -> {
             if (Main.getMain() == null)
                 return;
             var parentBounds = Main.getMain().getTabBounds();
 
-            var window = (Window)x.getSource();
+            var window = ((CDialog)x.getSource()).getDialogPane().getScene().getWindow();
 
             window.setX(parentBounds.getMinX() + (parentBounds.getWidth() - window.getWidth()) / 2);
             window.setY(parentBounds.getMinY() + (parentBounds.getHeight() - window.getHeight()) / 2);
@@ -90,5 +98,9 @@ public class CDialog<T> extends Dialog<T> {
         UI.getUI().getHandler().execute(new KeyEvent(DIALOG_HIDE).setSource(this));
 
         return res;
+    }
+
+    protected CMsgBox showMsg(Alert.AlertType type, String title, String desc){
+        return CMsgBox.msg(type, title, desc, getOwner());
     }
 }

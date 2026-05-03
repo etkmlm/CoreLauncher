@@ -16,6 +16,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 import java.util.Optional;
@@ -57,8 +58,8 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
     @FXML
     private Spinner<Integer> spnMajor;
 
-    public DJavaSelector(){
-        super("layout/dialog/javaselector.fxml", true);
+    public DJavaSelector(Window owner){
+        super("layout/dialog/javaselector.fxml", true, owner);
 
         btnClose.enableTransparentAnimation();
         btnClose.setOnMouseClicked(a -> close(null));

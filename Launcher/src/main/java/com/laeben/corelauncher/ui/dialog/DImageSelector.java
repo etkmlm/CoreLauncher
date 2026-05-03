@@ -15,6 +15,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,8 +25,8 @@ import java.util.Optional;
 
 public class DImageSelector extends CDialog<ImageEntity> {
 
-    public DImageSelector(){
-        super("layout/dialog/imageselector.fxml", false);
+    public DImageSelector(Window owner){
+        super("layout/dialog/imageselector.fxml", false, owner);
 
         getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
     }

@@ -6,9 +6,9 @@ import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CCombo;
-import com.laeben.corelauncher.ui.control.CMsgBox;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.Window;
 
 import java.util.Locale;
 
@@ -32,8 +32,8 @@ public class DStartupConfigurator extends CDialog<Boolean>{
 
     private Locale selectedLanguage;
 
-    public DStartupConfigurator() {
-        super("layout/dialog/startup.fxml", false);
+    public DStartupConfigurator(Window owner) {
+        super("layout/dialog/startup.fxml", false, owner);
 
         getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
 
@@ -62,7 +62,7 @@ public class DStartupConfigurator extends CDialog<Boolean>{
         btnApply.enableTransparentAnimation();
         btnApply.setOnMouseClicked(a -> {
             if (txtUsername.getText() == null || txtUsername.getText().isBlank()){
-                CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("error.username")).execute();
+                showMsg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("error.username")).execute();
                 return;
             }
             Configurator.getConfigurator().setDefaultAccount(Account.fromUsername(txtUsername.getText() == null || txtUsername.getText().isBlank() ? "IAMUSER" : txtUsername.getText()).setOnline(chkOnline.isSelected()));

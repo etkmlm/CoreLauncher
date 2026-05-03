@@ -29,6 +29,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 
 import java.awt.*;
 import java.io.InvalidObjectException;
@@ -78,8 +79,8 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
     @FXML
     private CWorker<List<CResource>, Void> wModpack;
 
-    public DModSelector(final T resource, ResourcePreferences p) {
-        super("layout/dialog/modselector.fxml", false);
+    public DModSelector(final T resource, ResourcePreferences p, Window owner) {
+        super("layout/dialog/modselector.fxml", false, owner);
         this.resource = resource;
         preferences = p;
 

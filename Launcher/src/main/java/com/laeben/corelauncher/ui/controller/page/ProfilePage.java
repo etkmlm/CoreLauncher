@@ -80,7 +80,7 @@ public class ProfilePage extends HandlerController {
         lvShaders = new CList<>();
         lvWorlds = new CList<>();
 
-        selector = new DProfileSelector(DProfileSelector.Functionality.SINGLE_PROFILE_SELECTOR);
+        selector = new DProfileSelector(DProfileSelector.Functionality.SINGLE_PROFILE_SELECTOR, null);
 
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
             var oldp = (Profile)a.getOldValue();
@@ -227,7 +227,7 @@ public class ProfilePage extends HandlerController {
                 return false;
             }
             else if (a.equals(CProfile.DELETE)){
-                var x = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
+                var x = showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
                         .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO).executeForResult();
                 return x.isPresent() && x.get().result() == CMsgBox.ResultType.YES;
             }
@@ -269,7 +269,7 @@ public class ProfilePage extends HandlerController {
             if (a.getButton() != MouseButton.SECONDARY)
                 return;
 
-            var r = new DResourceSelector(profile).execute();
+            var r = new DResourceSelector(profile, getStage()).execute();
             if (r.isEmpty())
                 return;
 
@@ -481,6 +481,7 @@ public class ProfilePage extends HandlerController {
 
     @Override
     public void init(){
+        ownDialog(selector);
         addRegisteredEventFilter(EventFilter.node(getRootNode(), KeyEvent.KEY_RELEASED, a -> {
             if (a.getTarget().equals(txtSearch))
                 return;

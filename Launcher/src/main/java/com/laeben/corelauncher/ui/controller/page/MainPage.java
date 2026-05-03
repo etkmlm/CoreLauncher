@@ -66,7 +66,7 @@ public class MainPage extends HandlerController {
         showUpTransition.setFromX(0);
         showUpTransition.setToX(1);
 
-        selector = new DProfileSelector(DProfileSelector.Functionality.DOCK_SELECTOR);
+        selector = new DProfileSelector(DProfileSelector.Functionality.DOCK_SELECTOR, null);
 
         dockContext = new CMenu();
         dockContext.addItem(null, PROFILES, Translator.translate("dock.menu.profiles"), a -> {
@@ -375,6 +375,11 @@ public class MainPage extends HandlerController {
         root.getChildren().add(p);
 
         return p;
+    }
+
+    @Override
+    public void init() {
+        ownDialog(selector);
     }
 
     @Override

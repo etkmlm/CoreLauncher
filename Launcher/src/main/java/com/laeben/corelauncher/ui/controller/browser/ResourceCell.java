@@ -25,6 +25,7 @@ import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
@@ -49,6 +50,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
 
     private final Node gr;
     private Link link;
+    private final SimpleBooleanProperty installing;
     private final ObjectProperty<CResource> exists;
 
     private final ReverseBorderColorAnimation animation;
@@ -67,12 +69,19 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
         animation.setReverseDelay(100);
 
         exists = new SimpleObjectProperty<>();
+        installing = new SimpleBooleanProperty();
 
-        exists.addListener(a -> UI.runAsync(() -> {
-            boolean installed = exists.get() != null;
-            btnInstall.setText(installed ? "—" : "+");
-            btnInstall.pseudoClassStateChanged(INSTALLED, installed);
-        }));
+        exists.addListener(a -> UI.runAsync(this::igniteInstalled));
+        installing.addListener((a, o, n) -> UI.runAsync(this::igniteInstalled));
+    }
+
+    private void igniteInstalled(){
+        final boolean inled = exists.get() != null;
+        final boolean insling = installing.get();
+
+        boolean installed = insling || inled;
+        btnInstall.setText(installed ? "—" : "+");
+        btnInstall.pseudoClassStateChanged(INSTALLED, installed);
     }
 
     private void playAnimation(boolean isPositive){
@@ -172,102 +181,116 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
         return this;
     }
 
+    private void onInstallClicked(){
+        var prefs = link.preferences();
+        var res = link.resource();
+
+        var profile = prefs.getProfile() == null ? null : prefs.getProfile();
+
+        boolean isNewProfile = false;
+
+        boolean useShaderSetup = false;
+
+        if (profile == null){
+            if (res.getResourceType() == ResourceType.SHADER && !prefs.hasLoaderTypes()){
+                List<String> versions = null;
+                if (prefs.hasGameVersions())
+                    versions = prefs.getGameVersions();
+
+                prefs = ResourcePreferences.getShaderPreferences();
+
+                if (versions != null){
+                    prefs.clearAnd().includeGameVersions(versions);
+                }
+
+                useShaderSetup = true;
+            }
+
+            try {
+                profile = ResourcePreferences.createProfileFromPreferences(prefs, res);
+
+                if (profile == null)
+                    return;
+            } catch (PerformException | InvalidObjectException e) {
+                Logger.getLogger().log(LogType.ERROR, e.getMessage());
+                return;
+            }
+
+            isNewProfile = true;
+
+            Main.getMain().selectProfile(profile);
+        }
+
+        if (exists.get() == null){
+            try{
+                CResource resourceToInstall;
+                if (res instanceof ResourceOpti ro){
+                    resourceToInstall = ro.getMod();
+
+                    Profiler.getProfiler().setProfile(profile.getName(), x -> x.getAllResources().add(resourceToInstall));
+                }
+                else{
+                    playAnimation(true);
+                    installing.set(true);
+                    var opt = ModSource.Options
+                            .create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(res.getResourceType(), profile.getLoader().getType()))
+                            .allowOverwrite(isNewProfile && !prefs.hasGameVersions());
+                    if (res.getResourceType() != ResourceType.MODPACK)
+                        opt.dependencies(true);
+
+                    var all = res.getSourceType().getSource()
+                            .getCoreResource(res.getId(), opt);
+                    if (all == null || !installing.get()){
+                        exists.set(null);
+                        return;
+                    }
+
+                    resourceToInstall = all.get(0);
+
+                    if (useShaderSetup){
+                        var rrrr = Modrinth.getModrinth().getPreferredShaderMod(opt);
+                        if (rrrr != null)
+                            all = Stream.concat(all.stream(), rrrr.stream()).distinct().toList();
+                    }
+
+                    if (Modder.getModder().include(profile, all, isNewProfile ? Modder.IncludeMode.OVERWRITE_PROFILE : Modder.IncludeMode.DEFAULT) == 0){
+                        installing.set(false);
+                        return;
+                    }
+                }
+
+                exists.set(resourceToInstall);
+                installing.set(false);
+                //playAnimation(true);
+            } catch (NoConnectionException | HttpException | StopException e) {
+                exists.set(null);
+            }
+        }
+        else{
+            Modder.getModder().remove(profile, exists.get());
+            exists.set(null);
+            playAnimation(false);
+        }
+
+        if (isNewProfile && onNewProfileCreated != null){
+            var finalProfile = profile;
+            UI.runAsync(() -> onNewProfileCreated.accept(finalProfile));
+        }
+    }
+
     @FXML
     public void initialize(){
         //btnInstall.enableTransparentAnimation();
         //btnMore.enableTransparentAnimation();
         icon.setCornerRadius(72, 72, 16);
-        btnInstall.setOnMouseClicked(a -> new Thread(() -> {
-            var prefs = link.preferences();
-            var res = link.resource();
-
-            var profile = prefs.getProfile() == null ? null : prefs.getProfile();
-
-            boolean isNewProfile = false;
-
-            boolean useShaderSetup = false;
-
-            if (profile == null){
-                if (res.getResourceType() == ResourceType.SHADER && !prefs.hasLoaderTypes()){
-                    List<String> versions = null;
-                    if (prefs.hasGameVersions())
-                        versions = prefs.getGameVersions();
-
-                    prefs = ResourcePreferences.getShaderPreferences();
-
-                    if (versions != null){
-                        prefs.clearAnd().includeGameVersions(versions);
-                    }
-
-                    useShaderSetup = true;
-                }
-
-                try {
-                    profile = ResourcePreferences.createProfileFromPreferences(prefs, res);
-
-                    if (profile == null)
-                        return;
-                } catch (PerformException | InvalidObjectException e) {
-                    Logger.getLogger().log(LogType.ERROR, e.getMessage());
-                    return;
-                }
-
-                isNewProfile = true;
-
-                Main.getMain().selectProfile(profile);
+        btnInstall.setOnMouseClicked(a -> {
+            if (installing.get()){
+                installing.set(false);
+                return;
             }
 
-            if (exists.get() == null){
-                try{
-                    CResource resourceToInstall;
-                    if (res instanceof ResourceOpti ro){
-                        resourceToInstall = ro.getMod();
-
-                        Profiler.getProfiler().setProfile(profile.getName(), x -> x.getAllResources().add(resourceToInstall));
-                    }
-                    else{
-                        var opt = ModSource.Options
-                                .create(profile.getVersionId(), ModResource.getGlobalSafeLoaders(res.getResourceType(), profile.getLoader().getType()))
-                                .allowOverwrite(isNewProfile && !prefs.hasGameVersions());
-                        if (res.getResourceType() != ResourceType.MODPACK)
-                            opt.dependencies(true);
-
-                        var all = res.getSourceType().getSource()
-                                .getCoreResource(res.getId(), opt);
-                        if (all == null){
-                            exists.set(null);
-                            return;
-                        }
-
-                        resourceToInstall = all.get(0);
-
-                        if (useShaderSetup){
-                            var rrrr = Modrinth.getModrinth().getPreferredShaderMod(opt);
-                            if (rrrr != null)
-                                all = Stream.concat(all.stream(), rrrr.stream()).distinct().toList();
-                        }
-
-                        if (Modder.getModder().include(profile, all, isNewProfile ? Modder.IncludeMode.OVERWRITE_PROFILE : Modder.IncludeMode.DEFAULT) == 0)
-                            return;
-                    }
-
-                    exists.set(resourceToInstall);
-                    playAnimation(true);
-                } catch (NoConnectionException | HttpException | StopException e) {
-                    exists.set(null);
-                }
-            }
-            else{
-                Modder.getModder().remove(profile, exists.get());
-                exists.set(null);
-                playAnimation(false);
-            }
-
-            if (isNewProfile && onNewProfileCreated != null){
-                var finalProfile = profile;
-                UI.runAsync(() -> onNewProfileCreated.accept(finalProfile));
-            }
-        }).start());
+            new Thread(this::onInstallClicked).start();
+        });
         lblName.setOnMouseClicked(a -> showSelector());
         btnMore.setOnMouseClicked(a -> showSelector());
     }
@@ -277,7 +300,7 @@ public class ResourceCell extends ListCell<ResourceCell.Link> {
             return;
 
         if (selector == null)
-            selector = new DModSelector<>(link.resource(), link.preferences());
+            selector = new DModSelector<>(link.resource(), link.preferences(), getScene() == null ? null : getScene().getWindow());
         Optional<DModSelector.ModSelection> r = Optional.empty();
         try {
             r = (Optional<DModSelector.ModSelection>)selector.select(exists.get());

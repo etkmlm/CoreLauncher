@@ -20,6 +20,7 @@ import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.minecraft.loader.optifine.OptiFine;
 import com.laeben.corelauncher.ui.control.CMsgBox;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -455,7 +456,7 @@ public class Modder {
     private boolean checkModpackOverride(Profile profile, Modpack modpack) throws StopException {
         final var result = UI.runSync(() -> {
             if (modpack.targetVersionId != null && !modpack.targetVersionId.equals(profile.getVersionId())){
-                var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.version"))
+                var k = Main.getMain().showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("mods.ask.version"))
                         .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
                         .executeForResult();
 

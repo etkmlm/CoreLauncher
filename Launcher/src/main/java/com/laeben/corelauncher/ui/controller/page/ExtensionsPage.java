@@ -31,7 +31,7 @@ public class ExtensionsPage extends HandlerController {
             else if (a.getKey().equals(ExtensionWrapper.EXTENSION_REMOVE)){
                 pList.getItems().remove((Extension) a.getSource());
                 if (!pendingRestart){
-                    var res = CMsgBox.msg(Alert.AlertType.WARNING, Translator.translate("ask.warn"), Translator.translate("extensions.restart"))
+                    var res = showMsg(Alert.AlertType.WARNING, Translator.translate("ask.warn"), Translator.translate("extensions.restart"))
                             .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                             .executeForResult();
                     if (res.isEmpty())

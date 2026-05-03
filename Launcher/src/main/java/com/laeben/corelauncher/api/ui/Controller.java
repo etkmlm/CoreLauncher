@@ -1,11 +1,14 @@
 package com.laeben.corelauncher.api.ui;
 
+import com.laeben.corelauncher.ui.control.CMsgBox;
+import com.laeben.corelauncher.ui.dialog.CDialog;
 import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.ui.entity.LScene;
 import com.laeben.corelauncher.ui.entity.LStage;
 import com.laeben.corelauncher.ui.util.EventFilterManager;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.stage.WindowEvent;
 
 import java.util.function.Consumer;
@@ -134,6 +137,21 @@ public abstract class Controller {
 
     public void addRegisteredEventFilter(EventFilter filter){
         efManager.addEventFilter(filter);
+    }
+
+    /**
+     * Create a message box with the parent stage.
+     */
+    public CMsgBox showMsg(Alert.AlertType type, String title, String desc){
+        return CMsgBox.msg(type, title, desc, stage);
+    }
+
+    /**
+     * Own a dialog with the parent stage.
+     */
+    public <T extends CDialog> T ownDialog(T dialog){
+        dialog.initOwner(stage);
+        return dialog;
     }
 
     public void dispose(){

@@ -45,6 +45,7 @@ import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
+import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.TranslateTransition;
@@ -56,6 +57,7 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -210,7 +212,7 @@ public class Main extends HandlerController {
             }
         }, true);
         Launcher.getLauncher().setOnAuthFail(v -> {
-            final var result = UI.runSync(() -> CMsgBox.msg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth.api", v.getValue()))
+            final var result = UI.runSync(() -> showMsg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth.api", v.getValue()))
                     .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                     .executeForResult());
 
@@ -696,12 +698,13 @@ public class Main extends HandlerController {
             menuBackground.setClip(n);
         });
 
-        addTab("pages/main", "        ", false, MainPage.class);
+        var icon = ImageUtil.getLocalImage("add.png", 16, 16);
+        addTab("pages/main", " ", new ImageView(icon), false, MainPage.class);
 
         setBackground(Configurator.getConfig().getBackgroundImage());
 
         if (Configurator.getConfig().shouldShowHelloDialog()){
-            var x = new DStartupConfigurator().execute();
+            var x = new DStartupConfigurator(getStage()).execute();
             if (x){
                 Configurator.getConfig().setShowHelloDialog(false);
                 Configurator.save();
@@ -790,12 +793,27 @@ public class Main extends HandlerController {
      * @param <T> type of the new controller
      */
     public <T extends Controller> T replaceTab(Controller from, String fxml, String title, boolean closable, Class<T> type){
+        return replaceTab(from, fxml, title, null, closable, type);
+    }
+
+    /**
+     * Replaces the old tab with the new one.
+     * @param from old controller
+     * @param fxml target layout path
+     * @param title target title
+     * @param graphic target graphic
+     * @param closable is the new tab closable
+     * @param type type instance
+     * @return the controller of the new tab
+     * @param <T> type of the new controller
+     */
+    public <T extends Controller> T replaceTab(Controller from, String fxml, String title, Node graphic, boolean closable, Class<T> type){
         var t = tab.getTabs().stream().filter(x -> x instanceof CTab ct && from.equals(ct.getController())).findFirst();
         int index = t.map(tab.getTabs()::indexOf).orElse(-1);
         if (index != -1)
             closeTab(index);
 
-        var t1 = createTab(fxml, title, closable);
+        var t1 = createTab(fxml, title, graphic, closable);
 
         tab.getTabs().add(index, t1);
         tab.getSelectionModel().select(t1);
@@ -817,14 +835,28 @@ public class Main extends HandlerController {
      * @param <T> type of the controller
      */
     public <T extends Controller> T addTab(String fxml, String title, boolean closable, Class<T> type){
-        var t = tab.getTabs().stream().filter(x -> x.getText().equals(title)).findFirst().orElse(null);
+        return addTab(fxml, title, null, closable, type);
+    }
+
+    /**
+     * Creates a tab, and adds it to the pane.
+     * @param fxml target layout path
+     * @param title target title
+     * @param graphic target graphic
+     * @param closable is the tab closable
+     * @param type type instance
+     * @return controller
+     * @param <T> type of the controller
+     */
+    public <T extends Controller> T addTab(String fxml, String title, Node graphic, boolean closable, Class<T> type){
+        var t = tab.getTabs().stream().filter(x -> Objects.equals(x.getText(), title)).findFirst().orElse(null);
 
         if (t instanceof CTab ct){
             tab.getSelectionModel().select(ct);
             return (T)ct.getController();
         }
 
-        var t1 = createTab(fxml, title, closable);
+        var t1 = createTab(fxml, title, graphic, closable);
 
         tab.getTabs().add(t1);
 
@@ -838,10 +870,11 @@ public class Main extends HandlerController {
         return (T)t1.getController();
     }
 
-    private CTab createTab(String fxml, String title, boolean closable){
+    private CTab createTab(String fxml, String title, Node graphic, boolean closable){
         var t = new CTab();
         t.setClosable(closable);
         t.setText(title);
+        t.setGraphic(graphic);
 
         var n = UI.load(CoreLauncherFX.class.getResource("layout/" + fxml + ".fxml"));
 

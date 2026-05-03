@@ -249,7 +249,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
         icon.setCornerRadius(icon.getFitWidth(), icon.getFitHeight(), 16);
         icon.setOnMouseClicked(a -> {
-            var s = new DImageSelector();
+            var s = new DImageSelector(getStage());
             var x = s.action();
             if (x.isEmpty())
                 return;

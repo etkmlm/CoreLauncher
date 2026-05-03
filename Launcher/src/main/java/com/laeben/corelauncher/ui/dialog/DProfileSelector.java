@@ -17,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 import javafx.util.Duration;
 import org.controlsfx.control.SearchableComboBox;
 
@@ -83,8 +84,8 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
     private final Functionality fn;
 
 
-    public DProfileSelector(Functionality f){
-        super("layout/dialog/profileselector.fxml", true);
+    public DProfileSelector(Functionality f, Window owner){
+        super("layout/dialog/profileselector.fxml", true, owner);
 
         fn = f;
 
@@ -210,7 +211,7 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
     }
 
     private void deleteSelectedProfiles(){
-        var h = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
+        var h = showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
                 .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO).executeForResult();
         if (!(h.isPresent() && h.get().result() == CMsgBox.ResultType.YES))
             return;

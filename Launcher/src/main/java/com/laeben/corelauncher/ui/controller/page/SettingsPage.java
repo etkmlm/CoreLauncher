@@ -314,7 +314,7 @@ public class SettingsPage extends HandlerController {
         });
 
         btnSelectDefaultOptions.setOnMouseClicked(a -> {
-            var selector = new DProfileSelector(DProfileSelector.Functionality.SINGLE_PROFILE_SELECTOR);
+            var selector = new DProfileSelector(DProfileSelector.Functionality.SINGLE_PROFILE_SELECTOR, getStage());
             var x = selector.show(null, Profiler.getProfiler().getAllProfiles());
             if (x.isEmpty() || x.get().getProfiles().isEmpty())
                 return;
@@ -331,7 +331,7 @@ public class SettingsPage extends HandlerController {
         });
 
         btnResetDefaultOptions.setOnMouseClicked(a -> {
-            var k = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
+            var k = showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
                     .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                     .executeForResult();
 

@@ -169,8 +169,7 @@ public class WorldsPage extends HandlerController {
             if (selectedWorld == null)
                 return;
 
-            var r = CMsgBox
-                    .msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
+            var r = showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
                     .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                     .executeForResult();
             if (r.isEmpty() || r.get().result() != CMsgBox.ResultType.YES)

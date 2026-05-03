@@ -61,7 +61,7 @@ public class JavaPage extends HandlerController {
         txtSearch.textProperty().addListener(a -> pList.filter(txtSearch.getText()));
 
         btnAdd.setOnMouseClicked(a -> {
-            var r = new DJavaSelector().action();
+            var r = new DJavaSelector(getStage()).action();
             if (r.isEmpty())
                 return;
             var j = r.get();
@@ -85,7 +85,7 @@ public class JavaPage extends HandlerController {
     }
 
     private void deleteSelectedJavaEntities(){
-        var h = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
+        var h = showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
                 .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO).executeForResult();
         if (!(h.isPresent() && h.get().result() == CMsgBox.ResultType.YES))
             return;

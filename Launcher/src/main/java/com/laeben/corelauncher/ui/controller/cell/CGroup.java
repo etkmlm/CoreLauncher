@@ -10,6 +10,7 @@ import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.ui.control.CField;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CMenu;
@@ -28,7 +29,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -58,7 +58,7 @@ public class CGroup extends CDockObject {
     private final VBox mainPane;
     private final FlowPane lvProfiles;
     private final ScaleTransition trns;
-    private final TextField txtName;
+    private final CField txtName;
     private final CButton btnRename;
 
     private final CView miniatureOut;
@@ -95,7 +95,8 @@ public class CGroup extends CDockObject {
         menuGroupButton.setVisible(false);
         menuGroupButton.setManaged(false);
 
-        selector = new DProfileSelector(DProfileSelector.Functionality.MULTIPLE_PROFILE_SELECTOR);
+        selector = new DProfileSelector(DProfileSelector.Functionality.MULTIPLE_PROFILE_SELECTOR, null);
+        sceneProperty().addListener((observable, oldValue, newValue) -> selector.initOwner(newValue == null ? null : newValue.getWindow()));
 
         miniatureOut = new CView();
         miniatureOut.setCornerRadius(48, 48, 8);
@@ -134,8 +135,7 @@ public class CGroup extends CDockObject {
         btnRename.setStyle("-fx-font-size: 14pt;-fx-pref-height: 45px");
         btnRename.setText(Translator.translate("option.done"));
 
-        txtName = new TextField();
-        txtName.setStyle("-fx-background-color: transparent; -fx-font-weight: bolder;");
+        txtName = new CField();
         txtName.setFocusTraversable(false);
         txtName.focusedProperty().addListener(a -> {
             if (txtName.isFocused()){

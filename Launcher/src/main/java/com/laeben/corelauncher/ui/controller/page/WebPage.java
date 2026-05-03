@@ -41,7 +41,7 @@ public class WebPage extends HandlerController {
     public WebPage reload(WebComplex complex){
         boolean shouldClose = complex.getState() != WebComplex.State.OK;
         if (shouldClose && complex.getState() == WebComplex.State.MISSING_LIBRARIES){
-            var result = CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("browser.embedded.library"))
+            var result = showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("browser.embedded.library"))
                     .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                     .executeForResult();
             if (result.isPresent() && result.get().result().isPositive()){

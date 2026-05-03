@@ -15,6 +15,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -48,8 +49,8 @@ public class DResourceSelector extends CDialog<List<CResource>>{
 
     private final List<CResource> resources;
 
-    public DResourceSelector(Profile profile) {
-        super("layout/dialog/resourceselector.fxml", true);
+    public DResourceSelector(Profile profile, Window owner) {
+        super("layout/dialog/resourceselector.fxml", true, owner);
 
         this.profile = profile;
 
