@@ -39,9 +39,9 @@ public class SelectionPane<T> extends Pane {
         getChildren().add(selectRect);
 
         navMaster = new Pane();
+        navMaster.setViewOrder(-2);
 
         nav = new CNav();
-        nav.setViewOrder(-1000);
         nav.addItem(Translator.translate("option.cancel"), "-shape-cancel", a -> {
             if (onSelectCancel != null)
                 onSelectCancel.run();

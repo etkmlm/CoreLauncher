@@ -20,7 +20,7 @@
         <Label fx:id="lblUsername" text="%username" GridPane.rowIndex="1"/>
         <HBox alignment="CENTER" spacing="10" GridPane.rowIndex="1" GridPane.columnIndex="1">
             <TextField fx:id="txtUsername" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-            <CheckBox fx:id="chkOnline" maxWidth="Infinity" text="%online"/>
+            <CheckBox fx:id="chkOnline" value="true" maxWidth="Infinity" text="%online"/>
         </HBox>
 
     </GridPane>

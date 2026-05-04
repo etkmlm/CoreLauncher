@@ -37,6 +37,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.stage.Popup;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.control.GridCell;
 
@@ -239,6 +240,8 @@ public abstract class CDockObject extends GridCell {
                 exporting = false;
             }
             else{
+                if (wnd instanceof Stage s && s.getOwner() != null) wnd = s.getOwner();
+
                 double x = wnd.getX();
                 double y = wnd.getY();
                 double w = wnd.getWidth();
@@ -249,8 +252,6 @@ public abstract class CDockObject extends GridCell {
 
                 exporting = (mX < x || mX > x + w) || (mY < y || mY > y + h);
             }
-
-
 
             if (exporting){
                 moving = false;
