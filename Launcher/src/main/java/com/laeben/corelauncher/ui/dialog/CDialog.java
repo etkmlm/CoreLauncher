@@ -87,14 +87,16 @@ public class CDialog<T> extends Dialog<T> {
     }
 
     protected Optional<T> action(){
-        Main.getMain().setDialogLayer(true);
+        if (Main.getMain() != null)
+            Main.getMain().setDialogLayer(true);
         UI.getUI().getHandler().execute(new KeyEvent(DIALOG_SHOWN).setSource(this));
         if (enableAnimation){
             node.setTranslateY(1000);
             trns.playFromStart();
         }
         var res = super.showAndWait();
-        Main.getMain().setDialogLayer(false);
+        if (Main.getMain() != null)
+            Main.getMain().setDialogLayer(false);
         UI.getUI().getHandler().execute(new KeyEvent(DIALOG_HIDE).setSource(this));
 
         return res;

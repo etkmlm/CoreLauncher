@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.*?>
+<?import com.laeben.corelauncher.ui.control.CColorPicker?>
+<?import javafx.scene.control.Slider?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="500.0" fx:id="root" prefWidth="600" styleClass="dialog-content">
+    <CButton prefWidth="48" prefHeight="48" text="X" fx:id="btnClose" AnchorPane.rightAnchor="16" AnchorPane.topAnchor="16" styleClass="transparent"/>
+    <Label text="%colorpicker.title" AnchorPane.topAnchor="24" AnchorPane.leftAnchor="16" style="-fx-font-size: 16pt"/>
+
+    <VBox spacing="16" alignment="CENTER" AnchorPane.rightAnchor="8" AnchorPane.leftAnchor="8" AnchorPane.bottomAnchor="64" AnchorPane.topAnchor="96">
+        <CColorPicker
+                selectedColorVisible="false"
+                prefWidth="128"
+                prefHeight="128"
+                VBox.vgrow="ALWAYS"
+                fx:id="picker"
+        />
+        <HBox spacing="8" alignment="CENTER">
+            <Label text="%colorpicker.opacity"/>
+            <Slider fx:id="sldOpacity" value="1" max="1" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <HBox spacing="8" alignment="CENTER">
+            <Pane fx:id="pColor" prefWidth="64" prefHeight="64" maxWidth="64" maxHeight="64"/>
+            <TextField promptText="%colorpicker.prompt" fx:id="txtColor" HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </VBox>
+
+    <CButton fx:id="btnDone" text="%option.done" AnchorPane.bottomAnchor="8" AnchorPane.rightAnchor="8" />
+
+</AnchorPane>
