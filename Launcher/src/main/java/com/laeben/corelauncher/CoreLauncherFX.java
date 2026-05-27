@@ -43,7 +43,7 @@ public class CoreLauncherFX extends Application {
 
         if (Debug.DEBUG_UI){
             Debug.runUI();
-            UI.shutdown();
+            //UI.shutdown();
         }
         else{
             UI.getUI().create("main").show();

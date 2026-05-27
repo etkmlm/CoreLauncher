@@ -95,6 +95,13 @@
 
                 <Label styleClass="property-key" text="%settings.guiShortcut" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                 <CheckBox fx:id="chkGuiShortcut" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+
+                <Label styleClass="property-key" text="%settings.omitLibs" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                    <tooltip>
+                        <Tooltip text="%settings.omitLibs.hint"/>
+                    </tooltip>
+                </Label>
+                <CheckBox fx:id="chkOmitLibs" GridPane.columnIndex="2" GridPane.rowIndex="6" />
             </GridPane>
         </VBox>
 

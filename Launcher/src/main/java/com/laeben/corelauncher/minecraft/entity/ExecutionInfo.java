@@ -133,6 +133,7 @@ public class ExecutionInfo{
             var libDir = gameDir.to("libraries");
 
             libraries = LibraryConcat.begin(libDir)
+                    .addLibraries(Configurator.getConfig().omitLauncherLibraries() ? List.of() : Arrays.stream(LauncherConfig.LAUNCHER_LIBRARIES).toList())
                     .addLibraries(v0.libraries)
                     .addLibraries(v.libraries)
                     .build()
@@ -146,7 +147,7 @@ public class ExecutionInfo{
                     .distinct()
                     .toList();*/
 
-            agents = Arrays.stream(LauncherConfig.LAUNCHER_LIBRARIES).filter(x -> x.isAgent).map(x -> "-javaagent:" + libDir.to(x.calculatePath())).toList();
+            agents = Configurator.getConfig().omitLauncherLibraries() ? List.of() : Arrays.stream(LauncherConfig.LAUNCHER_LIBRARIES).filter(x -> x.isAgent).map(x -> "-javaagent:" + libDir.to(x.calculatePath())).toList();
             //agentPath = libDir.to(Arrays.stream(LauncherConfig.LAUNCHER_AGENTS).filter(x -> x.fileName.startsWith("clfixer")).findFirst().orElse(new Library()).calculatePath());
         }
 

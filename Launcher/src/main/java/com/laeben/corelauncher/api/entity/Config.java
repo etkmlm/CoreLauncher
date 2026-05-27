@@ -36,6 +36,7 @@ public class Config {
     private boolean placeNewProfileToDock;
     private boolean selectAndPlayDock;
     private boolean autoChangeWrapper;
+    private boolean omitLauncherLibs;
     private JavaSourceType javaSource;
     private List<Integer> announces;
 
@@ -97,6 +98,14 @@ public class Config {
     public Path getLastBackupPath() { return lastBackupPath; }
     public void setLastBackupPath(Path path){
         this.lastBackupPath = path;
+    }
+
+    public void setOmitLauncherLibraries(boolean value){
+        this.omitLauncherLibs = value;
+    }
+
+    public boolean omitLauncherLibraries(){
+        return omitLauncherLibs;
     }
 
     public boolean disableSelectNewProfile() {
