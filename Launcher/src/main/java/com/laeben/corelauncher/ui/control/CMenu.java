@@ -4,6 +4,7 @@ import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.entity.PopupNode;
 import javafx.animation.ScaleTransition;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -21,7 +22,7 @@ public class CMenu extends VBox implements PopupNode {
     public record ItemClickEventArgs(MouseEvent event, String key) {}
 
     private final ScaleTransition trns;
-    private CButton button;
+    private Node node;
     private Popup parentPopup;
     private final Popup popup;
     private final VBox menu;
@@ -61,13 +62,21 @@ public class CMenu extends VBox implements PopupNode {
         trns.setDuration(Duration.millis(animationDuration));
     }
 
-    public void setButton(CButton button){
-        this.button = button;
-        getChildren().removeIf(x -> x instanceof HBox);
+    public void setButton(Node node){
+        if (this.node != null){
+            getChildren().removeIf(x -> x instanceof HBox);
+        }
+
         var container = new HBox();
         container.setAlignment(Pos.CENTER_RIGHT);
-        container.getChildren().add(button);
+        container.getChildren().add(node);
         getChildren().add(container);
+
+        setNode(node);
+    }
+
+    public void setNode(Node node){
+        this.node = node;
     }
 
     public void clear(){
@@ -115,6 +124,17 @@ public class CMenu extends VBox implements PopupNode {
         return btn;
     }
 
+    public void renameItem(String key, String text){
+        for (var i : menu.getChildren()){
+            if (!key.equals(i.getId())) continue;
+            if (i instanceof HBox hb &&
+                !hb.getChildren().isEmpty() &&
+                hb.getChildren().get(0) instanceof CButton cb)
+                cb.setText(text);
+            break;
+        }
+    }
+
     public void removeItem(String key){
         menu.getChildren().removeIf(a -> key.equals(a.getId()));
     }
@@ -123,9 +143,16 @@ public class CMenu extends VBox implements PopupNode {
         return menuOpen;
     }
 
+    public void show(double x, double y){
+        popup.show(node, x, y);
+        trns.playFromStart();
+
+        menuOpen = true;
+    }
+
     public void show(){
-        var b = button.localToScreen(button.getBoundsInLocal());
-        popup.show(button, b.getMaxX() - b.getWidth() * 1.5, b.getMaxY() - b.getHeight() * 2);
+        var b = node.localToScreen(node.getBoundsInLocal());
+        popup.show(node, b.getMaxX() - b.getWidth() * 1.5, b.getMaxY() - b.getHeight() * 2);
         trns.playFromStart();
 
         menuOpen = true;

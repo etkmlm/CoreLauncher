@@ -37,6 +37,7 @@
     <HBox spacing="8" alignment="CENTER" AnchorPane.bottomAnchor="8" AnchorPane.leftAnchor="8" AnchorPane.rightAnchor="8">
         <CheckBox fx:id="chkOffline" text="%imageselector.download" />
         <Region HBox.hgrow="ALWAYS"/>
+        <CButton fx:id="btnRemove" text="%option.remove" visible="false" managed="false"/>
         <CButton fx:id="btnDone" text="%option.done" />
     </HBox>
 

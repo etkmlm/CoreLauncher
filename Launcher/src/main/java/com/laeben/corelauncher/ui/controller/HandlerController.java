@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class HandlerController extends Controller {
+    private final String keyFamily;
     private final String key;
     private final List<EventHandler<?>> handlers;
     public HandlerController(String key){
-        this.key = key + hashCode();
+        this.keyFamily = key;
+        this.key = this.keyFamily + hashCode();
         this.handlers = new ArrayList<>();
     }
 
@@ -20,6 +22,14 @@ public abstract class HandlerController extends Controller {
         handler.addHandler(key, m, async);
         if (!handlers.contains(handler))
             handlers.add(handler);
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getKeyFamily() {
+        return keyFamily;
     }
 
     @Override

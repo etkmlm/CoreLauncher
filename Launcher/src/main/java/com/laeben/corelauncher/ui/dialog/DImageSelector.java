@@ -7,6 +7,7 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
+import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
 import com.laeben.corelauncher.util.ImageUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -26,9 +27,33 @@ import java.util.Optional;
 public class DImageSelector extends CDialog<ImageEntity> {
 
     public DImageSelector(Window owner){
+        this(null, owner);
+    }
+
+    public DImageSelector(ImageEntity image, Window owner){
         super("layout/dialog/imageselector.fxml", false, owner);
 
         getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL);
+
+        if (image != null) {
+            this.image.setImageAsync(ImageUtil.getImage(image, 128, 128));
+            rectImage.setVisible(false);
+
+            if (image.isNetwork()){
+                url = image.getUrl();
+                txtInput.setText(image.getUrl());
+            }
+            else if (image.isEmbedded()){
+                embedded = true;
+                url = image.getUrl();
+            }
+            else{
+                path = image.getPath(Configurator.getConfig().getImagePath());
+            }
+
+            btnRemove.setVisible(true);
+            btnRemove.setManaged(true);
+        }
     }
 
     @FXML
@@ -43,6 +68,8 @@ public class DImageSelector extends CDialog<ImageEntity> {
     private TextField txtInput;
     @FXML
     private CButton btnSelect;
+    @FXML
+    private CButton btnRemove;
     @FXML
     private CButton btnDone;
     @FXML
@@ -75,8 +102,6 @@ public class DImageSelector extends CDialog<ImageEntity> {
         image.setCornerRadius(image.getFitWidth(), image.getFitHeight(), 16);
         rectImage.setFill(new ImagePattern(ImageUtil.getDefaultImage(128)));
 
-
-
         pnImages.getChildren().addAll(
                 getView("creeper.png"),
                 getView("creeper_light.png"),
@@ -91,6 +116,10 @@ public class DImageSelector extends CDialog<ImageEntity> {
         btnClose.enableTransparentAnimation();
         btnClose.setOnMouseClicked(a -> {
             setResult(null);
+            close();
+        });
+        btnRemove.setOnMouseClicked(a -> {
+            setDialogResult(new DialogResult.Removed<>());
             close();
         });
         btnDone.setOnMouseClicked(a -> {
@@ -159,7 +188,19 @@ public class DImageSelector extends CDialog<ImageEntity> {
         });
     }
 
+    /**
+     * Traditional way to get the result.
+     * Use if it is enough to check whether the image is selected or not.
+     */
     public Optional<ImageEntity> action(){
         return super.action();
+    }
+
+    /**
+     * Combined way to get the result.
+     * Use if there is a need to handle the removed situation.
+     */
+    public DialogResult<ImageEntity> actionForResult(){
+        return super.actionForResult();
     }
 }

@@ -6,6 +6,7 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.Main;
+import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
 import com.laeben.corelauncher.ui.entity.LStage;
 import com.laeben.corelauncher.ui.util.ControlUtil;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
@@ -30,6 +31,8 @@ public class CDialog<T> extends Dialog<T> {
     public static final String DIALOG_HIDE = "dialogHide";
 
     protected Node node;
+
+    private DialogResult<T> result = null;
 
     protected final TranslateTransition trns;
     private final boolean enableAnimation;
@@ -102,7 +105,17 @@ public class CDialog<T> extends Dialog<T> {
         return res;
     }
 
+    protected DialogResult<T> actionForResult(){
+        var o = action();
+
+        return result != null ? result : (o.isEmpty() ? new DialogResult.Cancelled<>() : new DialogResult.Completed<>(o.get()));
+    }
+
     protected CMsgBox showMsg(Alert.AlertType type, String title, String desc){
         return CMsgBox.msg(type, title, desc, getOwner());
+    }
+
+    protected void setDialogResult(DialogResult<T> result){
+        this.result = result;
     }
 }

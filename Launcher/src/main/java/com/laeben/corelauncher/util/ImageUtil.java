@@ -37,7 +37,7 @@ public class ImageUtil {
             return task.get();
         } catch (InterruptedException | ExecutionException e) {
             Logger.getLogger().log(e);
-            return getDefaultImage(task.getRequestedWidth());
+            return useDefault ? getDefaultImage(task.getRequestedWidth()) : null;
         }
     }
     public static void getImageAsync(ImageTask task, Consumer<Image> onDone, boolean useDefault){

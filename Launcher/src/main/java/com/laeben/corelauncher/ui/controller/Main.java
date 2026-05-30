@@ -11,7 +11,7 @@ import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.*;
-import com.laeben.corelauncher.api.entity.FDObject;
+import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.socket.entity.CLPacket;
 import com.laeben.corelauncher.api.socket.entity.CLPacketType;
@@ -19,8 +19,6 @@ import com.laeben.corelauncher.api.socket.entity.CLStatusPacket;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.Controller;
-import com.laeben.corelauncher.api.entity.Account;
-import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.ui.entity.FocusLimiter;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.discord.Discord;
@@ -35,17 +33,18 @@ import com.laeben.corelauncher.minecraft.util.ServerHandshake;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.ui.controller.page.*;
 import com.laeben.corelauncher.ui.control.*;
+import com.laeben.corelauncher.ui.dialog.DColorPicker;
+import com.laeben.corelauncher.ui.dialog.DImageSelector;
 import com.laeben.corelauncher.ui.dialog.DStartupConfigurator;
+import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
 import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.ui.tutorial.Instructor;
 import com.laeben.corelauncher.ui.tutorial.StepPopup;
 import com.laeben.corelauncher.ui.util.ControlUtil;
-import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
-import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.TranslateTransition;
@@ -57,12 +56,12 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import javafx.animation.ScaleTransition;
@@ -87,6 +86,9 @@ public class Main extends HandlerController {
     public static final String EXTENSIONS = "exts";
     public static final String TUTORIALS = "tuts";
 
+    public static final String CUSTOMIZE_ICON = "seticon";
+    public static final String CUSTOMIZE_COLOR = "setcolor";
+
     public static final double MIN_HEIGHT = 600;
     public static final double MIN_WIDTH = 1024;
 
@@ -98,8 +100,6 @@ public class Main extends HandlerController {
     private AnchorPane menu;
     @FXML
     private Pane menuBackground;
-    /*@FXML
-    private CView head;*/
     @FXML
     private CHeadView head;
     @FXML
@@ -150,6 +150,9 @@ public class Main extends HandlerController {
 
     @FXML
     private ProgressIndicator ind;
+
+    private final CMenu tabMenu;
+    private CTab tabMenuContext;
 
     public CMenu cMenu;
     private final DecimalFormat df;
@@ -202,13 +205,19 @@ public class Main extends HandlerController {
         registerHandler(Modder.getModder().getHandler(), this::onGeneralEvent, true);
         registerHandler(NetUtil.getHandler(), this::onProgress, false);
         registerHandler(Configurator.getConfigurator().getHandler(), a -> {
-            if (a.getKey().equals(Configurator.BACKGROUND_CHANGE))
-                setBackground(Configurator.getConfig().getBackgroundImage());
-            else if (a.getKey().equals(Configurator.USER_CHANGE)){
-                if (selectedProfile != null && selectedProfile.isValid())
-                    setUser(selectedProfile.getUser() == null ? Configurator.getConfig().getUser().reload() : selectedProfile.getUser().reload());
-                else
-                    setUser(Configurator.getConfig().getUser().reload());
+            switch (a.getKey()) {
+                case Configurator.BACKGROUND_CHANGE -> setBackground(Configurator.getConfig().getBackgroundImage());
+                case Configurator.USER_CHANGE -> {
+                    if (selectedProfile != null && selectedProfile.isValid())
+                        setUser(selectedProfile.getUser() == null ? Configurator.getConfig().getUser().reload() : selectedProfile.getUser().reload());
+                    else
+                        setUser(Configurator.getConfig().getUser().reload());
+                }
+                /*case Configurator.UI_PREFERENCE_CHANGE -> {
+                    var preference = (UIPreference) a.getNewValue();
+                    var key = a.getSource().toString();
+
+                }*/ // disabled currently
             }
         }, true);
         Launcher.getLauncher().setOnAuthFail(v -> {
@@ -247,6 +256,32 @@ public class Main extends HandlerController {
 
         imgPlay = ImageCacheManager.getImage("play.png", 48);
         imgPause = ImageCacheManager.getImage("menu.png", 48);
+
+        tabMenu = new CMenu();
+        tabMenu.addItem(null, CUSTOMIZE_ICON, Translator.translate("tab.customize.icon"), (x) -> {
+            if (tabMenuContext == null) return;
+
+            var selector = new DImageSelector(tabMenuContext.getImageIcon(), getStage());
+            var result = selector.actionForResult();
+            if (result instanceof DialogResult.Cancelled) return;
+
+            ImageEntity img = result instanceof DialogResult.Completed<ImageEntity> i ? i.value() : null;
+            tabMenuContext.setIconAsync(img);
+
+            Configurator.getConfigurator().setUIPreference(tabMenuContext.getKey(), a -> a.setCustomImage(img));
+        });
+        tabMenu.addItem(null, CUSTOMIZE_COLOR, Translator.translate("tab.customize.color"), (x) -> {
+            if (tabMenuContext == null) return;
+
+            var selector = new DColorPicker(tabMenuContext.getHeaderColor(), getStage());
+            var result = selector.pickColor();
+            if (result instanceof DialogResult.Cancelled) return;
+
+            Color c = result instanceof DialogResult.Completed<Color> co ? co.value() : null;
+            tabMenuContext.setHeaderColor(c);
+
+            Configurator.getConfigurator().setUIPreference(tabMenuContext.getKey(), a -> a.setCustomColor(c));
+        });
 
         instance = this;
     }
@@ -568,6 +603,7 @@ public class Main extends HandlerController {
         btnMenu.setPrefWidth(64);
         btnMenu.setOnMouseClicked(a -> cMenu.show());
         cMenu.setButton(btnMenu);
+        tabMenu.setNode(tab);
 
         menuTranslate.setNode(menuInner);
         prgTranslate.setNode(progress);
@@ -651,6 +687,10 @@ public class Main extends HandlerController {
     @Override
     public void init() {
         addRegisteredEventFilter(EventFilter.node(root, MouseEvent.ANY, (a) -> {
+            if (a.getButton() == MouseButton.PRIMARY && a.getEventType() == MouseEvent.MOUSE_PRESSED && tabMenu.isMenuOpen()) {
+                tabMenu.hide();
+            }
+
             if (focusLimiter != null){
                 var node = (Node) a.getTarget();
 
@@ -698,8 +738,23 @@ public class Main extends HandlerController {
             menuBackground.setClip(n);
         });
 
-        var icon = ImageUtil.getLocalImage("add.png", 16, 16);
-        addTab("pages/main", " ", new ImageView(icon), false, MainPage.class);
+        var mainTab = (CTab)addTab("pages/main", "        ", false, MainPage.class).getParentObject();
+        if (mainTab != null) {
+            var prefs = Configurator.getConfig().getUIPreferences();
+            for (var p : prefs){
+                if (!mainTab.getKey().equals(p.getIdentifier())) continue;
+
+                if (p.getCustomImage() != null)
+                    mainTab.setIconAsync(p.getCustomImage());
+
+                if (p.getCustomColor() != null){
+                    try{
+                        mainTab.setHeaderColor(Color.web(p.getCustomColor()));
+                    }
+                    catch (IllegalArgumentException ignored){}
+                }
+            }
+        }
 
         setBackground(Configurator.getConfig().getBackgroundImage());
 
@@ -793,27 +848,12 @@ public class Main extends HandlerController {
      * @param <T> type of the new controller
      */
     public <T extends Controller> T replaceTab(Controller from, String fxml, String title, boolean closable, Class<T> type){
-        return replaceTab(from, fxml, title, null, closable, type);
-    }
-
-    /**
-     * Replaces the old tab with the new one.
-     * @param from old controller
-     * @param fxml target layout path
-     * @param title target title
-     * @param graphic target graphic
-     * @param closable is the new tab closable
-     * @param type type instance
-     * @return the controller of the new tab
-     * @param <T> type of the new controller
-     */
-    public <T extends Controller> T replaceTab(Controller from, String fxml, String title, Node graphic, boolean closable, Class<T> type){
         var t = tab.getTabs().stream().filter(x -> x instanceof CTab ct && from.equals(ct.getController())).findFirst();
         int index = t.map(tab.getTabs()::indexOf).orElse(-1);
         if (index != -1)
             closeTab(index);
 
-        var t1 = createTab(fxml, title, graphic, closable);
+        var t1 = createTab(fxml, title, closable);
 
         tab.getTabs().add(index, t1);
         tab.getSelectionModel().select(t1);
@@ -835,20 +875,6 @@ public class Main extends HandlerController {
      * @param <T> type of the controller
      */
     public <T extends Controller> T addTab(String fxml, String title, boolean closable, Class<T> type){
-        return addTab(fxml, title, null, closable, type);
-    }
-
-    /**
-     * Creates a tab, and adds it to the pane.
-     * @param fxml target layout path
-     * @param title target title
-     * @param graphic target graphic
-     * @param closable is the tab closable
-     * @param type type instance
-     * @return controller
-     * @param <T> type of the controller
-     */
-    public <T extends Controller> T addTab(String fxml, String title, Node graphic, boolean closable, Class<T> type){
         var t = tab.getTabs().stream().filter(x -> Objects.equals(x.getText(), title)).findFirst().orElse(null);
 
         if (t instanceof CTab ct){
@@ -856,7 +882,7 @@ public class Main extends HandlerController {
             return (T)ct.getController();
         }
 
-        var t1 = createTab(fxml, title, graphic, closable);
+        var t1 = createTab(fxml, title, closable);
 
         tab.getTabs().add(t1);
 
@@ -870,11 +896,10 @@ public class Main extends HandlerController {
         return (T)t1.getController();
     }
 
-    private CTab createTab(String fxml, String title, Node graphic, boolean closable){
+    private CTab createTab(String fxml, String title, boolean closable){
         var t = new CTab();
         t.setClosable(closable);
         t.setText(title);
-        t.setGraphic(graphic);
 
         var n = UI.load(CoreLauncherFX.class.getResource("layout/" + fxml + ".fxml"));
 
@@ -1115,6 +1140,29 @@ public class Main extends HandlerController {
             announceLater(Translator.translate("announce.warn"), Translator.translate("settings.warn.invalidGamePath"), Announcement.AnnouncementType.INFO, Duration.millis(8000));
 
         instructor.setBaseNode(getRootNode());
+
+        final StackPane headersRegion = (StackPane) tab.lookup(".headers-region");
+        headersRegion.setOnMouseClicked(a -> {
+            if (a.getButton() != MouseButton.SECONDARY) return;
+
+            Node tab = (Node)a.getTarget();
+            while (tab != null && tab.getParent() != headersRegion) {
+                tab = tab.getParent();
+            }
+
+            if (tab == null) return;
+
+            int index = headersRegion.getChildren().indexOf(tab);
+
+            if (index != 0) return; // currently only for main tab
+
+            tabMenuContext = (CTab) this.tab.getTabs().get(index);
+
+            if (tab instanceof Pane p)
+                tabMenuContext.setHeaderRegion(p);
+
+            tabMenu.show(a.getScreenX(), a.getScreenY());
+        });
 
         if (!createDefaultProfile)
             return;

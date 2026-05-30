@@ -13,6 +13,10 @@ public interface ImageCache<T> {
     static <T> ImageCache<T> get(T key, int size){
         if (key instanceof Profile p)
             return (ImageCache<T>) new ProfileImageCache(p, size);
+        else if (key instanceof String s)
+            return (ImageCache<T>) new StringImageCache(s, size);
+        else if (key instanceof ImageKeyProvider p)
+            return (ImageCache<T>) new StringImageCache(p.getKey(), size);
         else
             return (ImageCache<T>) new StringImageCache(key.toString(), size);
     }
@@ -72,11 +76,42 @@ public interface ImageCache<T> {
 
         @Override
         public ImageTask getImage() {
-            return ImageTask.fromImage(ImageUtil.getLocalImage(key));
+            return ImageTask.fromImage(ImageUtil.getLocalImage(key, size, size));
         }
 
         @Override
         public String getKey() {
+            return key;
+        }
+    }
+
+    class ProviderImageCache implements ImageCache<ImageKeyProvider>{
+        private final ImageKeyProvider key;
+        private final int size;
+        private final Image image;
+        public ProviderImageCache(ImageKeyProvider key, int size){
+            this.key = key;
+            this.size = size;
+            this.image = ImageUtil.getImageSync(getImage(), true);
+        }
+
+        @Override
+        public int getSize() {
+            return size;
+        }
+
+        @Override
+        public Image getCachedImage() {
+            return image;
+        }
+
+        @Override
+        public ImageTask getImage() {
+            return ImageTask.fromImage(ImageUtil.getLocalImage(key.getKey(), size, size));
+        }
+
+        @Override
+        public ImageKeyProvider getKey() {
             return key;
         }
     }

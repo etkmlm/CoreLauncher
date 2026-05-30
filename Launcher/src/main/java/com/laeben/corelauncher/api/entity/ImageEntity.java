@@ -6,7 +6,7 @@ import java.net.MalformedURLException;
 import java.util.UUID;
 
 public class ImageEntity {
-    private boolean network;
+    private final boolean network;
     private boolean embedded;
     private boolean base64;
     private String url;

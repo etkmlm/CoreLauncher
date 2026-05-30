@@ -161,12 +161,13 @@
                 <Label styleClass="property-key" text="%settings.scale" GridPane.columnIndex="1" GridPane.rowIndex="14"/>
                 <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="14" />
 
-                <CButton fx:id="btnCheckUpdate" text="%settings.update" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="17"/>
-                <CButton fx:id="btnGC" text="%settings.gc" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="18"/>
-                <HBox spacing="10" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="16">
-                    <CButton fx:id="btnClearImages" text="%settings.images.clear"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="16" GridPane.hgrow="ALWAYS">
+                    <CButton fx:id="btnClearImages" text="%settings.images.clear" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                     <CWorker fx:id="workerImages"/>
                 </HBox>
+                <CButton fx:id="btnCheckUpdate" maxWidth="Infinity" text="%settings.update" GridPane.columnIndex="2" GridPane.rowIndex="16" GridPane.hgrow="ALWAYS"/>
+                <CButton fx:id="btnGC" maxWidth="Infinity" text="%settings.gc" GridPane.columnIndex="1" GridPane.rowIndex="17" GridPane.hgrow="ALWAYS"/>
+                <CButton fx:id="btnUIPrefs" maxWidth="Infinity" text="%settings.uiPrefs" GridPane.columnIndex="2" GridPane.rowIndex="17" GridPane.hgrow="ALWAYS"/>
             </GridPane>
         </VBox>
 

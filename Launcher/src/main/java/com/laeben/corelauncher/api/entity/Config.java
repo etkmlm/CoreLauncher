@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.api.entity;
 
+import com.laeben.corelauncher.api.ui.entity.UIPreference;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.core.entity.Path;
@@ -39,6 +40,8 @@ public class Config {
     private boolean omitLauncherLibs;
     private JavaSourceType javaSource;
     private List<Integer> announces;
+
+    private List<UIPreference> uiPreferences;
 
     private double windowWidth;
     private double windowHeight;
@@ -320,6 +323,11 @@ public class Config {
         return customJavaVersions;
     }
 
+    public List<UIPreference> getUIPreferences(){
+        if (uiPreferences == null)
+            uiPreferences = new ArrayList<>();
+        return uiPreferences;
+    }
     public void setUser(Account a){
         this.user = a;
     }

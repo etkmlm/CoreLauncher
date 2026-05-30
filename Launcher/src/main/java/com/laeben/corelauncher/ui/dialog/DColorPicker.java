@@ -2,6 +2,7 @@ package com.laeben.corelauncher.ui.dialog;
 
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CColorPicker;
+import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
 import javafx.fxml.FXML;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Slider;
@@ -12,8 +13,6 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Window;
-
-import java.util.Optional;
 
 public class DColorPicker extends CDialog<Color> {
     public DColorPicker(Window owner){
@@ -26,6 +25,10 @@ public class DColorPicker extends CDialog<Color> {
         this(owner);
 
         picker.setSelectedColor(color);
+        if (color != null){
+            btnRemove.setVisible(true);
+            btnRemove.setManaged(true);
+        }
     }
 
     @FXML
@@ -36,6 +39,8 @@ public class DColorPicker extends CDialog<Color> {
     private Pane pColor;
     @FXML
     private CButton btnClose;
+    @FXML
+    private CButton btnRemove;
     @FXML
     private CButton btnDone;
 
@@ -76,13 +81,18 @@ public class DColorPicker extends CDialog<Color> {
             close();
         });
 
+        btnRemove.setOnMouseClicked(a -> {
+            setDialogResult(new DialogResult.Removed());
+            close();
+        });
+
         btnDone.setOnMouseClicked(a -> {
             setResult(picker.getSelectedColor());
             close();
         });
     }
 
-    public Optional<Color> pickColor(){
-        return super.action();
+    public DialogResult<Color> pickColor(){
+        return super.actionForResult();
     }
 }

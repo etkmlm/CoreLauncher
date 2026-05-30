@@ -30,6 +30,9 @@
         </HBox>
     </VBox>
 
-    <CButton fx:id="btnDone" text="%option.done" AnchorPane.bottomAnchor="8" AnchorPane.rightAnchor="8" />
+    <HBox spacing="8" alignment="CENTER_RIGHT" AnchorPane.bottomAnchor="8" AnchorPane.rightAnchor="8">
+        <CButton visible="false" managed="false" fx:id="btnRemove" text="%option.remove" />
+        <CButton fx:id="btnDone" text="%option.done" />
+    </HBox>
 
 </AnchorPane>

@@ -44,8 +44,8 @@ public class CWorker<T, H> extends StackPane {
     }
 
     private void ind(boolean v){
-        indicator.setVisible(v);
-        indicator.setManaged(v);
+        setVisible(v);
+        setManaged(v);
     }
 
     public CWorker<T, H> begin(){

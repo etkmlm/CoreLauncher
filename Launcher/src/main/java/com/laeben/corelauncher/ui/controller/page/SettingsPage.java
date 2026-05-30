@@ -124,6 +124,8 @@ public class SettingsPage extends HandlerController {
     private CButton btnOpenDefaultOptions;
     @FXML
     private CButton btnGC;
+    @FXML
+    private CButton btnUIPrefs;
 
     @FXML
     private CheckBox chkDiscordEnable;
@@ -184,17 +186,20 @@ public class SettingsPage extends HandlerController {
         reloadJava();
 
         registerHandler(Configurator.getConfigurator().getHandler(), x -> {
-            if (x.getKey().equals(Configurator.GAME_PATH_CHANGE)){
-                var path = (Path)x.getNewValue();
-                txtGamePath.setText(path.toString());
-            }
-            else if (x.getKey().equals(Configurator.BACKGROUND_CHANGE)){
-                var path = (Path)x.getNewValue();
-                txtCustomBackground.setText(path == null ? null : path.toString());
-            }
-            else if (x.getKey().equals(Configurator.LANGUAGE_CHANGE)){
-                Discord.getDiscord().setActivity(Activity.setForIdling());
-                UI.getUI().reset();
+            switch (x.getKey()) {
+                case Configurator.GAME_PATH_CHANGE -> {
+                    var path = (Path) x.getNewValue();
+                    txtGamePath.setText(path.toString());
+                }
+                case Configurator.BACKGROUND_CHANGE -> {
+                    var path = (Path) x.getNewValue();
+                    txtCustomBackground.setText(path == null ? null : path.toString());
+                }
+                case Configurator.LANGUAGE_CHANGE -> {
+                    Discord.getDiscord().setActivity(Activity.setForIdling());
+                    UI.getUI().reset();
+                }
+                case Configurator.UI_PREFERENCE_CLEAR -> UI.getUI().reset();
             }
         }, true);
 
@@ -258,6 +263,16 @@ public class SettingsPage extends HandlerController {
         ram.setup();
 
         btnGC.setOnMouseClicked(a -> System.gc());
+        btnUIPrefs.setOnMouseClicked(a -> {
+            var answ = showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translate("settings.ask.resetPrefs"))
+                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
+                    .executeForResult();
+
+            if (answ.isEmpty() || !answ.get().result().isPositive())
+                return;
+
+            Configurator.getConfigurator().clearUIPreferences();
+        });
 
         cbLanguage.valueProperty().addListener(x -> {
             try{

@@ -3,6 +3,7 @@ package com.laeben.corelauncher.api;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.entity.*;
+import com.laeben.corelauncher.api.ui.entity.UIPreference;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.core.entity.Path;
@@ -13,6 +14,7 @@ import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 public class Configurator {
     public static final String BACKGROUND_CHANGE = "bgChange";
@@ -20,6 +22,8 @@ public class Configurator {
     public static final String USER_CHANGE = "userChange";
     public static final String GAME_PATH_CHANGE = "gamePathChange";
     public static final String JAVA_SOURCE_CHANGE = "javaSourceChange";
+    public static final String UI_PREFERENCE_CHANGE = "uiPrefChange";
+    public static final String UI_PREFERENCE_CLEAR = "uiPrefClear";
 
     private static Configurator instance;
     private final EventHandler<ChangeEvent> handler;
@@ -109,7 +113,6 @@ public class Configurator {
     public void setLanguage(Locale l){
         var oldLang = config.getLanguage();
         config.setLanguage(l);
-        Translator.getTranslator().setLanguage(l);
         save();
 
         handler.execute(new ChangeEvent(LANGUAGE_CHANGE, oldLang, l));
@@ -121,6 +124,32 @@ public class Configurator {
         save();
 
         handler.execute(new ChangeEvent(JAVA_SOURCE_CHANGE, oldType, type));
+    }
+
+    public void setUIPreference(String id, Consumer<UIPreference> set){
+        var pref = config.getUIPreferences().stream().filter(a -> id.equals(a.getIdentifier())).findFirst();
+
+        UIPreference old = pref.orElse(null);
+        UIPreference n = null;
+
+        if (old != null) set.accept(old);
+        else{
+            n = new UIPreference();
+            n.setIdentifier(id);
+            set.accept(n);
+            config.getUIPreferences().add(n);
+        }
+
+        save();
+
+        handler.execute((ChangeEvent) new ChangeEvent(UI_PREFERENCE_CHANGE, old, n == null ? old : n).setSource(id));
+    }
+
+    public void clearUIPreferences(){
+        config.getUIPreferences().clear();
+        save();
+
+        handler.execute(new ChangeEvent(UI_PREFERENCE_CLEAR, null, null));
     }
 
     public List<Java> verifyAndGetCustomJavaVersions(){
