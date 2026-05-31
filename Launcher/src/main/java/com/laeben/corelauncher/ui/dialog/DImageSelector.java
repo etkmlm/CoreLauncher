@@ -193,6 +193,11 @@ public class DImageSelector extends CDialog<ImageEntity> {
      * Use if it is enough to check whether the image is selected or not.
      */
     public Optional<ImageEntity> action(){
+
+        // disable visibility, no chance for handling the remove action
+        btnRemove.setVisible(false);
+        btnRemove.setManaged(false);
+
         return super.action();
     }
 

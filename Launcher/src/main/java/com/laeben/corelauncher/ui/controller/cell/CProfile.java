@@ -3,12 +3,15 @@ package com.laeben.corelauncher.ui.controller.cell;
 import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.api.FloatDock;
+import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.ui.control.CShapefulButton;
+import com.laeben.corelauncher.ui.controller.Main;
+import com.laeben.corelauncher.ui.dialog.DImageSelector;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import javafx.animation.FadeTransition;
@@ -30,6 +33,7 @@ import java.util.function.Predicate;
 public class CProfile extends CDockObject{
 
     public static final String REMOVE = "remove";
+    public static final String CHANGE_ICON = "cicon";
 
     @FXML
     private AnchorPane imgRoot;
@@ -134,6 +138,16 @@ public class CProfile extends CDockObject{
             return onMenuClick == null || onMenuClick.test(a);
         });
         menu.addItem(ImageCacheManager.getImage("remove.png", 48), REMOVE, Translator.translate("option.remove"), a -> vanish());
+        menu.addItem(ImageCacheManager.getImage("edit_old.png", 48), CHANGE_ICON, Translator.translate("profile.menu.icon"), a -> {
+            var s = new DImageSelector(profile.getIcon(), Main.getMain().getStage());
+            var x = s.action();
+            if (x.isEmpty())
+                return;
+            var ent = x.get();
+
+            ImageCacheManager.remove(profile);
+            Profiler.getProfiler().setProfile(profile.getName(), p -> p.setIcon(ent.isEmpty() ? null : ent));
+        });
 
         //btnSelect.setOnDragDetected(a -> drag(p1, p2, img_30));
         //btnSelect.setOnMouseReleased(a -> selectPrimary());
