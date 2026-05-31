@@ -58,7 +58,9 @@ public class CDialog<T> extends Dialog<T> {
         getDialogPane().prefHeightProperty().bind(n.prefHeightProperty());
         getDialogPane().prefWidthProperty().bind(n.prefWidthProperty());
 
-        ((Stage)getDialogPane().getScene().getWindow()).getIcons().addAll(LStage.getIconSet());
+        final var window = (Stage)getDialogPane().getScene().getWindow();
+
+        window.getIcons().addAll(LStage.getIconSet());
 
         setResultConverter(a -> null);
 
@@ -67,13 +69,11 @@ public class CDialog<T> extends Dialog<T> {
                 return;
             var parentBounds = Main.getMain().getTabBounds();
 
-            var window = ((CDialog)x.getSource()).getDialogPane().getScene().getWindow();
-
             window.setX(parentBounds.getMinX() + (parentBounds.getWidth() - window.getWidth()) / 2);
             window.setY(parentBounds.getMinY() + (parentBounds.getHeight() - window.getHeight()) / 2);
         });
 
-        getDialogPane().getScene().getWindow().addEventFilter(MouseEvent.MOUSE_PRESSED, a -> {
+        window.addEventFilter(MouseEvent.MOUSE_PRESSED, a -> {
             if (a.getButton() == MouseButton.MIDDLE && Configurator.getConfig().isEnabledMiddlePaste()) {
                 var tf = ControlUtil.getTextFieldParent(a.getTarget());
                 if (tf != null && tf.isEditable()) tf.paste();

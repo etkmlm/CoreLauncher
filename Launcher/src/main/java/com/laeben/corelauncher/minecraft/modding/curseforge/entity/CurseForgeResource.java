@@ -94,9 +94,6 @@ public class CurseForgeResource implements ModResource {
         String version = null;
 
         for (var v : file.gameVersions){
-            if (filterLoaderMatch && filterVersionMatch)
-                break;
-
             if (v.indexOf('.') > 0){ // get the newest version (only main versions)
                 var n = VersionUtil.calculateVersionValue(v);
                 if (n > val){
@@ -107,7 +104,7 @@ public class CurseForgeResource implements ModResource {
 
             v = v.toLowerCase();
 
-            if (!filterVersionMatch && (filterVersions == null || filterVersions.contains(v))){
+            if (!filterVersionMatch && (filterVersions == null && version != null || filterVersions != null && filterVersions.contains(v))){
                 filterVersionMatch = true;
                 continue;
             }
@@ -134,6 +131,8 @@ public class CurseForgeResource implements ModResource {
         }
 
         file.mainGameVersion = version;
+
+        assert version != null;
 
         return ((noSupportedLoaders || filterLoaderMatch) && filterVersionMatch) || (filterVersions == null && filterLoaderTypes == null);
     }
