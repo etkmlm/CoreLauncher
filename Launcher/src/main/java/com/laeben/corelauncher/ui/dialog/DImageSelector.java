@@ -78,6 +78,7 @@ public class DImageSelector extends CDialog<ImageEntity> {
     private boolean network = false;
     private boolean embedded = false;
     private boolean ok = false;
+    private boolean forResult = false;
     private String url;
     private Path path;
 
@@ -193,10 +194,11 @@ public class DImageSelector extends CDialog<ImageEntity> {
      * Use if it is enough to check whether the image is selected or not.
      */
     public Optional<ImageEntity> action(){
-
-        // disable visibility, no chance for handling the remove action
-        btnRemove.setVisible(false);
-        btnRemove.setManaged(false);
+        // disable visibility for direct action() function, since no chance to handle the remove action
+        if (!forResult){
+            btnRemove.setVisible(false);
+            btnRemove.setManaged(false);
+        }
 
         return super.action();
     }
@@ -206,6 +208,7 @@ public class DImageSelector extends CDialog<ImageEntity> {
      * Use if there is a need to handle the removed situation.
      */
     public DialogResult<ImageEntity> actionForResult(){
+        forResult = true;
         return super.actionForResult();
     }
 }

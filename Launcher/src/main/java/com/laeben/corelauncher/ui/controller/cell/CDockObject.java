@@ -131,14 +131,15 @@ public abstract class CDockObject extends GridCell {
     @FXML
     protected CShapefulButton btnSelect;
 
-    protected boolean moving;
-    protected boolean exporting;
-    protected boolean pressed;
-    protected long pressTime;
-    protected double pressRelativeMouseX;
-    protected double pressRelativeMouseY;
-    protected double pressLayoutX;
-    protected double pressLayoutY;
+    private boolean moving;
+    private boolean exporting;
+    private boolean exportingFlag;
+    private boolean pressed;
+    private long pressTime;
+    private double pressRelativeMouseX;
+    private double pressRelativeMouseY;
+    private double pressLayoutX;
+    private double pressLayoutY;
 
     public static CDockObject get(FDObject item){
         return item.isSingle() ? new CProfile().set(item) : new CGroup().set(item);
@@ -188,6 +189,13 @@ public abstract class CDockObject extends GridCell {
         return this;
     }
 
+    protected boolean setExporting(boolean exp){
+        if (this.exporting == exp) return false;
+        this.exporting = exp;
+
+        return true;
+    }
+
     private void onFocusChange(Observable o, Boolean v1, Boolean v2) {
         if ((v2 == null || !v2) || (!moving && !exporting))
             return;
@@ -209,13 +217,14 @@ public abstract class CDockObject extends GridCell {
         onReleasedIn();
     }
 
-    private void onReleasedIn(){
+    protected void onReleasedIn(){
         root.setScaleX(1);
         root.setScaleY(1);
 
         grabListener.accept(new KeyEvent(RELEASE).setSource(this));
         moving = false;
-        exporting = false;
+
+        if (!exportingFlag) setExporting(false);
     }
 
     private void onPressed(MouseEvent a){
@@ -236,24 +245,20 @@ public abstract class CDockObject extends GridCell {
 
             var wnd = getScene().getWindow();
 
-            if (wnd instanceof Popup){
-                exporting = false;
-            }
-            else{
-                if (wnd instanceof Stage s && s.getOwner() != null) wnd = s.getOwner();
+            if (wnd instanceof Popup p)
+                wnd = p.getOwnerWindow();
 
-                double x = wnd.getX();
-                double y = wnd.getY();
-                double w = wnd.getWidth();
-                double h = wnd.getHeight();
+            if (wnd instanceof Stage s && s.getOwner() != null) wnd = s.getOwner();
 
-                double mX = a.getScreenX();
-                double mY = a.getScreenY();
+            double x = wnd.getX();
+            double y = wnd.getY();
+            double w = wnd.getWidth();
+            double h = wnd.getHeight();
 
-                exporting = (mX < x || mX > x + w) || (mY < y || mY > y + h);
-            }
+            double mX = a.getScreenX();
+            double mY = a.getScreenY();
 
-            if (exporting){
+            if (setExporting((mX < x || mX > x + w) || (mY < y || mY > y + h)) && exporting){
                 moving = false;
                 onReleased(a);
                 a.setDragDetect(true);
@@ -278,8 +283,20 @@ public abstract class CDockObject extends GridCell {
         return moving;
     }
 
+    protected boolean exportingFlag(){
+        return exportingFlag;
+    }
+
+    protected void setExportingFlag(boolean flag){
+        exportingFlag = flag;
+    }
+
     public boolean isExporting(){
         return exporting;
+    }
+
+    public long getPressTime() {
+        return pressTime;
     }
 
     public double getPressRelativeMouseX() {

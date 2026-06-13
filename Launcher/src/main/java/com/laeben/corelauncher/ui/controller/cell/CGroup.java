@@ -327,18 +327,21 @@ public class CGroup extends CDockObject {
         if (ke.getKey().equals(CDockObject.RELEASE)){
             setMiniatureImage(null);
 
-            if (isOut && System.currentTimeMillis() > outSince + 1000){
+            boolean doTransfer = false;
+
+            if (isOut && (cdo.isPressed() || System.currentTimeMillis() > outSince + 800)){
                 isOut = false;
                 on = null;
                 outSince = 0;
 
-                if (onTransfer != null){
-                    var selected = getSelectedItems();
+                doTransfer = !cdo.isPressed();
+            }
 
-                    hide();
-                    onTransfer.accept(new TransferInfo(this, selected.isEmpty() ? List.of(cdo) : selected, scenelocal.getMinX() + miniatureOut.getLayoutX(), scenelocal.getMinY() + miniatureOut.getLayoutY()));
-                }
+            if (doTransfer && onTransfer != null){
+                var selected = getSelectedItems();
 
+                hide();
+                onTransfer.accept(new TransferInfo(this, selected.isEmpty() ? List.of(cdo) : selected, scenelocal.getMinX() + miniatureOut.getLayoutX(), scenelocal.getMinY() + miniatureOut.getLayoutY()));
                 return;
             }
 
@@ -408,8 +411,12 @@ public class CGroup extends CDockObject {
 
     @Override
     protected void onMouseReleased(MouseEvent e){
-        if (moving)
+        if (isMoving() || isExporting()) {
+            if (exportingFlag()) setExportingFlag(false);
+            else if (isExporting()) setExportingFlag(true);
+
             return;
+        }
         show(e.getScreenX(), e.getScreenY());
     }
 
