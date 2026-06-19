@@ -6,6 +6,7 @@ import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
+import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.core.util.StrUtil;
@@ -18,12 +19,14 @@ import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Popup;
 import javafx.util.Duration;
 
 import java.util.List;
@@ -153,8 +156,19 @@ public class CProfile extends CDockObject{
         //btnSelect.setOnMouseReleased(a -> selectPrimary());
 
         root.setOnDragDone(a -> {
+            a.consume();
+
             if (p2.exists())
                 p2.delete();
+
+            UI.runAsync(() -> {
+                if (root.getScene().getWindow() instanceof Popup po){
+                    po.setAutoHide(true);
+                    po.hide();
+                }
+
+                onReleasedIn();
+            });
         });
 
         var bg = new Background(new BackgroundImage(img_128, null, null, null, null));
@@ -181,12 +195,18 @@ public class CProfile extends CDockObject{
     }
 
     @Override
-    protected void drag() {
+    protected void drag(MouseEvent e) {
         var p = getPrimaryProfile();
         if (p == null)
             return;
 
-        var board = root.startDragAndDrop(TransferMode.MOVE);
+        if (root.getScene().getWindow() instanceof Popup po){
+            po.setAutoHide(false);
+        }
+
+        Node source = (Node) e.getSource();
+
+        var board = source.startDragAndDrop(TransferMode.MOVE);
         board.setDragView(img);
 
         var content = new ClipboardContent();
@@ -198,6 +218,8 @@ public class CProfile extends CDockObject{
         content.putFiles(List.of(p2.toFile()));
 
         board.setContent(content);
+
+        e.consume();
     }
 
     public CProfile setOnMenuClick(Predicate<String> onMenuClick){

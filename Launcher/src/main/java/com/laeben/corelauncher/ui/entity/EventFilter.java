@@ -60,6 +60,9 @@ public class EventFilter<T extends Event>{
 
         if (node != null)
             node.removeEventFilter(eventType, eventHandler);
+
+        if (scene != null)
+            scene.removeEventFilter(eventType, eventHandler);
     }
 
     public static <T extends Event> EventFilter window(Window wnd, EventType<T> type, EventHandler<T> handler) {

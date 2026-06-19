@@ -329,12 +329,12 @@ public class CGroup extends CDockObject {
 
             boolean doTransfer = false;
 
-            if (isOut && (cdo.isPressed() || System.currentTimeMillis() > outSince + 800)){
+            if (isOut && (cdo.isExporting() || System.currentTimeMillis() > outSince + 800)){
                 isOut = false;
                 on = null;
                 outSince = 0;
 
-                doTransfer = !cdo.isPressed();
+                doTransfer = !cdo.isExporting();
             }
 
             if (doTransfer && onTransfer != null){
@@ -352,6 +352,7 @@ public class CGroup extends CDockObject {
                 return;
 
             int index = lvProfiles.getChildren().indexOf(on);
+            if (index == -1) return;
             lvProfiles.getChildren().remove(cdo);
             lvProfiles.getChildren().add(index, cdo);
 
@@ -411,12 +412,8 @@ public class CGroup extends CDockObject {
 
     @Override
     protected void onMouseReleased(MouseEvent e){
-        if (isMoving() || isExporting()) {
-            if (exportingFlag()) setExportingFlag(false);
-            else if (isExporting()) setExportingFlag(true);
-
+        if (isMoving() || isExporting())
             return;
-        }
         show(e.getScreenX(), e.getScreenY());
     }
 
@@ -436,7 +433,7 @@ public class CGroup extends CDockObject {
     }
 
     @Override
-    protected void drag() {
+    protected void drag(MouseEvent e) {
 
     }
 

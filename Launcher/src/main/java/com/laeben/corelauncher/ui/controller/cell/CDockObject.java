@@ -110,7 +110,7 @@ public abstract class CDockObject extends GridCell {
             if (listenerRegistered)
                 return;
 
-            efManager.addEventFilter(EventFilter.node(root, MouseEvent.DRAG_DETECTED, e -> drag()));
+            efManager.addEventFilter(EventFilter.node(root, MouseEvent.DRAG_DETECTED, this::drag));
             efManager.addEventFilter(EventFilter.node(root, MouseEvent.MOUSE_DRAGGED, this::onDragged));
             efManager.addEventFilter(EventFilter.node(root, MouseEvent.MOUSE_PRESSED, this::onPressed));
             efManager.addEventFilter(EventFilter.node(root, MouseEvent.MOUSE_RELEASED, this::onReleased));
@@ -133,7 +133,6 @@ public abstract class CDockObject extends GridCell {
 
     private boolean moving;
     private boolean exporting;
-    private boolean exportingFlag;
     private boolean pressed;
     private long pressTime;
     private double pressRelativeMouseX;
@@ -146,7 +145,7 @@ public abstract class CDockObject extends GridCell {
     }
 
     protected abstract boolean onSet(FDObject item);
-    protected abstract void drag();
+    protected abstract void drag(MouseEvent e);
     protected void onMouseExited(MouseEvent e){}
     protected void onMouseEntered(MouseEvent e){}
     protected void onMouseReleased(MouseEvent e){}
@@ -223,12 +222,13 @@ public abstract class CDockObject extends GridCell {
 
         grabListener.accept(new KeyEvent(RELEASE).setSource(this));
         moving = false;
-
-        if (!exportingFlag) setExporting(false);
     }
 
     private void onPressed(MouseEvent a){
+        setExporting(false);
+
         pressed = true;
+
         pressTime = System.currentTimeMillis();
         pressRelativeMouseX = a.getX();
         pressRelativeMouseY = a.getY();
@@ -258,9 +258,9 @@ public abstract class CDockObject extends GridCell {
             double mX = a.getScreenX();
             double mY = a.getScreenY();
 
-            if (setExporting((mX < x || mX > x + w) || (mY < y || mY > y + h)) && exporting){
+            if (setExporting((mX < x || mX > x + w) || (mY < y || mY > y + h)) && isExporting()){
                 moving = false;
-                onReleased(a);
+                onReleasedIn();
                 a.setDragDetect(true);
             }
             else{
@@ -281,14 +281,6 @@ public abstract class CDockObject extends GridCell {
 
     public boolean isMoving(){
         return moving;
-    }
-
-    protected boolean exportingFlag(){
-        return exportingFlag;
-    }
-
-    protected void setExportingFlag(boolean flag){
-        exportingFlag = flag;
     }
 
     public boolean isExporting(){
