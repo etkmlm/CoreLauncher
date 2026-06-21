@@ -21,6 +21,7 @@ import com.laeben.corelauncher.ui.controller.cell.CProfile;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.util.ProfileUtil;
+import com.laeben.corelauncher.util.BoundUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import javafx.animation.ScaleTransition;
 import com.laeben.corelauncher.api.ui.UI;
@@ -457,7 +458,8 @@ public class MainPage extends HandlerController {
                     continue;
                 var bnds = obj.localToParent(obj.getBoundsInLocal());
 
-                if (bounds.contains(bnds))
+                if (BoundUtil.getIntersectionLength(bnds.getMinX(), bnds.getMaxX(), bounds.getMinX(), bounds.getMaxX()) >= 56 &&
+                        BoundUtil.getIntersectionLength(bnds.getMinY(), bnds.getMaxY(), bounds.getMinY(), bounds.getMaxY()) >= 64)
                     obj.setSelected(true);
             }
         });

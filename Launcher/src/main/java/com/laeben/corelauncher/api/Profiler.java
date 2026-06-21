@@ -111,7 +111,7 @@ public class Profiler {
 
         var targetPath = Path.begin(new File(Profiler.class.getProtectionDomain().getCodeSource().getLocation().toURI()).toPath());
 
-        var args = String.format("-jar \"%s\" --launch %s", targetPath, p.getName());
+        var args = String.format("-jar \"%s\" --launch \"%s\"", targetPath, p.getName());
 
         Shortcut.create(destination, javaPath, targetPath.parent(), iconPath, args, OS.getSystemOS());
     }

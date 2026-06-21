@@ -101,9 +101,9 @@ public abstract class CDockObject extends GridCell {
 
         selected.addListener((a, os, ns) -> {
             if (ns != null && ns)
-                setOpacity(0.8);
+                root.setStyle("-fx-background-color: #405563AB; -fx-background-insets: -8 -8 -8 -8; -fx-background-radius: 16px");
             else
-                setOpacity(1);
+                root.setStyle(null);
         });
 
         onFocusChangeValue = this::onFocusChange;
