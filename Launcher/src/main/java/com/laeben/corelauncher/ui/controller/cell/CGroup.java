@@ -9,9 +9,7 @@ import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
-import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.ui.control.CField;
-import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CMenu;
 import com.laeben.corelauncher.ui.control.CView;
@@ -302,9 +300,11 @@ public class CGroup extends CDockObject {
     }
 
     private void onProfileEvent(KeyEvent e){
-        if (e.getKey().equals(CDockObject.SELECT)){
-            Main.getMain().selectProfile((Profile) e.getSource());
-            hide();
+        if (e.getKey().equals(CDockObject.SELECT) || e.getKey().equals(CDockObject.EXECUTE)){
+            listener.accept(e);
+
+            if (e.getKey().equals(CDockObject.EXECUTE)) hide();
+            // only hide when a profile is executed, otherwise the profile cannot be double-clicked
         }
         else if (e.getKey().equals(FloatDock.REMOVE)){
             reloadItems();
@@ -428,10 +428,6 @@ public class CGroup extends CDockObject {
         lY = y - pos.getMinY();
     }
 
-    public void close(){
-        gPopup.hide();
-    }
-
     @Override
     protected void drag(MouseEvent e) {
 
@@ -443,7 +439,7 @@ public class CGroup extends CDockObject {
             lvProfiles.getChildren().add(new CProfile()
                     .setOnMenuClick(a -> {
                         if (a.equals(CDockObject.EDIT) || a.equals(CDockObject.PAGE) || a.equals(CDockObject.COPY))
-                            close();
+                            hide();
                         return true;
                     })
                     .set(FDObject.createSingle(object.getProfiles().get(i), i, 0))

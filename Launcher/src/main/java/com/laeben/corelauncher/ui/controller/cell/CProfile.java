@@ -111,6 +111,13 @@ public class CProfile extends CDockObject{
     }
 
     @Override
+    protected void onMouseDoubleClicked(MouseEvent e){
+        if (e.getButton() == MouseButton.PRIMARY){
+            listener.accept((KeyEvent) new KeyEvent(EXECUTE).setSource(this));
+        }
+    }
+
+    @Override
     protected boolean onSet(FDObject item) {
         var profile = item
                 .getProfiles()

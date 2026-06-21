@@ -55,6 +55,7 @@ public abstract class CDockObject extends GridCell {
     public static final String OPEN = "open";
     public static final String COPY = "copy";
     public static final String SELECT = "select";
+    public static final String EXECUTE = "execute";
     public static final String SHORTCUT = "shortcut";
 
     public static final DataFormat dataFormat = new DataFormat("profile");
@@ -62,6 +63,7 @@ public abstract class CDockObject extends GridCell {
 
     public static final int PREF_HEIGHT = 128;
     public static final int PREF_WIDTH = 128;
+    private static final int DOUBLE_CLICK_SPAN = 500;
 
     private final Node gr;
     protected FDObject object;
@@ -134,7 +136,10 @@ public abstract class CDockObject extends GridCell {
     private boolean moving;
     private boolean exporting;
     private boolean pressed;
+    private MouseButton previousPressButton;
+    private long previousPressTime;
     private long pressTime;
+    private MouseButton pressButton;
     private double pressRelativeMouseX;
     private double pressRelativeMouseY;
     private double pressLayoutX;
@@ -149,6 +154,7 @@ public abstract class CDockObject extends GridCell {
     protected void onMouseExited(MouseEvent e){}
     protected void onMouseEntered(MouseEvent e){}
     protected void onMouseReleased(MouseEvent e){}
+    protected void onMouseDoubleClicked(MouseEvent e){}
 
     public CDockObject set(FDObject item){
         if (item == null || (item.type == FDObject.FDType.SINGLE && item.getProfiles().isEmpty())){
@@ -212,7 +218,11 @@ public abstract class CDockObject extends GridCell {
             return;
         }
 
-        onMouseReleased(a);
+        if (System.currentTimeMillis() < previousPressTime + DOUBLE_CLICK_SPAN && previousPressButton == pressButton){ // on double click
+            onMouseDoubleClicked(a);
+        }
+        else onMouseReleased(a);
+
         onReleasedIn();
     }
 
@@ -229,7 +239,10 @@ public abstract class CDockObject extends GridCell {
 
         pressed = true;
 
+        previousPressTime = pressTime;
+        previousPressButton = pressButton;
         pressTime = System.currentTimeMillis();
+        pressButton = a.getButton();
         pressRelativeMouseX = a.getX();
         pressRelativeMouseY = a.getY();
         pressLayoutX = getLayoutX();
@@ -373,7 +386,7 @@ public abstract class CDockObject extends GridCell {
     public void selectPrimary(){
         if (moving || exporting || listener == null)
             return;
-        listener.accept((KeyEvent) new KeyEvent(SELECT).setSource(getPrimaryProfile()));
+        listener.accept((KeyEvent) new KeyEvent(SELECT).setSource(this));
     }
 
     public CDockObject setListener(Consumer<KeyEvent> listener){

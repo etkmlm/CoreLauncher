@@ -202,7 +202,7 @@ public class MainPage extends HandlerController {
         var pr = CDockObject.get(obj);
         if (pr == null)
             return null;
-        pr.setListener(this::onProfileSelectEvent).setGrabListener(a -> {
+        pr.setListener(this::onDockObjectEvent).setGrabListener(a -> {
             if (!(a instanceof KeyEvent ke))
                 return;
             var source = (CDockObject)a.getSource();
@@ -538,20 +538,21 @@ public class MainPage extends HandlerController {
                 c.setSelected(false);
         });
     }
-    public void onProfileSelectEvent(KeyEvent e) {
-        if (!e.getKey().equals(CDockObject.SELECT))
+    public void onDockObjectEvent(KeyEvent e) {
+        if ((!e.getKey().equals(CDockObject.SELECT) && !e.getKey().equals(CDockObject.EXECUTE)) || !(e.getSource() instanceof CProfile c))
             return;
 
-        var p = (Profile) e.getSource();
+        var p = c.getPrimaryProfile();
 
         if (p == null)
             return;
 
-        Main.getMain().selectProfile(p);
+        if (e.getKey().equals(CDockObject.SELECT))
+            Main.getMain().selectProfile(p);
 
-        if (Configurator.getConfig().isEnabledSelectAndPlayDock()){
+        if (e.getKey().equals(CDockObject.EXECUTE) || Configurator.getConfig().isEnabledSelectAndPlayDock()){
             boolean v1 = Main.getMain().launchClick(false);
-            if (!v1)
+            if (!v1) // if there was a launching process already, it's going to stop, then launch again
                 Main.getMain().launchClick(false);
         }
     }
