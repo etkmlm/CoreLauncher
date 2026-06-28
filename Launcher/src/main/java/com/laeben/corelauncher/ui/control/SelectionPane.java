@@ -5,11 +5,9 @@ import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
-import javafx.geometry.Point2D;
-import javafx.geometry.Pos;
+import javafx.geometry.*;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 
 import java.util.List;
@@ -151,5 +149,58 @@ public class SelectionPane<T> extends Pane {
 
     public boolean isSelectionMenuOpen(){
         return nav.isEnabled();
+    }
+
+    public record GridCellBounds(double minX, double minY, double contentX, double contentY, double width, double height){ }
+
+    public GridCellBounds getGridCellBounds(Region node, double pad, double size, double spacing) {
+        final double rawCoordX = node.getLayoutX() - pad;
+        final double rawCoordY = node.getLayoutY() - pad;
+
+        final double spacedSize = size + spacing;
+        final double halfSpacing = spacing / 2.0;
+        final double sideSize = size + halfSpacing;
+
+        final double minX;
+        final double posX;
+        final double width;
+        final double lastCoordX = getWidth() - sideSize;
+        if (rawCoordX <= sideSize) {
+            minX = 0;
+            posX = minX;
+            width = sideSize;
+        }
+        else if (rawCoordX >= lastCoordX) {
+            minX = lastCoordX;
+            posX = minX;
+            width = sideSize;
+        }
+        else {
+            minX = sideSize + Math.floor((rawCoordX - sideSize) / spacedSize) * spacedSize;
+            posX = minX + halfSpacing;
+            width = spacedSize;
+        }
+
+        final double minY;
+        final double posY;
+        final double height;
+        final double lastCoordY = getHeight() - sideSize;
+        if (rawCoordY <= sideSize) {
+            minY = 0;
+            posY = minY;
+            height = sideSize;
+        }
+        else if (rawCoordY >= lastCoordY) {
+            minY = lastCoordY;
+            posY = minY;
+            height = sideSize;
+        }
+        else {
+            minY = sideSize + Math.floor((rawCoordY - sideSize) / spacedSize) * spacedSize;
+            posY = minY + halfSpacing;
+            height = spacedSize;
+        }
+
+        return new GridCellBounds(pad + minX, pad + minY, pad + posX, pad + posY, width, height);
     }
 }

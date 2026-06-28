@@ -46,6 +46,8 @@ public class CTab extends Tab {
     }
     public void setHeaderRegion(Pane headerRegion){
         this.headerRegion = headerRegion;
+
+        setHeaderColor(headerColor);
     }
 
     private Color headerColor = null;

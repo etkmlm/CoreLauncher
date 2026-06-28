@@ -5,6 +5,7 @@ import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.annotation.ReturnsNull;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.ui.UI;
@@ -32,10 +33,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -75,6 +78,8 @@ public abstract class CDockObject extends GridCell {
     private Consumer<BaseEvent> grabListener;
 
     private final BooleanProperty selected;
+    private Background storedBackground;
+    private Color storedSelectionColor;
 
     private boolean listenerRegistered = false;
     private final ChangeListener<Boolean> onFocusChangeValue;
@@ -99,11 +104,16 @@ public abstract class CDockObject extends GridCell {
 
         selected = new SimpleBooleanProperty();
 
+        storedSelectionColor = null;
         selected.addListener((a, os, ns) -> {
-            if (ns != null && ns)
-                root.setStyle("-fx-background-color: #405563AB; -fx-background-insets: -8 -8 -8 -8; -fx-background-radius: 16px");
+            if (ns != null && ns){
+                if (storedSelectionColor != Configurator.getCache().getDockSelectionColor())
+                    root.setBackground(storedBackground = new Background(new BackgroundFill(storedSelectionColor = Configurator.getCache().getDockSelectionColor(), new CornerRadii(16), new Insets(-8))));
+                else
+                    root.setBackground(storedBackground);
+            }
             else
-                root.setStyle(null);
+                root.setBackground(null);
         });
 
         onFocusChangeValue = this::onFocusChange;

@@ -13,6 +13,7 @@ import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.ui.entity.UIPreference;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.cell.CGroup;
@@ -28,6 +29,10 @@ import com.laeben.corelauncher.api.ui.UI;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.input.*;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.Region;
 import javafx.util.Duration;
 
 import java.io.File;
@@ -42,6 +47,7 @@ public class MainPage extends HandlerController {
     public static final String PROFILE = "prof";
     public static final String BROWSER = "mods.browser";
     public static final String SORT = "srt";
+    public static final String ALIGN_GRID = "alngrd";
 
     @FXML
     public SelectionPane<CDockObject> root;
@@ -50,6 +56,8 @@ public class MainPage extends HandlerController {
 
     private final CMenu dockContext;
     private final CButton dockGhost;
+
+    private final Region gridCellIndicator;
 
     private final DProfileSelector selector;
 
@@ -66,6 +74,12 @@ public class MainPage extends HandlerController {
         showUpTransition.setDuration(Duration.millis(300));
         showUpTransition.setFromX(0);
         showUpTransition.setToX(1);
+
+        gridCellIndicator = new Region();
+        gridCellIndicator.setViewOrder(5);
+        gridCellIndicator.setVisible(false);
+
+        gridCellIndicator.setBackground(new Background(new BackgroundFill(Configurator.getCache().getDockSelectionColor(), new CornerRadii(16), null)));
 
         selector = new DProfileSelector(DProfileSelector.Functionality.DOCK_SELECTOR, null);
 
@@ -123,6 +137,15 @@ public class MainPage extends HandlerController {
         dockContext.addItem(null, SORT, Translator.translate("dock.menu.sort"), a -> {
             FloatDock.getDock().sortObjects(16, 16, root.getWidth(), CDockObject.PREF_WIDTH, 64);
         });
+        dockContext.addItem(null, ALIGN_GRID, Configurator.getConfig().useGridAlignment() ? Translator.translate("dock.menu.align.disable") : Translator.translate("dock.menu.align.enable"), a -> {
+            boolean value = !Configurator.getConfig().useGridAlignment();
+            if (value)
+                FloatDock.getDock().sortObjects(16, 16, root.getWidth(), CDockObject.PREF_WIDTH, 64);
+
+            a.button().setText(value ? Translator.translate("dock.menu.align.disable") : Translator.translate("dock.menu.align.enable"));
+            Configurator.getConfig().setUseGridAlignment(value);
+            Configurator.save();
+        });
 
         dockGhost = new CButton();
         dockGhost.setScaleX(0);
@@ -130,6 +153,15 @@ public class MainPage extends HandlerController {
 
         dockContext.setButton(dockGhost);
 
+        registerHandler(Configurator.getConfigurator().getHandler(), a -> {
+            if (a.getKey().equals(Configurator.UI_PREFERENCE_CHANGE) &&
+                a.getOldValue() instanceof UIPreference p && p.getIdentifier().equals(UIPreference.DOCK_SELECTION_COLOR)) {
+                gridCellIndicator.setBackground(new Background(new BackgroundFill(Configurator.getCache().getDockSelectionColor(), new CornerRadii(16), null)));
+            }
+            else if (a.getKey().equals(Configurator.UI_PREFERENCE_CLEAR)){
+                gridCellIndicator.setBackground(new Background(new BackgroundFill(Configurator.getCache().getDockSelectionColor(), new CornerRadii(16), null)));
+            }
+        }, true);
         registerHandler(FloatDock.getDock().getHandler(), a -> {
             if (a instanceof KeyEvent e){
                 if (e.getKey().equals(FloatDock.REMOVE_ALL)){
@@ -216,6 +248,13 @@ public class MainPage extends HandlerController {
                     return;
                 }
 
+                if (Configurator.getConfig().useGridAlignment()){
+                    final var gridBounds = root.getGridCellBounds(pr, 16, CDockObject.PREF_WIDTH, 64);
+                    pr.setLayoutX(gridBounds.contentX());
+                    pr.setLayoutY(gridBounds.contentY());
+                    gridCellIndicator.setVisible(false);
+                }
+
                 obj.layoutX = pr.getLayoutX();
                 obj.layoutY = pr.getLayoutY();
 
@@ -257,6 +296,18 @@ public class MainPage extends HandlerController {
 
                 pr.setLayoutX(vec.mouseX() - pos.getMinX() - vec.padX());
                 pr.setLayoutY(vec.mouseY() - pos.getMinY() - vec.padY());
+
+                if (Configurator.getConfig().useGridAlignment()){
+                    if (!gridCellIndicator.isVisible())
+                        gridCellIndicator.setVisible(true);
+                    final var gridBounds = root.getGridCellBounds(pr, 16, CDockObject.PREF_WIDTH, 64);
+                    gridCellIndicator.setLayoutX(gridBounds.minX());
+                    gridCellIndicator.setLayoutY(gridBounds.minY());
+                    if (gridCellIndicator.getWidth() != gridBounds.width())
+                        gridCellIndicator.setPrefWidth(gridBounds.width());
+                    if (gridCellIndicator.getHeight() != gridBounds.height())
+                        gridCellIndicator.setPrefHeight(gridBounds.height());
+                }
 
                 var point = new Point2D(vec.mouseX(), vec.mouseY());
 
@@ -386,6 +437,7 @@ public class MainPage extends HandlerController {
     @Override
     public void preInit() {
         root.getChildren().add(dockGhost);
+        root.getChildren().add(gridCellIndicator);
 
         root.setOnMouseClicked(a -> {
             if (a.getButton() != MouseButton.SECONDARY || !a.getTarget().equals(root))

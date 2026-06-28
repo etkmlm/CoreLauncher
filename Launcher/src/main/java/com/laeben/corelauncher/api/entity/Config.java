@@ -38,6 +38,7 @@ public class Config {
     private boolean selectAndPlayDock;
     private boolean autoChangeWrapper;
     private boolean omitLauncherLibs;
+    private boolean useGridAlignment;
     private JavaSourceType javaSource;
     private List<Integer> announces;
 
@@ -308,6 +309,13 @@ public class Config {
         debugLogMode = mode;
     }
 
+    public boolean useGridAlignment(){
+        return useGridAlignment;
+    }
+    public void setUseGridAlignment(boolean val){
+        this.useGridAlignment = val;
+    }
+
     public boolean hideAfter(){
         return hideAfter;
     }
@@ -321,6 +329,10 @@ public class Config {
         if (customJavaVersions == null)
             customJavaVersions = new ArrayList<>();
         return customJavaVersions;
+    }
+
+    public UIPreference getUIPreference(String id){
+        return getUIPreferences().stream().filter(a -> id.equals(a.getIdentifier())).findFirst().orElse(null);
     }
 
     public List<UIPreference> getUIPreferences(){

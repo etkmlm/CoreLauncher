@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 public class CMenu extends VBox implements PopupNode {
 
-    public record ItemClickEventArgs(MouseEvent event, String key) {}
+    public record ItemClickEventArgs(MouseEvent event, String key, CButton button) {}
 
     private final ScaleTransition trns;
     private Node node;
@@ -97,7 +97,7 @@ public class CMenu extends VBox implements PopupNode {
         btn.setMaxWidth(Double.MAX_VALUE);
         btn.setOnMouseClicked(x -> {
             hide();
-            onClick.accept(new ItemClickEventArgs(x, key));
+            onClick.accept(new ItemClickEventArgs(x, key, btn));
             if (hidePopup)
                 usePopup(PopupWindow::hide);
         });

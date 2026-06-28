@@ -747,12 +747,8 @@ public class Main extends HandlerController {
                 if (p.getCustomImage() != null)
                     mainTab.setIconAsync(p.getCustomImage());
 
-                if (p.getCustomColor() != null){
-                    try{
-                        mainTab.setHeaderColor(Color.web(p.getCustomColor()));
-                    }
-                    catch (IllegalArgumentException ignored){}
-                }
+                if (p.getCustomColor() != null)
+                    mainTab.setHeaderColor(p.getCustomColor());
             }
         }
 
@@ -1142,6 +1138,17 @@ public class Main extends HandlerController {
         instructor.setBaseNode(getRootNode());
 
         final StackPane headersRegion = (StackPane) tab.lookup(".headers-region");
+
+        // lookup for initial tabs
+        final var headersLookup = headersRegion.getChildren();
+        for (var t : headersLookup){
+            if (t == null) continue;
+            int index = headersRegion.getChildren().indexOf(t);
+
+            if (t instanceof Pane p)
+                ((CTab) this.tab.getTabs().get(index)).setHeaderRegion(p);
+        }
+
         headersRegion.setOnMouseClicked(a -> {
             if (a.getButton() != MouseButton.SECONDARY) return;
 

@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import com.laeben.core.entity.TranslationBundle;
 import com.laeben.corelauncher.api.entity.Account;
+import com.laeben.corelauncher.api.ui.entity.UIPreference;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.Image;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
@@ -13,6 +14,7 @@ import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.core.entity.Path;
 import com.laeben.corelauncher.util.entity.PathFactory;
+import javafx.scene.paint.Color;
 
 import java.lang.reflect.Type;
 
@@ -26,6 +28,7 @@ public class GsonUtil {
                 .registerTypeAdapter(Path.class, new PathFactory())
                 .registerTypeAdapter(Account.class, new Account.AccountFactory())
                 .registerTypeAdapter(Java.class, new Java.JavaFactory())
+                .registerTypeAdapter(Color.class, new UIPreference.ColorFactory())
                 .registerTypeAdapter(Image.class, new Image.ImageFactory())
                 .registerTypeAdapter(TranslationBundle.class, new TranslationBundle.TranslationBundleFactory())
                 .registerTypeAdapter(ModSource.TypeFactory.class, new ModSource.TypeFactory())

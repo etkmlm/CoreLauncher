@@ -10,6 +10,7 @@ import com.laeben.core.entity.Path;
 import com.google.gson.Gson;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
+import javafx.scene.paint.Color;
 
 import java.io.InputStreamReader;
 import java.util.List;
@@ -28,12 +29,40 @@ public class Configurator {
     private static Configurator instance;
     private final EventHandler<ChangeEvent> handler;
 
-    private static Config config;
-    private static int configLoadIndex = 1;
+    private Config config;
+    private int configLoadIndex = 1;
     private final Path configFilePath;
     private static final Gson gson = GsonUtil.DEFAULT_GSON.newBuilder().
             registerTypeAdapter(Profile.class, new Profile.ProfileFieldFactory()).create();
 
+
+    private final ConfigCache cache = new ConfigCache();
+
+    /**
+     * Helper class to handle variables quickly.
+     */
+    public class ConfigCache {
+        private static final Color DEFAULT_SELECTION_COLOR = Color.web("#405563AB");
+        private Color dockSelectionColor;
+
+        public Color getDockSelectionColor() {
+            return dockSelectionColor == null ? DEFAULT_SELECTION_COLOR : dockSelectionColor;
+        }
+
+        void handleUIChange(String id, UIPreference oldPref, UIPreference newPref) {
+            if (id.equals(UIPreference.DOCK_SELECTION_COLOR)) {
+                dockSelectionColor = newPref.getCustomColor();
+            }
+        }
+
+        void reloadUI(){
+            for (var c : config.getUIPreferences()) handleUIChange(c.getIdentifier(), null, c);
+        }
+
+        void handleUIClear(){
+            dockSelectionColor = null;
+        }
+    }
 
     public Configurator(Path configPath){
         configFilePath = configPath.to("config.json");
@@ -61,6 +90,10 @@ public class Configurator {
         }
     }
 
+    public static ConfigCache getCache(){
+        return getConfigurator().cache;
+    }
+
     public EventHandler<ChangeEvent> getHandler(){
         return handler;
     }
@@ -75,6 +108,7 @@ public class Configurator {
             var read = configFilePath.read();
             Logger.getLogger().logDebug("Loading config from: " + read);
             config = gson.fromJson(read, Config.class);
+            cache.reloadUI();
 
             configLoadIndex = 1;
             return true;
@@ -85,7 +119,7 @@ public class Configurator {
     }
 
     public static Config getConfig(){
-        return config;
+        return getConfigurator().config;
     }
 
     public void setGamePath(Path path){
@@ -127,9 +161,7 @@ public class Configurator {
     }
 
     public void setUIPreference(String id, Consumer<UIPreference> set){
-        var pref = config.getUIPreferences().stream().filter(a -> id.equals(a.getIdentifier())).findFirst();
-
-        UIPreference old = pref.orElse(null);
+        UIPreference old = config.getUIPreference(id);
         UIPreference n = null;
 
         if (old != null) set.accept(old);
@@ -142,6 +174,7 @@ public class Configurator {
 
         save();
 
+        cache.handleUIChange(id, old, n == null ? old : n);
         handler.execute((ChangeEvent) new ChangeEvent(UI_PREFERENCE_CHANGE, old, n == null ? old : n).setSource(id));
     }
 
@@ -149,6 +182,7 @@ public class Configurator {
         config.getUIPreferences().clear();
         save();
 
+        cache.handleUIClear();
         handler.execute(new ChangeEvent(UI_PREFERENCE_CLEAR, null, null));
     }
 
@@ -176,6 +210,7 @@ public class Configurator {
         handler.execute(new ChangeEvent(LANGUAGE_CHANGE, null, config.getLanguage()));
         handler.execute(new ChangeEvent(BACKGROUND_CHANGE, null, config.getBackgroundImage()));
         handler.execute(new ChangeEvent(USER_CHANGE, null, config.getUser()));
+        handler.execute(new ChangeEvent(UI_PREFERENCE_CLEAR, null, null));
     }
 
     private boolean save(Config c){
@@ -195,6 +230,6 @@ public class Configurator {
     }
 
     public static boolean save(){
-        return instance.save(config);
+        return instance.save(getConfig());
     }
 }

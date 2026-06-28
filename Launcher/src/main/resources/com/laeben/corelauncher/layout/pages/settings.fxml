@@ -21,10 +21,6 @@
                     <ColumnConstraints prefWidth="300"/>
                 </columnConstraints>
 
-                <Label styleClass="property-key" text="%settings.customBackground" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <TextField fx:id="txtCustomBackground" maxWidth="Infinity" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                <CButton styleClass="transparent" fx:id="btnSelectBackground" text="..." GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-
                 <Label styleClass="property-key" text="%settings.language" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 <ChoiceBox fx:id="cbLanguage" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
@@ -52,6 +48,33 @@
 
                 <Label styleClass="property-key" text="%settings.middlePaste" GridPane.columnIndex="1" GridPane.rowIndex="8" />
                 <CheckBox fx:id="chkMiddlePaste" GridPane.columnIndex="2" GridPane.rowIndex="8"/>
+            </GridPane>
+        </VBox>
+        <VBox>
+            <Label styleClass="title" text="%settings.title.ui" />
+            <GridPane>
+                <columnConstraints>
+                    <ColumnConstraints prefWidth="30" />
+                    <ColumnConstraints percentWidth="30" minWidth="400"  />
+                    <ColumnConstraints minWidth="300" maxWidth="500" hgrow="ALWAYS" />
+                    <ColumnConstraints prefWidth="300"/>
+                </columnConstraints>
+
+                <Label styleClass="property-key" text="%settings.customBackground" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <TextField fx:id="txtCustomBackground" maxWidth="Infinity" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <CButton styleClass="transparent" fx:id="btnSelectBackground" text="..." GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+                <Label styleClass="property-key" text="%settings.gridSelectionColor" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Region fx:id="cGridSelection" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+                <Label styleClass="property-key" text="%settings.scale" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+
+                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="4" GridPane.hgrow="ALWAYS">
+                    <CButton fx:id="btnClearImages" text="%settings.images.clear" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    <CWorker fx:id="workerImages"/>
+                </HBox>
+                <CButton fx:id="btnUIPrefs" maxWidth="Infinity" text="%settings.uiPrefs" GridPane.columnIndex="2" GridPane.rowIndex="5" GridPane.hgrow="ALWAYS"/>
             </GridPane>
         </VBox>
         <VBox>
@@ -90,18 +113,29 @@
                 <Label styleClass="property-key" text="%settings.hideAfter" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                 <CheckBox fx:id="chkHideAfter" GridPane.columnIndex="2" GridPane.rowIndex="3" />
 
-                <Label styleClass="property-key" text="%settings.gameLog" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                <CheckBox fx:id="chkGamelog" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                <Label styleClass="property-key" text="%settings.placeDock" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <CheckBox fx:id="chkPlaceDock" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                <Label styleClass="property-key" text="%settings.selectPlay" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <CheckBox fx:id="chkSelectPlay" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
-                <Label styleClass="property-key" text="%settings.guiShortcut" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                <CheckBox fx:id="chkGuiShortcut" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                <Label styleClass="property-key" text="%settings.gameLog" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <CheckBox fx:id="chkGamelog" GridPane.columnIndex="2" GridPane.rowIndex="6" />
 
-                <Label styleClass="property-key" text="%settings.omitLibs" GridPane.columnIndex="1" GridPane.rowIndex="6">
+                <Label styleClass="property-key" text="%settings.guiShortcut" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                <CheckBox fx:id="chkGuiShortcut" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+
+                <Label styleClass="property-key" text="%settings.omitLibs" GridPane.columnIndex="1" GridPane.rowIndex="8">
                     <tooltip>
                         <Tooltip text="%settings.omitLibs.hint"/>
                     </tooltip>
                 </Label>
-                <CheckBox fx:id="chkOmitLibs" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                <CheckBox fx:id="chkOmitLibs" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+
+                <Label styleClass="property-key" text="%settings.overwriteImport" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                <CheckBox fx:id="chkOverwriteImportDefault" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+
+                <Label styleClass="property-key" text="%settings.disableSelectNewProfile" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                <CheckBox fx:id="chkDisableSelectNewProfile" GridPane.columnIndex="2" GridPane.rowIndex="10" />
             </GridPane>
         </VBox>
 
@@ -128,46 +162,27 @@
                 <Label styleClass="property-key" text="%settings.debugLogMode" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                 <CheckBox fx:id="chkDebugLogMode" GridPane.columnIndex="2" GridPane.rowIndex="4" />
 
-                <Label styleClass="property-key" text="%settings.placeDock" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                <CheckBox fx:id="chkPlaceDock" GridPane.columnIndex="2" GridPane.rowIndex="5" />
-                <Label styleClass="property-key" text="%settings.selectPlay" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                <CheckBox fx:id="chkSelectPlay" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                <Label styleClass="property-key" text="%settings.autoLoader" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <CheckBox fx:id="chkAutoLoader" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
-                <Label styleClass="property-key" text="%settings.autoLoader" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                <CheckBox fx:id="chkAutoLoader" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                <Label styleClass="property-key" text="%settings.externalAuth" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <CheckBox fx:id="chkUseExternalAuth" GridPane.columnIndex="2" GridPane.rowIndex="6" />
 
-                <Label styleClass="property-key" text="%settings.overwriteImport" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                <CheckBox fx:id="chkOverwriteImportDefault" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                <Label styleClass="property-key" text="%settings.embeddedBrowser" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                <CheckBox fx:id="chkUseEmbeddedBrowser" GridPane.columnIndex="2" GridPane.rowIndex="7" />
 
-                <Label styleClass="property-key" text="%settings.externalAuth" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                <CheckBox fx:id="chkUseExternalAuth" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                <Label styleClass="property-key" text="%settings.searchBrowserManually" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                <CheckBox fx:id="chkSearchBrowserManually" GridPane.columnIndex="2" GridPane.rowIndex="8" />
 
-                <Label styleClass="property-key" text="%settings.embeddedBrowser" GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                <CheckBox fx:id="chkUseEmbeddedBrowser" GridPane.columnIndex="2" GridPane.rowIndex="10" />
-
-                <Label styleClass="property-key" text="%settings.disableSelectNewProfile" GridPane.columnIndex="1" GridPane.rowIndex="11" />
-                <CheckBox fx:id="chkDisableSelectNewProfile" GridPane.columnIndex="2" GridPane.rowIndex="11" />
-
-                <Label styleClass="property-key" text="%settings.searchBrowserManually" GridPane.columnIndex="1" GridPane.rowIndex="12" />
-                <CheckBox fx:id="chkSearchBrowserManually" GridPane.columnIndex="2" GridPane.rowIndex="12" />
-
-                <Label styleClass="property-key" text="%settings.threads" GridPane.columnIndex="1" GridPane.rowIndex="13">
+                <Label styleClass="property-key" text="%settings.threads" GridPane.columnIndex="1" GridPane.rowIndex="9">
                     <tooltip>
                         <Tooltip text="%settings.tip.threads"/>
                     </tooltip>
                 </Label>
-                <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="13" />
+                <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="9" />
 
-                <Label styleClass="property-key" text="%settings.scale" GridPane.columnIndex="1" GridPane.rowIndex="14"/>
-                <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="14" />
-
-                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="16" GridPane.hgrow="ALWAYS">
-                    <CButton fx:id="btnClearImages" text="%settings.images.clear" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                    <CWorker fx:id="workerImages"/>
-                </HBox>
-                <CButton fx:id="btnCheckUpdate" maxWidth="Infinity" text="%settings.update" GridPane.columnIndex="2" GridPane.rowIndex="16" GridPane.hgrow="ALWAYS"/>
-                <CButton fx:id="btnGC" maxWidth="Infinity" text="%settings.gc" GridPane.columnIndex="1" GridPane.rowIndex="17" GridPane.hgrow="ALWAYS"/>
-                <CButton fx:id="btnUIPrefs" maxWidth="Infinity" text="%settings.uiPrefs" GridPane.columnIndex="2" GridPane.rowIndex="17" GridPane.hgrow="ALWAYS"/>
+                <CButton fx:id="btnCheckUpdate" maxWidth="Infinity" text="%settings.update" GridPane.columnIndex="2" GridPane.rowIndex="10" GridPane.hgrow="ALWAYS"/>
+                <CButton fx:id="btnGC" maxWidth="Infinity" text="%settings.gc" GridPane.columnIndex="2" GridPane.rowIndex="11" GridPane.hgrow="ALWAYS"/>
             </GridPane>
         </VBox>
 

@@ -5,6 +5,7 @@ import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.Tool;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
+import com.laeben.corelauncher.api.ui.entity.UIPreference;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
@@ -17,7 +18,9 @@ import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.ui.dialog.DColorPicker;
 import com.laeben.corelauncher.ui.dialog.DProfileSelector;
+import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
@@ -32,8 +35,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -135,6 +138,10 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkGuiShortcut;
     @FXML
     private CCombo<JavaSourceType> cbJavaSource;
+
+    @FXML
+    private Region cGridSelection;
+
     /*@FXML
     private Spinner txtCommPort;*/
 
@@ -271,6 +278,7 @@ public class SettingsPage extends HandlerController {
             if (answ.isEmpty() || !answ.get().result().isPositive())
                 return;
 
+            Configurator.getConfigurator().setCustomBackground(null);
             Configurator.getConfigurator().clearUIPreferences();
         });
 
@@ -479,6 +487,23 @@ public class SettingsPage extends HandlerController {
             Configurator.save();
         });
 
+        cGridSelection.setOnMouseClicked(a -> {
+            var result = new DColorPicker(Configurator.getCache().getDockSelectionColor(), getStage()).pickColor();
+            if (result instanceof DialogResult.Cancelled<Color>) return;
+
+            Color c = null;
+
+            if (result instanceof DialogResult.Completed<Color> completed){
+                c = completed.value();
+            }
+
+            final Color finalColor = c;
+            Configurator.getConfigurator().setUIPreference(UIPreference.DOCK_SELECTION_COLOR, x -> x.setCustomColor(finalColor));
+
+            // retrieve from cache in case of null value
+            cGridSelection.setBackground(new Background(new BackgroundFill(Configurator.getCache().getDockSelectionColor(), new CornerRadii(8), null)));
+        });
+
         btnSelectGamePath.enableTransparentAnimation();
         btnSelectGamePath.setOnMouseClicked(x -> {
             DirectoryChooser chooser = new DirectoryChooser();
@@ -642,6 +667,7 @@ public class SettingsPage extends HandlerController {
             chkSearchBrowserManually.setSelected(c.doSearchBrowserManually());
             chkMiddlePaste.setSelected(c.isEnabledMiddlePaste());
             chkOmitLibs.setSelected(c.omitLauncherLibraries());
+            cGridSelection.setBackground(new Background(new BackgroundFill(Configurator.getCache().getDockSelectionColor(), new CornerRadii(8), null)));
 
             chkInGameRPC.setDisable(c.isDisabledRPC());
             //txtCommPort.setDisable(c.isDisabledRPC());

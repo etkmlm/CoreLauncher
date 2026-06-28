@@ -13,10 +13,12 @@ public class ControlUtil {
     public static void scroller(ScrollEvent e){
         e.consume();
 
-        var factory = ((Spinner<Double>)e.getSource()).getValueFactory();
-        if (e.getDeltaY() == 0)
-            return;
-        factory.increment(e.getDeltaY() > 0 ? 1 : -1);
+        if (e.getSource() instanceof Spinner<?> n && n.isFocused()){
+            var factory = ((Spinner<Double>)n).getValueFactory();
+            if (e.getDeltaY() == 0)
+                return;
+            factory.increment(e.getDeltaY() > 0 ? 1 : -1);
+        }
     }
 
     public static void setAnchorFill(Node n){
