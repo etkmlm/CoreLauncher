@@ -1,6 +1,7 @@
 package com.laeben.corelauncher;
 
 import com.laeben.core.LaebenApp;
+import com.laeben.core.entity.LaebenAppFile;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
@@ -23,6 +24,7 @@ import com.laeben.corelauncher.minecraft.loader.optifine.OptiFine;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.util.APIListener;
+import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -312,8 +314,18 @@ public class CoreLauncher {
         System.exit(0);
     }
 
-    public static void updateCheck(){
-        var latest = LauncherConfig.APPLICATION.getLatest();
+    public static class FileList extends ArrayList<LaebenAppFile> {}
+
+    public static void updateCheck(boolean network) throws NoConnectionException, HttpException {
+        LaebenAppFile latest;
+        if (network){
+            // TODO implement this into core library
+            var latestVersion = LauncherConfig.APPLICATION.getObject("latest", GsonUtil.EMPTY_GSON, Double.class);
+            var files = LauncherConfig.APPLICATION.getObject("files", null, FileList.class);
+            latest = files.stream().filter(x -> x.version() == latestVersion).findFirst().orElse(null);
+        }
+        else latest = LauncherConfig.APPLICATION.getLatest();
+
         if (latest != null && LauncherConfig.VERSION < latest.version() && Configurator.getConfig().isEnabledAutoUpdate()){
             var result = CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("update.title"), Translator.translateFormat("update.newVersion", latest.version()))
                     .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)

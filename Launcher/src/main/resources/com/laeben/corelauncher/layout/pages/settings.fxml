@@ -181,7 +181,10 @@
                 </Label>
                 <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="9" />
 
-                <CButton fx:id="btnCheckUpdate" maxWidth="Infinity" text="%settings.update" GridPane.columnIndex="2" GridPane.rowIndex="10" GridPane.hgrow="ALWAYS"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="10" GridPane.hgrow="ALWAYS">
+                    <CButton fx:id="btnCheckUpdate" text="%settings.update" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    <CWorker fx:id="workerUpdate"/>
+                </HBox>
                 <CButton fx:id="btnGC" maxWidth="Infinity" text="%settings.gc" GridPane.columnIndex="2" GridPane.rowIndex="11" GridPane.hgrow="ALWAYS"/>
             </GridPane>
         </VBox>

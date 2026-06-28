@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller.page;
 
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
@@ -114,6 +115,8 @@ public class SettingsPage extends HandlerController {
     private Label lblVersion;
     @FXML
     private CButton btnCheckUpdate;
+    @FXML
+    private CWorker workerUpdate;
     @FXML
     private CButton btnClearImages;
     @FXML
@@ -297,6 +300,19 @@ public class SettingsPage extends HandlerController {
                 Logger.getLogger().log(e);
             }
         });
+
+        workerUpdate.begin().withTask(a -> new Task() {
+
+            @Override
+            protected Object call() throws Exception {
+                CoreLauncher.updateCheck(true);
+                return null;
+            }
+        }).onFailed(a -> {
+            if (workerUpdate.getError() instanceof NoConnectionException) return;
+            Main.getMain().announceLater(Translator.translate("settings"), Translator.translate("settings.update.error"), Announcement.AnnouncementType.ERROR, Duration.seconds(2));
+            Logger.getLogger().log(workerUpdate.getError());
+        }).onDone(a -> Main.getMain().announceLater(Translator.translate("settings"), Translator.translate("settings.update.done"), Announcement.AnnouncementType.INFO, Duration.seconds(2)));
 
         workerImages.begin().withTask(a -> new Task() {
             @Override
@@ -553,7 +569,7 @@ public class SettingsPage extends HandlerController {
         cbLanguage.setItems(languages);
 
         btnCheckUpdate.setText(Translator.translate("settings.checkup"));
-        btnCheckUpdate.setOnMouseClicked(a -> CoreLauncher.updateCheck());
+        btnCheckUpdate.setOnMouseClicked(a -> workerUpdate.run());
         lblVersion.setText(Double.toString(LauncherConfig.VERSION));
     }
 

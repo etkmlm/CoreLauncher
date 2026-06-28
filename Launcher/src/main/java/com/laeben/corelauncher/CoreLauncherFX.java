@@ -1,6 +1,9 @@
 package com.laeben.corelauncher;
 
+import com.laeben.core.entity.exception.HttpException;
+import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.api.FloatDock;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
@@ -56,7 +59,14 @@ public class CoreLauncherFX extends Application {
         ExtensionWrapper.getWrapper().fireEvent("onUILoad");
 
         // Version check
-        CoreLauncher.updateCheck();
+        try {
+            CoreLauncher.updateCheck(false);
+        } catch (NoConnectionException ignored) {
+
+        }
+        catch (HttpException e){
+            Logger.getLogger().log(e);
+        }
 
         new Thread(CoreLauncher::announcementCheck).start();
     }
