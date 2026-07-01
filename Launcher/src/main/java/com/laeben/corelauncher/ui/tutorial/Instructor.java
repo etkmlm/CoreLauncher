@@ -1,6 +1,5 @@
 package com.laeben.corelauncher.ui.tutorial;
 
-import com.google.gson.JsonObject;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.corelauncher.LauncherConfig;
@@ -93,7 +92,7 @@ public class Instructor {
     }
 
     public List<Tutorial> getOnlineTutorials() throws NoConnectionException, HttpException {
-        var xs = LauncherConfig.APPLICATION.getObject("tutorials", GsonUtil.DEFAULT_GSON, JsonObject.class);
+        var xs = LauncherConfig.APPLICATION.getObjects("tutorials", GsonUtil.DEFAULT_GSON, Tutorial.class, null);
         if (xs == null)
             return List.of();
 
@@ -101,8 +100,7 @@ public class Instructor {
 
         var lang = Configurator.getConfig().getLanguage();
 
-        for (var x : xs.keySet()){
-            var tuto = GsonUtil.DEFAULT_GSON.fromJson(xs.get(x), Tutorial.class);
+        for (var tuto : xs){
             if (tuto.hasLocale(lang))
                 lst.add(tuto);
         }

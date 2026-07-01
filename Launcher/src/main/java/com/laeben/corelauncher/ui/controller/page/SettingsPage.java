@@ -305,7 +305,7 @@ public class SettingsPage extends HandlerController {
 
             @Override
             protected Object call() throws Exception {
-                CoreLauncher.updateCheck(true);
+                CoreLauncher.updateCheck();
                 return null;
             }
         }).onFailed(a -> {

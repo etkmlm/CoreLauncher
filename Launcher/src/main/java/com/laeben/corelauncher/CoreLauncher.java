@@ -24,7 +24,6 @@ import com.laeben.corelauncher.minecraft.loader.optifine.OptiFine;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.util.APIListener;
-import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -47,6 +46,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class CoreLauncher {
     public static final String KEY = "clauncher";
@@ -316,15 +316,8 @@ public class CoreLauncher {
 
     public static class FileList extends ArrayList<LaebenAppFile> {}
 
-    public static void updateCheck(boolean network) throws NoConnectionException, HttpException {
-        LaebenAppFile latest;
-        if (network){
-            // TODO implement this into core library
-            var latestVersion = LauncherConfig.APPLICATION.getObject("latest", GsonUtil.EMPTY_GSON, Double.class);
-            var files = LauncherConfig.APPLICATION.getObject("files", null, FileList.class);
-            latest = files.stream().filter(x -> x.version() == latestVersion).findFirst().orElse(null);
-        }
-        else latest = LauncherConfig.APPLICATION.getLatest();
+    public static void updateCheck() throws NoConnectionException, HttpException {
+        LaebenAppFile latest = LauncherConfig.APPLICATION.getLatest();
 
         if (latest != null && LauncherConfig.VERSION < latest.version() && Configurator.getConfig().isEnabledAutoUpdate()){
             var result = CMsgBox.msg(Alert.AlertType.INFORMATION, Translator.translate("update.title"), Translator.translateFormat("update.newVersion", latest.version()))
@@ -363,11 +356,23 @@ public class CoreLauncher {
         var showed = Configurator.getConfig().getShowedAnnounces();
         var locale = Configurator.getConfig().getLanguage();
 
-        if (!LaebenApp.isOffline()){
-            showed.removeIf(a -> LauncherConfig.APPLICATION.getAnnouncements().stream().noneMatch(x -> x.getId() == a));
+        List<com.laeben.core.entity.Announcement> announcements;
+        try {
+            announcements = LauncherConfig.APPLICATION.getAnnouncements();
+        } catch (NoConnectionException ignored) {
+            return;
+        } catch (HttpException e) {
+            Logger.getLogger().log(e);
+            return;
         }
 
-        for (var ann : LauncherConfig.APPLICATION.getAnnouncements()){
+        if (announcements == null) return;
+
+        if (!announcements.isEmpty()){
+            showed.removeIf(a -> announcements.stream().noneMatch(x -> x.getId() == a));
+        }
+
+        for (var ann : announcements){
             boolean versCheck = !ann.containingVersion(String.valueOf(LauncherConfig.VERSION));
             boolean dateCheck = ann.getDate().after(now);
             if (versCheck || dateCheck){

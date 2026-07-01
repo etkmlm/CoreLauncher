@@ -60,7 +60,7 @@ public class CoreLauncherFX extends Application {
 
         // Version check
         try {
-            CoreLauncher.updateCheck(false);
+            CoreLauncher.updateCheck();
         } catch (NoConnectionException ignored) {
 
         }
