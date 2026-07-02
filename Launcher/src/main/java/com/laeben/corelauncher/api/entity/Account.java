@@ -1,12 +1,7 @@
 package com.laeben.corelauncher.api.entity;
 
 import com.laeben.core.entity.RequestParameter;
-import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
-import com.laeben.core.entity.exception.StopException;
-import com.laeben.corelauncher.api.exception.PerformException;
-import com.laeben.corelauncher.minecraft.util.Authenticator;
-import com.laeben.corelauncher.minecraft.util.Tokener;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.*;
@@ -22,7 +17,6 @@ import java.util.Objects;
 public class Account{
     private static final String UUID_URL = "https://api.minecraftservices.com/minecraft/profile/lookup/bulk/byname";
     private static final String PROFILE_URL = "https://sessionserver.mojang.com/session/minecraft/profile/";
-    private static final String VERIFY_URL = "https://api.minecraftservices.com/entitlements/mcstore";
 
     public static final class AccountFactory implements JsonSerializer<Account>, JsonDeserializer<Account> {
         @Override
@@ -43,7 +37,7 @@ public class Account{
         }
     }
     private final String username;
-    private Tokener tokener;
+    private TokenInfo tokens;
     private String uuid;
     private String skin;
     private String cape;
@@ -52,44 +46,30 @@ public class Account{
     private boolean isReloaded;
     private boolean isOnline;
 
-    private transient String _token;
-
     private Account(String username){
         this.username = username;
     }
 
     public Account copyAs(String username){
         var account = new Account(username);
-        account.tokener = tokener;
+        account.tokens = tokens;
         account.isOnline = isOnline;
-        account._token = _token;
         return account;
     }
 
     /**
-     * Authenticate the account with Mojang.
-     * @return the account
+     * Returns the stored access token, otherwise returns the default access token.
      */
-    public Account authenticate() throws PerformException, StopException {
-        if (!isOnline || !NetUtil.check())
-            return this;
-        if (tokener == null)
-            tokener = Authenticator.getAuthenticator().authenticate(username);
-        return this;
+    public String getAccessToken(){
+        return getTokens() == null ? TokenInfo.DEFAULT_ACCESS_TOKEN : getTokens().getAccessToken();
     }
 
-    public void cacheToken() throws PerformException, StopException {
-        _token = isOnline() ? authenticate().getTokener().getAccessToken() : "null";
+    public TokenInfo getTokens(){
+        return tokens;
     }
 
-    public String getCachedToken(){
-        return _token == null ? "null" : _token;
-    }
-
-    public Tokener getTokener(){
-        if (tokener == null)
-            return Tokener.empty(username);
-        return tokener;
+    public void setTokens(TokenInfo info){
+        this.tokens = info;
     }
 
     /**
@@ -99,30 +79,6 @@ public class Account{
      */
     public static Account fromUsername(String username){
         return new Account(username);
-    }
-
-
-    /**
-     * Validates account access token.
-     */
-    public boolean validate(){
-        if (tokener == null)
-            return false;
-
-        JsonObject obj;
-        try {
-            String str = NetUtil.urlToString(VERIFY_URL, List.of(RequestParameter.bearer(tokener.getAccessToken())));
-
-            obj = GsonUtil.DEFAULT_GSON.fromJson(str, JsonObject.class);
-        } catch (NoConnectionException | HttpException | PerformException ignored) {
-            return false;
-        }
-
-        if (!obj.has("items"))
-            return false;
-
-        var items = obj.getAsJsonArray("items");
-        return items.asList().stream().anyMatch(x -> x.getAsJsonObject().get("name").getAsString().equals("game_minecraft"));
     }
 
     public String getUsername(){

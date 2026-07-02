@@ -207,7 +207,7 @@ public class ExecutionInfo{
                     .register("${game_assets}", assetsRoot.toString())
                     .register("${assets_index_name}", assets.id)
                     .register("${auth_uuid}", account.reload().getUuid())
-                    .register("${auth_access_token}", account.getCachedToken())
+                    .register("${auth_access_token}", account.getAccessToken())
                     .register("${user_properties}", "{}")
                     .register("${user_type}", "msa")
                     .register("${version_type}", version.type == null ? "release" : version.type)

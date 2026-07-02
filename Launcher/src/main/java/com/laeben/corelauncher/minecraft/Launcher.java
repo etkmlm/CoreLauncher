@@ -12,6 +12,7 @@ import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
 import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.mapping.PGMapper;
 import com.laeben.corelauncher.minecraft.modding.Modder;
+import com.laeben.corelauncher.minecraft.util.Authenticator;
 import com.laeben.corelauncher.minecraft.util.CommandConcat;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.java.JavaManager;
@@ -185,7 +186,7 @@ public class Launcher {
 
             boolean authSuccess = false;
             try{
-                info.account.cacheToken();
+                Authenticator.getAuthenticator().getAccessToken(info.account);
                 authSuccess = true;
             }
             catch (PerformException e){
@@ -196,8 +197,8 @@ public class Launcher {
                 Logger.getLogger().log(LogType.ERROR, "Ignoring authentication failure...");
             }
 
-            if (authSuccess){
-                String username = info.account.getTokener().getMicrosoftUsername();
+            if (authSuccess && info.account.getTokens() != null){
+                String username = info.account.getTokens().getUsername();
                 if (username != null && !username.equals(info.account.getUsername())){
                     var acc = info.account.copyAs(username);
                     if (info.account.equals(Configurator.getConfig().getUser())){
@@ -234,7 +235,7 @@ public class Launcher {
 
 
             // Due to some reasons, authentication process does not complete without requesting to the certificate URL, so we are requesting here.
-            info.account.validate();
+            Authenticator.getAuthenticator().validateAccessToken(info.account);
 
             // Start a new session
             var session = new Session(info.dir, finalCmds);

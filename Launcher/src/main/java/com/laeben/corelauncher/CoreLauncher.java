@@ -199,7 +199,7 @@ public class CoreLauncher {
         new CurseForge().reload();
         new Modrinth().reload();
         new Modder();
-        new Authenticator();
+        new Authenticator().reloadTokenStore();
         new Discord().startDiscordThread();
         new ExtensionWrapper().reload();
         new EmbeddedBrowser(new JSONCacheStore()); // use json cache store by default
