@@ -59,6 +59,8 @@ public class Config {
     private boolean useExternalAuth;
     private boolean useEmbeddedBrowser;
 
+    private String curseApiKey;
+
     public Path getGamePath(){
         return (gamePath == null ? DEFAULT_GAME_PATH : gamePath).forceSetDir(true);
     }
@@ -143,6 +145,13 @@ public class Config {
     }
     public void setDefaultMaxRAM(int maxRAM){
         defaultMaxRAM = maxRAM;
+    }
+
+    public String getCurseForgeApiKey(){
+        return curseApiKey;
+    }
+    public void setCurseForgeApiKey(String key){
+        this.curseApiKey = key;
     }
 
     public boolean doSearchBrowserManually() {

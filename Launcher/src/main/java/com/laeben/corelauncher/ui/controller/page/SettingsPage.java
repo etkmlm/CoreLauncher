@@ -143,6 +143,9 @@ public class SettingsPage extends HandlerController {
     private CCombo<JavaSourceType> cbJavaSource;
 
     @FXML
+    private TextField txtCurseForgeKey;
+
+    @FXML
     private Region cGridSelection;
 
     /*@FXML
@@ -161,6 +164,7 @@ public class SettingsPage extends HandlerController {
     private final RAMManager ram;
 
     private boolean changeAccount;
+    private boolean changeApiKey;
 
     private boolean needsToRestart;
 
@@ -268,6 +272,7 @@ public class SettingsPage extends HandlerController {
         });
 
         txtAccount.textProperty().addListener(a -> tryToEnableSave());
+        txtCurseForgeKey.textProperty().addListener(a -> tryToEnableSave());
 
         ram.setControls(txtMinRAM, txtMaxRAM, sldRAM);
         ram.setup();
@@ -562,6 +567,7 @@ public class SettingsPage extends HandlerController {
         //txtCommPort.setValueFactory(fCommPort);
 
         txtAccount.setOnKeyPressed(a -> changeAccount = true);
+        txtCurseForgeKey.setOnKeyPressed(a -> changeApiKey = true);
 
         chkOnline.selectedProperty().addListener(a -> Configurator.getConfigurator().setDefaultAccount(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected())));
 
@@ -604,6 +610,22 @@ public class SettingsPage extends HandlerController {
         //btnSave.setText(Translator.translate("option.save"));
         btnSave.setVisible(false);
         btnSave.setOnMouseClicked(x -> {
+            if (changeApiKey){
+                String key = txtCurseForgeKey.getText();
+
+                if (key != null){
+                    key = key.trim();
+                    if (key.isEmpty()) key = null;
+                }
+
+                if (key != null && !key.startsWith("$2a$")){
+                    Main.getMain().announceLater(Translator.translate("error.oops"), Translator.translate("error.curseApi"), Announcement.AnnouncementType.ERROR, Duration.seconds(2));
+                    return;
+                }
+
+                Configurator.getConfig().setCurseForgeApiKey(key);
+            }
+
             if (changeAccount){
                 Configurator.getConfigurator().setDefaultAccount(Account.fromUsername(txtAccount.getText() == null || txtAccount.getText().isBlank() ? "IAMUSER" : txtAccount.getText()).setOnline(chkOnline.isSelected()));
             }
@@ -656,6 +678,7 @@ public class SettingsPage extends HandlerController {
                 chkOnline.setSelected(false);
             }
 
+            txtCurseForgeKey.setText(c.getCurseForgeApiKey());
             ram.setDefaultMin(c.getDefaultMinRAM());
             ram.setDefaultMax(c.getDefaultMaxRAM());
             sldRAM.setValue(ram.getMax());

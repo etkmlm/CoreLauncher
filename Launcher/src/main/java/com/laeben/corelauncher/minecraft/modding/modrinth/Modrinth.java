@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class Modrinth implements ModSource {
-    //private static final String API_KEY = "$2a$10$fdQjum78EUUUcJIw2a6gb.m1DNZCQzwvf0EBcfm.YgwIrmFX/1K3m";
     private static final String BASE_URL = "https://api.modrinth.com";
     private static final String PREFERRED_SHADER_MOD = "YL57xq9U"; // Iris
 
