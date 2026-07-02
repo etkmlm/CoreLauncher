@@ -5,7 +5,10 @@ import com.laeben.core.entity.LaebenAppFile;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
+import com.laeben.corelauncher.api.exception.PerformException;
+import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -267,7 +270,7 @@ public class CoreLauncher {
             if (!Configurator.getConfig().useNonGUIShortcut()){
                 var profile = Profiler.getProfiler().getProfile(profileName);
                 if (profile != null)
-                    CoreLauncherFX.fromArgs = profile;
+                    CoreLauncherFX.profileToLaunch = profile;
                 confProfile = false;
             }
             else
@@ -281,6 +284,24 @@ public class CoreLauncher {
 
             if (profile != null){
                 try{
+                    Launcher.getLauncher().setOnAuthFail(a -> {
+                        if (!a.getKey().equals(Launcher.AUTH_FAIL)) return true;
+                        PerformException exception = (PerformException) a.getValue();
+                        if (exception.getValue() instanceof IllegalStateException e && e.getMessage().contains("Toolkit")){ // needs gui
+                            Launcher.getLauncher().getHandler().addHandler(KEY, x -> {
+                                if (x instanceof KeyEvent ke){
+                                    if (ke.getKey().startsWith(Launcher.SESSION_START))
+                                        UI.getUI().hideAll();
+                                    else if (ke.getKey().startsWith(Launcher.SESSION_END))
+                                        System.exit(0);
+                                }
+                            }, true); // listen session start activity
+                            CoreLauncherFX.profileToLaunch = profile;
+                            CoreLauncherFX.launchFX();
+                            return false;
+                        }
+                        return true;
+                    });
                     Launcher.getLauncher().prepare(profile);
                     Launcher.getLauncher().launch(ExecutionInfo.fromProfile(profile));
                 }
@@ -298,11 +319,6 @@ public class CoreLauncher {
         if (Debug.DEBUG)
             Debug.run();
         else{
-            /*System.setProperty("prism.lcdtext", "false");
-            System.setProperty("prism.text", "t2k");*/
-            System.setProperty("prism.allowhidpi", "true");
-            System.setProperty("glass.win.uiScale", Configurator.getConfig().getUIScale() + "%");
-            System.setProperty("glass.gtk.uiScale", Configurator.getConfig().getUIScale() + "%");
             CoreLauncherFX.launchFX();
         }
 

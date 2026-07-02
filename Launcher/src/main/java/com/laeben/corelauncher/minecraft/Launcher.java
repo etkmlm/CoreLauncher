@@ -190,8 +190,8 @@ public class Launcher {
                 authSuccess = true;
             }
             catch (PerformException e){
-                Logger.getLogger().log(LogType.ERROR, "Authentication failed: " + e.getMessage() + " XErr " + e.getValue());
-                if (onAuthFail != null && !onAuthFail.apply((ValueEvent) new ValueEvent(AUTH_FAIL, e.getValue()).setSource(info))){
+                Logger.getLogger().log(LogType.ERROR, "Authentication failed: '" + e.getMessage() + "' Details: " + e.getValue());
+                if (onAuthFail != null && !onAuthFail.apply((ValueEvent) new ValueEvent(AUTH_FAIL, e).setSource(info))){
                     throw new StopException();
                 }
                 Logger.getLogger().log(LogType.ERROR, "Ignoring authentication failure...");

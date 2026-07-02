@@ -128,6 +128,9 @@ public class Main extends HandlerController {
 
     private Profile selectedProfile;
 
+    // temp variable to hide the launcher
+    private boolean hideAfterLaunch;
+
     private boolean preventScrollFilter;
 
     private boolean statusNeedsUpdate;
@@ -221,7 +224,9 @@ public class Main extends HandlerController {
             }
         }, true);
         Launcher.getLauncher().setOnAuthFail(v -> {
-            final var result = UI.runSync(() -> showMsg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth.api", v.getValue()))
+            PerformException ex = (PerformException) v.getValue();
+
+            final var result = UI.runSync(() -> showMsg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translateFormat("error.auth.api", ex.getValue()))
                     .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO)
                     .executeForResult());
 

@@ -2,6 +2,7 @@ package com.laeben.corelauncher;
 
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.Profile;
@@ -28,7 +29,7 @@ public class CoreLauncherFX extends Application {
         CLUI_CSS = clui.toExternalForm();
     }
 
-    static Profile fromArgs;
+    static Profile profileToLaunch;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -50,9 +51,9 @@ public class CoreLauncherFX extends Application {
         }
         else{
             UI.getUI().create("main").show();
-            if (fromArgs != null){
-                Main.getMain().launch(fromArgs, false, null);
-                fromArgs = null;
+            if (profileToLaunch != null){
+                Main.getMain().launch(profileToLaunch, false, null);
+                profileToLaunch = null;
             }
         }
 
@@ -72,6 +73,11 @@ public class CoreLauncherFX extends Application {
     }
 
     public static void launchFX(){
+        /*System.setProperty("prism.lcdtext", "false");
+        System.setProperty("prism.text", "t2k");*/
+        System.setProperty("prism.allowhidpi", "true");
+        System.setProperty("glass.win.uiScale", Configurator.getConfig().getUIScale() + "%");
+        System.setProperty("glass.gtk.uiScale", Configurator.getConfig().getUIScale() + "%");
         launch();
     }
 
