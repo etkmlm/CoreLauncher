@@ -158,7 +158,7 @@ public class CCombo<T> extends Region {
         }
         else{
             var bounds = localToScreen(txtSearch.getLayoutBounds());
-            //lvItems.setPrefWidth(txtSearch.getWidth());
+            lvItems.setPrefWidth(txtSearch.getWidth());
             popup.setWidth(txtSearch.getWidth());
             popup.show(this, bounds.getMinX(), bounds.getMaxY() - 10);
             txtSearch.setCursor(Cursor.TEXT);

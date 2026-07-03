@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class Session {
@@ -20,6 +21,7 @@ public class Session {
     private BufferedReader inputReader;
     private BufferedReader errorReader;
     private final List<String> commands;
+    private final Map<String, String> environment;
     private final Path workDir;
     private final Path logFile;
     private static int lastSessionId = 0;
@@ -29,9 +31,10 @@ public class Session {
 
     private int exitCode;
 
-    public Session(Path workDir, List<String> commands){
+    public Session(Path workDir, List<String> commands, Map<String, String> environment){
         this.commands = commands;
         this.workDir = workDir;
+        this.environment = environment;
 
         inputThread = new Thread(() -> reader(inputReader, "IN"));
         errorThread = new Thread(() -> reader(errorReader, "ERROR"));
@@ -60,10 +63,13 @@ public class Session {
 
         try{
             Logger.getLogger().logHyph("SESSION START: " + sessionId);
-            var process = new ProcessBuilder()
+            var processBuilder = new ProcessBuilder()
                     .directory(workDir.toFile())
-                    .command(commands)
-                    .start();
+                    .command(commands);
+
+            if (environment != null) processBuilder.environment().putAll(environment);
+
+            var process = processBuilder.start();
 
             inputReader = process.inputReader();
             errorReader = process.errorReader();

@@ -4,6 +4,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.api.Tool;
 import com.laeben.corelauncher.api.entity.*;
+import com.laeben.corelauncher.api.gpu.entity.GPUDisplay;
 import com.laeben.corelauncher.api.ui.Controller;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.entity.FocusLimiter;
@@ -15,6 +16,7 @@ import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.loader.Custom;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.entity.LoaderVersion;
+import com.laeben.corelauncher.ui.control.CCombo;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
@@ -22,6 +24,7 @@ import com.laeben.corelauncher.ui.control.CTab;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.dialog.DImageSelector;
 import com.laeben.corelauncher.ui.entity.EventFilter;
+import com.laeben.corelauncher.ui.util.GPUUtil;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.ImageUtil;
@@ -44,6 +47,7 @@ import javafx.util.Duration;
 import org.controlsfx.control.SearchableComboBox;
 
 import java.util.List;
+import java.util.Objects;
 
 public class EditProfilePage extends HandlerController implements FocusLimiter {
     public static final String KEY = "pgedit";
@@ -116,7 +120,9 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     private CButton btnSelectLoader;
 
     @FXML
-    public CView icon;
+    private CView icon;
+    @FXML
+    private CCombo<GPUDisplay> cbGPUType;
 
     private final ToggleGroup loaderGroup;
     private final ObservableList<String> versions;
@@ -140,6 +146,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
      * online - 7
      * jvm - 8
      * mm ram - 9
+     * gpu type - 10
      */
     private final NTSManager nts;
     private Bounds headerCache;
@@ -153,7 +160,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
     public EditProfilePage(){
         super(KEY);
         loaderGroup = new ToggleGroup();
-        nts = new NTSManager(10);
+        nts = new NTSManager(11);
         nts.setOnSet(a -> {
             boolean f = nts.needsToSave();
             boolean k = nts.calcNts();
@@ -258,6 +265,12 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             ImageCacheManager.remove(profile);
             icon.setImageAsync(ImageUtil.getImage(tempProfile.getIcon()));
             nts.set(0, true);
+        });
+
+        cbGPUType.setValueFactory(GPUUtil::getGPUName);
+        cbGPUType.setOnItemChanged(a -> {
+            tempProfile.setGPUType(a.type());
+            nts.set(10, !Objects.equals(a.type(), profile.getGPUType()));
         });
 
         cbGameVersion.valueProperty().addListener((x, before, after) -> {
@@ -472,6 +485,19 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
             cbGameVersion.setValue(tempProfile.getVersionId());
 
+            cbGPUType.getItems().setAll(GPUUtil.getAllGPUTypes());
+            cbGPUType.getItems().add(0, GPUDisplay.DEFAULT);
+            boolean setValue = false;
+            for (var d : cbGPUType.getItems()){
+                if (!d.type().equals(tempProfile.getGPUType())) continue;
+
+                cbGPUType.setValue(d);
+                setValue = true;
+                break;
+            }
+            if (!setValue)
+                cbGPUType.setValue(GPUDisplay.DEFAULT);
+
             var j = tempProfile.getJava();
             cbJavaVersion.setValue(j != null ? j.toIdentifier() : "...");
 
@@ -506,6 +532,8 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         catch (Exception e){
             Logger.getLogger().log(e);
         }
+
+        nts.clear();
     }
 
     public void save(){

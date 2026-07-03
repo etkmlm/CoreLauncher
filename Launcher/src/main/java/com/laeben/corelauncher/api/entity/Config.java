@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.api.entity;
 
+import com.laeben.corelauncher.api.gpu.entity.GPUType;
 import com.laeben.corelauncher.api.ui.entity.UIPreference;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -12,20 +13,9 @@ import java.util.Locale;
 
 public class Config {
     private static final Path DEFAULT_GAME_PATH = Path.begin(OSUtil.getAppFolder());
-    //private static final int DEFAULT_COMM_PORT = 9875;
 
-    private Account user;
-    private Path gamePath;
-    private Path lastBackupPath;
-    private Locale language;
-    private Path backgroundImage;
-    private Profile lastSelectedProfile;
-    private List<Java> customJavaVersions;
-    private Java defaultJava;
-    private int defaultMinRAM;
-    private int defaultMaxRAM;
-    private int downloadThreads;
-    private int uiScale;
+    /* Boolean Fields */
+
     private boolean showOldReleases;
     private boolean showSnapshots;
     private boolean logMode;
@@ -39,28 +29,46 @@ public class Config {
     private boolean autoChangeWrapper;
     private boolean omitLauncherLibs;
     private boolean useGridAlignment;
-    private JavaSourceType javaSource;
-    private List<Integer> announces;
-
-    private List<UIPreference> uiPreferences;
-
-    private double windowWidth;
-    private double windowHeight;
-
     private boolean disableRPC;
-    //private int commPort;
     private boolean enableInGameRPC;
     private boolean useNonGuiShortcut;
     private boolean overwriteImported;
     private boolean disableSelectNewProfile;
     private boolean searchBrowserManually;
     private boolean middlePaste;
-
     private boolean useExternalAuth;
     private boolean useEmbeddedBrowser;
 
-    private String curseApiKey;
+    /* Number Fields */
 
+    private int defaultMinRAM;
+    private int defaultMaxRAM;
+    private int downloadThreads;
+    private int uiScale;
+    private double windowWidth;
+    private double windowHeight;
+
+    /* Class Fields */
+
+    private Account user;
+    private Path gamePath;
+    private Path lastBackupPath;
+    private Locale language;
+    private Path backgroundImage;
+    private Profile lastSelectedProfile;
+    private List<Java> customJavaVersions;
+    private Java defaultJava;
+    private JavaSourceType javaSource;
+    private List<Integer> announces;
+    private List<UIPreference> uiPreferences;
+    private String curseApiKey;
+    private GPUType gpuType;
+
+    /* Getters */
+
+    public GPUType getGPUType(){
+        return gpuType;
+    }
     public Path getGamePath(){
         return (gamePath == null ? DEFAULT_GAME_PATH : gamePath).forceSetDir(true);
     }
@@ -76,237 +84,93 @@ public class Config {
     public Path getNativesPath(){
         return getLauncherPath().to("natives");
     }
-
-    public void setGamePath(Path gamePath){
-        this.gamePath = gamePath;
-    }
-
     public List<Integer> getShowedAnnounces(){
         if (announces == null)
             announces = new ArrayList<>();
         return announces;
     }
-
     public int getUIScale(){
         return uiScale < 1 ? 100 : uiScale;
     }
-    public void setUIScale(int uiScale){
-        this.uiScale = uiScale;
-    }
-
     public int getDownloadThreadsCount(){
         return downloadThreads == 0 ? 10 : downloadThreads;
     }
-    public void setDownloadThreadsCount(int downloadThreads){
-        this.downloadThreads = downloadThreads;
-    }
-
     public Path getLastBackupPath() { return lastBackupPath; }
-    public void setLastBackupPath(Path path){
-        this.lastBackupPath = path;
-    }
-
-    public void setOmitLauncherLibraries(boolean value){
-        this.omitLauncherLibs = value;
-    }
-
     public boolean omitLauncherLibraries(){
         return omitLauncherLibs;
     }
-
     public boolean disableSelectNewProfile() {
         return disableSelectNewProfile;
     }
-    public void setDisableSelectNewProfile(boolean disableSelectNewProfile) {
-        this.disableSelectNewProfile = disableSelectNewProfile;
-    }
-
     public JavaSourceType getJavaSourceType() { return javaSource == null ? JavaSourceType.AZUL : javaSource; }
-    public void setJavaSourceType(JavaSourceType source){
-        this.javaSource = source;
-    }
-
-    public void setLanguage(Locale l){
-        this.language = l;
-    }
-    public void setDefaultJava(Java j){
-        defaultJava = j;
-    }
-
     public Java getDefaultJava(){
         return defaultJava;
     }
-    public void setDefaultMinRAM(int minRam){
-        defaultMinRAM = minRam;
-    }
-
     public int getDefaultMinRAM(){
         return defaultMinRAM;
     }
-    public void setDefaultMaxRAM(int maxRAM){
-        defaultMaxRAM = maxRAM;
-    }
-
     public String getCurseForgeApiKey(){
         return curseApiKey;
     }
-    public void setCurseForgeApiKey(String key){
-        this.curseApiKey = key;
-    }
-
     public boolean doSearchBrowserManually() {
         return searchBrowserManually;
     }
-    public void setSearchBrowserManually(boolean searchBrowserManually) {
-        this.searchBrowserManually = searchBrowserManually;
-    }
-
     public boolean useExternalAuth(){
         return useExternalAuth;
     }
-    public void setUseExternalAuth(boolean val){
-        useExternalAuth = val;
-    }
-
     public boolean useEmbeddedBrowser(){
         return useEmbeddedBrowser;
     }
-    public void setUseEmbeddedBrowser(boolean val){
-        useEmbeddedBrowser = val;
-    }
-
     public boolean useNonGUIShortcut(){
         return useNonGuiShortcut;
     }
-    public void setUseNonGuiShortcut(boolean val){
-        useNonGuiShortcut = val;
-    }
-
     public boolean isAutoChangeLoader(){
         return autoChangeWrapper;
     }
-    public void setAutoChangeLoader(boolean val){
-        autoChangeWrapper = val;
-    }
-
     public boolean isDisabledRPC(){
         return disableRPC;
     }
-    public void setDisabledRPC(boolean v){
-        this.disableRPC = v;
-    }
-
     public boolean isEnabledInGameRPC(){
         return enableInGameRPC;
     }
-    public void setEnabledInGameRPC(boolean v){
-        this.enableInGameRPC = v;
-    }
-
     public boolean isEnabledSelectAndPlayDock(){
         return selectAndPlayDock;
     }
-    public void setEnabledSelectAndPlayDock(boolean v){
-        this.selectAndPlayDock = v;
-    }
-
     public boolean isOverwriteImportedEnabled(){
         return overwriteImported;
     }
-    public void setOverwriteImported(boolean v){
-        this.overwriteImported = v;
-    }
-
     public boolean isEnabledMiddlePaste(){
         return middlePaste;
     }
-    public void setEnabledMiddlePaste(boolean v){
-        this.middlePaste = v;
-    }
-
     public double getWindowWidth(){
         return windowWidth == 0 ? 1612 : windowWidth;
     }
-
     public double getWindowHeight(){
         return windowHeight == 0 ? 964 : windowHeight;
     }
-
-    public void setWindowSize(double w, double h){
-        windowWidth = w;
-        windowHeight = h;
-    }
-
-    /*public int getCommPort(){
-        return commPort <= 0 ? DEFAULT_COMM_PORT : commPort;
-    }
-
-    public void setCommPort(int port){
-        this.commPort = port;
-    }*/
-
     public Path getBackgroundImage(){
         return backgroundImage != null ? (backgroundImage.exists() ? backgroundImage : null) : null;
     }
-
-    public void setBackgroundImage(Path img){
-        this.backgroundImage = img;
-    }
-
     public int getDefaultMaxRAM(){
         return defaultMaxRAM;
     }
-
     public boolean isShowOldReleases() {
         return showOldReleases;
     }
-
     public boolean shouldShowHelloDialog(){
         return showHelloDialog;
     }
-    public void setShowHelloDialog(boolean s){
-        showHelloDialog = s;
-    }
-
     public boolean shouldPlaceNewProfileToDock(){
         return placeNewProfileToDock;
     }
-    public void setPlaceNewProfileToDock(boolean val){
-        this.placeNewProfileToDock = val;
-    }
-
-    public void setShowOldReleases(boolean showOldReleases) {
-        this.showOldReleases = showOldReleases;
-    }
-
     public boolean isShowSnapshots() {
         return showSnapshots;
     }
     public boolean isEnabledAutoUpdate(){
         return autoUpdate;
     }
-    public void setAutoUpdate(boolean autoUpdate){
-        this.autoUpdate = autoUpdate;
-    }
-
     public boolean delGameLogs(){
         return delGameLogs;
-    }
-
-    public void setDelGameLogs(boolean a){
-        delGameLogs = a;
-    }
-
-    public void setShowSnapshots(boolean showSnapshots) {
-        this.showSnapshots = showSnapshots;
-    }
-
-    public void setLastSelectedProfile(Profile p){
-        lastSelectedProfile = p;
-    }
-
-    public void setLogMode(boolean mode){
-        logMode = mode;
     }
     public boolean getLogMode(){
         return logMode;
@@ -314,22 +178,11 @@ public class Config {
     public boolean getDebugLogMode(){
         return debugLogMode;
     }
-    public void setDebugLogMode(boolean mode){
-        debugLogMode = mode;
-    }
-
     public boolean useGridAlignment(){
         return useGridAlignment;
     }
-    public void setUseGridAlignment(boolean val){
-        this.useGridAlignment = val;
-    }
-
     public boolean hideAfter(){
         return hideAfter;
-    }
-    public void setHideAfter(boolean ha){
-        hideAfter = ha;
     }
     public Profile getLastSelectedProfile(){
         return lastSelectedProfile;
@@ -339,20 +192,14 @@ public class Config {
             customJavaVersions = new ArrayList<>();
         return customJavaVersions;
     }
-
     public UIPreference getUIPreference(String id){
         return getUIPreferences().stream().filter(a -> id.equals(a.getIdentifier())).findFirst().orElse(null);
     }
-
     public List<UIPreference> getUIPreferences(){
         if (uiPreferences == null)
             uiPreferences = new ArrayList<>();
         return uiPreferences;
     }
-    public void setUser(Account a){
-        this.user = a;
-    }
-
     public Account getUser(){
         if (user == null){
             var conf = Configurator.generateDefaultConfig();
@@ -363,9 +210,122 @@ public class Config {
 
         return user;
     }
-
     public Locale getLanguage(){
         return language == null ? Locale.getDefault() : language;
     }
 
+    /* Setters */
+
+    public void setGPUType(GPUType type){
+        this.gpuType = type;
+    }
+    public void setGamePath(Path gamePath){
+        this.gamePath = gamePath;
+    }
+    public void setUser(Account a){
+        this.user = a;
+    }
+    public void setHideAfter(boolean ha){
+        hideAfter = ha;
+    }
+    public void setUseGridAlignment(boolean val){
+        this.useGridAlignment = val;
+    }
+    public void setDelGameLogs(boolean a){
+        delGameLogs = a;
+    }
+    public void setShowSnapshots(boolean showSnapshots) {
+        this.showSnapshots = showSnapshots;
+    }
+    public void setLastSelectedProfile(Profile p){
+        lastSelectedProfile = p;
+    }
+    public void setLogMode(boolean mode){
+        logMode = mode;
+    }
+    public void setDebugLogMode(boolean mode){
+        debugLogMode = mode;
+    }
+    public void setBackgroundImage(Path img){
+        this.backgroundImage = img;
+    }
+    public void setShowHelloDialog(boolean s){
+        showHelloDialog = s;
+    }
+    public void setPlaceNewProfileToDock(boolean val){
+        this.placeNewProfileToDock = val;
+    }
+    public void setAutoUpdate(boolean autoUpdate){
+        this.autoUpdate = autoUpdate;
+    }
+    public void setShowOldReleases(boolean showOldReleases) {
+        this.showOldReleases = showOldReleases;
+    }
+    public void setWindowSize(double w, double h){
+        windowWidth = w;
+        windowHeight = h;
+    }
+    public void setEnabledMiddlePaste(boolean v){
+        this.middlePaste = v;
+    }
+    public void setUseNonGuiShortcut(boolean val){
+        useNonGuiShortcut = val;
+    }
+    public void setAutoChangeLoader(boolean val){
+        autoChangeWrapper = val;
+    }
+    public void setDisabledRPC(boolean v){
+        this.disableRPC = v;
+    }
+    public void setEnabledInGameRPC(boolean v){
+        this.enableInGameRPC = v;
+    }
+    public void setEnabledSelectAndPlayDock(boolean v){
+        this.selectAndPlayDock = v;
+    }
+    public void setOverwriteImported(boolean v){
+        this.overwriteImported = v;
+    }
+    public void setJavaSourceType(JavaSourceType source){
+        this.javaSource = source;
+    }
+    public void setLanguage(Locale l){
+        this.language = l;
+    }
+    public void setDefaultJava(Java j){
+        defaultJava = j;
+    }
+    public void setDefaultMinRAM(int minRam){
+        defaultMinRAM = minRam;
+    }
+    public void setDefaultMaxRAM(int maxRAM){
+        defaultMaxRAM = maxRAM;
+    }
+    public void setCurseForgeApiKey(String key){
+        this.curseApiKey = key;
+    }
+    public void setUseExternalAuth(boolean val){
+        useExternalAuth = val;
+    }
+    public void setUseEmbeddedBrowser(boolean val){
+        useEmbeddedBrowser = val;
+    }
+    public void setSearchBrowserManually(boolean searchBrowserManually) {
+        this.searchBrowserManually = searchBrowserManually;
+    }
+    public void setUIScale(int uiScale){
+        this.uiScale = uiScale;
+    }
+    public void setDownloadThreadsCount(int downloadThreads){
+        this.downloadThreads = downloadThreads;
+    }
+    public void setLastBackupPath(Path path){
+        this.lastBackupPath = path;
+    }
+    public void setOmitLauncherLibraries(boolean value){
+        this.omitLauncherLibs = value;
+    }
+    public void setDisableSelectNewProfile(boolean disableSelectNewProfile) {
+        this.disableSelectNewProfile = disableSelectNewProfile;
+    }
 }

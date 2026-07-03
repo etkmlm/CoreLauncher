@@ -6,6 +6,7 @@ import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.gpu.entity.GPUType;
 import com.laeben.corelauncher.minecraft.util.ArgumentConcat;
 import com.laeben.corelauncher.minecraft.util.CommandConcat;
 import com.laeben.corelauncher.minecraft.util.LibraryConcat;
@@ -26,18 +27,20 @@ public class ExecutionInfo{
     public Version version;
     public Account account;
     public Java java;
+    public GPUType gpuType;
     public Path dir;
     public String[] args;
     public boolean ignoreAuth;
 
     public ServerInfo server;
 
-    public ExecutionInfo(String executor, Version v, Account account, Java java, Path dir, String... args){
+    public ExecutionInfo(String executor, Version v, Account account, Java java, Path dir, GPUType gpuType, String... args){
         this.executor = executor;
         this.version = v;
         this.account = account;
         this.java = java;
         this.dir = dir;
+        this.gpuType = gpuType == null ? GPUType.DEFAULT : gpuType;
         this.args = args;
     }
 
@@ -65,7 +68,10 @@ public class ExecutionInfo{
                 concat.add("-Xmx" + cMax + "M");
         }
 
-        return new ExecutionInfo(profile.getName(), profile.getLoader().getVersion(profile.getVersionId(), profile.getLoaderVersion()), profile.getUser(), profile.getJava(), profile.getPath(), concat.generate().toArray(new String[0]));
+        GPUType gpuType = profile.getGPUType();
+        if (gpuType == null) gpuType = Configurator.getConfig().getGPUType();
+
+        return new ExecutionInfo(profile.getName(), profile.getLoader().getVersion(profile.getVersionId(), profile.getLoaderVersion()), profile.getUser(), profile.getJava(), profile.getPath(), gpuType, concat.generate().toArray(new String[0]));
     }
 
     public ExecutionInfo includeServer(ServerInfo info){

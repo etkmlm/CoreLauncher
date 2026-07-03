@@ -5,14 +5,14 @@ import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.Tool;
+import com.laeben.corelauncher.api.entity.*;
+import com.laeben.corelauncher.api.gpu.entity.GPUDisplay;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.entity.UIPreference;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
-import com.laeben.corelauncher.api.entity.Account;
-import com.laeben.corelauncher.api.entity.Config;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
 import com.laeben.corelauncher.ui.control.*;
@@ -22,12 +22,11 @@ import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.ui.dialog.DColorPicker;
 import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
+import com.laeben.corelauncher.ui.util.GPUUtil;
 import com.laeben.corelauncher.ui.util.RAMManager;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 import com.laeben.corelauncher.util.java.JavaManager;
-import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.core.entity.Path;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -141,6 +140,8 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkGuiShortcut;
     @FXML
     private CCombo<JavaSourceType> cbJavaSource;
+    @FXML
+    private CCombo<GPUDisplay> cbGPUType;
 
     @FXML
     private TextField txtCurseForgeKey;
@@ -258,10 +259,14 @@ public class SettingsPage extends HandlerController {
         }
     }
 
+
+
     @Override
     public void preInit(){
         cbJavaSource.setValueFactory(JavaSourceType::getDisplayName);
         cbJavaSource.getItems().setAll(JavaSourceType.values());
+
+        cbGPUType.setValueFactory(GPUUtil::getGPUName);
 
         reload();
 
@@ -415,6 +420,10 @@ public class SettingsPage extends HandlerController {
         });
 
         cbJavaSource.setOnItemChanged(a -> Configurator.getConfigurator().setJavaSourceType(a));
+        cbGPUType.setOnItemChanged(a -> {
+            Configurator.getConfig().setGPUType(a.type());
+            Configurator.save();
+        });
 
         btnJavaMan.enableTransparentAnimation();
         btnJavaMan.setOnMouseClicked((a) -> Main.getMain().addTab("pages/java", Translator.translate("java.manager"), true, JavaPage.class));
@@ -677,6 +686,19 @@ public class SettingsPage extends HandlerController {
                 txtAccount.setText(null);
                 chkOnline.setSelected(false);
             }
+
+            cbGPUType.getItems().setAll(GPUUtil.getAllGPUTypes());
+            cbGPUType.getItems().add(0, GPUDisplay.DEFAULT);
+            boolean setValue = false;
+            for (var d : cbGPUType.getItems()){
+                if (!d.type().equals(c.getGPUType())) continue;
+
+                cbGPUType.setValue(d);
+                setValue = true;
+                break;
+            }
+            if (!setValue)
+                cbGPUType.setValue(GPUDisplay.DEFAULT);
 
             txtCurseForgeKey.setText(c.getCurseForgeApiKey());
             ram.setDefaultMin(c.getDefaultMinRAM());

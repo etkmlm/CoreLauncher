@@ -5,9 +5,12 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.ValueEvent;
+import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.gpu.WindowsGPUSelector;
+import com.laeben.corelauncher.api.gpu.entity.GPUType;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
 import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.mapping.PGMapper;
@@ -22,7 +25,9 @@ import com.laeben.core.util.events.KeyEvent;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -214,11 +219,32 @@ public class Launcher {
 
             String[] gameCmds = linfo.getGameArguments();
 
-            String argsss = null;
+            String patcherArgs = null;
             var mptxt = linfo.clientPath.parent().to("client.txt");
             if (mptxt.exists() && Configurator.getConfig().isEnabledInGameRPC()){
                 String txt = getMappingArgs(mptxt.read());
-                argsss = "-Dcom.laeben.clpatcher.args=" + txt;
+                patcherArgs = "-Dcom.laeben.clpatcher.args=" + txt;
+            }
+
+            final GPUType gpuType = info.gpuType;
+            final OS systemOS = OS.getSystemOS();
+
+            boolean useDriPrime = !gpuType.equals(GPUType.DEFAULT) && OS.getSystemOS() == OS.LINUX;
+
+            if (!useDriPrime && systemOS == OS.WINDOWS && !gpuType.equals(GPUType.DEFAULT)){
+                // windows only allows gpu preferences to be changed for the java executable
+                // so scope is java
+
+                if (WindowsGPUSelector.addPreference(info.java.getWindowExecutable(), gpuType))
+                    Logger.getLogger().log(LogType.INFO, "[Scope|Java] GPU changed to " + gpuType);
+                else Logger.getLogger().log(LogType.ERROR, "[Scope|Java] GPU cannot be changed to " + gpuType);
+            }
+
+            if (useDriPrime){
+                // gpu preferene is only changed for the current execution
+                // so scope is profile
+
+                Logger.getLogger().log(LogType.INFO, "[Scope|Profile] GPU changed to " + gpuType);
             }
 
             // Final commands
@@ -227,18 +253,24 @@ public class Launcher {
                     .add(2, linfo.agents)
                     .add(linfo.getJvmArguments())
                     .add(info.args)
-                    .add(argsss)
+                    .add(patcherArgs)
                     .add("-cp", cp)
                     .add(linfo.mainClass)
                     .add(gameCmds)
                     .generate();
 
+            Map<String, String> env = null;
+
+            if (useDriPrime){
+                env = new HashMap<>();
+                env.put("DRI_PRIME", gpuType.getId(OS.LINUX));
+            }
 
             // Due to some reasons, authentication process does not complete without requesting to the certificate URL, so we are requesting here.
             Authenticator.getAuthenticator().validateAccessToken(info.account);
 
             // Start a new session
-            var session = new Session(info.dir, finalCmds);
+            var session = new Session(info.dir, finalCmds, env);
             session.setOnPacketReceived(a -> handler.execute(new ValueEvent(SESSION_RECEIVE, a)));
 
             handleState(SESSION_START + info.executor);

@@ -3,6 +3,7 @@ package com.laeben.corelauncher.api.entity;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.annotation.ReturnsNull;
+import com.laeben.corelauncher.api.gpu.entity.GPUType;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
@@ -74,15 +75,11 @@ public class Profile {
     private String[] jvmArgs;
     private Java java;
     private List<CResource> allResources;
-    /*private List<Mod> mods;
-    private List<Resourcepack> resources;
-    private List<Modpack> modpacks;
-    private List<World> worlds;
-    private List<Shader> shaders;*/
     private int minRAM;
     private int maxRAM;
     private int type;
     private Loader wrapper;
+    private GPUType gpuType;
 
     private transient boolean meta;
     private transient long createdAt;
@@ -131,6 +128,10 @@ public class Profile {
     }
 
     /* Getters */
+
+    public GPUType getGPUType(){
+        return gpuType;
+    }
 
     public long getCreatedAt(){
         return createdAt;
@@ -319,6 +320,9 @@ public class Profile {
     public void setIcon(ImageEntity icon){
         this.icon = icon;
     }
+    public void setGPUType(GPUType type){
+        this.gpuType = type;
+    }
 
     /* Utils */
 
@@ -383,6 +387,7 @@ public class Profile {
         this.minRAM = p.minRAM;
         this.maxRAM = p.maxRAM;
         this.wrapper = p.wrapper;
+        this.gpuType = p.gpuType;
 
         this.jvmArgs = p.jvmArgs == null ? null : Arrays.copyOf(p.jvmArgs, p.jvmArgs.length);
         this.allResources = p.allResources == null ? null : new ArrayList<>(p.allResources);

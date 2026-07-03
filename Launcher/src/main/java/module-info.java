@@ -66,6 +66,7 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.api.nbt;
     opens com.laeben.corelauncher.api.nbt.util;
     opens com.laeben.corelauncher.api.nbt.entity;
+    opens com.laeben.corelauncher.api.gpu.entity;
     opens com.laeben.corelauncher.wrap;
     opens com.laeben.corelauncher.wrap.exception;
     opens com.laeben.corelauncher.wrap.entity;
