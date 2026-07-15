@@ -185,14 +185,6 @@ public class CShapefulButton extends HBox {
 
         setHgrow(this, Priority.NEVER);
 
-        shape.addListener((a, b, shape) -> {
-            if (shape != null){
-                if (shapeFill.isBound())
-                    shape.setFill(shapeFill.get());
-                shape.fillProperty().bind(shapeFill);
-            }
-        });
-
         setAlignment(Pos.CENTER);
 
         textControl = new Text();
@@ -217,15 +209,22 @@ public class CShapefulButton extends HBox {
             leftShapeRect.setShape(c);
             if (c == null){
                 getChildren().remove(leftShapeRect);
-
             }
             else{
                 getChildren().add(0, leftShapeRect);
+                if (shapeFill.isBound())
+                    c.setFill(shapeFill.get());
+                c.fillProperty().bind(shapeFill);
             }
+        });
+        text.addListener((a, b, c) -> {
+            if (c == null || c.isEmpty())
+                getChildren().remove(textControl);
+            else
+                getChildren().add(getChildren().size() <= 1 ? 0 : 1, textControl);
         });
 
         setSpacing(6);
-        getChildren().addAll(textControl);
 
         fade = new FadeTransition();
         fadeDeeper = new FadeTransition();

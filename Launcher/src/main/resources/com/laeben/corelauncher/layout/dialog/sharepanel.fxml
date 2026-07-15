@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CWorker?>
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            prefHeight="550.0" fx:id="root" prefWidth="750.0" styleClass="dialog-content" stylesheets="@../../style/controls/dpspanel.css">
+    <CButton prefWidth="48" prefHeight="48" text="X" fx:id="btnClose" styleClass="transparent" AnchorPane.rightAnchor="4" AnchorPane.topAnchor="4"/>
+    <HBox AnchorPane.topAnchor="16" AnchorPane.leftAnchor="8" spacing="8" alignment="CENTER_LEFT">
+        <Label text="%sharepanel.title" style="-fx-font-size: 16pt;-fx-font-weight: bold"/>
+        <Label text="•" style="-fx-font-size: 24pt"/>
+        <Label fx:id="lblKey" style="-fx-font-size: 16pt"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" AnchorPane.rightAnchor="8" AnchorPane.leftAnchor="8" AnchorPane.bottomAnchor="64" AnchorPane.topAnchor="64">
+        <VBox spacing="16">
+            <VBox fx:id="pProfiles" spacing="8">
+                <!--<Label text="Profiles" style="-fx-font-weight: bold;-fx-font-size: 14pt"/>-->
+                <CButton fx:id="btnPickProfiles" text="%sharepanel.profiles.pick"/>
+                <ListView fx:id="lvProfiles"/>
+            </VBox>
+            <VBox fx:id="pRecipients" spacing="8">
+                <Label text="%sharepanel.recipients" style="-fx-font-weight: bold; -fx-font-size: 16pt"/>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <TextField fx:id="txtKey" HBox.hgrow="ALWAYS" promptText="%browser.network.hintEnterKey"/>
+                    <CButton fx:id="btnAcceptKey" text="%option.add"/>
+                    <CWorker fx:id="worker" maxWidth="48" maxHeight="48"/>
+                </HBox>
+                <FlowPane hgap="8" vgap="8" fx:id="paneRecepients"/>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+    <HBox alignment="CENTER" AnchorPane.bottomAnchor="8" AnchorPane.leftAnchor="8" AnchorPane.rightAnchor="8">
+        <CheckBox fx:id="chkFull" text="%sharepanel.profiles.full">
+            <tooltip>
+                <Tooltip text="%sharepanel.profiles.full.tip"/>
+            </tooltip>
+        </CheckBox>
+        <Region HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <CButton fx:id="btnDone" text="%option.done"/>
+    </HBox>
+
+</AnchorPane>

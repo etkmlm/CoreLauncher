@@ -16,6 +16,7 @@ import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
+import com.laeben.corelauncher.lan.LANShare;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
@@ -206,6 +207,7 @@ public class CoreLauncher {
         new Discord().startDiscordThread();
         new ExtensionWrapper().reload();
         new EmbeddedBrowser(new JSONCacheStore()); // use json cache store by default
+        new LANShare().reload();
 
         // Launcher Web API Listener
         APIListener.start();

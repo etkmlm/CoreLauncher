@@ -23,8 +23,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.DataFormat;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
@@ -155,14 +153,14 @@ public class WorldsPage extends HandlerController {
             if (selectedWorld == null)
                 return;
 
-            setClipboard(selectedWorld.seed);
+            OSUtil.setClipboard(String.valueOf(selectedWorld.seed));
         });
 
         lblSpawn.setOnMouseClicked(a -> {
             if (selectedWorld == null)
                 return;
 
-            setClipboard(selectedWorld.worldSpawn.toString());
+            OSUtil.setClipboard(selectedWorld.worldSpawn.toString());
         });
 
         btnDelete.setOnMouseClicked(a -> {
@@ -289,10 +287,6 @@ public class WorldsPage extends HandlerController {
                 }
             }).start();
         });
-    }
-
-    public void setClipboard(Object text){
-        Clipboard.getSystemClipboard().setContent(new HashMap<>(){{ put(DataFormat.PLAIN_TEXT, text.toString()); }});
     }
 
     public void select(World w){

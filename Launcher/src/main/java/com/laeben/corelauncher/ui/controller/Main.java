@@ -13,9 +13,10 @@ import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.*;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.exception.PerformException;
-import com.laeben.corelauncher.api.socket.entity.CLPacket;
+import com.laeben.corelauncher.api.socket.packet.CLPacket;
 import com.laeben.corelauncher.api.socket.entity.CLPacketType;
-import com.laeben.corelauncher.api.socket.entity.CLStatusPacket;
+import com.laeben.corelauncher.api.socket.packet.FilePacket;
+import com.laeben.corelauncher.api.socket.packet.StatusPacket;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.Controller;
@@ -23,6 +24,11 @@ import com.laeben.corelauncher.api.ui.entity.FocusLimiter;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
+import com.laeben.corelauncher.lan.LANShare;
+import com.laeben.corelauncher.lan.entity.LANProgressTuple;
+import com.laeben.corelauncher.lan.entity.LANRecipient;
+import com.laeben.corelauncher.lan.handler.LANProgressHandler;
+import com.laeben.corelauncher.lan.handler.ProgressHandler;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
@@ -38,11 +44,14 @@ import com.laeben.corelauncher.ui.dialog.DImageSelector;
 import com.laeben.corelauncher.ui.dialog.DStartupConfigurator;
 import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
 import com.laeben.corelauncher.ui.entity.EventFilter;
+import com.laeben.corelauncher.ui.entity.monitor.ProfileReceiveMonitorData;
+import com.laeben.corelauncher.ui.entity.monitor.ProfileShareMonitorData;
 import com.laeben.corelauncher.ui.tutorial.Instructor;
 import com.laeben.corelauncher.ui.tutorial.StepPopup;
 import com.laeben.corelauncher.ui.util.ControlUtil;
 import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.StrUtil;
+import com.laeben.corelauncher.ui.util.ProfileUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.JavaManager;
@@ -103,6 +112,8 @@ public class Main extends HandlerController {
     @FXML
     private CHeadView head;
     @FXML
+    private CButton btnMonitorCenter;
+    @FXML
     private TabPane tab;
     @FXML
     private Label lblProfileName;
@@ -128,8 +139,7 @@ public class Main extends HandlerController {
 
     private Profile selectedProfile;
 
-    // temp variable to hide the launcher
-    private boolean hideAfterLaunch;
+    private final CMonitorCenter monitorCenter;
 
     private boolean preventScrollFilter;
 
@@ -145,7 +155,7 @@ public class Main extends HandlerController {
 
     private final BooleanProperty running;
 
-    private final Executor executor;
+    private final ExecutorService executor;
 
     private FocusLimiter focusLimiter;
 
@@ -161,6 +171,8 @@ public class Main extends HandlerController {
     private final DecimalFormat df;
 
     private final EventHandler<KeyEvent> handler;
+    private final LANProgressHandler<Path> profileShareHandler;
+    private final ProgressHandler<Path> profileReceiveHandler;
 
     public Main(){
         super(KEY);
@@ -223,6 +235,8 @@ public class Main extends HandlerController {
                 }*/ // disabled currently
             }
         }, true);
+        LANShare.getInstance().setOnFileReceived(this::onLANFileReceived);
+        //registerHandler(LANShare.getInstance().getHandler(), this::onLANEvent, false);
         Launcher.getLauncher().setOnAuthFail(v -> {
             PerformException ex = (PerformException) v.getValue();
 
@@ -248,7 +262,7 @@ public class Main extends HandlerController {
 
         handler = new EventHandler<>();
 
-        executor = Executors.newSingleThreadExecutor();
+        executor = Executors.newFixedThreadPool(5);
         statusExecutor = new ScheduledThreadPoolExecutor(1);
         statusExecutor.scheduleAtFixedRate(() -> {
             if (statusNeedsUpdate){
@@ -286,6 +300,50 @@ public class Main extends HandlerController {
             tabMenuContext.setHeaderColor(c);
 
             Configurator.getConfigurator().setUIPreference(tabMenuContext.getKey(), a -> a.setCustomColor(c));
+        });
+
+        profileShareHandler = new LANProgressHandler<>() {
+            @Override
+            public boolean onProgress(LANProgressTuple<Path> payload, long current, long total) {
+                double percentage = current * 1.0 / total;
+                return UI.runSync(() -> {
+                    Boolean upResult = monitorCenter.getUploadsPanel().updateMonitor(payload.payload(), percentage);
+                    if (upResult == null){
+                        var data = new ProfileShareMonitorData(payload.payload(), payload.recipient(), payload.payload());
+                        monitorCenter.getUploadsPanel().putMonitor(data);
+                        return data.setPercentage(percentage);
+                    }
+                    else return upResult;
+                });
+            }
+        };
+        profileReceiveHandler = new ProgressHandler<>() {
+            @Override
+            public boolean onProgress(Path payload, long current, long total) {
+                double percentage = current * 1.0 / total;
+                return UI.runSync(() -> {
+                    Boolean upResult = monitorCenter.getDownloadsPanel().updateMonitor(payload, percentage);
+                    if (upResult == null){
+                        var data = new ProfileReceiveMonitorData(payload);
+                        monitorCenter.getDownloadsPanel().putMonitor(data);
+                        return data.setPercentage(percentage);
+                    }
+                    else return upResult;
+                });
+            }
+        };
+
+        monitorCenter = new CMonitorCenter();
+        monitorCenter.setOnMonitorChange(a -> {
+            if (btnMonitorCenter == null) return;
+            UI.runAsync(() -> {
+                btnMonitorCenter.setVisible(!a.isEmpty());
+                btnMonitorCenter.setManaged(!a.isEmpty());
+                if (a.isEmpty() && monitorCenter.isShowing())
+                    monitorCenter.hide();
+                if (!a.isEmpty() && a.wasAdded())
+                    monitorCenter.show(btnMonitorCenter);
+            });
         });
 
         instance = this;
@@ -486,14 +544,19 @@ public class Main extends HandlerController {
                 var val = (CLPacket)v.getValue();
                 if (val.getType() != CLPacketType.STATUS || !Configurator.getConfig().isEnabledInGameRPC())
                     return;
-                var status = new CLStatusPacket(val);
-                if (status.getType() == CLStatusPacket.InGameType.MULTIPLAYER)
-                    executor.execute(() -> {
-                        var a = ServerHandshake.shake(status.getData(), 25565);
-                        if (a != null)
-                            Discord.getDiscord().setActivity(Activity.setForParty("abc", a.players(), a.maxPlayers()));
-                    });
-                Discord.getDiscord().setActivity(Activity.setForInGame(status));
+                try {
+                    var status = new StatusPacket(val);
+                    if (status.getType() == StatusPacket.InGameType.MULTIPLAYER) {
+                        executor.submit(() -> {
+                            var a = ServerHandshake.shake(status.getData(), 25565);
+                            if (a != null)
+                                Discord.getDiscord().setActivity(Activity.setForParty("abc", a.players(), a.maxPlayers()));
+                        });
+                    }
+                    Discord.getDiscord().setActivity(Activity.setForInGame(status));
+                } catch (IOException ex) {
+                    Logger.getLogger().log(ex);
+                }
             }
         }
         else if (e instanceof KeyEvent k){
@@ -555,6 +618,37 @@ public class Main extends HandlerController {
         }
     }
 
+    private void onLANEvent(KeyEvent e){
+        if (e instanceof ValueEvent ve){
+            switch (ve.getKey()) {
+                case LANShare.NEW_RECIPIENT -> {
+                    var recp = (LANRecipient) ve.getValue();
+
+                    //recipients.add(recp);
+                }
+                case LANShare.REMOVE_RECIPIENT -> {
+                    var recp = (LANRecipient) ve.getValue();
+
+                    //recipients.remove(recp);
+                }
+            }
+        }
+    }
+    private void onLANFileReceived(CLPacket packet){
+        //Main.getMain().announceLater("Yay!", "Received a profile which is now located in: " + pp.getTempPath().toString(), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+        try {
+            final var filePacket = FilePacket.fromPacket(packet, Configurator.getConfig().getTemporaryFolder(), profileReceiveHandler);
+
+            executor.submit(() -> ProfileUtil.importO(filePacket.getTempPath(), 0, 0));
+        }
+        catch (CancellationException ignored){
+
+        }
+        catch (IOException e) {
+            Logger.getLogger().log(e);
+        }
+    }
+
     public static Main getMain(){
         return instance;
     }
@@ -609,6 +703,8 @@ public class Main extends HandlerController {
         btnMenu.setOnMouseClicked(a -> cMenu.show());
         cMenu.setButton(btnMenu);
         tabMenu.setNode(tab);
+
+        btnMonitorCenter.setOnMouseClicked(a -> monitorCenter.show(btnMonitorCenter));
 
         menuTranslate.setNode(menuInner);
         prgTranslate.setNode(progress);
@@ -977,10 +1073,10 @@ public class Main extends HandlerController {
         String s2 = status[1];
 
         String stat = null;
-        if (s1 != null && !s1.isBlank())
+        if (s1 != null && !s1.isEmpty())
             stat = s1;
 
-        if (s2 != null && !s2.isBlank())
+        if (s2 != null && !s2.isEmpty())
             stat = stat == null ? s2 : stat + "\n" + s2;
 
         lblStatus.setText(stat);
@@ -1198,6 +1294,10 @@ public class Main extends HandlerController {
 
         instructor.load(Instructor.generateGeneralTutorial());
         instructor.start(false);
+    }
+
+    public LANProgressHandler<Path> getProfileShareHandler() {
+        return profileShareHandler;
     }
 
     @Override

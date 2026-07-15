@@ -14,6 +14,7 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.ui.entity.UIPreference;
+import com.laeben.corelauncher.lan.profile.ProfileShare;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.cell.CGroup;
@@ -46,6 +47,7 @@ public class MainPage extends HandlerController {
     public static final String NEW_GROUP = "ngrp";
     public static final String PROFILE = "prof";
     public static final String BROWSER = "mods.browser";
+    public static final String NET_BROWSER = "netbr";
     public static final String SORT = "srt";
     public static final String ALIGN_GRID = "alngrd";
 
@@ -133,6 +135,13 @@ public class MainPage extends HandlerController {
             lY = a.event().getScreenY() - f.getMinY();
 
             Main.getMain().addTab("pages/browser", Translator.translate("mods.browser"), true, BrowserPage.class).setProfile(null);
+        });
+        dockContext.addItem(null, NET_BROWSER, Translator.translate("dock.menu.network"), a -> {
+            var f = root.localToScreen(root.getBoundsInLocal());
+            lX = a.event().getScreenX() - f.getMinX();
+            lY = a.event().getScreenY() - f.getMinY();
+
+            Main.getMain().addTab("pages/netbrowser", Translator.translate("browser.network.title"), true, NetworkBrowserPage.class);
         });
         dockContext.addItem(null, SORT, Translator.translate("dock.menu.sort"), a -> {
             FloatDock.getDock().sortObjects(16, 16, root.getWidth(), CDockObject.PREF_WIDTH, 64);
@@ -501,6 +510,13 @@ public class MainPage extends HandlerController {
                 0
         );
 
+        root.getNav().addItem(
+                Translator.translate("option.share"),
+                "-shape-export",
+                a -> shareAllSelectedObjects(),
+                0
+        );
+
         root.setOnSelectBegin(a -> deselectAllObjects());
         root.setOnSelectCancelled(this::deselectAllObjects);
 
@@ -571,6 +587,15 @@ public class MainPage extends HandlerController {
         else if (a.getCode() == KeyCode.BACK_SPACE){
             removeSelectedObjects();
         }
+    }
+
+    private void shareAllSelectedObjects(){
+        if (root.getSelectedItems().isEmpty()) return;
+
+        final var profileSet = root.getSelectedItems().stream().flatMap(a -> a.getObject().getProfiles().stream()).collect(Collectors.toUnmodifiableSet());
+
+        ProfileShare.fromProfiles(profileSet, getStage(), Main.getMain().getProfileShareHandler());
+        root.cancelSelection();
     }
 
     /**

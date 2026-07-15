@@ -3,13 +3,15 @@ package com.laeben.corelauncher.api.util;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.entity.Java;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.DataFormat;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
 import java.nio.file.Path;
+import java.util.HashMap;
 
 public class OSUtil {
 
@@ -91,5 +93,43 @@ public class OSUtil {
 
     public static void setSystemOS(OS systemOS){
         OSUtil.systemOS = systemOS;
+    }
+
+    public static byte[] getLocalIP(){
+        byte[] ip = new byte[4];
+        if (systemOS != OS.OSX){
+            try(final DatagramSocket socket = new DatagramSocket()){
+                socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+                ip = socket.getLocalAddress().getAddress();
+            } catch (SocketException e) {
+                Logger.getLogger().log(e);
+            } catch (UnknownHostException ignored) {
+
+            }
+        }
+        else{
+            try(final Socket socket = new Socket()){
+                socket.connect(new InetSocketAddress("google.com", 80));
+                ip = socket.getLocalAddress().getAddress();
+            } catch (UnknownHostException ignored) {
+
+            } catch (IOException e) {
+                Logger.getLogger().log(e);
+            }
+        }
+
+        return ip;
+    }
+
+    public static String getHostName(){
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            return null;
+        }
+    }
+
+    public static void setClipboard(String text){
+        Clipboard.getSystemClipboard().setContent(new HashMap<>(){{ put(DataFormat.PLAIN_TEXT, text); }});
     }
 }

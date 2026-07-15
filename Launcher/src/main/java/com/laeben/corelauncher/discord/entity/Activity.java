@@ -2,7 +2,7 @@ package com.laeben.corelauncher.discord.entity;
 
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
-import com.laeben.corelauncher.api.socket.entity.CLStatusPacket;
+import com.laeben.corelauncher.api.socket.packet.StatusPacket;
 
 import java.util.List;
 import java.util.Locale;
@@ -125,13 +125,13 @@ public class Activity {
 
     private static final Pattern privateV4Pattern = Pattern.compile("\\d+\\.\\d+\\.\\d+\\.\\d+(:\\d+)?");
 
-    public static Consumer<Activity> setForInGame(CLStatusPacket pack){
+    public static Consumer<Activity> setForInGame(StatusPacket pack){
         return a -> {
             a.type = Type.PLAYING.ordinal();
             a.timestamps = Activity.Timestamps.now();
             a.details = Translator.translate("discord.detail." + pack.getType().name().toLowerCase(Locale.US));
             a.state = pack.getData() != null && privateV4Pattern.matcher(pack.getData()).matches() ? Translator.translate("discord.state.private") : pack.getData();
-            if (pack.getType() != CLStatusPacket.InGameType.MULTIPLAYER){
+            if (pack.getType() != StatusPacket.InGameType.MULTIPLAYER){
                 a.party = null;
                 a.buttons = null;
             }

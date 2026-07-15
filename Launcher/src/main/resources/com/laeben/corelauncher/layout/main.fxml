@@ -23,22 +23,20 @@
         </Pane>
         <AnchorPane fx:id="menu" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0">
             <VBox fx:id="menuInner" prefHeight="30" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="10" AnchorPane.leftAnchor="10" alignment="CENTER">
-                <AnchorPane>
+                <HBox spacing="16" alignment="CENTER">
+
+
                     <CButton fx:id="btnPlay" styleClass="menu-button" AnchorPane.leftAnchor="0" prefWidth="64" prefHeight="64" />
-                    <Label fx:id="lblProfileName" AnchorPane.leftAnchor="80" text="ABC"/>
-                    <Label fx:id="lblProfileDescription" AnchorPane.leftAnchor="80" AnchorPane.bottomAnchor="0" text="1.12.2 Forge"/>
+                    <VBox spacing="8">
+                        <Label fx:id="lblProfileName" text="ABC"/>
+                        <Label fx:id="lblProfileDescription" text="1.12.2 Forge"/>
+                    </VBox>
+                    <Label fx:id="lblStatus" maxWidth="Infinity" HBox.hgrow="ALWAYS" alignment="CENTER" textAlignment="CENTER"/>
 
-                    <CMenu AnchorPane.rightAnchor="0" fx:id="cMenu"/>
-
-                    <!--<CView fx:id="head" styleClass="player-head" preserveRatio="true" pickOnBounds="true" AnchorPane.rightAnchor="80" fitHeight="64" fitWidth="64">
-                        <Image url="@../images/steve.png"/>
-                    </CView>-->
-                    <CHeadView fx:id="head" styleClass="player-head" fitHeight="64" fitWidth="64" AnchorPane.rightAnchor="80" prefHeight="64" prefWidth="64">
-
-                    </CHeadView>
-
-                    <Label fx:id="lblStatus" AnchorPane.bottomAnchor="2" alignment="CENTER" AnchorPane.leftAnchor="200" AnchorPane.rightAnchor="200" textAlignment="CENTER"/>
-                </AnchorPane>
+                    <CHeadView fx:id="head" styleClass="player-head" fitHeight="64" fitWidth="64" prefHeight="64" prefWidth="64"/>
+                    <CButton fx:id="btnMonitorCenter" visible="false" managed="false" text="G" styleClass="menu-button" prefHeight="64" prefWidth="64"/>
+                    <CMenu fx:id="cMenu"/>
+                </HBox>
 
             </VBox>
 

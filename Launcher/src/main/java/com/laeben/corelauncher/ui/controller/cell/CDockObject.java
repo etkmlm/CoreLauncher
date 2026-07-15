@@ -55,6 +55,7 @@ public abstract class CDockObject extends GridCell {
     public static final String DELETE = "delete";
     public static final String BACKUP = "backup";
     public static final String EXPORT = "export";
+    public static final String SHARE = "share";
     public static final String OPEN = "open";
     public static final String COPY = "copy";
     public static final String SELECT = "select";
@@ -349,6 +350,11 @@ public abstract class CDockObject extends GridCell {
             if (onAction != null && !onAction.test(a.key()))
                 return;
             ProfileUtil.export(profile, menuButton.getScene().getWindow());
+        });
+        menu.addItem(ImageCacheManager.getImage("export.png", 32), SHARE, Translator.translate("profile.menu.share"), a -> {
+            if (onAction != null && !onAction.test(a.key()))
+                return;
+
         });
         /*menu.addItem(i, Translator.translate("option.delete"), a -> {
             var d = FloatDock.getDock().findObject(profile);

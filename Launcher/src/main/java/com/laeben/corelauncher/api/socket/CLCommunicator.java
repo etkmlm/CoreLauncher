@@ -2,7 +2,7 @@ package com.laeben.corelauncher.api.socket;
 
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.socket.entity.CLPacket;
+import com.laeben.corelauncher.api.socket.packet.CLPacket;
 import com.laeben.corelauncher.util.EventHandler;
 
 import java.io.IOException;
@@ -16,8 +16,7 @@ import java.util.List;
 
 public class CLCommunicator {
     public static final String RECEIVE = "receive";
-
-    private static CLCommunicator instance;
+    public static final String ENDED = "ended";
 
     private final ServerSocket server;
     private final int port;
@@ -35,12 +34,6 @@ public class CLCommunicator {
         sockets = new ArrayList<>();
 
         handler = new EventHandler<>();
-
-        instance = this;
-    }
-
-    public static CLCommunicator getCommunicator(){
-        return instance;
     }
 
     public EventHandler<ValueEvent> getHandler(){
@@ -70,13 +63,15 @@ public class CLCommunicator {
                     sockets.add(newSocket);
 
 
-                for (var sock : sockets){
+                for (int i = 0; i < sockets.size(); i++){
+                    final var sock = sockets.get(i);
                     try{
                         var s = sock.getInputStream().readNBytes(4);
+                        if (s.length != 4) continue;
                         int size = intBuffer.put(0, s).getInt();
                         intBuffer.clear();
-                        var pack = CLPacket.fromArrayBuffer(sock.getInputStream().readNBytes(size));
-                        handler.execute(new ValueEvent(RECEIVE, pack));
+                        var pack = CLPacket.fromInputStream(sock.getInputStream(), size);
+                        handler.execute((ValueEvent) new ValueEvent(RECEIVE, pack).setSource(sock));
                     }
                     catch (SocketTimeoutException ignored){
 
@@ -90,11 +85,10 @@ public class CLCommunicator {
                             }
                         }
 
-                        sockets.remove(sock);
+                        sockets.remove(i);
+                        i--;
                     }
                 }
-
-
             }
 
             for (var s : sockets){
@@ -111,6 +105,8 @@ public class CLCommunicator {
                     Logger.getLogger().log(e);
                 }
             }
+
+            handler.execute(new ValueEvent(ENDED, null));
         }).start();
     }
 

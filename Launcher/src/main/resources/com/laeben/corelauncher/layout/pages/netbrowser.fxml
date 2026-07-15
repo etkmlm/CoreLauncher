@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.laeben.corelauncher.ui.control.CList?>
+<?import com.laeben.corelauncher.ui.control.CField?>
+<?import javafx.scene.shape.Rectangle?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.laeben.corelauncher.ui.controller.page.NetworkBrowserPage"
+      prefHeight="400.0" style="-fx-padding: 16px" prefWidth="650.0" spacing="16" stylesheets="@../../style/controls/clui.css">
+    <HBox alignment="CENTER">
+        <Label fx:id="lblKey" text="FRGNRJBNGJRBGJR" style="-fx-font-size: 30pt; -fx-font-weight: bold"/>
+        <Region maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="txtKey" minWidth="200" promptText="%browser.network.hintEnterKey" style="-fx-pref-height: 45px!important; -fx-padding: 8px; -fx-font-size: 20pt;-fx-line-spacing: 300px!important; "/>
+    </HBox>
+
+    <Label text="Saved Recipients"/>
+    <ListView fx:id="lvRecipients" prefHeight="120" orientation="HORIZONTAL" style="-fx-background-color: transparent!important;">
+
+    </ListView>
+
+    <Label text="Recent Transfers"/>
+    <CList fx:id="lvTransfers">
+
+    </CList>
+</VBox>

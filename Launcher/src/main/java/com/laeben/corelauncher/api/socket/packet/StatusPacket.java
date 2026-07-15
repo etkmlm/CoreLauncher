@@ -1,6 +1,8 @@
-package com.laeben.corelauncher.api.socket.entity;
+package com.laeben.corelauncher.api.socket.packet;
 
-public class CLStatusPacket{
+import java.io.IOException;
+
+public class StatusPacket {
 
     public enum InGameType{
         IDLING, SINGLEPLAYER, MULTIPLAYER
@@ -12,7 +14,7 @@ public class CLStatusPacket{
 
     private String data;
 
-    public CLStatusPacket(CLPacket packet){
+    public StatusPacket(CLPacket packet) throws IOException {
         this.packet = packet;
         type = InGameType.values()[packet.readInt()];
         if (type == InGameType.IDLING)

@@ -120,7 +120,7 @@ public interface ModSource {
         }
 
         public String getVersionId() {
-            return versionIds == null ? null : versionIds.get(0);
+            return versionIds == null || versionIds.isEmpty() ? null : versionIds.get(0);
         }
 
         public LoaderType getLoaderType() {

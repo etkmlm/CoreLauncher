@@ -3,7 +3,7 @@ package com.laeben.corelauncher.minecraft;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.entity.Path;
-import com.laeben.corelauncher.api.socket.entity.CLPacket;
+import com.laeben.corelauncher.api.socket.packet.CLPacket;
 
 import java.io.BufferedReader;
 import java.time.LocalDateTime;
