@@ -12,9 +12,15 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ *
+ * @param <T> result type
+ * @param <H> status type
+ */
 public class CWorker<T, H> extends StackPane {
 
     private Consumer<CWorker<T, H>> onDone;
+    private Consumer<CWorker<T, H>> doFinally;
     private Consumer<CWorker<T, H>> onFailed;
     private Consumer<CWorker<T, H>> onStatus;
 
@@ -25,6 +31,7 @@ public class CWorker<T, H> extends StackPane {
     private final ObjectProperty<H> status;
 
     private Executor executor;
+    private boolean isRunning;
     private Task<T> task;
     private final ProgressIndicator indicator;
 
@@ -79,6 +86,11 @@ public class CWorker<T, H> extends StackPane {
         return this;
     }
 
+    public CWorker<T, H> finallyDo(Consumer<CWorker<T, H>> r){
+        this.doFinally = r;
+        return this;
+    }
+
     public CWorker<T, H> onDone(Consumer<CWorker<T, H>> r){
         this.onDone = r;
         return this;
@@ -104,12 +116,20 @@ public class CWorker<T, H> extends StackPane {
             UI.runAsync(() -> ind(false));
             if (onFailed != null)
                 onFailed.accept(this);
+            if (doFinally != null)
+                doFinally.accept(this);
+
+            isRunning = false;
         });
         task.setOnSucceeded(a -> {
             value = (T)a.getSource().getValue();
             UI.runAsync(() -> ind(false));
             if (onDone != null)
                 onDone.accept(this);
+            if (doFinally != null)
+                doFinally.accept(this);
+
+            isRunning = false;
         });
 
         this.task = task;
@@ -122,12 +142,17 @@ public class CWorker<T, H> extends StackPane {
         return this;
     }
 
+    public boolean isRunning(){
+        return isRunning;
+    }
+
     public void run(){
         if (!reloadTask())
             return;
         UI.runAsync(() -> ind(true));
         if (executor == null)
             executor = Executors.newSingleThreadExecutor();
+        isRunning = true;
         executor.execute(task);
     }
 }

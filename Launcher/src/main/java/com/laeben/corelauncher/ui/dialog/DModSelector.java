@@ -178,7 +178,7 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
                     protected List<CResource> call() throws Exception {
                         return resource.getSourceType().getSource().getCoreResource(resource, ModSource.Options.create(preferences).aggregateModpack());
                     }
-            }).onDone(x -> {
+            }).onFailed(x -> Logger.getLogger().log(x.getError())).onDone(x -> {
                 var mps = x.getValue();
                 var mods = mps.stream().filter(a -> a instanceof Mod).map(a -> a.name).toList();
                 var ress = mps.stream().filter(a -> a instanceof Resourcepack).map(a -> a.name).toList();
@@ -189,9 +189,8 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
                     mpContentContainer.setManaged(true);
                     mpButtonContainer.setManaged(false);
                     mpButtonContainer.setVisible(false);
-                    Main.getMain().refreshStates();
                 });
-            });
+            }).finallyDo(x -> UI.runAsync(() -> Main.getMain().refreshStates()));
 
         btnModpack.setOnMouseClicked(e -> wModpack.run());
 
