@@ -6,7 +6,7 @@ public class Debug {
     public static final boolean DEBUG_UI = false;
 
     public static void run(){
-        //var profile = Profiler.getProfiler().getProfile("Valhelsia 60");
+        //var profile = Profiler.getProfiler().getProfile("FTB Continuumm");
         //var shortcutPath = Path.begin(java.nio.file.Path.of("C:/Users/furka/Desktop/java"));
         //var k = GsonUtil.DEFAULT_GSON.fromJson(js, Instructor.class);
     }
