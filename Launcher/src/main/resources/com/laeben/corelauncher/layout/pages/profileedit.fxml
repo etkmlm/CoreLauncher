@@ -85,7 +85,7 @@
                 <ChoiceBox fx:id="cbJavaVersion" maxWidth="Infinity" prefHeight="30"  GridPane.columnIndex="1" GridPane.rowIndex="3" />
                 <CButton styleClass="transparent" fx:id="btnJavaManager" text="..." GridPane.columnIndex="2" GridPane.rowIndex="3" />
 
-                <Label styleClass="property-key" text="%settings.gpuType" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                <Label styleClass="property-key" text="%settings.gpuType" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                 <CCombo fx:id="cbGPUType" prefWidth="100" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
                 <Label styleClass="property-key" text="%java.args" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />

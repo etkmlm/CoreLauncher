@@ -6,6 +6,7 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.Cat;
 import com.laeben.core.util.NetUtils;
+import com.laeben.core.util.StrUtil;
 import com.laeben.core.util.events.*;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.CoreLauncherFX;
@@ -20,6 +21,7 @@ import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.Controller;
 import com.laeben.corelauncher.api.ui.entity.FocusLimiter;
+import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
@@ -41,12 +43,12 @@ import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.ui.tutorial.Instructor;
 import com.laeben.corelauncher.ui.tutorial.StepPopup;
 import com.laeben.corelauncher.ui.util.ControlUtil;
-import com.laeben.corelauncher.api.util.NetUtil;
-import com.laeben.core.util.StrUtil;
+import com.laeben.corelauncher.ui.util.DisplayUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
+import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -64,12 +66,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import javafx.animation.ScaleTransition;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -158,13 +158,11 @@ public class Main extends HandlerController {
     private CTab tabMenuContext;
 
     public CMenu cMenu;
-    private final DecimalFormat df;
 
     private final EventHandler<KeyEvent> handler;
 
     public Main(){
         super(KEY);
-        df = new DecimalFormat("0.#");
         running = new SimpleBooleanProperty(false);
         running.addListener(a -> UI.runAsync(() -> {
             if (running.get()){
@@ -921,8 +919,12 @@ public class Main extends HandlerController {
     private void onProgress(ProgressEvent e){
         if (!running.get())
             running.set(true);
-        String id = e.getKey().equals(NetUtils.DOWNLOAD) ? "mb" : e.getKey();
-        setSecondaryStatus(df.format(e.getRemain()) + id + " / " + df.format(e.getTotal()) + id);
+        if (e.getKey().equals(NetUtils.DOWNLOAD)){
+            setSecondaryStatus(DisplayUtil.parseDownloadProgress(e.getCurrent()) + " / " + DisplayUtil.parseDownloadProgress(e.getTotal()));
+        }
+        else{
+            setSecondaryStatus(e.getCurrent() + e.getKey() + " / " + e.getTotal() + e.getKey());
+        }
 
         setProgress(e.getProgress());
     }

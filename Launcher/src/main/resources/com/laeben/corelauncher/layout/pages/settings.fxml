@@ -131,14 +131,14 @@
                 </Label>
                 <CheckBox fx:id="chkOmitLibs" GridPane.columnIndex="2" GridPane.rowIndex="8" />
 
-                <Label styleClass="property-key" text="%settings.gpuType" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                <CCombo fx:id="cbGPUType" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                <Label styleClass="property-key" text="%settings.overwriteImport" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                <CheckBox fx:id="chkOverwriteImportDefault" GridPane.columnIndex="2" GridPane.rowIndex="9" />
 
-                <Label styleClass="property-key" text="%settings.overwriteImport" GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                <CheckBox fx:id="chkOverwriteImportDefault" GridPane.columnIndex="2" GridPane.rowIndex="10" />
+                <Label styleClass="property-key" text="%settings.disableSelectNewProfile" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                <CheckBox fx:id="chkDisableSelectNewProfile" GridPane.columnIndex="2" GridPane.rowIndex="10" />
 
-                <Label styleClass="property-key" text="%settings.disableSelectNewProfile" GridPane.columnIndex="1" GridPane.rowIndex="11" />
-                <CheckBox fx:id="chkDisableSelectNewProfile" GridPane.columnIndex="2" GridPane.rowIndex="11" />
+                <Label styleClass="property-key" text="%settings.gpuType" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+                <CCombo fx:id="cbGPUType" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="11" />
             </GridPane>
         </VBox>
 
