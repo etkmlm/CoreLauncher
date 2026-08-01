@@ -392,7 +392,9 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
         });
         txtLoader.setOnMouseClicked(a -> {
-            var path = ((Custom)tempProfile.getLoader()).getPath(tempProfile.getVersionId());
+            if (tempProfile.getLoaderVersion() == null) return;
+
+            var path = ((Custom)tempProfile.getLoader()).getPath(tempProfile.getLoaderVersion());
             if (path.exists())
                 OSUtil.open(path.toFile());
         });

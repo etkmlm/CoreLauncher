@@ -244,6 +244,7 @@ public class MainPage extends HandlerController {
                     pr.setLayoutX(source.getPressLayoutX());
                     pr.setLayoutY(source.getPressLayoutY());
                     root.cancelSelection();
+                    gridCellIndicator.setVisible(false);
                     agreedMove = false;
                     return;
                 }

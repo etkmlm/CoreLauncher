@@ -418,7 +418,7 @@ public class Modder {
      * <br/><br/>
      * <b>Profile have to be saved after this function.</b>
      */
-    public int includeModpack(Profile p, Modpack mp) throws NoConnectionException, HttpException, StopException {
+    public int includeModpack(Profile p, Modpack mp, IncludeMode mode) throws NoConnectionException, HttpException, StopException {
         var path = p.getPath();
 
         var oldMp = p.getAllResources().stream().filter(a -> a.isSameResource(mp)).findFirst();
@@ -426,7 +426,7 @@ public class Modder {
 
         mp.getSource().applyModpack(mp, path, ModSource.Options.create(p));
 
-        boolean check = checkModpackOverride(p, mp);
+        boolean check = mode == IncludeMode.OVERWRITE_PROFILE || mode == IncludeMode.DEFAULT && checkModpackOverride(p, mp);
 
         EventHandler.disable();
 
@@ -549,7 +549,7 @@ public class Modder {
                 continue;
 
             if (r.getType() == ResourceType.MODPACK){
-                count += includeModpack(p, (Modpack)r);
+                count += includeModpack(p, (Modpack)r, mode);
                 continue;
             }
 

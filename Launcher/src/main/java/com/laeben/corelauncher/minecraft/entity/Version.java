@@ -31,7 +31,7 @@ public class Version {
     }
 
     public Asset getAssetIndex(){
-        return assetIndex == null ? new Asset(inheritsFrom == null ? id : inheritsFrom) : assetIndex;
+        return assetIndex == null ? new Asset(inheritsFrom == null ? (assets == null ? id : assets) : inheritsFrom) : assetIndex;
     }
 
     public boolean checkId(String id){

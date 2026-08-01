@@ -15,7 +15,7 @@ public class Asset {
 
 
     public Asset(String id){
-
+        this.id = id;
     }
 
     public Asset(String path, String hash, int size){
