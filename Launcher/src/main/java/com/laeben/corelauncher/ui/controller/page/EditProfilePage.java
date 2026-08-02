@@ -295,10 +295,8 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
             if (profile == null)
                 return;
-            if (profile.getJava() == null && java == null)
-                nts.set(5, false);
 
-            nts.set(5, java != null && (profile.getJava() == null || !profile.getJava().equals(java)));
+            nts.set(5, !Objects.equals(java, profile.getJava()));
         });
         cbJavaVersion.setItems(javaVersions);
 

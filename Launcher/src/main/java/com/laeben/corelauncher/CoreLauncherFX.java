@@ -52,7 +52,7 @@ public class CoreLauncherFX extends Application {
         else{
             UI.getUI().create("main").show();
             if (profileToLaunch != null){
-                Main.getMain().launch(profileToLaunch, false, null);
+                Main.getMain().launch(profileToLaunch, null, null);
                 profileToLaunch = null;
             }
         }

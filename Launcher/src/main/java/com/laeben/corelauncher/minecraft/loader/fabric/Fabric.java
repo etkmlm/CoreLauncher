@@ -53,7 +53,7 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
     }
 
     protected String getInstaller() throws NoConnectionException, HttpException {
-        if (cacheInstaller != null && !disableCache)
+        if (cacheInstaller != null && !redownSettings.hasClient())
             return cacheInstaller;
         var arr = gson.fromJson(NetUtil.urlToString(getInstallerUrl()), JsonArray.class);
         return cacheInstaller = arr.get(0).getAsJsonObject().get("url").getAsString();
@@ -77,7 +77,7 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
 
         // version id does not matter now
 
-        if (!cache.isEmpty() && !disableCache){
+        if (!cache.isEmpty() && !redownSettings.hasClient()){
             cache.forEach(a -> a.id = id);
             return (List<T>)cache;
         }
@@ -116,7 +116,7 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
         var temp = Configurator.getConfig().getTemporaryFolder();
         var jsonPath = gameDir.to("versions", jsonName, jsonName + ".json");
         var clientPath = gameDir.to("versions", jsonName, jsonName + ".jar");
-        if (clientPath.exists() && !disableCache)
+        if (clientPath.exists() && !redownSettings.hasClient())
             return;
 
         try{

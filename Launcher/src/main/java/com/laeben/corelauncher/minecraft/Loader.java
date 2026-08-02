@@ -16,6 +16,7 @@ import com.laeben.corelauncher.minecraft.entity.Asset;
 import com.laeben.corelauncher.minecraft.entity.AssetIndex;
 import com.laeben.corelauncher.minecraft.entity.Library;
 import com.laeben.corelauncher.minecraft.entity.Version;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.util.EventHandler;
@@ -45,7 +46,9 @@ public abstract class Loader<H extends Version> {
     private static final String ASSET_URL = "https://resources.download.minecraft.net/";
 
     protected EventHandler<BaseEvent> handler;
-    protected boolean disableCache;
+
+    // not null
+    protected RedownloadSettings redownSettings = RedownloadSettings.none();
     protected boolean stopRequested;
 
     public Loader(){
@@ -89,7 +92,7 @@ public abstract class Loader<H extends Version> {
 
     private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude, CargoNet cargo) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
         Path libPath = libDir.to(asset.path.split("/"));
-        if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || disableCache)
+        if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || redownSettings.hasLibraries())
         {
             var parcel = NetParcel.create(asset.url, libPath, false).setState(asset);
             if (exclude != null)
@@ -110,8 +113,8 @@ public abstract class Loader<H extends Version> {
         return profileInfo;
     }
 
-    public void setDisableCache(boolean mode){
-        this.disableCache = mode;
+    public void useRedownloadSettings(RedownloadSettings settings){
+        this.redownSettings = settings == null ? RedownloadSettings.none() : settings;
     }
 
     protected void setupLauncherLibraries(){
@@ -302,7 +305,7 @@ public abstract class Loader<H extends Version> {
             String url = ASSET_URL + nhash + "/" + hash;
 
             Path path = assetDir.to(nhash, hash);
-            if (!path.exists() || disableCache){
+            if (!path.exists() || redownSettings.hasAssets()){
                 cargo.add(NetParcel.create(url, path.forceSetDir(false), false).setState(asset));
                 //NetUtil.download(url, path.forceSetDir(false), false, true);
                 continue;

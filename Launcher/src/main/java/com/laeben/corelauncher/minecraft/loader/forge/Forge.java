@@ -63,7 +63,7 @@ public class Forge extends Loader<ForgeVersion> {
     public List<ForgeVersion> getVersions(String versionId) {
         logState("acqVersionForge - " + versionId);
 
-        if (cache.containsKey(versionId) && !disableCache)
+        if (cache.containsKey(versionId) && !redownSettings.hasClient())
             return cache.get(versionId);
 
         cache.remove(versionId);
@@ -128,7 +128,7 @@ public class Forge extends Loader<ForgeVersion> {
 
         Vanilla.getVanilla().install(version);
 
-        if (verJsonPath.exists() && !disableCache)
+        if (verJsonPath.exists() && !redownSettings.hasClient())
             return;
 
         var art = version.fArtifacts.stream().filter(x -> x.type == FArtifact.Type.INSTALLER).findFirst().orElse(null);

@@ -45,7 +45,7 @@ public class Quilt extends Fabric<QuiltVersion> {
         var temp = Configurator.getConfig().getTemporaryFolder();
         var jsonPath = gameDir.to("versions", jsonName, jsonName + ".json");
         var clientPath = gameDir.to("versions", jsonName, jsonName + ".jar");
-        if (clientPath.exists() && !disableCache)
+        if (clientPath.exists() && !redownSettings.hasClient())
             return;
 
         try{

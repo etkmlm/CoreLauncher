@@ -30,6 +30,7 @@ import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
 import com.laeben.corelauncher.minecraft.entity.ServerInfo;
 import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.util.ServerHandshake;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
@@ -648,7 +649,7 @@ public class Main extends HandlerController {
         tab.setOnKeyPressed(a -> handler.execute((KeyEvent) new KeyEvent(TAB_KEY_PRESS).setSource(a)));
         tab.getSelectionModel().selectedItemProperty().addListener((a, o, n) -> handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(n)));
 
-        btnPlay.setOnMouseClicked(a -> launchClick(a.isShiftDown()));
+        btnPlay.setOnMouseClicked(a -> launchClick(a.isShiftDown() ? RedownloadSettings.all() : null));
 
         head.setCornerRadius(64, 64, 16);
 
@@ -1013,7 +1014,7 @@ public class Main extends HandlerController {
         return handler;
     }
 
-    public boolean launchClick(boolean cache){
+    public boolean launchClick(RedownloadSettings redownSettings){
         if (running.get()){
             if (selectedProfile != null) {
                 invokeStopRequests();
@@ -1023,7 +1024,7 @@ public class Main extends HandlerController {
             return false;
         }
         else if (selectedProfile != null){
-            launch(selectedProfile, cache, null);
+            launch(selectedProfile, redownSettings, null);
             return true;
         }
         return false;
@@ -1049,11 +1050,11 @@ public class Main extends HandlerController {
     * session end
     * show ui
     * */
-    public void launch(Profile p, boolean cache, ServerInfo server){
+    public void launch(Profile p, RedownloadSettings redownSettings, ServerInfo server){
         var wr = (Loader<?>)p.getLoader();
-        Vanilla.getVanilla().setDisableCache(cache);
-        Modder.getModder().setDisableCache(cache);
-        wr.setDisableCache(cache);
+        Vanilla.getVanilla().useRedownloadSettings(redownSettings);
+        Modder.getModder().useRedownloadSettings(redownSettings);
+        wr.useRedownloadSettings(redownSettings);
         wr.getHandler().addHandler(KEY, this::onGeneralEvent, true);
 
         var task = new Task<>() {
@@ -1078,9 +1079,9 @@ public class Main extends HandlerController {
 
                 Cat.sleep(200);
 
-                wr.setDisableCache(false);
-                Vanilla.getVanilla().setDisableCache(false);
-                Modder.getModder().setDisableCache(false);
+                wr.useRedownloadSettings(null);
+                Vanilla.getVanilla().useRedownloadSettings(null);
+                Modder.getModder().useRedownloadSettings(null);
                 wr.getHandler().removeHandler(KEY);
 
                 return null;
@@ -1096,10 +1097,10 @@ public class Main extends HandlerController {
             UI.runAsync(this::refreshStates);
             if (Configurator.getConfig().hideAfter())
                 UI.getUI().showAll();
-            wr.setDisableCache(false);
+            wr.useRedownloadSettings(null);
             wr.getHandler().removeHandler(KEY);
-            Vanilla.getVanilla().setDisableCache(false);
-            Modder.getModder().setDisableCache(false);
+            Vanilla.getVanilla().useRedownloadSettings(null);
+            Modder.getModder().useRedownloadSettings(null);
             // ---
 
             if (f instanceof NoConnectionException){

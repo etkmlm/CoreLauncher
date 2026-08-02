@@ -55,7 +55,7 @@ public class NeoForge extends Loader<NeoForgeVersion> {
 
     @Override
     public List<NeoForgeVersion> getAllVersions() {
-        if (!cache.isEmpty() && !disableCache)
+        if (!cache.isEmpty() && !redownSettings.hasClient())
             return cache;
 
         try {
@@ -91,7 +91,7 @@ public class NeoForge extends Loader<NeoForgeVersion> {
 
         Vanilla.getVanilla().install(version);
 
-        if (verJsonPath.exists() && !disableCache)
+        if (verJsonPath.exists() && !redownSettings.hasClient())
             return;
 
         String installerUrl = getNeoInstaller(version);

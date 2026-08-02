@@ -50,7 +50,7 @@ public class APIListener {
                         continue;
                     var profile = Main.getMain().getSelectedProfile();
 
-                    Main.getMain().launch(profile, false, new ServerInfo(server, port));
+                    Main.getMain().launch(profile, null, new ServerInfo(server, port));
                 }
             }
         }).start();

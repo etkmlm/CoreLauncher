@@ -65,14 +65,14 @@ public class Vanilla extends Loader<Version> {
 
     @Override
     public List<Version> getAllVersions() {
-        if (_info == null || disableCache)
+        if (_info == null || redownSettings.hasClient())
             reload();
 
         return _info == null ? getOfflineVersions() : _info.versions;
     }
 
     public String getLatestRelease(){
-        if (_info == null || disableCache)
+        if (_info == null || redownSettings.hasClient())
             reload();
 
         return _info == null ? null : _info.latest.release;
@@ -101,7 +101,7 @@ public class Vanilla extends Loader<Version> {
 
             if (stopRequested)
                 return;
-            if (!jsonPath.exists() || disableCache)
+            if (!jsonPath.exists() || redownSettings.hasClient())
             {
                 String vJson = getVersionString(v.id);
                 info = GsonUtil.EMPTY_GSON.fromJson(vJson, Version.class);
@@ -110,14 +110,14 @@ public class Vanilla extends Loader<Version> {
             else
                 info = GsonUtil.EMPTY_GSON.fromJson(jsonPath.read(), Version.class);
 
-            if (!clientPath.exists() || disableCache || !checkLen(info.downloads.client.url, clientPath)){
+            if (!clientPath.exists() || redownSettings.hasClient() || !checkLen(info.downloads.client.url, clientPath)){
                 logState(Loader.CLIENT_DOWNLOAD);
                 Logger.getLogger().logDebug("Downloading client " + v.id + "...");
                 NetUtil.download(info.downloads.client.url, clientPath, false, true);
             }
 
             try{
-                if ((!mappingPath.exists() || disableCache) && info.downloads.client_mappings != null){
+                if ((!mappingPath.exists() || redownSettings.hasClient()) && info.downloads.client_mappings != null){
                     NetUtil.download(info.downloads.client_mappings.url, mappingPath, false, false);
                 }
             }

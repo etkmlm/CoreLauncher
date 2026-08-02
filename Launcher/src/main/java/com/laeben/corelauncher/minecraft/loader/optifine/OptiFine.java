@@ -73,7 +73,7 @@ public class OptiFine extends Loader<OptiVersion> {
     @Override
     public List<OptiVersion> getAllVersions() {
 
-        if (!cache.isEmpty() && !disableCache)
+        if (!cache.isEmpty() && !redownSettings.hasClient())
             return cache;
         cache.clear();
 
@@ -144,7 +144,7 @@ public class OptiFine extends Loader<OptiVersion> {
         String name = v.getJsonName();
         var jsonPath = gameDir.to("versions", name, name + ".json");
         var clientPath = gameDir.to("versions", name, name + ".jar");
-        if (clientPath.exists() && !disableCache)
+        if (clientPath.exists() && !redownSettings.hasClient())
             return;
 
         try{

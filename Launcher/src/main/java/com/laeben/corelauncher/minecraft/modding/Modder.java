@@ -15,6 +15,7 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.loader.entity.LoaderVersion;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
@@ -63,7 +64,7 @@ public class Modder {
     private static Modder instance;
     private final EventHandler<BaseEvent> handler;
 
-    private boolean disableCache = false;
+    private RedownloadSettings redownSettings;
     private boolean stopRequested = false;
 
     public Modder(){
@@ -161,7 +162,7 @@ public class Modder {
             }
 
             var pxx = path.to(a.fileName);
-            if (pxx.exists() && !disableCache && pxx.getSize() > 0)
+            if (pxx.exists() && !redownSettings.hasMods() && pxx.getSize() > 0)
                 continue;
 
             if (a.fileUrl == null){
@@ -312,7 +313,7 @@ public class Modder {
         return new ModInfo(name, type, versionId, loader, version);
     }
 
-    public void installResourcepacks(Profile p, List<Resourcepack> rs) throws NoConnectionException, HttpException, StopException {
+    public void installResourcepacks(Profile p, List<Resourcepack> rs) throws NoConnectionException, StopException {
         var path = p.getPath().to("resourcepacks");
         int i = 0;
         int size = rs.size();
@@ -327,7 +328,7 @@ public class Modder {
                 continue;
             }
             var px = path.to(pack.fileName);
-            if (px.exists() && !disableCache && px.getSize() > 0)
+            if (px.exists() && !redownSettings.hasResourcePacks() && px.getSize() > 0)
                 continue;
 
             if (pack.fileUrl == null){
@@ -485,7 +486,7 @@ public class Modder {
         return result;
     }
 
-    public void installShaders(Profile p, List<Shader> shs) throws NoConnectionException, FileNotFoundException, HttpException, StopException {
+    public void installShaders(Profile p, List<Shader> shs) throws NoConnectionException, FileNotFoundException, StopException {
         var path = p.getPath().to("shaderpacks");
         int i = 0;
         int size = shs.size();
@@ -500,7 +501,7 @@ public class Modder {
                 continue;
             }
             var pxx = path.to(shader.fileName);
-            if (pxx.exists() && !disableCache && pxx.getSize() > 0)
+            if (pxx.exists() && !redownSettings.hasShaders() && pxx.getSize() > 0)
                 continue;
 
             if (shader.fileUrl == null){
@@ -659,8 +660,8 @@ public class Modder {
             Profiler.getProfiler().setProfile(profile.getName(), null);
     }
 
-    public void setDisableCache(boolean mode){
-        this.disableCache = mode;
+    public void useRedownloadSettings(RedownloadSettings settings){
+        this.redownSettings = settings;
     }
 
     public void setStopRequested(boolean val){

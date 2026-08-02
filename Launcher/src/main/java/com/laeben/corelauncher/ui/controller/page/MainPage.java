@@ -606,9 +606,9 @@ public class MainPage extends HandlerController {
             Main.getMain().selectProfile(p);
 
         if (e.getKey().equals(CDockObject.EXECUTE) || Configurator.getConfig().isEnabledSelectAndPlayDock()){
-            boolean v1 = Main.getMain().launchClick(false);
+            boolean v1 = Main.getMain().launchClick(null);
             if (!v1) // if there was a launching process already, it's going to stop, then launch again
-                Main.getMain().launchClick(false);
+                Main.getMain().launchClick(null);
         }
     }
 
