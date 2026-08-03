@@ -4,9 +4,9 @@ import com.google.gson.JsonArray;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.network.Network;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.entity.OS;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 
@@ -25,7 +25,7 @@ public class AzulJavaSource implements JavaSource {
     public JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException {
         String url = String.format("%s?java_version=%s&os=%s&arch=%s&java_package_type=%s&javafx_bundled=false&availability_types=CA&release_status=ga&certifications=tck&page_size=1&archive_type=%s", ZULU, j.majorVersion, getZuluOS(os), arch, JavaManager.PACKAGE_TYPE, os == OS.WINDOWS ? "zip" : "tar_gz");
 
-        var arr = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(url), JsonArray.class);
+        var arr = GsonUtil.EMPTY_GSON.fromJson(Network.urlToString(url), JsonArray.class);
         if (arr == null || arr.isEmpty())
             return null;
         var object = arr.get(0);

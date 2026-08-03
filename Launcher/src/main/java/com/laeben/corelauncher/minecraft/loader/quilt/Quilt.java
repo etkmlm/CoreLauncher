@@ -2,6 +2,8 @@ package com.laeben.corelauncher.minecraft.loader.quilt;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
+import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
@@ -10,7 +12,6 @@ import com.laeben.corelauncher.minecraft.loader.fabric.entity.FabricVersion;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.util.NetUtil;
 
 public class Quilt extends Fabric<QuiltVersion> {
 
@@ -51,7 +52,7 @@ public class Quilt extends Fabric<QuiltVersion> {
         try{
             logState(".quilt.state.download");
             String installer = getInstaller();
-            var path = NetUtil.download(installer, temp.to("quiltinstaller.jar"), false, false);
+            var path = Network.download(NetworkToken.create(installer, temp.to("quiltinstaller.jar"), false), false);
 
             if (stopRequested)
                 throw new StopException();

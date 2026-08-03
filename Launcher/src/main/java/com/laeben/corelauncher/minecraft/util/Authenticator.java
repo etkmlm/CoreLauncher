@@ -5,6 +5,7 @@ import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Account;
@@ -19,7 +20,6 @@ import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.page.WebPage;
 import com.laeben.corelauncher.util.APIListener;
 import com.laeben.corelauncher.util.GsonUtil;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.laeben.corelauncher.util.entity.LogType;
@@ -124,7 +124,7 @@ public class Authenticator {
         Pattern p = Pattern.compile(regex);
         String r = APIListener.createClosePageRequest();
 
-        String s = NetUtil.listenServer(port, r);
+        String s = Network.listenServer(port, r);
         if (s == null)
             return null;
         var m = p.matcher(s);
@@ -132,7 +132,7 @@ public class Authenticator {
     }
 
     private XblInfo extractXbl(String body) throws PerformException, NoConnectionException {
-        final String response = NetUtil.post(OAUTH_TOKEN_URL, body);
+        final String response = Network.post(OAUTH_TOKEN_URL, body);
 
         var json = gson.fromJson(response, JsonObject.class);
 
@@ -181,7 +181,7 @@ public class Authenticator {
                    "TokenType": "JWT"
                 }
                 """.replace("$", token);
-        var prc = gson.fromJson(NetUtil.post(AUTH_URL, json, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        var prc = gson.fromJson(Network.post(AUTH_URL, json, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
 
         String xblToken = prc.get("Token").getAsString();
         var arr = prc.get("DisplayClaims").getAsJsonObject().get("xui").getAsJsonArray().asList().stream().filter(x -> x.getAsJsonObject().has("uhs")).findFirst();
@@ -203,7 +203,7 @@ public class Authenticator {
                 }
                 """.replace("$", xblToken);
 
-        var xstsResponse = gson.fromJson(NetUtil.post(XSTS_URL, xjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        var xstsResponse = gson.fromJson(Network.post(XSTS_URL, xjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
 
         if (xstsResponse.has("XErr")){
             throw new PerformException("authFail", xstsResponse.get("XErr").getAsLong());
@@ -212,7 +212,7 @@ public class Authenticator {
         String authToken = xstsResponse.get("Token").getAsString();
 
         String fjson = "{ \"identityToken\": \"XBL3.0 x=" + hash + ";" + authToken + "\" }";
-        var user = gson.fromJson(NetUtil.post(MC_AUTH_URL, fjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        var user = gson.fromJson(Network.post(MC_AUTH_URL, fjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
 
         String name = null;
         //String name = user.get("username").getAsString();
@@ -236,7 +236,7 @@ public class Authenticator {
 
     private void imitateCodeRedirect(String redirect, String code){
         try {
-            NetUtil.urlToString(redirect + "?code=" + code);
+            Network.urlToString(redirect + "?code=" + code);
         } catch (Exception ignored) {
 
         }
@@ -311,7 +311,7 @@ public class Authenticator {
      * @return valid access token
      */
     public String getAccessToken(Account account) throws NoConnectionException, PerformException, StopException {
-        if (!account.isOnline() || !NetUtil.check()) return TokenInfo.DEFAULT_ACCESS_TOKEN;
+        if (!account.isOnline() || !Network.check()) return TokenInfo.DEFAULT_ACCESS_TOKEN;
 
         TokenInfo tokens = account.getTokens();
 
@@ -362,7 +362,7 @@ public class Authenticator {
 
         JsonObject obj;
         try {
-            String str = NetUtil.urlToString(VERIFY_URL, List.of(RequestParameter.bearer(account.getTokens().getAccessToken())));
+            String str = Network.urlToString(VERIFY_URL, List.of(RequestParameter.bearer(account.getTokens().getAccessToken())));
 
             obj = GsonUtil.DEFAULT_GSON.fromJson(str, JsonObject.class);
         } catch (NoConnectionException | HttpException ignored) {

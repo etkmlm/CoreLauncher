@@ -27,7 +27,7 @@ public abstract class CargoNet {
             Path result = null;
             Exception ex = null;
             try{
-                result = NetUtil.download(parcel);
+                result = NetUtil.download(parcel.toToken());
             }
             catch (Exception e){
                 ex = e;

@@ -1,8 +1,8 @@
 package com.laeben.corelauncher.minecraft;
 
-import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
@@ -22,13 +22,11 @@ import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.core.entity.Path;
 import com.google.gson.*;
 import javafx.scene.image.Image;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -79,7 +77,7 @@ public abstract class Loader<H extends Version> {
 
     protected boolean checkLen(String url, Path file){
         try{
-            return !NetUtil.check() || NetUtil.getContentLength(url) == file.getSize();
+            return !Network.check() || Network.getContentLength(url) == file.getSize();
         }
         catch (NoConnectionException e){
             return true;
@@ -90,9 +88,9 @@ public abstract class Loader<H extends Version> {
         return Configurator.getConfig().getGamePath();
     }
 
-    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude, CargoNet cargo) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
+    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude, CargoNet cargo) {
         Path libPath = libDir.to(asset.path.split("/"));
-        if (!libPath.exists()/* || !checkLen(asset.url, libPath)*/ || redownSettings.hasLibraries())
+        if (!libPath.exists() || (asset.size != 0 && asset.size != libPath.getSize())/* || !checkLen(asset.url, libPath)*/ || redownSettings.hasLibraries())
         {
             var parcel = NetParcel.create(asset.url, libPath, false).setState(asset);
             if (exclude != null)
@@ -184,9 +182,6 @@ public abstract class Loader<H extends Version> {
 
                 Logger.getLogger().logDebug("OK\n");
             }
-            catch (NoConnectionException e){
-                throw e;
-            }
             catch (Exception e){
                 Logger.getLogger().log(LogType.INFO, "ERRLIB: " + lib.name);
                 Logger.getLogger().log(e);
@@ -242,7 +237,7 @@ public abstract class Loader<H extends Version> {
             if (!assetFile.exists()){
                 if (vIndex.url == null)
                     return;
-                assetFile.write(asstText = NetUtil.urlToString(vIndex.url));
+                assetFile.write(asstText = Network.urlToString(vIndex.url));
             }
             else
                 asstText = assetFile.read();
@@ -305,7 +300,7 @@ public abstract class Loader<H extends Version> {
             String url = ASSET_URL + nhash + "/" + hash;
 
             Path path = assetDir.to(nhash, hash);
-            if (!path.exists() || redownSettings.hasAssets()){
+            if (!path.exists() || (asset.size != 0 && path.getSize() != asset.size) || redownSettings.hasAssets()){
                 cargo.add(NetParcel.create(url, path.forceSetDir(false), false).setState(asset));
                 //NetUtil.download(url, path.forceSetDir(false), false, true);
                 continue;

@@ -6,6 +6,8 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
+import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.StrUtil;
@@ -181,7 +183,7 @@ public class Modder {
                 continue;
             }
 
-            if (NetUtil.download(url, path.to(a.fileName), false) != null)
+            if (NetUtil.download(NetworkToken.create(url, path.to(a.fileName), false)) != null)
                 continue;
 
             var up = fill(p, a);
@@ -201,7 +203,7 @@ public class Modder {
             });
 
             try{
-                if (NetUtil.download(up.fileUrl, path.to(up.fileName), false) == null){
+                if (NetUtil.download(NetworkToken.create(up.fileUrl, path.to(up.fileName), false)) == null){
                     var x = Modrinth.getModrinth().getProjectVersions(a.name, List.of(p.getVersionId()), List.of(p.getLoader().getType()));
                     var s = x.stream().flatMap(f -> f.getFiles().stream()).filter(f -> f.filename != null && f.filename.equals(a.fileName)).findFirst();
 
@@ -209,7 +211,7 @@ public class Modder {
                         Logger.getLogger().logDebug("ERR");
                         continue;
                     }
-                    NetUtil.download(s.get().url, path.to(a.fileName), false);
+                    NetUtil.download(NetworkToken.create(s.get().url, path.to(a.fileName), false));
                 }
             }
             catch (HttpException e){
@@ -337,7 +339,7 @@ public class Modder {
             }
 
             try{
-                NetUtil.download(pack.fileUrl, px, false);
+                NetUtil.download(NetworkToken.create(pack.fileUrl, px, false));
             }
             catch (HttpException e){
                 Logger.getLogger().log( LogType.ERROR, "Error while installing resourcepack: " + pack.name);
@@ -371,7 +373,7 @@ public class Modder {
 
             Path zip = null;
             try{
-                zip = NetUtil.download(w.fileUrl, worlds.to(w.fileName), false);
+                zip = NetUtil.download(NetworkToken.create(w.fileUrl, worlds.to(w.fileName), false));
             }
             catch (HttpException e){
                 Logger.getLogger().log( LogType.ERROR, "Error while installing world: " + w.name);
@@ -510,7 +512,7 @@ public class Modder {
             }
 
             try{
-                NetUtil.download(shader.fileUrl, pxx, false, true);
+                Network.download(NetworkToken.create(shader.fileUrl, pxx, false), true);
             }
             catch (HttpException e){
                 Logger.getLogger().log( LogType.ERROR, "Error while installing shader: " + shader.name);

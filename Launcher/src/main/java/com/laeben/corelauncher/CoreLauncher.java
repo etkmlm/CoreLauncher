@@ -5,6 +5,8 @@ import com.laeben.core.entity.LaebenAppFile;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
+import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.api.exception.PerformException;
@@ -29,7 +31,6 @@ import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.util.APIListener;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.core.entity.Path;
@@ -146,10 +147,10 @@ public class CoreLauncher {
         SYSTEM_OS_ARCH = arch == null ? (SYSTEM_OS_64 ? "x64" : "x86") : arch;
         // ------------------
 
-        NetUtil.patchSSL();
+        Network.patchSSL();
 
         if (listArgs.contains("--offline"))
-            NetUtil.setOffline(true);
+            Network.setOffline(true);
 
         var cfg = new Configurator(LAUNCHER_PATH);
 
@@ -344,7 +345,7 @@ public class CoreLauncher {
                 var n = CoreLauncher.LAUNCHER_PATH.to("clnew.jar");
                 new Thread(() -> {
                     try{
-                        NetUtil.download(latest.url(), n, false, true);
+                        Network.download(NetworkToken.create(latest.url(), n, false), true);
                     }
                     catch (NoConnectionException | StopException | HttpException | FileNotFoundException e){
                         return;

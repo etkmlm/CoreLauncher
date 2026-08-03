@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.api.util.entity;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.network.entity.NetworkToken;
 
 public class NetParcel {
     private final String url;
@@ -73,4 +74,8 @@ public class NetParcel {
         return isDone;
     }
 
+
+    public NetworkToken toToken(){
+        return NetworkToken.create(url, path, uon);
+    }
 }

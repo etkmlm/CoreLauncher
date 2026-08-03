@@ -4,11 +4,12 @@ import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.entity.NetworkToken;
+import com.laeben.core.network.requester.RequesterFactory;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.util.NetUtil;
-import com.laeben.core.util.RequesterFactory;
 import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
@@ -124,7 +125,7 @@ public class CurseForge implements ModSource {
         if (overwriteManifest)
             manifest.delete();
         if (!manifest.exists()){
-            var ppp = NetUtil.download(mp.fileUrl, zip, false);
+            var ppp = NetUtil.download(NetworkToken.create(mp.fileUrl, zip, false));
             //Modder.getModder().getHandler().execute(new KeyEvent("stop"));
             zip.extract(tempDir, null);
             assert ppp != null;

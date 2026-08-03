@@ -3,6 +3,8 @@ package com.laeben.corelauncher.minecraft.loader.fabric;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
+import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
@@ -11,7 +13,6 @@ import com.laeben.corelauncher.minecraft.loader.fabric.entity.BaseFabricVersion;
 import com.laeben.corelauncher.minecraft.loader.fabric.entity.FabricVersion;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
@@ -55,7 +56,7 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
     protected String getInstaller() throws NoConnectionException, HttpException {
         if (cacheInstaller != null && !redownSettings.hasClient())
             return cacheInstaller;
-        var arr = gson.fromJson(NetUtil.urlToString(getInstallerUrl()), JsonArray.class);
+        var arr = gson.fromJson(Network.urlToString(getInstallerUrl()), JsonArray.class);
         return cacheInstaller = arr.get(0).getAsJsonObject().get("url").getAsString();
     }
 
@@ -85,7 +86,7 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
 
         try{
             String url = getBaseUrl() + "versions/loader/" + id;
-            var json = gson.fromJson(NetUtil.urlToString(url), JsonArray.class);
+            var json = gson.fromJson(Network.urlToString(url), JsonArray.class);
             if (json == null)
                 return List.of();
 
@@ -123,7 +124,7 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
             logState(".fabric.state.download");
 
             String installer = getInstaller();
-            var path = NetUtil.download(installer, temp.to("quiltinstaller.jar"), false, false);
+            var path = Network.download(NetworkToken.create(installer, temp.to("quiltinstaller.jar"), false), false);
 
             if (stopRequested)
                 throw new StopException();

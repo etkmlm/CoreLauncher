@@ -1,15 +1,6 @@
 package com.laeben.corelauncher.minecraft.loader.entity;
 
 public class RedownloadSettings {
-    private static final RedownloadSettings NONE = new RedownloadSettings();
-    private static final RedownloadSettings ALL = new RedownloadSettings()
-            .client()
-            .libraries()
-            .assets()
-            .mods()
-            .resourcePacks()
-            .shaders();
-
     private boolean client;
     private boolean libraries;
     private boolean assets;
@@ -18,35 +9,41 @@ public class RedownloadSettings {
     private boolean shaders;
 
     public static RedownloadSettings all(){
-        return ALL;
+        return new RedownloadSettings()
+                .client(true)
+                .libraries(true)
+                .assets(true)
+                .mods(true)
+                .resourcePacks(true)
+                .shaders(true);
     }
 
     public static RedownloadSettings none(){
-        return NONE;
+        return new RedownloadSettings();
     }
 
-    public RedownloadSettings client(){
-        this.client = true;
+    public RedownloadSettings client(boolean value){
+        this.client = value;
         return this;
     }
-    public RedownloadSettings libraries(){
-        this.libraries = true;
+    public RedownloadSettings libraries(boolean value){
+        this.libraries = value;
         return this;
     }
-    public RedownloadSettings assets(){
-        this.assets = true;
+    public RedownloadSettings assets(boolean value){
+        this.assets = value;
         return this;
     }
-    public RedownloadSettings mods(){
-        this.mods = true;
+    public RedownloadSettings mods(boolean value){
+        this.mods = value;
         return this;
     }
-    public RedownloadSettings resourcePacks(){
-        this.resourcePacks = true;
+    public RedownloadSettings resourcePacks(boolean value){
+        this.resourcePacks = value;
         return this;
     }
-    public RedownloadSettings shaders(){
-        this.shaders = true;
+    public RedownloadSettings shaders(boolean value){
+        this.shaders = value;
         return this;
     }
 

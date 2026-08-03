@@ -60,7 +60,7 @@ public class NativeManager {
         Logger.getLogger().log(LogType.INFO, "Downloading module %s from package %s with version %s, URL = '%s'".formatted(module, pkg, version, url));
 
         var parcel = NetParcel.create(url, jarPath, false);
-        var path = NetUtil.download(parcel);
+        var path = NetUtil.download(parcel.toToken());
         path.extract(exDir, null);
 
         for(var file : exDir.getFiles()){

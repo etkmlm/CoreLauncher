@@ -1,8 +1,8 @@
 package com.laeben.corelauncher.util;
 
+import com.laeben.core.network.Network;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.Translator;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.minecraft.entity.ServerInfo;
 import com.laeben.corelauncher.ui.controller.Main;
 
@@ -12,13 +12,13 @@ public class APIListener {
 
     public static String createClosePageRequest(){
         var resource = CoreLauncher.class.getResourceAsStream("data/auth.html");
-        return resource == null ? null : NetUtil.inputStreamToString(resource).replace("$turnOff", Translator.translate("auth.ok"));
+        return resource == null ? null : Network.inputStreamToString(resource).replace("$turnOff", Translator.translate("auth.ok"));
     }
 
     public static void start(){
         new Thread(() -> {
             while (true){
-                var n = NetUtil.listenServer(9845, createClosePageRequest());
+                var n = Network.listenServer(9845, createClosePageRequest());
                 if (n == null)
                     continue;
 

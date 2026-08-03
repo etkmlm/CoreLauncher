@@ -6,10 +6,11 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
+import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.exception.PerformException;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
@@ -59,7 +60,7 @@ public class NeoForge extends Loader<NeoForgeVersion> {
             return cache;
 
         try {
-            var all = gson.fromJson(NetUtil.urlToString(NEO_INDEX), JsonObject.class);
+            var all = gson.fromJson(Network.urlToString(NEO_INDEX), JsonObject.class);
             cache.clear();
             cache.addAll(all.get("versions").getAsJsonArray().asList().stream().map(a -> new NeoForgeVersion(a.getAsString())).toList());
             Collections.reverse(cache);
@@ -99,7 +100,7 @@ public class NeoForge extends Loader<NeoForgeVersion> {
         try{
             logState(".forge.state.neodownload");
             var path = Configurator.getConfig().getTemporaryFolder();
-            path = NetUtil.download(installerUrl, path, true, false);
+            path = Network.download(NetworkToken.create(installerUrl, path, true), false);
 
             if (stopRequested)
                 throw new StopException();

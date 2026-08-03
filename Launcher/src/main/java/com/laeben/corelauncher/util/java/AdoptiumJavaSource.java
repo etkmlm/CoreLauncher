@@ -4,9 +4,9 @@ import com.google.gson.JsonArray;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.network.Network;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.entity.OS;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 
@@ -24,7 +24,7 @@ public class AdoptiumJavaSource implements JavaSource {
 
         String url = String.format("%s%d/hotspot?os=%s&image_type=%s&architecture=%s", ADOPTIUM, j.majorVersion, os.getName(), JavaManager.PACKAGE_TYPE, arch);
 
-        var arr = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(url), JsonArray.class);
+        var arr = GsonUtil.EMPTY_GSON.fromJson(Network.urlToString(url), JsonArray.class);
         if (arr == null || arr.isEmpty())
             return null;
         var object = arr.get(0);

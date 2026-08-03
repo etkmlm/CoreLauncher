@@ -3,13 +3,14 @@ package com.laeben.corelauncher.minecraft.loader;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
+import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.entity.MainInfo;
 import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.entity.Path;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class Vanilla extends Loader<Version> {
         var v = getAllVersions().stream().filter(x -> x.checkId(id)).findFirst();
         return v.map(version -> {
             try{
-                return NetUtil.urlToString(version.url);
+                return Network.urlToString(version.url);
             }
             catch (NoConnectionException | HttpException e){
                 return null;
@@ -113,12 +114,12 @@ public class Vanilla extends Loader<Version> {
             if (!clientPath.exists() || redownSettings.hasClient() || !checkLen(info.downloads.client.url, clientPath)){
                 logState(Loader.CLIENT_DOWNLOAD);
                 Logger.getLogger().logDebug("Downloading client " + v.id + "...");
-                NetUtil.download(info.downloads.client.url, clientPath, false, true);
+                Network.download(NetworkToken.create(info.downloads.client.url, clientPath, false), true);
             }
 
             try{
                 if ((!mappingPath.exists() || redownSettings.hasClient()) && info.downloads.client_mappings != null){
-                    NetUtil.download(info.downloads.client_mappings.url, mappingPath, false, false);
+                    Network.download(NetworkToken.create(info.downloads.client_mappings.url, mappingPath, false), false);
                 }
             }
             catch (Exception ignored){
@@ -142,7 +143,7 @@ public class Vanilla extends Loader<Version> {
     public void reload(){
         _info = null;
         try{
-            _info = GsonUtil.EMPTY_GSON.fromJson(NetUtil.urlToString(INFO_URL), MainInfo.class);
+            _info = GsonUtil.EMPTY_GSON.fromJson(Network.urlToString(INFO_URL), MainInfo.class);
         }
         catch (NoConnectionException ignored){
 

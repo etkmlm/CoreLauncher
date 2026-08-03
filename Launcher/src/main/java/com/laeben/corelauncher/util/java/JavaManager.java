@@ -2,12 +2,13 @@ package com.laeben.corelauncher.util.java;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
+import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.OS;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
@@ -178,7 +179,7 @@ public class JavaManager {
             if (Main.getMain() != null)
                 Main.getMain().setPrimaryStatus(Translator.translateFormat("java.downloading", info.name()));
 
-            var file = NetUtil.download(info.url(), targetDir, true, true);
+            var file = Network.download(NetworkToken.create(info.url(), targetDir, true), true);
 
             if (existsPath != null) // handling existing java version before extracting the file
                 existsPath.delete();

@@ -4,8 +4,8 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
 import com.laeben.core.util.Cat;
-import com.laeben.core.util.NetUtils;
 import com.laeben.core.util.StrUtil;
 import com.laeben.core.util.events.*;
 import com.laeben.corelauncher.CoreLauncher;
@@ -21,7 +21,6 @@ import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.Controller;
 import com.laeben.corelauncher.api.ui.entity.FocusLimiter;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
@@ -34,6 +33,7 @@ import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.util.ServerHandshake;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
+import com.laeben.corelauncher.ui.controller.main.CLaunchConfigurator;
 import com.laeben.corelauncher.ui.controller.page.*;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.dialog.DColorPicker;
@@ -158,7 +158,8 @@ public class Main extends HandlerController {
     private final CMenu tabMenu;
     private CTab tabMenuContext;
 
-    public CMenu cMenu;
+    @FXML
+    private CMenu cMenu;
 
     private final EventHandler<KeyEvent> handler;
 
@@ -205,7 +206,7 @@ public class Main extends HandlerController {
         registerHandler(Launcher.getLauncher().getHandler(), this::onGeneralEvent, true);
         registerHandler(Vanilla.getVanilla().getHandler(), this::onGeneralEvent, true);
         registerHandler(Modder.getModder().getHandler(), this::onGeneralEvent, true);
-        registerHandler(NetUtil.getHandler(), this::onProgress, false);
+        registerHandler(Network.getHandler(), this::onProgress, false);
         registerHandler(Configurator.getConfigurator().getHandler(), a -> {
             switch (a.getKey()) {
                 case Configurator.BACKGROUND_CHANGE -> setBackground(Configurator.getConfig().getBackgroundImage());
@@ -290,6 +291,279 @@ public class Main extends HandlerController {
         instance = this;
     }
 
+    public static Main getMain(){
+        return instance;
+    }
+
+    /* LAUNCH */
+
+    public boolean launchClick(RedownloadSettings redownSettings){
+        if (running.get()){
+            if (selectedProfile != null) {
+                invokeStopRequests();
+                Discord.getDiscord().setActivity(Activity.setForIdling());
+            }
+            running.set(false);
+            return false;
+        }
+        else if (selectedProfile != null){
+            launch(selectedProfile, redownSettings, null);
+            return true;
+        }
+        return false;
+    }
+
+    /*
+     * revoke stop requests
+     * - prepare
+     * * throw stop exception
+     * clear status
+     * - launch (includes start and end session event)
+     * enable caches and remove handler
+     *
+     * in case of exception
+     * refresh states
+     * show ui
+     * enable caches and remove handler
+     *
+     * session start
+     * refresh states
+     * hide ui
+     *
+     * session end
+     * show ui
+     * */
+    public void launch(Profile p, RedownloadSettings redownSettings, ServerInfo server){
+        var wr = (Loader<?>)p.getLoader();
+        Vanilla.getVanilla().useRedownloadSettings(redownSettings);
+        Modder.getModder().useRedownloadSettings(redownSettings);
+        wr.useRedownloadSettings(redownSettings);
+        wr.getHandler().addHandler(KEY, this::onGeneralEvent, true);
+
+        var task = new Task<>() {
+            @Override
+            protected Object call() throws NoConnectionException, StopException, HttpException, FileNotFoundException, PerformException, VersionNotFoundException {
+                revokeStopRequests();
+
+                Launcher.getLauncher().prepare(p);
+                Cat.sleep(200);
+
+                if (wr.isStopRequested())
+                    throw new StopException();
+
+                UI.runAsync(Main.this::clearStatus);
+
+                // includes session start event
+                // announce -> set discord activity -> hide ui
+
+                // includes session end event
+                // announce -> set discord activity -> show ui
+                Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p).includeServer(server));
+
+                Cat.sleep(200);
+
+                wr.useRedownloadSettings(null);
+                Vanilla.getVanilla().useRedownloadSettings(null);
+                Modder.getModder().useRedownloadSettings(null);
+                wr.getHandler().removeHandler(KEY);
+
+                return null;
+            }
+        };
+
+        task.setOnFailed(a -> {
+            var f = a.getSource().getException();
+
+            Cat.sleep(500);
+
+            // reset them again because it failed
+            UI.runAsync(this::refreshStates);
+            if (Configurator.getConfig().hideAfter())
+                UI.getUI().showAll();
+            wr.useRedownloadSettings(null);
+            wr.getHandler().removeHandler(KEY);
+            Vanilla.getVanilla().useRedownloadSettings(null);
+            Modder.getModder().useRedownloadSettings(null);
+            // ---
+
+            if (f instanceof NoConnectionException){
+                announceLater(Translator.translate("error.oops"),Translator.translate("error.connection"), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
+                //UI.runAsync(() -> setPrimaryStatus());
+            }
+            else if (f instanceof VersionNotFoundException e){
+                announceLater(Translator.translate("error.oops"), Translator.translateFormat("error.noVersion", e.getMessage()), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
+                //UI.runAsync(() -> setPrimaryStatus());
+            }
+            else if (f instanceof StopException){
+                //
+            }
+            else if (f instanceof PerformException pe){
+                announceLater(Translator.translate("error.oops"), pe.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
+                //UI.runAsync(() -> setPrimaryStatus(pe.getMessage()));
+            }
+            else if (f instanceof Exception e){
+                Logger.getLogger().log(e);
+                announceLater(Translator.translate("error.unknown"),e.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(4000));
+            }
+        });
+
+        running.set(true);
+
+        new Thread(task).start();
+    }
+
+    /* ANNOUNCEMENT */
+
+    /**
+     * Makes a regular announcement.
+     */
+    public void announceLater(String title, String content, Announcement.AnnouncementType type, Duration duration){
+        UI.runAsync(() -> announcer.announce(new Announcement(title, content, type), duration));
+    }
+
+    /**
+     * Makes an announcement of a throwable with the given duration.
+     * @param exception target exception
+     * @param duration announcement duration
+     * @return false if the exception was unkown
+     */
+    public boolean announceLater(Throwable exception, Duration duration){
+        String msg;
+
+        boolean state = true;
+
+        if (exception instanceof StopException)
+            return state;
+        else if (state = exception instanceof NoConnectionException)
+            msg = Translator.translate("error.connection");
+        else
+            msg = Translator.translate("error.unknown");
+        UI.runAsync(() -> announcer.announce(new Announcement(Translator.translate("error.oops"), msg, Announcement.AnnouncementType.ERROR), duration));
+        return state;
+    }
+
+    /* TABS */
+
+    private ScrollPane getScroll(){
+        var pane = new ScrollPane();
+        pane.getStyleClass().add("main-scroll");
+        pane.setStyle("-fx-background-color: -tab-fill; -fx-border-radius: 0 16px 16px 16px;-fx-background-radius: 0 16px 16px 16px;");
+        pane.setFitToWidth(true);
+        pane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        pane.setFitToHeight(true);
+        addRegisteredEventFilter(EventFilter.node(pane, ScrollEvent.SCROLL, a -> {
+            if (preventScrollFilter)
+                return;
+
+            double val = a.getDeltaY() * 0.001 * (pane.getHeight() * 1 / 800);
+            pane.setVvalue(pane.getVvalue() - val);
+        }));
+        return pane;
+    }
+    public void closeTab(int index){
+        var t = tab.getTabs().get(index);
+        if (t instanceof CTab ct){
+            removeRegisteredEventFilter(ct.getContent());
+            ct.dispose();
+        }
+        tab.getTabs().remove(t);
+    }
+    public void closeTab(Tab tab){
+        if (tab instanceof CTab ct){
+            removeRegisteredEventFilter(ct.getContent());
+            ct.dispose();
+        }
+        getTab().getTabs().remove(tab);
+    }
+    public void relocateTab(int i1, int i2){
+        int limit = tab.getTabs().size() - 1;
+        if (i2 > limit || i1 > limit)
+            return;
+        var tabs = new ArrayList<>(tab.getTabs());
+        Collections.swap(tabs, i1, i2);
+        tab.getTabs().setAll(tabs);
+    }
+
+    /**
+     * Replaces the old tab with the new one.
+     * @param from old controller
+     * @param fxml target layout path
+     * @param title target title
+     * @param closable is the new tab closable
+     * @param type type instance
+     * @return the controller of the new tab
+     * @param <T> type of the new controller
+     */
+    public <T extends Controller> T replaceTab(Controller from, String fxml, String title, boolean closable, Class<T> type){
+        var t = tab.getTabs().stream().filter(x -> x instanceof CTab ct && from.equals(ct.getController())).findFirst();
+        int index = t.map(tab.getTabs()::indexOf).orElse(-1);
+        if (index != -1)
+            closeTab(index);
+
+        var t1 = createTab(fxml, title, closable);
+
+        tab.getTabs().add(index, t1);
+        tab.getSelectionModel().select(t1);
+
+        //handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t1));
+
+        ExtensionWrapper.getWrapper().fireEvent(API_TAB_LOAD, t1);
+
+        return (T)t1.getController();
+    }
+
+    /**
+     * Creates a tab, and adds it to the pane.
+     * @param fxml target layout path
+     * @param title target title
+     * @param closable is the tab closable
+     * @param type type instance
+     * @return controller
+     * @param <T> type of the controller
+     */
+    public <T extends Controller> T addTab(String fxml, String title, boolean closable, Class<T> type){
+        var t = tab.getTabs().stream().filter(x -> Objects.equals(x.getText(), title)).findFirst().orElse(null);
+
+        if (t instanceof CTab ct){
+            tab.getSelectionModel().select(ct);
+            return (T)ct.getController();
+        }
+
+        var t1 = createTab(fxml, title, closable);
+
+        tab.getTabs().add(t1);
+
+        tab.getSelectionModel().select(t1);
+        t1.getController().onShown();
+
+        //handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t1));
+
+        ExtensionWrapper.getWrapper().fireEvent(API_TAB_LOAD, t1);
+
+        return (T)t1.getController();
+    }
+
+    private CTab createTab(String fxml, String title, boolean closable){
+        var t = new CTab();
+        t.setClosable(closable);
+        t.setText(title);
+
+        var n = UI.load(CoreLauncherFX.class.getResource("layout/" + fxml + ".fxml"));
+
+        var scroll = getScroll();
+        scroll.setContent(n.getRootNode());
+        t.setContent(scroll);
+        t.setOnClosed(a -> {
+            removeRegisteredEventFilter(scroll);
+            t.dispose();
+        });
+        t.setController(n.setNode(scroll).setParentObject(t).setStage(getStage()));
+
+        return t;
+    }
+
+    /* STATUS */
+
     /**
      * Revoke stop requests and set running to false.
      */
@@ -310,7 +584,7 @@ public class Main extends HandlerController {
             selectedProfile.getLoader().setStopRequested(true);
         Vanilla.getVanilla().setStopRequested(true);
         Modder.getModder().setStopRequested(true);
-        NetUtil.stop();
+        Network.stop();
     }
 
     /**
@@ -431,6 +705,185 @@ public class Main extends HandlerController {
         return spl.length == 1 ? Translator.translate(spl[0]) : Translator.translateFormat(spl[0], Arrays.stream(spl).skip(1).map(x -> (Object) x).toList());*/
     }
 
+    private void onProgress(ProgressEvent e){
+        if (!running.get())
+            running.set(true);
+        if (e.getKey().equals(Network.DOWNLOAD)){
+            setSecondaryStatus(DisplayUtil.parseDownloadProgress(e.getCurrent()) + " / " + DisplayUtil.parseDownloadProgress(e.getTotal()));
+        }
+        else{
+            setSecondaryStatus(e.getCurrent() + e.getKey() + " / " + e.getTotal() + e.getKey());
+        }
+
+        setProgress(e.getProgress());
+    }
+    public void setProgress(double progress){
+        if (!showingProgress){
+            showProgress();
+        }
+        if (progress < 0){
+            hideProgress();
+            progress = 0;
+        }
+
+
+        percentage = progress;
+        statusNeedsUpdate = true;
+        //this.progress.setProgress(progress);
+    }
+    public void showProgress(){
+        this.progress.setProgress(0);
+        menuTranslate.playFromStart();
+        prgTranslate.playFromStart();
+        showingProgress = true;
+    }
+    public void hideProgress(){
+        menuTranslate.playFromStart();
+        prgTranslate.playFromStart();
+        menuTranslate.jumpTo(Duration.ZERO);
+        prgTranslate.jumpTo(Duration.ZERO);
+        menuTranslate.stop();
+        prgTranslate.stop();
+        showingProgress = false;
+    }
+
+    /**
+     * Clears the status object.
+     */
+    public void clearStatus(){
+        Arrays.fill(status, null);
+        lblStatus.setText(null);
+
+        setProgress(-1);
+    }
+
+    /**
+     * Triggers the update of the status.
+     */
+    public void updateStatus(){
+        if (!running.get())
+            return;
+
+        String s1 = status[0];
+        String s2 = status[1];
+
+        String stat = null;
+        if (s1 != null && !s1.isBlank())
+            stat = s1;
+
+        if (s2 != null && !s2.isBlank())
+            stat = stat == null ? s2 : stat + "\n" + s2;
+
+        lblStatus.setText(stat);
+        progress.setProgress(percentage);
+    }
+
+    /**
+     * Sets the primary status.
+     * @param text Status text.
+     */
+    public void setPrimaryStatus(String text){
+        status[0] = text;
+        statusNeedsUpdate = true;
+        //updateStatus();
+    }
+
+    /**
+     * Sets the secondary status.
+     * @param text Status text.
+     */
+    public void setSecondaryStatus(String text){
+        status[1] = text;
+        statusNeedsUpdate = true;
+        //updateStatus();
+    }
+
+    /* GETTERS & SETTERS */
+
+    private CLaunchConfigurator generateLaunchConfigurator(){
+        var launchConfigurator = new CLaunchConfigurator(selectedProfile != null && selectedProfile.getLoader().getType().isNative());
+        launchConfigurator.setOnSubmitted(a -> launchClick(a.getRedownSettings()));
+        launchConfigurator.setOnHiding(a -> btnPlay.setDisable(false));
+        launchConfigurator.setOnShowing(a -> btnPlay.setDisable(true));
+        return launchConfigurator;
+    }
+
+    public void selectProfile(Profile p){
+        selectedProfile = p;
+
+        UI.runAsync(() -> {
+            try{
+                if (p != null && p.isValid()){
+                    lblProfileName.setText(p.getName());
+                    lblProfileDescription.setText(p.getVersionId() + " " + StrUtil.toUpperFirst(p.getLoader().getType().getIdentifier()));
+                    setUser(p.getUser() == null ? Configurator.getConfig().getUser().reload() : p.getUser().reload());
+                }
+                else{
+                    lblProfileName.setText(null);
+                    lblProfileDescription.setText(null);
+                    setUser(Configurator.getConfig().getUser().reload());
+                }
+
+                Configurator.getConfig().setLastSelectedProfile(p);
+                Configurator.save();
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
+        });
+
+    }
+    public Profile getSelectedProfile(){
+        return selectedProfile;
+    }
+
+    private void setUser(Account account) {
+        //head.setImage(account.getHead());
+        head.setHead(account.getHead());
+        head.setDecoration(account.getHeadDecoration());
+        Tooltip.install(head, new Tooltip(account.getUsername()));
+    }
+
+    public Bounds getTabBounds(){
+        return tab.localToScreen(tab.getBoundsInLocal());
+    }
+
+    public void setFocusLimiter(FocusLimiter limit){
+        focusLimiter = limit;
+    }
+
+    public static AnchorPane getExternalLayer(CTab tab){
+        var c = new AnchorPane();
+        var f = (ScrollPane)tab.getContent();
+        c.getChildren().add(f);
+        ControlUtil.setAnchorFill(f);
+
+        return c;
+    }
+
+    private void setBackground(Path path) {
+        try {
+            var background = new Background(new BackgroundImage(
+                    new Image(path.toFile().toURI().toURL().toExternalForm()),
+                    null,
+                    null,
+                    BackgroundPosition.CENTER,
+                    new BackgroundSize(root.getWidth(),root.getHeight(), false, false, true, true)));
+            double r = 10;
+            double w = 1300;
+            double h = 800;
+            root.setStyle("-fx-shape:\"M " + r + " 0 " + " L " + (w - r) + " " + "0" + " Q " + w + " 0 " + w + " " + r + " L " + w + " " + (h - r) + " Q " + w + " " + h + " " + (w - r) + " " + h + " L " + r + " " + h + " Q 0 " + h + " 0 " + (h - r) + " L 0 " + r + " Q 0 0 " + r + " 0 Z\"");
+            root.setBackground(background);
+        } catch (Exception e) {
+            root.setBackground(null);
+            root.setStyle(null);
+        }
+    }
+
+    public EventHandler<KeyEvent> getHandler(){
+        return handler;
+    }
+
     public TabPane getTab(){
         return tab;
     }
@@ -443,33 +896,15 @@ public class Main extends HandlerController {
         return announcer;
     }
 
-    /**
-     * Makes a regular announcement.
-     */
-    public void announceLater(String title, String content, Announcement.AnnouncementType type, Duration duration){
-        UI.runAsync(() -> announcer.announce(new Announcement(title, content, type), duration));
+    public void setDialogLayer(boolean v){
+        dialogLayer.setVisible(v);
     }
 
-    /**
-     * Makes an announcement of a throwable with the given duration.
-     * @param exception target exception
-     * @param duration announcement duration
-     * @return false if the exception was unkown
-     */
-    public boolean announceLater(Throwable exception, Duration duration){
-        String msg;
-
-        boolean state = true;
-
-        if (exception instanceof StopException)
-            return state;
-        else if (state = exception instanceof NoConnectionException)
-            msg = Translator.translate("error.connection");
-        else
-            msg = Translator.translate("error.unknown");
-        UI.runAsync(() -> announcer.announce(new Announcement(Translator.translate("error.oops"), msg, Announcement.AnnouncementType.ERROR), duration));
-        return state;
+    public void setPreventScrollFilter(boolean value){
+        this.preventScrollFilter = value;
     }
+
+    /* EVENT HANDLING */
 
     private void onGeneralEvent(BaseEvent e) {
         if (e instanceof ProgressEvent p)
@@ -554,50 +989,6 @@ public class Main extends HandlerController {
         }
     }
 
-    public static Main getMain(){
-        return instance;
-    }
-
-    public void selectProfile(Profile p){
-        selectedProfile = p;
-
-        UI.runAsync(() -> {
-            try{
-                if (p != null && p.isValid()){
-                    lblProfileName.setText(p.getName());
-                    lblProfileDescription.setText(p.getVersionId() + " " + StrUtil.toUpperFirst(p.getLoader().getType().getIdentifier()));
-                    setUser(p.getUser() == null ? Configurator.getConfig().getUser().reload() : p.getUser().reload());
-                }
-                else{
-                    lblProfileName.setText(null);
-                    lblProfileDescription.setText(null);
-                    setUser(Configurator.getConfig().getUser().reload());
-                }
-
-                Configurator.getConfig().setLastSelectedProfile(p);
-                Configurator.save();
-            }
-            catch (Exception e){
-                Logger.getLogger().log(e);
-            }
-        });
-
-    }
-    public Profile getSelectedProfile(){
-        return selectedProfile;
-    }
-
-    private void setUser(Account account) {
-        //head.setImage(account.getHead());
-        head.setHead(account.getHead());
-        head.setDecoration(account.getHeadDecoration());
-        Tooltip.install(head, new Tooltip(account.getUsername()));
-    }
-
-    public Bounds getTabBounds(){
-        return tab.localToScreen(tab.getBoundsInLocal());
-    }
-
     @Override
     public void preInit(){
         var btnMenu = new CButton();
@@ -649,45 +1040,19 @@ public class Main extends HandlerController {
         tab.setOnKeyPressed(a -> handler.execute((KeyEvent) new KeyEvent(TAB_KEY_PRESS).setSource(a)));
         tab.getSelectionModel().selectedItemProperty().addListener((a, o, n) -> handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(n)));
 
-        btnPlay.setOnMouseClicked(a -> launchClick(a.isShiftDown() ? RedownloadSettings.all() : null));
+        btnPlay.setOnMouseClicked(a -> {
+            if ((a.getButton() == MouseButton.SECONDARY || a.isShiftDown()) && !running.get()){
+                generateLaunchConfigurator().show(btnPlay, 16, 16);
+            }
+            else{
+                launchClick(null);
+            }
+        });
 
         head.setCornerRadius(64, 64, 16);
 
         instructor.setPopup(stepPopup);
     }
-
-    public void setFocusLimiter(FocusLimiter limit){
-        focusLimiter = limit;
-    }
-
-    public static AnchorPane getExternalLayer(CTab tab){
-        var c = new AnchorPane();
-        var f = (ScrollPane)tab.getContent();
-        c.getChildren().add(f);
-        ControlUtil.setAnchorFill(f);
-
-        return c;
-    }
-
-    private void setBackground(Path path) {
-        try {
-            var background = new Background(new BackgroundImage(
-                    new Image(path.toFile().toURI().toURL().toExternalForm()),
-                    null,
-                    null,
-                    BackgroundPosition.CENTER,
-                    new BackgroundSize(root.getWidth(),root.getHeight(), false, false, true, true)));
-            double r = 10;
-            double w = 1300;
-            double h = 800;
-            root.setStyle("-fx-shape:\"M " + r + " 0 " + " L " + (w - r) + " " + "0" + " Q " + w + " 0 " + w + " " + r + " L " + w + " " + (h - r) + " Q " + w + " " + h + " " + (w - r) + " " + h + " L " + r + " " + h + " Q 0 " + h + " 0 " + (h - r) + " L 0 " + r + " Q 0 0 " + r + " 0 Z\"");
-            root.setBackground(background);
-        } catch (Exception e) {
-            root.setBackground(null);
-            root.setStyle(null);
-        }
-    }
-
     @Override
     public void init() {
         addRegisteredEventFilter(EventFilter.node(root, MouseEvent.ANY, (a) -> {
@@ -795,348 +1160,6 @@ public class Main extends HandlerController {
             getStage().setMaximized(true);
         }
     }
-
-    /* TABS */
-    private ScrollPane getScroll(){
-        var pane = new ScrollPane();
-        pane.getStyleClass().add("main-scroll");
-        pane.setStyle("-fx-background-color: -tab-fill; -fx-border-radius: 0 16px 16px 16px;-fx-background-radius: 0 16px 16px 16px;");
-        pane.setFitToWidth(true);
-        pane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        pane.setFitToHeight(true);
-        addRegisteredEventFilter(EventFilter.node(pane, ScrollEvent.SCROLL, a -> {
-            if (preventScrollFilter)
-                return;
-
-            double val = a.getDeltaY() * 0.001 * (pane.getHeight() * 1 / 800);
-            pane.setVvalue(pane.getVvalue() - val);
-        }));
-        return pane;
-    }
-    public void closeTab(int index){
-        var t = tab.getTabs().get(index);
-        if (t instanceof CTab ct){
-            removeRegisteredEventFilter(ct.getContent());
-            ct.dispose();
-        }
-        tab.getTabs().remove(t);
-    }
-    public void closeTab(Tab tab){
-        if (tab instanceof CTab ct){
-            removeRegisteredEventFilter(ct.getContent());
-            ct.dispose();
-        }
-        getTab().getTabs().remove(tab);
-    }
-    public void relocateTab(int i1, int i2){
-        int limit = tab.getTabs().size() - 1;
-        if (i2 > limit || i1 > limit)
-            return;
-        var tabs = new ArrayList<>(tab.getTabs());
-        Collections.swap(tabs, i1, i2);
-        tab.getTabs().setAll(tabs);
-    }
-
-    /**
-     * Replaces the old tab with the new one.
-     * @param from old controller
-     * @param fxml target layout path
-     * @param title target title
-     * @param closable is the new tab closable
-     * @param type type instance
-     * @return the controller of the new tab
-     * @param <T> type of the new controller
-     */
-    public <T extends Controller> T replaceTab(Controller from, String fxml, String title, boolean closable, Class<T> type){
-        var t = tab.getTabs().stream().filter(x -> x instanceof CTab ct && from.equals(ct.getController())).findFirst();
-        int index = t.map(tab.getTabs()::indexOf).orElse(-1);
-        if (index != -1)
-            closeTab(index);
-
-        var t1 = createTab(fxml, title, closable);
-
-        tab.getTabs().add(index, t1);
-        tab.getSelectionModel().select(t1);
-
-        //handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t1));
-
-        ExtensionWrapper.getWrapper().fireEvent(API_TAB_LOAD, t1);
-
-        return (T)t1.getController();
-    }
-
-    /**
-     * Creates a tab, and adds it to the pane.
-     * @param fxml target layout path
-     * @param title target title
-     * @param closable is the tab closable
-     * @param type type instance
-     * @return controller
-     * @param <T> type of the controller
-     */
-    public <T extends Controller> T addTab(String fxml, String title, boolean closable, Class<T> type){
-        var t = tab.getTabs().stream().filter(x -> Objects.equals(x.getText(), title)).findFirst().orElse(null);
-
-        if (t instanceof CTab ct){
-            tab.getSelectionModel().select(ct);
-            return (T)ct.getController();
-        }
-
-        var t1 = createTab(fxml, title, closable);
-
-        tab.getTabs().add(t1);
-
-        tab.getSelectionModel().select(t1);
-        t1.getController().onShown();
-
-        //handler.execute((KeyEvent) new KeyEvent(TAB_FOCUS_CHANGE).setSource(t1));
-
-        ExtensionWrapper.getWrapper().fireEvent(API_TAB_LOAD, t1);
-
-        return (T)t1.getController();
-    }
-
-    private CTab createTab(String fxml, String title, boolean closable){
-        var t = new CTab();
-        t.setClosable(closable);
-        t.setText(title);
-
-        var n = UI.load(CoreLauncherFX.class.getResource("layout/" + fxml + ".fxml"));
-
-        var scroll = getScroll();
-        scroll.setContent(n.getRootNode());
-        t.setContent(scroll);
-        t.setOnClosed(a -> {
-            removeRegisteredEventFilter(scroll);
-            t.dispose();
-        });
-        t.setController(n.setNode(scroll).setParentObject(t).setStage(getStage()));
-
-        return t;
-    }
-
-    /* TABS END */
-
-    private void onProgress(ProgressEvent e){
-        if (!running.get())
-            running.set(true);
-        if (e.getKey().equals(NetUtils.DOWNLOAD)){
-            setSecondaryStatus(DisplayUtil.parseDownloadProgress(e.getCurrent()) + " / " + DisplayUtil.parseDownloadProgress(e.getTotal()));
-        }
-        else{
-            setSecondaryStatus(e.getCurrent() + e.getKey() + " / " + e.getTotal() + e.getKey());
-        }
-
-        setProgress(e.getProgress());
-    }
-    public void setProgress(double progress){
-        if (!showingProgress){
-            showProgress();
-        }
-        if (progress < 0){
-            hideProgress();
-            progress = 0;
-        }
-
-
-        percentage = progress;
-        statusNeedsUpdate = true;
-        //this.progress.setProgress(progress);
-    }
-    public void showProgress(){
-        this.progress.setProgress(0);
-        menuTranslate.playFromStart();
-        prgTranslate.playFromStart();
-        showingProgress = true;
-    }
-    public void hideProgress(){
-        menuTranslate.playFromStart();
-        prgTranslate.playFromStart();
-        menuTranslate.jumpTo(Duration.ZERO);
-        prgTranslate.jumpTo(Duration.ZERO);
-        menuTranslate.stop();
-        prgTranslate.stop();
-        showingProgress = false;
-    }
-
-    /**
-     * Clears the status object.
-     */
-    public void clearStatus(){
-        Arrays.fill(status, null);
-        lblStatus.setText(null);
-
-        setProgress(-1);
-    }
-
-    /**
-     * Triggers the update of the status.
-     */
-    public void updateStatus(){
-        if (!running.get())
-            return;
-
-        String s1 = status[0];
-        String s2 = status[1];
-
-        String stat = null;
-        if (s1 != null && !s1.isBlank())
-            stat = s1;
-
-        if (s2 != null && !s2.isBlank())
-            stat = stat == null ? s2 : stat + "\n" + s2;
-
-        lblStatus.setText(stat);
-        progress.setProgress(percentage);
-    }
-
-    /**
-     * Sets the primary status.
-     * @param text Status text.
-     */
-    public void setPrimaryStatus(String text){
-        status[0] = text;
-        statusNeedsUpdate = true;
-        //updateStatus();
-    }
-
-    /**
-     * Sets the secondary status.
-     * @param text Status text.
-     */
-    public void setSecondaryStatus(String text){
-        status[1] = text;
-        statusNeedsUpdate = true;
-        //updateStatus();
-    }
-
-    public EventHandler<KeyEvent> getHandler(){
-        return handler;
-    }
-
-    public boolean launchClick(RedownloadSettings redownSettings){
-        if (running.get()){
-            if (selectedProfile != null) {
-                invokeStopRequests();
-                Discord.getDiscord().setActivity(Activity.setForIdling());
-            }
-            running.set(false);
-            return false;
-        }
-        else if (selectedProfile != null){
-            launch(selectedProfile, redownSettings, null);
-            return true;
-        }
-        return false;
-    }
-
-    /*
-    * revoke stop requests
-    * - prepare
-    * * throw stop exception
-    * clear status
-    * - launch (includes start and end session event)
-    * enable caches and remove handler
-    *
-    * in case of exception
-    * refresh states
-    * show ui
-    * enable caches and remove handler
-    *
-    * session start
-    * refresh states
-    * hide ui
-    *
-    * session end
-    * show ui
-    * */
-    public void launch(Profile p, RedownloadSettings redownSettings, ServerInfo server){
-        var wr = (Loader<?>)p.getLoader();
-        Vanilla.getVanilla().useRedownloadSettings(redownSettings);
-        Modder.getModder().useRedownloadSettings(redownSettings);
-        wr.useRedownloadSettings(redownSettings);
-        wr.getHandler().addHandler(KEY, this::onGeneralEvent, true);
-
-        var task = new Task<>() {
-            @Override
-            protected Object call() throws NoConnectionException, StopException, HttpException, FileNotFoundException, PerformException, VersionNotFoundException {
-                revokeStopRequests();
-
-                Launcher.getLauncher().prepare(p);
-                Cat.sleep(200);
-
-                if (wr.isStopRequested())
-                    throw new StopException();
-
-                UI.runAsync(Main.this::clearStatus);
-
-                // includes session start event
-                // announce -> set discord activity -> hide ui
-
-                // includes session end event
-                // announce -> set discord activity -> show ui
-                Launcher.getLauncher().launch(ExecutionInfo.fromProfile(p).includeServer(server));
-
-                Cat.sleep(200);
-
-                wr.useRedownloadSettings(null);
-                Vanilla.getVanilla().useRedownloadSettings(null);
-                Modder.getModder().useRedownloadSettings(null);
-                wr.getHandler().removeHandler(KEY);
-
-                return null;
-            }
-        };
-
-        task.setOnFailed(a -> {
-            var f = a.getSource().getException();
-
-            Cat.sleep(500);
-
-            // reset them again because it failed
-            UI.runAsync(this::refreshStates);
-            if (Configurator.getConfig().hideAfter())
-                UI.getUI().showAll();
-            wr.useRedownloadSettings(null);
-            wr.getHandler().removeHandler(KEY);
-            Vanilla.getVanilla().useRedownloadSettings(null);
-            Modder.getModder().useRedownloadSettings(null);
-            // ---
-
-            if (f instanceof NoConnectionException){
-                announceLater(Translator.translate("error.oops"),Translator.translate("error.connection"), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
-                //UI.runAsync(() -> setPrimaryStatus());
-            }
-            else if (f instanceof VersionNotFoundException e){
-                announceLater(Translator.translate("error.oops"), Translator.translateFormat("error.noVersion", e.getMessage()), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
-                //UI.runAsync(() -> setPrimaryStatus());
-            }
-            else if (f instanceof StopException){
-                //
-            }
-            else if (f instanceof PerformException pe){
-                announceLater(Translator.translate("error.oops"), pe.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
-                //UI.runAsync(() -> setPrimaryStatus(pe.getMessage()));
-            }
-            else if (f instanceof Exception e){
-                Logger.getLogger().log(e);
-                announceLater(Translator.translate("error.unknown"),e.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(4000));
-            }
-        });
-
-        running.set(true);
-
-        new Thread(task).start();
-    }
-
-    public void setDialogLayer(boolean v){
-        dialogLayer.setVisible(v);
-    }
-
-    public void setPreventScrollFilter(boolean value){
-        this.preventScrollFilter = value;
-    }
-
     @Override
     public void onShown() {
         var path = Configurator.getConfig().getGamePath().toString();

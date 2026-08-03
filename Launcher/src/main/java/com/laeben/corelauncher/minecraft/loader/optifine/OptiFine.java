@@ -3,6 +3,8 @@ package com.laeben.corelauncher.minecraft.loader.optifine;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
+import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
@@ -131,7 +133,7 @@ public class OptiFine extends Loader<OptiVersion> {
 
         var path = Configurator.getConfig().getTemporaryFolder();
         String fileName = get.getJsonName() + ".jar";
-        path = NetUtil.download(get.url, path.to(fileName), false, false);
+        path = Network.download(NetworkToken.create(get.url, path.to(fileName), false), false);
 
         path.move(modsFolder.to(fileName));
     }
@@ -155,7 +157,7 @@ public class OptiFine extends Loader<OptiVersion> {
 
             refreshUrl(v); // We need to refresh it
 
-            path = NetUtil.download(v.url, path.to(clientPath.getName()), false, false);
+            path = Network.download(NetworkToken.create(v.url, path.to(clientPath.getName()), false), false);
 
             if (stopRequested)
                 throw new StopException();

@@ -2,8 +2,8 @@ package com.laeben.corelauncher.api.entity;
 
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.network.Network;
 import com.laeben.corelauncher.util.GsonUtil;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.google.gson.*;
 import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.entity.LogType;
@@ -96,7 +96,7 @@ public class Account{
             return this;
 
         try{
-            String accInfoJson = NetUtil.post(UUID_URL, "[\"" + username + "\"]", List.of(RequestParameter.contentType("application/json")));
+            String accInfoJson = Network.post(UUID_URL, "[\"" + username + "\"]", List.of(RequestParameter.contentType("application/json")));
             if (!accInfoJson.startsWith("[")){ // 403 Forbidden
                 Logger.getLogger().log(LogType.WARN, "Cannot acquire account '" + username + "', response from server: \n" + accInfoJson);
                 throw new NoConnectionException();
@@ -106,7 +106,7 @@ public class Account{
 
                 uuid = accInfo.get(0).getAsJsonObject().get("id").getAsString();
 
-                String js = NetUtil.urlToString(PROFILE_URL + uuid);
+                String js = Network.urlToString(PROFILE_URL + uuid);
 
                 if (js != null){
                     var properties = GsonUtil.EMPTY_GSON.fromJson(js, JsonObject.class).get("properties").getAsJsonArray();
