@@ -447,7 +447,7 @@ public class Main extends HandlerController {
     private ScrollPane getScroll(){
         var pane = new ScrollPane();
         pane.getStyleClass().add("main-scroll");
-        pane.setStyle("-fx-background-color: -tab-fill; -fx-border-radius: 0 16px 16px 16px;-fx-background-radius: 0 16px 16px 16px;");
+        pane.setStyle("-fx-background-color: -tab-fill; -fx-border-radius: 8px 16px 16px 16px;-fx-background-radius: 8px 16px 16px 16px;");
         pane.setFitToWidth(true);
         pane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         pane.setFitToHeight(true);

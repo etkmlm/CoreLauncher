@@ -37,9 +37,9 @@
 .tab-pane .tab{
     /*-fx-background-color: #252540;*/
     -fx-background-color: -tab-header-fill;
-    -fx-background-radius: 5px 5px 0 0;
-    -fx-background-insets: 0;
-    -fx-padding: 8px 8px 8px 15px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 16px 8px 16px;
+    -fx-background-insets: 0 4 0 0;
 }
 
 .tab-pane .tab .focus-indicator{
@@ -54,10 +54,6 @@
     -fx-text-fill: -tab-header-text-fill;
     -fx-font-size: 13pt;
     -fx-padding: 0 0 -5px 0;
-}
-
-.tab-pane .tab{
-
 }
 
 .tab-pane .tab .tab-close-button{
@@ -79,7 +75,7 @@
 }
 
 .tab-pane .tab-header-area{
-    -fx-padding: 0 0 0 0;
+    -fx-padding: 0 0 4 0;
 }
 
 .tab-pane .tab-header-area .tab-header-background{
