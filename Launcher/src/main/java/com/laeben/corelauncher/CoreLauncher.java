@@ -1,6 +1,7 @@
 package com.laeben.corelauncher;
 
 import com.laeben.core.LaebenApp;
+import com.laeben.core.concurrency.CancellableToken;
 import com.laeben.core.entity.LaebenAppFile;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
@@ -57,11 +58,14 @@ public class CoreLauncher {
 
     public static final OS SYSTEM_OS = OS.getSystemOS();
     public static final Path LAUNCHER_PATH = Path.begin(java.nio.file.Path.of(System.getProperty("user.dir")));
+    // it is a directory if the launcher is running with classes
     public static final Path LAUNCHER_EXECUTE_PATH;
 
     public static boolean SYSTEM_OS_64;
     public static String SYSTEM_OS_ARCH;
     public static boolean GUI_INIT = false;
+
+    private static CancellableToken<?> mainToken;
 
     static {
         Path p;
@@ -89,6 +93,8 @@ public class CoreLauncher {
     public static void main(String[] args){
         var listArgs = Arrays.stream(args).toList();
         new Logger();
+
+        mainToken = new CancellableToken<>();
 
         if (listArgs.contains("--old")){
             try{
@@ -204,12 +210,12 @@ public class CoreLauncher {
         new Modrinth().reload();
         new Modder();
         new Authenticator().reloadTokenStore();
-        new Discord().startDiscordThread();
+        new Discord(mainToken).startDiscordThread();
         new ExtensionWrapper().reload();
         new EmbeddedBrowser(new JSONCacheStore()); // use json cache store by default
 
         // Launcher Web API Listener
-        APIListener.start();
+        APIListener.start(mainToken);
 
         /*try{
             new CLCommunicator(9845).start();
@@ -322,6 +328,8 @@ public class CoreLauncher {
         else{
             CoreLauncherFX.launchFX();
         }
+
+        mainToken.stop();
 
         Configurator.getConfig().getTemporaryFolder().getFiles().forEach(Path::delete);
         if (Configurator.getConfig().delGameLogs()){

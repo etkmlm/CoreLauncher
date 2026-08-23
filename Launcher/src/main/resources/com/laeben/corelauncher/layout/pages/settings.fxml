@@ -154,44 +154,47 @@
                 </columnConstraints>
 
                 <Label styleClass="property-key" text="%settings.version" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Label styleClass="property-key" fx:id="lblVersion" text="%settings.showSnaps" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                <Label styleClass="property-key" fx:id="lblVersion" GridPane.columnIndex="2" GridPane.rowIndex="1" />
 
-                <Label styleClass="property-key" text="%settings.autoUpdate" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <CheckBox fx:id="chkAutoUpdate" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                <Label styleClass="property-key" text="%settings.apiPort" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label styleClass="property-key" fx:id="lblAPIPort" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
 
-                <Label styleClass="property-key" text="%settings.logMode" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <CheckBox fx:id="chkLogMode" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                <Label styleClass="property-key" text="%settings.autoUpdate" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <CheckBox fx:id="chkAutoUpdate" GridPane.columnIndex="2" GridPane.rowIndex="3" />
 
-                <Label styleClass="property-key" text="%settings.debugLogMode" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                <CheckBox fx:id="chkDebugLogMode" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                <Label styleClass="property-key" text="%settings.logMode" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <CheckBox fx:id="chkLogMode" GridPane.columnIndex="2" GridPane.rowIndex="4" />
 
-                <Label styleClass="property-key" text="%settings.autoLoader" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                <CheckBox fx:id="chkAutoLoader" GridPane.columnIndex="2" GridPane.rowIndex="5" />
+                <Label styleClass="property-key" text="%settings.debugLogMode" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <CheckBox fx:id="chkDebugLogMode" GridPane.columnIndex="2" GridPane.rowIndex="5" />
 
-                <Label styleClass="property-key" text="%settings.externalAuth" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                <CheckBox fx:id="chkUseExternalAuth" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+                <Label styleClass="property-key" text="%settings.autoLoader" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <CheckBox fx:id="chkAutoLoader" GridPane.columnIndex="2" GridPane.rowIndex="6" />
 
-                <Label styleClass="property-key" text="%settings.embeddedBrowser" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                <CheckBox fx:id="chkUseEmbeddedBrowser" GridPane.columnIndex="2" GridPane.rowIndex="7" />
+                <Label styleClass="property-key" text="%settings.externalAuth" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                <CheckBox fx:id="chkUseExternalAuth" GridPane.columnIndex="2" GridPane.rowIndex="7" />
 
-                <Label styleClass="property-key" text="%settings.searchBrowserManually" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                <CheckBox fx:id="chkSearchBrowserManually" GridPane.columnIndex="2" GridPane.rowIndex="8" />
+                <Label styleClass="property-key" text="%settings.embeddedBrowser" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                <CheckBox fx:id="chkUseEmbeddedBrowser" GridPane.columnIndex="2" GridPane.rowIndex="8" />
 
-                <Label styleClass="property-key" text="%settings.threads" GridPane.columnIndex="1" GridPane.rowIndex="9">
+                <Label styleClass="property-key" text="%settings.searchBrowserManually" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                <CheckBox fx:id="chkSearchBrowserManually" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+
+                <Label styleClass="property-key" text="%settings.threads" GridPane.columnIndex="1" GridPane.rowIndex="10">
                     <tooltip>
                         <Tooltip text="%settings.tip.threads"/>
                     </tooltip>
                 </Label>
-                <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="9" />
+                <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="10" />
 
-                <Label styleClass="property-key" text="%settings.curseApi" GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                <TextField fx:id="txtCurseForgeKey" minWidth="160" GridPane.columnIndex="2" GridPane.rowIndex="10"/>
+                <Label styleClass="property-key" text="%settings.curseApi" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+                <TextField fx:id="txtCurseForgeKey" minWidth="160" GridPane.columnIndex="2" GridPane.rowIndex="11"/>
 
-                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="11" GridPane.hgrow="ALWAYS">
+                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="12" GridPane.hgrow="ALWAYS">
                     <CButton fx:id="btnCheckUpdate" text="%settings.update" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                     <CWorker fx:id="workerUpdate"/>
                 </HBox>
-                <CButton fx:id="btnGC" maxWidth="Infinity" text="%settings.gc" GridPane.columnIndex="2" GridPane.rowIndex="12" GridPane.hgrow="ALWAYS"/>
+                <CButton fx:id="btnGC" maxWidth="Infinity" text="%settings.gc" GridPane.columnIndex="2" GridPane.rowIndex="13" GridPane.hgrow="ALWAYS"/>
             </GridPane>
         </VBox>
 

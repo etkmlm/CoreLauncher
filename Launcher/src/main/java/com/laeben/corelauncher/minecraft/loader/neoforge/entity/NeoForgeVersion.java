@@ -18,16 +18,16 @@ public class NeoForgeVersion extends LoaderVersion {
         if (a.length >= 3){
             int c = Integer.parseInt(a[0]);
 
-            id = a[0] + (a[1].equals("0") ? "" : "." + a[1]);
+            if (c < 26){
+                id = "1." + a[0] + (a[1].equals("0") ? "" : "." + a[1]);
+            }
+            else if (a.length > 3){ // 26.1.2.0-beta -> version 26.1.2
+                id = a[0] + "." + a[1] + (a[2].equals("0") ? "" : "." + a[2]);
+            }
+
             var last = a[a.length - 1];
             if (last.contains("snapshot")){
                 id += "-" + last.split("\\+")[1];
-            }
-            if (c < 26){
-                id = "1." + id;
-            }
-            else if (a.length > 3){ // 26.1.2.0-beta -> version 26.1.2
-                id += "." + a[2];
             }
         }
         else id = "*";

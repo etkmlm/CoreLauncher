@@ -3,6 +3,7 @@ package com.laeben.corelauncher.discord.entity;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.socket.entity.CLStatusPacket;
+import com.laeben.corelauncher.util.APIListener;
 
 import java.util.List;
 import java.util.Locale;
@@ -136,7 +137,7 @@ public class Activity {
                 a.buttons = null;
             }
             else{
-                a.buttons = List.of(new Button(Translator.translate("discord.button.join"), "http://localhost:9845/join?server=" + pack.getData()));
+                a.buttons = List.of(new Button(Translator.translate("discord.button.join"), "http://localhost:" + APIListener.getActivePort() + "/join?server=" + pack.getData()));
             }
         };
     }

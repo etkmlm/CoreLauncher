@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.discord;
 
 import com.google.gson.Gson;
+import com.laeben.core.concurrency.CancellableToken;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.discord.entity.*;
@@ -26,7 +27,7 @@ public class Discord {
     private final Handshake handshake;
 
     private boolean handshooked = false;
-    private boolean isRunning = false;
+    private CancellableToken<?> token;
     private Activity activity;
     private boolean idlingActivity = false;
     private boolean needToUpdateActivity = false;
@@ -35,6 +36,8 @@ public class Discord {
     private ScheduledFuture task;
 
     public Discord() {
+        token = new CancellableToken<>();
+
         ipc = new DiscordIPC();
         gson = new Gson();
 
@@ -44,11 +47,15 @@ public class Discord {
         instance = this;
     }
 
-    public void startDiscordThread(){
-        isRunning = true;
+    public Discord(CancellableToken<?> token){
+        this();
 
+        this.token = token;
+    }
+
+    public void startDiscordThread(){
         task = executor.scheduleWithFixedDelay(() -> {
-            if (!isRunning){
+            if (token.shouldStop()){
                 task.cancel(true);
                 return;
             }
@@ -103,7 +110,7 @@ public class Discord {
     }
 
     public void stopDiscordThread(){
-        isRunning = false;
+        token.stop();
     }
 
     public static Discord getDiscord(){

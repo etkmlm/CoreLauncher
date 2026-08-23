@@ -51,7 +51,7 @@ public class CLaunchConfigurator extends CPopup {
             final var chkMods = new CheckBox(Translator.translate("launchConfigurator.redown.mods"));
             chkMods.setSelected(true);
             chkMods.selectedProperty().addListener((observable, oldValue, newValue) -> redownSettings.mods(newValue));
-            box.getChildren().add(3, chkMods);
+            box.getChildren().add(chkMods);
 
             final var chkShaders = new CheckBox(Translator.translate("launchConfigurator.redown.shaders"));
             chkShaders.setSelected(true);

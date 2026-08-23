@@ -283,7 +283,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             nts.set(3, !eq);
 
             if (!eq)
-                refreshLoaderVersions();
+                refreshLoaderVersions(tempProfile.getLoader());
         });
         cbGameVersion.setItems(versions);
         cbLoaderVersion.setItems(loaderVersions);
@@ -348,11 +348,12 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         loaderGroup.selectToggle(vanilla);
 
         loaderGroup.selectedToggleProperty().addListener(a -> {
+            final var oldLoader = tempProfile.getLoader();
             var loader = Loader.getLoader(((RadioButton) loaderGroup.getSelectedToggle()).getId());
             nts.set(2, profile.getLoader().getType() != loader.getType());
             tempProfile.setLoader(loader);
             if (cbGameVersion.getValue() != null && !cbGameVersion.getValue().isBlank())
-                refreshLoaderVersions();
+                refreshLoaderVersions(oldLoader);
         });
 
         cbLoaderVersion.valueProperty().addListener(a -> {
@@ -361,7 +362,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
             var value = cbLoaderVersion.getValue();
 
-            tempProfile.setLoaderVersion(value);
+            //tempProfile.setLoaderVersion(value);
 
             if (value == null || value.isEmpty())
                 return;
@@ -435,7 +436,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         return JavaManager.getManager().tryGet(new Java(name));
     }
 
-    private void refreshLoaderVersions(){
+    private void refreshLoaderVersions(Loader oldLoader){
         /*cbWrapperVersion.getItems().clear();
         cbWrapperVersion.getItems().add("...");*/
         loaderVersions.setAll("...");
@@ -443,22 +444,26 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
 
 
         String versionId = tempProfile.getVersionId();
-        var wr = tempProfile.getLoader();
-        if (wr instanceof Custom){
+        var loader = tempProfile.getLoader();
+        if (loader instanceof Custom c){
             pLoader.setVisible(true);
             cbLoaderVersion.setVisible(false);
+
+            txtLoader.setText(c.getPath(tempProfile.getLoaderVersion()).toString());
         }
         else{
             pLoader.setVisible(false);
             cbLoaderVersion.setVisible(true);
-            if (!(wr instanceof Vanilla)){
+            if (!(loader instanceof Vanilla)){
                 List<String> m = tempProfile.getLoader().getVersions(versionId).stream().map(x -> ((LoaderVersion)x).getLoaderVersion()).toList();
                 //cbWrapperVersion.getItems().addAll(m);
                 loaderVersions.addAll(m);
-                if (!m.isEmpty())
-                    cbLoaderVersion.setValue(m.get(0)); // select latest version
-            }
 
+                if (oldLoader != null && oldLoader.getType() == loader.getType() && tempProfile.getLoaderVersion() != null)
+                    cbLoaderVersion.setValue(tempProfile.getLoaderVersion());
+                else if (!m.isEmpty())
+                    cbLoaderVersion.setValue(m.get(0));
+            }
         }
     }
 
@@ -518,13 +523,8 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
             var loaderToggle = loaderGroup.getToggles().stream().filter(x -> ((RadioButton)x).getId().equals(wr.getType().getIdentifier())).findFirst().orElse(vanilla);
             loaderGroup.selectToggle(loaderToggle);
 
-            refreshLoaderVersions();
-            if (wr instanceof Custom c){
-                txtLoader.setText(c.getPath(tempProfile.getLoaderVersion()).toString());
-            }
-            else if (!(wr instanceof Vanilla) && tempProfile.getLoaderVersion() != null){
-                cbLoaderVersion.setValue(tempProfile.getLoaderVersion());
-            }
+            refreshLoaderVersions(wr);
+
             ram.setDefaultMin(tempProfile.getMinRAM());
             ram.setDefaultMax(tempProfile.getMaxRAM());
             sldRAM.setValue(tempProfile.getMaxRAM());
@@ -577,6 +577,8 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
                     Announcement.AnnouncementType.ERROR), Duration.seconds(2));
             return;
         }
+
+        tempProfile.setLoaderVersion(cbLoaderVersion.getValue());
 
         if (!name.equals(profile.getName()) && Profiler.getProfiler().getProfile(name) != null) {
             Main.getMain().getAnnouncer().announce(new Announcement(

@@ -24,6 +24,7 @@ import com.laeben.corelauncher.ui.dialog.DProfileSelector;
 import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
 import com.laeben.corelauncher.ui.util.GPUUtil;
 import com.laeben.corelauncher.ui.util.RAMManager;
+import com.laeben.corelauncher.util.APIListener;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 import com.laeben.corelauncher.util.java.JavaManager;
@@ -148,6 +149,9 @@ public class SettingsPage extends HandlerController {
 
     @FXML
     private Region cGridSelection;
+
+    @FXML
+    private Label lblAPIPort;
 
     /*@FXML
     private Spinner txtCommPort;*/
@@ -669,6 +673,8 @@ public class SettingsPage extends HandlerController {
 
     private void reload(){
         try{
+            lblAPIPort.setText(String.valueOf(APIListener.getActivePort()));
+
             Config c = Configurator.getConfig();
 
             if (c.getDefaultJava() != null)
