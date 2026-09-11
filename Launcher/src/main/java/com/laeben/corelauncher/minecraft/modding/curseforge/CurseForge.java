@@ -1,25 +1,31 @@
 package com.laeben.corelauncher.minecraft.modding.curseforge;
 
+import com.google.gson.stream.JsonReader;
+import com.laeben.core.concurrency.CancellableToken;
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
+import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.network.requester.RequesterFactory;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Profile;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.core.entity.Path;
 import com.google.gson.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
-import com.laeben.corelauncher.ui.controller.browser.CurseForgeSearch;
-import com.laeben.corelauncher.ui.controller.browser.Search;
+import com.laeben.corelauncher.minecraft.modding.event.ModdingContext;
+import com.laeben.corelauncher.ui.controller.browser.search.CurseForgeSearch;
+import com.laeben.corelauncher.ui.controller.browser.search.Search;
 import com.laeben.corelauncher.util.GsonUtil;
 
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +35,7 @@ public class CurseForge implements ModSource {
     // if you are going to fork or modify this repository, you must change this with your own
     private static final String BASE_API_KEY = "$2a$10$fdQjum78EUUUcJIw2a6gb.m1DNZCQzwvf0EBcfm.YgwIrmFX/1K3m";
 
+    private static final String CDN_URL = "https://mediafilez.forgecdn.net/files/";
     private static final String BASE_URL = "https://api.curseforge.com";
     private static final int GAME_ID = 432;
     private static CurseForge instance;
@@ -56,7 +63,7 @@ public class CurseForge implements ModSource {
         return storedKey == null ? BASE_API_KEY : storedKey;
     }
 
-    public CurseForgeSearchResponse search(CurseForgeSearchRequest s) throws NoConnectionException, HttpException {
+    public CurseForgeSearchResponse search(CurseForgeSearchRequest s) throws NoConnectionException, HttpException, IOException, StopException {
         var params = RequestParameter.classToParams(s, CurseForgeSearchRequest.class);
         if (s.gameVersions != null){
             var vers = params.stream().filter(x -> x.key().equals("gameVersions")).findFirst().orElse(null);
@@ -72,11 +79,15 @@ public class CurseForge implements ModSource {
         return gson.fromJson(a, CurseForgeSearchResponse.class);
     }
 
-    public List<CurseForgeResource> getResources(List<Object> ids) throws NoConnectionException {
+    /**
+     * Retrieve resources from CurseForge API.
+     * @param opt options for handled ids, nullable
+     */
+    public List<CurseForgeResource> getResources(List<Object> ids, Options opt) throws NoConnectionException, StopException, IOException {
         if (ids.isEmpty())
             return null;
         var request = new ModsRequest();
-        request.modIds = ids.stream().map(a -> a instanceof Double da ? da.intValue() : (int)a).toArray(Integer[]::new);
+        request.modIds = (opt == null ? ids.stream() : opt.streamIdList(ids)).map(a -> a instanceof Double da ? da.intValue() : (int)a).toArray(Integer[]::new);
         String json = gson.toJson(request);
         var f = post("/v1/mods", json);
         if (f == null)
@@ -85,15 +96,24 @@ public class CurseForge implements ModSource {
 
         return data.asList().stream().map(a -> gson.fromJson(a, CurseForgeResource.class)).toList();
     }
-    public void fillResource(CurseForgeResource r, Options opt) throws NoConnectionException, HttpException {
+    public Manifest getModpackManifest(Modpack mp) throws NoConnectionException, HttpException, IOException, StopException {
+        if (mp.fileId == null) return null;
+
+        String idf = mp.fileId.toString();
+        if (idf.length() > 4 && idf.length() < 8) { // -- ideally 7 digits --
+            idf = idf.substring(0, 4) + "/" + idf.substring(4);
+        }
+        //else doesn't know what's going to happen
+
+        final String manifestUrl = CDN_URL + idf + "/manifest.json";
+        //final String manifestUrl = mp.fileUrl.substring(0, mp.fileUrl.lastIndexOf('/')) + "/manifest.json";
+        var temp = Network.download(NetworkToken.create(manifestUrl, Configurator.getConfig().getTemporaryFolder().to("manifest-" + mp.fileHash + ".json"), false));
+        return gson.fromJson(new JsonReader(new FileReader(temp.toFile())), Manifest.class);
+    }
+    public void fillResource(CurseForgeResource r, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
         var params = new ArrayList<RequestParameter>();
 
         // curse forge does not support multiple file searching
-        /*if (opt.hasGameVersion())
-            params.add(new RequestParameter("gameVersions", String.join(",", opt.getVersionIds())));
-
-        if (opt.hasLoaderType())
-            params.add(new RequestParameter("modLoaderTypes", String.join(",", opt.getLoaders())));*/
 
         if (opt.hasGameVersion())
             params.add(new RequestParameter("gameVersion", opt.getVersionIds().size() == 1 ? opt.getVersionId() : opt.getVersionIds().stream().max(Version.VersionIdComparator.INSTANCE).get()));
@@ -105,7 +125,7 @@ public class CurseForge implements ModSource {
         r.latestFiles = rs.get("data").getAsJsonArray().asList().stream().map(x -> gson.fromJson(x, CurseForgeFile.class)).toList();
     }
 
-    public List<CurseForgeFile> getFiles(List<Integer> ids) throws NoConnectionException {
+    public List<CurseForgeFile> getFiles(List<Integer> ids) throws NoConnectionException, StopException, IOException {
         var obj = new JsonObject();
         var arr = new JsonArray();
         arr.asList().addAll(ids.stream().map(JsonPrimitive::new).toList());
@@ -117,7 +137,7 @@ public class CurseForge implements ModSource {
     }
 
     @Override
-    public Path extractModpack(Modpack mp, Path path, boolean overwriteManifest) throws NoConnectionException, HttpException, StopException {
+    public Path extractModpack(Modpack mp, Path path, boolean overwriteManifest, ProgressFunction onProgress, CancellableToken<?> token) throws StopException, NoConnectionException, HttpException, IOException {
         var zip = path.to("mpInfo.zip");
         String name = StrUtil.pure(mp.name);
         var tempDir = path.to(name);
@@ -125,20 +145,25 @@ public class CurseForge implements ModSource {
         if (overwriteManifest)
             manifest.delete();
         if (!manifest.exists()){
-            var ppp = NetUtil.download(NetworkToken.create(mp.fileUrl, zip, false));
-            //Modder.getModder().getHandler().execute(new KeyEvent("stop"));
-            zip.extract(tempDir, null);
-            assert ppp != null;
-            ppp.delete();
-            tempDir.to("manifest.json").move(manifest);
-            tempDir.to("overrides").move(path);
-            tempDir.delete();
+            Path ppp = null;
+            try{
+                ppp = Network.download(NetworkToken.create(mp.fileUrl, zip, false).withLogging(onProgress).syncWith(token));
+                //Modder.getModder().getHandler().execute(new KeyEvent("stop"));
+                onProgress.onContext(ModdingContext.EXTRACTING_MODPACK);
+                zip.extract(tempDir, null);
+                tempDir.to("manifest.json").move(manifest);
+                tempDir.to("overrides").move(path);
+            }
+            finally {
+                if (ppp != null) ppp.delete();
+                tempDir.delete();
+            }
         }
 
         return manifest;
     }
 
-    private String get(String api, List<RequestParameter> params) throws NoConnectionException, HttpException {
+    private String get(String api, List<RequestParameter> params) throws NoConnectionException, HttpException, IOException, StopException {
         var r = factory.create().to(api)
                 .withHeader(new RequestParameter("x-api-key", getApiKey()))
                 .withParam(new RequestParameter("gameId", GAME_ID));
@@ -146,7 +171,7 @@ public class CurseForge implements ModSource {
             r.withParams(params);
         return r.getString();
     }
-    private String post(String api, String body) throws NoConnectionException {
+    private String post(String api, String body) throws NoConnectionException, StopException, IOException {
         var r = factory.create().to(api)
                 .withHeader(new RequestParameter("x-api-key", getApiKey()))
                 .withHeader(RequestParameter.contentType("application/json"));
@@ -158,7 +183,7 @@ public class CurseForge implements ModSource {
         try{
             get = get("/v1/categories", null);
         }
-        catch (NoConnectionException | HttpException ignored) {
+        catch (NoConnectionException | HttpException | IOException | StopException ignored) {
 
         }
         if (get == null){
@@ -179,11 +204,11 @@ public class CurseForge implements ModSource {
     }
 
     @Override
-    public List<CResource> getCoreResources(List<Object> ids, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getCoreResources(List<Object> ids, Options opt) throws NoConnectionException, HttpException, StopException, IOException {
         if (ids.isEmpty())
             return null;
 
-        var resources = getResources(ids);
+        var resources = getResources(ids, opt);
 
         if (opt.useMeta() && !opt.getIncludeDependencies())
             return resources.stream().map(x -> (CResource)CResource.fromForgeResourceGeneric(null, null, x, null)).toList();
@@ -192,6 +217,8 @@ public class CurseForge implements ModSource {
 
         var all = new ArrayList<CResource>();
         for (var x : resources){
+            opt.handleId(x.id);
+
             try {
                 fillResource(x, opt);
             } catch (NoConnectionException | HttpException ignored) {
@@ -211,16 +238,10 @@ public class CurseForge implements ModSource {
 
             var r = CResource.fromForgeResourceGeneric(f.mainGameVersion, f.mainLoader, x, f);
             if (r instanceof Modpack mp && opt.getAggregateModpack()){
-                var p = Configurator.getConfig().getTemporaryFolder().to(StrUtil.pure(mp.name));
-                try {
-                    applyModpack(mp, p, opt);
-                } catch (StopException ignored) {
+                var manifest = getModpackManifest(mp);
+                if (manifest == null) continue;
 
-                }
-                p.delete();
-                all.addAll(mp.mods);
-                all.addAll(mp.resources);
-                all.addAll(mp.shaders);
+                all.addAll(getCoreResources(manifest.files.stream().map(a -> (Object) a.projectID).toList(), opt.cloneFromPlatform().meta().self(false)));
             }
             else
                 all.add(r);
@@ -229,39 +250,27 @@ public class CurseForge implements ModSource {
         if (opt.getIncludeDependencies())
             all.addAll(getDependencies(all, opt.cloneFromPlatform().allowOverwrite(opt.doesAllowOverwrite()).self(false)));
 
-        /*return data.asList().stream().map(x -> {
-            var res = gson.fromJson(x, ResourceForge.class);
-            if (!opt.useMeta() || opt.getIncludeDependencies()) {
-                try {
-                    getFullResource(res, opt);
-                } catch (NoConnectionException | HttpException ignored) {
-
-                }
-                return CResource.fromForgeResourceGeneric(null, null, res, null);
-            }
-            return (CResource) CResource.fromForgeResourceGeneric(opt.getVersionId(), opt.getLoaderType().getIdentifier(), res, null);
-        }).toList();*/
-
         return all;
     }
 
     @Override
-    public List<CResource> getCoreResource(Object id, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getCoreResource(Object id, Options opt) throws NoConnectionException, HttpException, StopException, IOException {
         return getCoreResources(List.of(id), opt);
     }
 
     @Override
-    public List<CResource> getAllCoreResources(Object id, Options opt) throws NoConnectionException, HttpException {
-        var res = getResources(List.of(id));
-        if (res == null)
+    public List<CResource> getAllCoreResources(Object id, Options opt) throws NoConnectionException, HttpException, StopException, IOException {
+        var res = opt.wasIdHandled(id) ? null : getResources(List.of(id), null);
+        if (res == null || res.isEmpty())
             return null;
         var r = res.get(0);
         return getAllCoreResources(r, opt);
     }
 
     @Override
-    public List<CResource> getAllCoreResources(ModResource r, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getAllCoreResources(ModResource r, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
         var cfr = (CurseForgeResource) r;
+        opt.handleId(cfr.id);
 
         fillResource(cfr, opt);
 
@@ -271,12 +280,12 @@ public class CurseForge implements ModSource {
     }
 
     @Override
-    public List<CResource> getCoreResource(ModResource res, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getCoreResource(ModResource res, Options opt) throws NoConnectionException, HttpException, StopException, IOException {
         return getCoreResources(List.of(res.getId()), opt);
     }
 
     @Override
-    public List<CResource> getDependencies(List<CResource> res, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getDependencies(List<CResource> res, Options opt) throws NoConnectionException, HttpException, StopException, IOException {
         var mds = new ArrayList<CResource>();
 
         //var sendOpt = opt.getIncludeSelf() ? opt : opt.clone().includeSelf();
@@ -285,12 +294,15 @@ public class CurseForge implements ModSource {
             if (m.fileUrl == null)
                 continue;
 
-            if (opt.getIncludeSelf())
+            if (opt.getIncludeSelf() && !opt.wasIdHandled(m.id)){
+                opt.handleId(m.id);
                 mds.add(m);
+            }
 
-            if (m.dependencies == null)
+            if (m.dependencies == null || m.dependencies.isEmpty())
                 continue;
-            var ms = getCoreResources(m.dependencies.stream().map(a -> a.id).toList(), opt.dependencies(true));
+
+            var ms = getCoreResources(m.dependencies.stream().map(a -> a.id).filter(a -> !opt.wasIdHandled(a)).toList(), opt.dependencies(true));
             if (ms != null)
                 mds.addAll(ms);
             //mds.addAll(getDependencies(ms.stream().toList(), sendOpt));
@@ -310,13 +322,16 @@ public class CurseForge implements ModSource {
     }
 
     @Override
-    public void applyModpack(Modpack m, Path path, Options opt) throws NoConnectionException, HttpException, StopException {
+    public void applyModpack(Modpack m, Path path, Options opt) throws NoConnectionException, HttpException, StopException, IOException {
         var mp = new CurseForgeModpack(m);
 
-        var manifest = gson.fromJson(extractModpack(m, path, true).read(), Manifest.class);
+        var manifest = gson.fromJson(extractModpack(m, path, true, opt.getOnProgress(), opt.getCancellationToken()).read(), Manifest.class);
         mp.applyManifest(manifest);
 
-        var resources = getCoreResources(mp.getProjectIds(), Options.create(opt.getVersionId(), null).meta());
+        opt.getOnProgress().onContext(ModdingContext.RETRIEVING_MODPACK_DETAILS);
+
+        var resources = getCoreResources(mp.getProjectIds(), Options.create(opt.getVersionId(), null).useCancellationToken(opt.getCancellationToken()).useProgressLogging(opt.getOnProgress()).meta());
+        opt.getOnProgress().onContext(ModdingContext.APPLYING_MODPACK);
         mp.applyResources(resources, getFiles(mp.getFileIds()));
     }
 }

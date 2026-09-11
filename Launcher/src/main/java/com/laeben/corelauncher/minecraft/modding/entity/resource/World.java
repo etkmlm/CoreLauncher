@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.entity.resource;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.nbt.NBTFile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeResource;
 import com.laeben.core.entity.Path;
@@ -54,7 +55,7 @@ public class World extends CResource{
         byte[] gzip;
         try {
             gzip = path.openAsGzip();
-        } catch (IOException e) {
+        } catch (IOException | StopException e) {
             return null;
         }
         var nbt = new NBTFile(gzip);

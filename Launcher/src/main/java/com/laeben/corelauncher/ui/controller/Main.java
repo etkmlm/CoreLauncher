@@ -1,9 +1,10 @@
 package com.laeben.corelauncher.ui.controller;
 
 import com.laeben.core.entity.Path;
-import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.context.EventContext;
+import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.core.network.Network;
 import com.laeben.core.util.Cat;
 import com.laeben.core.util.StrUtil;
@@ -12,6 +13,7 @@ import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.*;
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.socket.entity.CLPacket;
@@ -27,6 +29,7 @@ import com.laeben.corelauncher.discord.entity.Activity;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
+import com.laeben.corelauncher.minecraft.token.LaunchToken;
 import com.laeben.corelauncher.minecraft.entity.ServerInfo;
 import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
@@ -68,9 +71,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InvalidObjectException;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -185,7 +186,7 @@ public class Main extends HandlerController {
 
             switch (a.getKey()) {
                 case Profiler.PROFILE_UPDATE -> {
-                    if (selectedProfile == a.getNewValue())
+                    if (selectedProfile == a.getNewValue() && !((Profile)a.getNewValue()).getName().equals(oldProfile.getName()))
                         selectProfile(selectedProfile);
                 }
                 case Profiler.PROFILE_DELETE -> {
@@ -206,7 +207,6 @@ public class Main extends HandlerController {
         registerHandler(Launcher.getLauncher().getHandler(), this::onGeneralEvent, true);
         registerHandler(Vanilla.getVanilla().getHandler(), this::onGeneralEvent, true);
         registerHandler(Modder.getModder().getHandler(), this::onGeneralEvent, true);
-        registerHandler(Network.getHandler(), this::onProgress, false);
         registerHandler(Configurator.getConfigurator().getHandler(), a -> {
             switch (a.getKey()) {
                 case Configurator.BACKGROUND_CHANGE -> setBackground(Configurator.getConfig().getBackgroundImage());
@@ -335,20 +335,17 @@ public class Main extends HandlerController {
      * */
     public void launch(Profile p, RedownloadSettings redownSettings, ServerInfo server){
         var wr = (Loader<?>)p.getLoader();
-        Vanilla.getVanilla().useRedownloadSettings(redownSettings);
-        Modder.getModder().useRedownloadSettings(redownSettings);
-        wr.useRedownloadSettings(redownSettings);
         wr.getHandler().addHandler(KEY, this::onGeneralEvent, true);
+
+        final var token = LaunchToken.create(p, FileCheckMode.ONLY_SIZE, redownSettings, getProgressHandler());
 
         var task = new Task<>() {
             @Override
-            protected Object call() throws NoConnectionException, StopException, HttpException, FileNotFoundException, PerformException, VersionNotFoundException {
-                revokeStopRequests();
-
-                Launcher.getLauncher().prepare(p);
+            protected Object call() throws NoConnectionException, StopException, PerformException, VersionNotFoundException {
+                Launcher.getLauncher().prepare(token);
                 Cat.sleep(200);
 
-                if (wr.isStopRequested())
+                if (token.shouldStop())
                     throw new StopException();
 
                 UI.runAsync(Main.this::clearStatus);
@@ -362,9 +359,6 @@ public class Main extends HandlerController {
 
                 Cat.sleep(200);
 
-                wr.useRedownloadSettings(null);
-                Vanilla.getVanilla().useRedownloadSettings(null);
-                Modder.getModder().useRedownloadSettings(null);
                 wr.getHandler().removeHandler(KEY);
 
                 return null;
@@ -380,10 +374,7 @@ public class Main extends HandlerController {
             UI.runAsync(this::refreshStates);
             if (Configurator.getConfig().hideAfter())
                 UI.getUI().showAll();
-            wr.useRedownloadSettings(null);
             wr.getHandler().removeHandler(KEY);
-            Vanilla.getVanilla().useRedownloadSettings(null);
-            Modder.getModder().useRedownloadSettings(null);
             // ---
 
             if (f instanceof NoConnectionException){
@@ -401,15 +392,15 @@ public class Main extends HandlerController {
                 announceLater(Translator.translate("error.oops"), pe.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(3000));
                 //UI.runAsync(() -> setPrimaryStatus(pe.getMessage()));
             }
-            else if (f instanceof Exception e){
-                Logger.getLogger().log(e);
-                announceLater(Translator.translate("error.unknown"),e.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(4000));
+            else {
+                Logger.getLogger().log(f);
+                announceLater(Translator.translate("error.unknown"),f.getMessage(), Announcement.AnnouncementType.ERROR, Duration.millis(4000));
             }
         });
 
         running.set(true);
 
-        new Thread(task).start();
+        Tasker.getDefault().await(task, token);
     }
 
     /* ANNOUNCEMENT */
@@ -569,22 +560,12 @@ public class Main extends HandlerController {
      */
     public void refreshStates(){
         running.set(false);
-        revokeStopRequests();
-    }
-
-    public void revokeStopRequests(){
-        if (selectedProfile != null)
-            selectedProfile.getLoader().setStopRequested(false);
-        Vanilla.getVanilla().setStopRequested(false);
-        Modder.getModder().setStopRequested(false);
     }
 
     public void invokeStopRequests(){
-        if (selectedProfile != null)
-            selectedProfile.getLoader().setStopRequested(true);
-        Vanilla.getVanilla().setStopRequested(true);
-        Modder.getModder().setStopRequested(true);
+        //token.stop();
         Network.stop();
+        Tasker.getDefault().stopAll();
     }
 
     /**
@@ -705,18 +686,6 @@ public class Main extends HandlerController {
         return spl.length == 1 ? Translator.translate(spl[0]) : Translator.translateFormat(spl[0], Arrays.stream(spl).skip(1).map(x -> (Object) x).toList());*/
     }
 
-    private void onProgress(ProgressEvent e){
-        if (!running.get())
-            running.set(true);
-        if (e.getKey().equals(Network.DOWNLOAD)){
-            setSecondaryStatus(DisplayUtil.parseDownloadProgress(e.getCurrent()) + " / " + DisplayUtil.parseDownloadProgress(e.getTotal()));
-        }
-        else{
-            setSecondaryStatus(e.getCurrent() + e.getKey() + " / " + e.getTotal() + e.getKey());
-        }
-
-        setProgress(e.getProgress());
-    }
     public void setProgress(double progress){
         if (!showingProgress){
             showProgress();
@@ -906,9 +875,22 @@ public class Main extends HandlerController {
 
     /* EVENT HANDLING */
 
+    public static ProgressFunction getProgressHandler(){
+        return getMain() != null ? getMain()::onProgress : null;
+    }
+    private void onProgress(long current, long length, EventContext context){
+        if (!running.get())
+            running.set(true);
+        setSecondaryStatus(DisplayUtil.parseDownloadProgress(current) + " / " + DisplayUtil.parseDownloadProgress(length));
+        setProgress(current * 1.0 / length);
+    }
     private void onGeneralEvent(BaseEvent e) {
-        if (e instanceof ProgressEvent p)
-            onProgress(p);
+        if (e instanceof ProgressEvent p){
+            /*if (!running.get())
+                running.set(true);*/
+            setSecondaryStatus(p.getCurrent() + p.getKey() + " / " + p.getTotal() + p.getKey());
+            setProgress(p.getProgress());
+        }
         else if (e instanceof ValueEvent v){
             if (v.getKey().startsWith(Launcher.SESSION_END)){
                 announcer.announce(new Announcement(Translator.translate("announce.game.ended"), Translator.translateFormat("announce.misc.profile", v.getKey().substring(10)) + "\n" + Translator.translateFormat("announce.misc.ecode", v.getValue()), Announcement.AnnouncementType.GAME), Duration.seconds(3));
@@ -1211,8 +1193,11 @@ public class Main extends HandlerController {
             Profile p;
             try {
                 p = Profiler.getProfiler().generateDefaultProfile();
-            } catch (InvalidObjectException e) {
+            } catch (IOException e) {
                 Logger.getLogger().log(e);
+                return;
+            }
+            catch (StopException ignored){
                 return;
             }
             var size = tab.getBoundsInLocal();

@@ -1,7 +1,8 @@
-package com.laeben.corelauncher.ui.controller.browser;
+package com.laeben.corelauncher.ui.controller.browser.search;
 
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.modding.entity.ModSide;
@@ -9,7 +10,9 @@ import com.laeben.corelauncher.minecraft.modding.entity.ResourcePreferences;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.*;
+import com.laeben.corelauncher.ui.controller.browser.cell.ResourceCellItem;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ModrinthSearch implements Search<Index> {
@@ -132,12 +135,12 @@ public class ModrinthSearch implements Search<Index> {
         return totalPages;
     }
 
-    public List<ResourceCell.Link> search(String query){
+    public List<ResourceCellItem> search(String query){
         request.setQuery(query);
         ModrinthSearchResponse resp = null;
         try{
             resp = Modrinth.getModrinth().search(request);
-        } catch (NoConnectionException | HttpException ignored) {
+        } catch (NoConnectionException | HttpException | IOException | StopException ignored) {
 
         }
 
@@ -169,7 +172,7 @@ public class ModrinthSearch implements Search<Index> {
             }
         }
 
-        return resp.hits.stream().map(x -> new ResourceCell.Link(prefs, x)).toList();
+        return resp.hits.stream().map(x -> new ResourceCellItem(prefs, x)).toList();
     }
 
     public ModrinthSearchRequest getSearch(){

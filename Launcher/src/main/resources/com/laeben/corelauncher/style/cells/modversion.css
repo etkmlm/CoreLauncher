@@ -1,0 +1,7 @@
+#btnInstall{
+    -fx-background-color: transparent!important;
+}
+
+#btnInstall:hover{
+    -fx-background-color: #000000a0!important;
+}

@@ -1,6 +1,5 @@
 package com.laeben.corelauncher.minecraft;
 
-import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.BaseEvent;
@@ -8,15 +7,17 @@ import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.Configurator;
-import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.gpu.WindowsGPUSelector;
 import com.laeben.corelauncher.api.gpu.entity.GPUType;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
+import com.laeben.corelauncher.minecraft.token.LaunchToken;
 import com.laeben.corelauncher.minecraft.entity.VersionNotFoundException;
 import com.laeben.corelauncher.minecraft.mapping.PGMapper;
 import com.laeben.corelauncher.minecraft.modding.Modder;
+import com.laeben.corelauncher.minecraft.token.VersionToken;
 import com.laeben.corelauncher.minecraft.util.Authenticator;
 import com.laeben.corelauncher.minecraft.util.CommandConcat;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -24,7 +25,7 @@ import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.core.util.events.KeyEvent;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -70,34 +71,41 @@ public class Launcher {
 
     /**
      * Prepares the profile to launch.
-     * @param profile target profile
+     * @param token the launch token
      */
-    public void prepare(Profile profile) throws NoConnectionException, StopException, PerformException, HttpException, FileNotFoundException, VersionNotFoundException {
+    public void prepare(LaunchToken token) throws NoConnectionException, StopException, PerformException, VersionNotFoundException {
+        final var profile = token.getProfile();
+
         handleState(PREPARE + profile.getName());
 
-        var version = profile.getLoader().getVersion(profile.getVersionId(), profile.getLoaderVersion());
+        var version = profile.getLoader().getVersion(profile.getVersionId(), profile.getLoaderVersion(), token.getRedownloadSettings());
         if (version == null)
             throw new VersionNotFoundException(profile.getLoaderVersion());
-        profile.getLoader().install(version);
+        profile.getLoader().install(VersionToken.create(version, token.getFileCheckMode(), token.getRedownloadSettings(), token.getOnProgress()).syncWith(token));
 
         if (!profile.getLoader().getType().isNative()){
-            Modder.getModder().installModpacks(profile, profile.getModpacks(true));
-            Modder.getModder().installMods(profile, profile.getMods(true));
+            Modder.getModder().installModpacks(token, profile.getModpacks(true));
+            Modder.getModder().installMods(token, profile.getMods(true));
         }
 
-        Modder.getModder().installWorlds(profile, profile.getOnlineWorlds(true));
-        Modder.getModder().installResourcepacks(profile, profile.getResourcepacks(true));
-        Modder.getModder().installShaders(profile, profile.getShaders(true));
+        Modder.getModder().installWorlds(token, profile.getOnlineWorlds(true));
+        Modder.getModder().installResourcepacks(token, profile.getResourcepacks(true));
+        Modder.getModder().installShaders(token, profile.getShaders(true));
 
-        var op1 = Configurator.getConfig().getLauncherPath().to("options.txt");
-        var op2 = profile.getPath().to("options.txt");
-        if (!op2.exists()){
-            if (op1.exists())
-                op1.copy(op2);
-            else {
-                var lang = Configurator.getConfig().getLanguage();
-                op2.write("lang:" + lang);
+        try{
+            var op1 = Configurator.getConfig().getLauncherPath().to("options.txt");
+            var op2 = profile.getPath().to("options.txt");
+            if (!op2.exists()){
+                if (op1.exists())
+                    op1.copy(op2);
+                else {
+                    var lang = Configurator.getConfig().getLanguage();
+                    op2.write("lang:" + lang);
+                }
             }
+        }
+        catch (IOException e){
+            Logger.getLogger().log("Options could not be written for " + token, e);
         }
     }
 
@@ -138,7 +146,7 @@ public class Launcher {
                             handleState(JAVA + linfo.java.majorVersion);
                             Logger.getLogger().log(LogType.INFO, "Downloading Java " + linfo.java.majorVersion);
                             try{
-                                JavaManager.getManager().downloadAndInclude(linfo.java, null);
+                                JavaManager.getManager().downloadAndInclude(linfo.java, null, Main.getProgressHandler());
                                 //handler.execute(new KeyEvent("jvdown"));
                             } catch (NoConnectionException e){
                                 handleState(JAVA_DOWNLOAD_ERROR);

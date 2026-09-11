@@ -16,6 +16,19 @@ public class CurseForgeFile {
         public long fingerprint;
     }
 
+    public enum HashAlg{
+        NONE, SHA1, MD5
+    }
+
+    public static class Hash{
+        public String value;
+        public int algo;
+
+        public HashAlg getAlgorithm(){
+            return HashAlg.values()[algo];
+        }
+    }
+
     public CurseForgeFile(){
 
     }
@@ -51,6 +64,8 @@ public class CurseForgeFile {
     @Expose
     public List<Module> modules;
     @Expose
+    public List<Hash> hashes;
+    @Expose
     public boolean isServerPack;
 
     public List<Dependency> getDependencies(){
@@ -63,6 +78,15 @@ public class CurseForgeFile {
         if (modules == null)
             return List.of();
         return modules;
+    }
+
+    public String getHash(HashAlg alg){
+        if (hashes == null || hashes.isEmpty()) return null;
+
+        for (var hash : hashes){
+            if (hash.getAlgorithm() == alg) return hash.value;
+        }
+        return null;
     }
 
     @Override

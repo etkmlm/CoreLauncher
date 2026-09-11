@@ -10,7 +10,6 @@ import com.laeben.corelauncher.api.entity.ImageEntity;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.nio.file.InvalidPathException;
@@ -28,24 +27,15 @@ public class NetUtil {
         }
     }
 
-    public static Path download(NetworkToken token) throws NoConnectionException, HttpException, StopException {
-        try{
-            return Network.download(token, true);
-        }
-        catch (FileNotFoundException ex){
-            return null;
-        }
-    }
-
     public static ImageEntity downloadImage(Path path, String url, boolean uon){
         try {
 
             Path i;
             try{
-                i = Network.download(NetworkToken.create(url, path, uon), false);
+                i = Network.download(NetworkToken.create(url, path, uon));
             }
             catch (InvalidPathException e){
-                i = Network.download(NetworkToken.create(url, path.to(UUID.randomUUID() + ".png"),false), false);
+                i = Network.download(NetworkToken.create(url, path.to(UUID.randomUUID() + ".png"),false));
             }
             if (i != null){
                 String identifier = i.getName();
@@ -55,7 +45,7 @@ public class NetUtil {
             }
             else
                 return null;
-        } catch (NoConnectionException | FileNotFoundException | StopException | HttpException e) {
+        } catch (NoConnectionException | StopException | HttpException | IOException e) {
             return null;
         }
     }

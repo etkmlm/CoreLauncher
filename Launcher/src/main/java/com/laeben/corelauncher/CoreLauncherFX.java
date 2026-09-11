@@ -2,6 +2,7 @@ package com.laeben.corelauncher;
 
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -62,7 +63,7 @@ public class CoreLauncherFX extends Application {
         // Version check
         try {
             CoreLauncher.updateCheck();
-        } catch (NoConnectionException ignored) {
+        } catch (NoConnectionException | StopException ignored) {
 
         }
         catch (HttpException e){

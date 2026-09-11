@@ -1,6 +1,8 @@
 package com.laeben.corelauncher.ui.controller.cell;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.Java;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CField;
@@ -13,6 +15,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
+
+import java.io.IOException;
 
 public class CJava extends CCell<Java> {
 
@@ -32,8 +36,14 @@ public class CJava extends CCell<Java> {
                 txtName.setEditable(false);
                 txtName.setCursor(Cursor.DEFAULT);
                 node.requestFocus();
-                if (JavaManager.getManager().renameCustomJava(java, txtName.getText()))
-                    txtName.setText(java.getName());
+                try {
+                    if (JavaManager.getManager().renameCustomJava(java, txtName.getText()))
+                        txtName.setText(java.getName());
+                } catch (StopException ignored) {
+
+                } catch (IOException e) {
+                    Logger.getLogger().log(e);
+                }
             }
         });
     }

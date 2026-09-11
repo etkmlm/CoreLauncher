@@ -7,15 +7,18 @@ import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.Loader;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.fabric.entity.BaseFabricVersion;
 import com.laeben.corelauncher.minecraft.loader.fabric.entity.FabricVersion;
+import com.laeben.corelauncher.minecraft.token.VersionToken;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +44,8 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
     }
 
     @Override
-    public T getVersion(String id, String wrId) {
-        return (T)getVersions(id).stream().filter(x -> x.getLoaderVersion().equals(wrId)).findFirst().orElse(null);
+    public T getVersion(String id, String wrId, RedownloadSettings redownloadSettings) {
+        return (T)getVersions(id, redownloadSettings).stream().filter(x -> x.getLoaderVersion().equals(wrId)).findFirst().orElse(null);
     }
 
     protected T getFabricVersion(){
@@ -53,8 +56,8 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
         return (T)new FabricVersion(id, wrId);
     }
 
-    protected String getInstaller() throws NoConnectionException, HttpException {
-        if (cacheInstaller != null && !redownSettings.hasClient())
+    protected String getInstaller(RedownloadSettings redownloadSettings) throws NoConnectionException, HttpException, IOException, StopException {
+        if (cacheInstaller != null && !redownloadSettings.hasClient())
             return cacheInstaller;
         var arr = gson.fromJson(Network.urlToString(getInstallerUrl()), JsonArray.class);
         return cacheInstaller = arr.get(0).getAsJsonObject().get("url").getAsString();
@@ -68,17 +71,17 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
     }
 
     @Override
-    public List<T> getAllVersions() {
+    public List<T> getAllVersions(RedownloadSettings redownloadSettings) {
         return null;
     }
 
     @Override
-    public List<T> getVersions(String id) {
+    public List<T> getVersions(String id, RedownloadSettings redownloadSettings) {
         logState("acqVersionFabric - " + id);
 
         // version id does not matter now
 
-        if (!cache.isEmpty() && !redownSettings.hasClient()){
+        if (!cache.isEmpty() && !redownloadSettings.hasClient()){
             cache.forEach(a -> a.id = id);
             return (List<T>)cache;
         }
@@ -109,37 +112,39 @@ public class Fabric<T extends BaseFabricVersion> extends Loader<T> {
     }
 
     @Override
-    public void install(T v) throws NoConnectionException, StopException {
-        Vanilla.getVanilla().install(v);
+    public void install(VersionToken<T> token) throws NoConnectionException, StopException {
+        Vanilla.getVanilla().install(token);
+
+        final T version = token.getVersion();
 
         var gameDir = Configurator.getConfig().getGamePath();
-        String jsonName = v.getJsonName();
+        String jsonName = version.getJsonName();
         var temp = Configurator.getConfig().getTemporaryFolder();
         var jsonPath = gameDir.to("versions", jsonName, jsonName + ".json");
         var clientPath = gameDir.to("versions", jsonName, jsonName + ".jar");
-        if (clientPath.exists() && !redownSettings.hasClient())
+        if (clientPath.exists() && !token.getRedownloadSettings().hasClient())
             return;
 
         try{
             logState(".fabric.state.download");
 
-            String installer = getInstaller();
-            var path = Network.download(NetworkToken.create(installer, temp.to("quiltinstaller.jar"), false), false);
+            String installer = getInstaller(token.getRedownloadSettings());
+            var path = Network.download(NetworkToken.create(installer, temp.to("quiltinstaller.jar"), false).syncWith(token));
 
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             logState(".fabric.state.install");
             try{
                 var process = new ProcessBuilder()
-                        .command(JavaManager.getDefault().getWindowExecutable().toString(), "-jar", path.toString(), "client", "-dir", gameDir.toString(), "-mcversion", v.id, "-loader", v.getLoaderVersion(), "-noprofile")
+                        .command(JavaManager.getDefault().getWindowExecutable().toString(), "-jar", path.toString(), "client", "-dir", gameDir.toString(), "-mcversion", version.id, "-loader", version.getLoaderVersion(), "-noprofile")
                         .inheritIO()
                         .start();
                 process.waitFor();
                 clientPath.write("");
             }
             catch (Exception e){
-                Logger.getLogger().logHyph("ERRFABRIC " + v.getLoaderVersion());
+                Logger.getLogger().logHyph("ERRFABRIC " + version.getLoaderVersion());
                 Logger.getLogger().log(e);
                 logState(UNKNOWN_ERROR);
             }

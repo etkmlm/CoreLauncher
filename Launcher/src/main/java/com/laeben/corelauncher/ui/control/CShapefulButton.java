@@ -217,15 +217,14 @@ public class CShapefulButton extends HBox {
             leftShapeRect.setShape(c);
             if (c == null){
                 getChildren().remove(leftShapeRect);
-
             }
-            else{
+            else if (b == null) {
                 getChildren().add(0, leftShapeRect);
             }
         });
 
         setSpacing(6);
-        getChildren().addAll(textControl);
+        //getChildren().addAll(textControl);
 
         fade = new FadeTransition();
         fadeDeeper = new FadeTransition();
@@ -274,6 +273,12 @@ public class CShapefulButton extends HBox {
     }
 
     public void setText(String text){
+        if (text == null){
+            getChildren().remove(textControl);
+        }
+        else if (getText() == null){
+            getChildren().add(0, textControl);
+        }
         this.text.set(text);
     }
 

@@ -29,6 +29,7 @@ import com.laeben.corelauncher.web.WebComplex;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
 
+import java.io.IOException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
@@ -106,10 +107,16 @@ public class Authenticator {
             return;
         }
 
-        tokenStore = gson.fromJson(path.read(), TokenStore.class);
+        try {
+            tokenStore = gson.fromJson(path.read(), TokenStore.class);
+        } catch (IOException e) {
+            Logger.getLogger().log("Token store could not be refreshed.", e);
+        } catch (StopException ignored) {
+
+        }
     }
 
-    public void saveTokenStore(){
+    public void saveTokenStore() throws StopException, IOException {
         var path = getTokenStorePath();
         if (tokenStore == null) path.delete();
         else path.write(gson.toJson(tokenStore));
@@ -119,20 +126,23 @@ public class Authenticator {
         listenPortBindFail = true;
     }
 
-    public String listen(String parameter, int port) {
+    public String listen(String parameter, int port) throws IOException, StopException {
         String regex = ".*" + parameter + "=(.*) HTTP.*";
         Pattern p = Pattern.compile(regex);
         String r = APIListener.createClosePageRequest();
 
         String s = Network.listenServer(port, r);
-        if (s == null)
-            return null;
         var m = p.matcher(s);
         return m.find() ? m.group(1) : null;
     }
 
-    private XblInfo extractXbl(String body) throws PerformException, NoConnectionException {
-        final String response = Network.post(OAUTH_TOKEN_URL, body);
+    private XblInfo extractXbl(String body) throws PerformException, NoConnectionException, StopException {
+        final String response;
+        try {
+            response = Network.post(OAUTH_TOKEN_URL, body);
+        } catch (IOException e) {
+            throw new PerformException("XBL extraction error", e);
+        }
 
         var json = gson.fromJson(response, JsonObject.class);
 
@@ -149,7 +159,7 @@ public class Authenticator {
         int ein = json.get("expires_in").getAsInt();
         return new XblInfo(token, rToken, ein);
     }
-    private XblInfo refreshXbl(String refreshToken) throws NoConnectionException, PerformException {
+    private XblInfo refreshXbl(String refreshToken) throws NoConnectionException, PerformException, StopException {
         final String body = String.format(
                 "client_id=%s" +
                 "&scope=XboxLive.signin offline_access" +
@@ -158,7 +168,7 @@ public class Authenticator {
 
         return extractXbl(body);
     }
-    private XblInfo getXbl(String code, String redirect) throws NoConnectionException, PerformException {
+    private XblInfo getXbl(String code, String redirect) throws NoConnectionException, PerformException, StopException {
         final String body = String.format(
                         "client_id=%s" +
                         "&scope=XboxLive.signin offline_access" +
@@ -168,7 +178,7 @@ public class Authenticator {
 
         return extractXbl(body);
     }
-    private AuthInfo getAccessTokenFromXBLToken(String token) throws NoConnectionException, PerformException {
+    private AuthInfo getAccessTokenFromXBLToken(String token) throws NoConnectionException, PerformException, StopException {
         String json =
                 """
                 {
@@ -181,7 +191,12 @@ public class Authenticator {
                    "TokenType": "JWT"
                 }
                 """.replace("$", token);
-        var prc = gson.fromJson(Network.post(AUTH_URL, json, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        JsonObject prc = null;
+        try {
+            prc = gson.fromJson(Network.post(AUTH_URL, json, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        } catch (IOException e) {
+            throw new PerformException("XBOX auth error", e);
+        }
 
         String xblToken = prc.get("Token").getAsString();
         var arr = prc.get("DisplayClaims").getAsJsonObject().get("xui").getAsJsonArray().asList().stream().filter(x -> x.getAsJsonObject().has("uhs")).findFirst();
@@ -203,7 +218,12 @@ public class Authenticator {
                 }
                 """.replace("$", xblToken);
 
-        var xstsResponse = gson.fromJson(Network.post(XSTS_URL, xjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        JsonObject xstsResponse = null;
+        try {
+            xstsResponse = gson.fromJson(Network.post(XSTS_URL, xjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        } catch (IOException e) {
+            throw new PerformException("XSTS response error", e);
+        }
 
         if (xstsResponse.has("XErr")){
             throw new PerformException("authFail", xstsResponse.get("XErr").getAsLong());
@@ -212,7 +232,12 @@ public class Authenticator {
         String authToken = xstsResponse.get("Token").getAsString();
 
         String fjson = "{ \"identityToken\": \"XBL3.0 x=" + hash + ";" + authToken + "\" }";
-        var user = gson.fromJson(Network.post(MC_AUTH_URL, fjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        JsonObject user = null;
+        try {
+            user = gson.fromJson(Network.post(MC_AUTH_URL, fjson, List.of(RequestParameter.contentType("application/json"))), JsonObject.class);
+        } catch (IOException e) {
+            throw new PerformException("Minecraft auth error", e);
+        }
 
         String name = null;
         //String name = user.get("username").getAsString();
@@ -291,7 +316,7 @@ public class Authenticator {
                 }
                 catch (NoConnectionException ignored) {
 
-                } catch (HttpException e) {
+                } catch (HttpException | IOException e) {
                     Logger.getLogger().log(e);
                 } catch (StopException ignored) {
                     c = CODE_STOP;
@@ -336,7 +361,11 @@ public class Authenticator {
 
                     tokens = constructTokenInfo(authInfo, freshXbl);
                     getTokenStore().updateTokens(tokens);
-                    saveTokenStore();
+                    try {
+                        saveTokenStore();
+                    } catch (IOException e) {
+                        throw new PerformException("Token store could not be saved", e);
+                    }
 
                     account.setTokens(tokens);
                     return tokens.getAccessToken();
@@ -346,7 +375,11 @@ public class Authenticator {
 
         tokens = authenticate(account.getUsername());
         getTokenStore().updateTokens(tokens);
-        saveTokenStore();
+        try {
+            saveTokenStore();
+        } catch (IOException e) {
+            throw new PerformException("Token store could not be saved", e);
+        }
 
         account.setTokens(tokens);
 
@@ -356,7 +389,7 @@ public class Authenticator {
     /**
      * Validates account access token.
      */
-    public boolean validateAccessToken(Account account){
+    public boolean validateAccessToken(Account account) throws StopException {
         if (!account.isOnline() || account.getTokens() == null)
             return false;
 
@@ -365,7 +398,7 @@ public class Authenticator {
             String str = Network.urlToString(VERIFY_URL, List.of(RequestParameter.bearer(account.getTokens().getAccessToken())));
 
             obj = GsonUtil.DEFAULT_GSON.fromJson(str, JsonObject.class);
-        } catch (NoConnectionException | HttpException ignored) {
+        } catch (NoConnectionException | HttpException | IOException ignored) {
             return false;
         }
 

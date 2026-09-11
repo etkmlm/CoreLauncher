@@ -1,9 +1,11 @@
 package com.laeben.corelauncher.util;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.util.entity.ImageCache;
 import javafx.scene.image.Image;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -32,7 +34,7 @@ public class ImageCacheManager {
         return getImage(k, size, () -> ImageCache.get(k, size));
     }
 
-    public static String encodeImage(Path img){
+    public static String encodeImage(Path img) throws StopException, IOException {
         var bytes = img.readBytes();
         return Base64.getEncoder().encodeToString(bytes);
     }

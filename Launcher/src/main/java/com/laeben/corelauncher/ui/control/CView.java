@@ -34,6 +34,10 @@ public class CView extends ImageView {
     }
 
     public void setImageAsync(ImageTask task){
-        ImageUtil.getImageAsync(task, this::setImage, false);
+        setImageAsync(task, false);
+    }
+
+    public void setImageAsync(ImageTask task, boolean useDefault){
+        ImageUtil.getImageAsync(task, this::setImage, useDefault);
     }
 }

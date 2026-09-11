@@ -16,6 +16,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.AnchorPane;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 
 public class WebPage extends HandlerController {
@@ -51,7 +52,7 @@ public class WebPage extends HandlerController {
                         EmbeddedBrowser.downloadNativeLibraries();
                     } catch (NoConnectionException | StopException ignored) {
 
-                    } catch (HttpException e) {
+                    } catch (HttpException | IOException e) {
                         Logger.getLogger().log(e);
 
                     }

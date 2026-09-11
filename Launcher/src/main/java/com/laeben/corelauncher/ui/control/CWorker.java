@@ -1,5 +1,7 @@
 package com.laeben.corelauncher.ui.control;
 
+import com.laeben.core.concurrency.CancellableToken;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.ui.UI;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -31,6 +33,7 @@ public class CWorker<T, H> extends StackPane {
     private final ObjectProperty<H> status;
 
     private Executor executor;
+    private CancellableToken<?> cancellableToken;
     private boolean isRunning;
     private Task<T> task;
     private final ProgressIndicator indicator;
@@ -86,6 +89,15 @@ public class CWorker<T, H> extends StackPane {
         return this;
     }
 
+    public CWorker<T, H> withToken(CancellableToken<?> token){
+        if (this.cancellableToken != null && !this.cancellableToken.stopRequested())
+            throw new RuntimeException("Cannot overwrite unused cancellable token.");
+
+        this.cancellableToken = token;
+
+        return this;
+    }
+
     public CWorker<T, H> finallyDo(Consumer<CWorker<T, H>> r){
         this.doFinally = r;
         return this;
@@ -114,7 +126,7 @@ public class CWorker<T, H> extends StackPane {
         task.setOnFailed(a -> {
             e = a.getSource().getException();
             UI.runAsync(() -> ind(false));
-            if (onFailed != null)
+            if (!(e instanceof StopException) && onFailed != null)
                 onFailed.accept(this);
             if (doFinally != null)
                 doFinally.accept(this);
@@ -140,6 +152,12 @@ public class CWorker<T, H> extends StackPane {
         this.taskFactory = taskFactory;
 
         return this;
+    }
+
+    public CancellableToken<?> getCancellableToken(){
+        if (cancellableToken == null || cancellableToken.stopRequested())
+            cancellableToken = new CancellableToken<>();
+        return cancellableToken;
     }
 
     public boolean isRunning(){

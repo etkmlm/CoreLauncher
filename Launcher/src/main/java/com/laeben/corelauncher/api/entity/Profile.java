@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.api.entity;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.annotation.ReturnsNull;
@@ -12,6 +13,7 @@ import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.core.entity.Path;
 import com.google.gson.*;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -102,13 +104,13 @@ public class Profile {
      * @return null if the given folder's name starts with dot (.)
      */
     @ReturnsNull
-    public static Profile fromFolder(Path profilePath) {
+    public static Profile fromFolder(Path profilePath) throws IOException, StopException {
         if (profilePath.getName().startsWith("."))
             return null;
 
         var file = profilePath.to("profile.json");
         if (file.exists()){
-            var p = PROFILE_GSON.fromJson(file.read(), Profile.class).setName(profilePath.getName());
+            Profile p = PROFILE_GSON.fromJson(file.read(), Profile.class).setName(profilePath.getName());
             p.createdAt = profilePath.toFile().lastModified();
             return p;
         }

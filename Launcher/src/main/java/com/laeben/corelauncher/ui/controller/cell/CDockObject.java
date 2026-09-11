@@ -259,6 +259,8 @@ public abstract class CDockObject extends GridCell {
         pressLayoutY = getLayoutY();
     }
     private void onDragged(MouseEvent a){
+        if (a.getButton() != MouseButton.PRIMARY) return;
+
         a.setDragDetect(false);
         if (!pressed){
             if (exporting)

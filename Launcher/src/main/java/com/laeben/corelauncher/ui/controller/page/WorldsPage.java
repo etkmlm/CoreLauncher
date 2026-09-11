@@ -1,6 +1,8 @@
 package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -199,7 +201,7 @@ public class WorldsPage extends HandlerController {
             var path = Path.begin(f.toPath());
             worker.begin().withTask(k -> new Task() {
                 @Override
-                protected Void call() {
+                protected Void call() throws IOException, StopException {
                     worldFolder.zip(path);
                     return null;
                 }
@@ -230,57 +232,62 @@ public class WorldsPage extends HandlerController {
                 var saves = profile.getPath().to("saves");
                 var arr = new ArrayList<String>();
                 for (var path : paths){
-                    String dirName = path.getNameWithoutExtension();
-                    var temp = Configurator.getConfig().getTemporaryFolder().to(dirName);
-                    {
-                        path.extract(temp, null);
+                    try{
+                        String dirName = path.getNameWithoutExtension();
+                        var temp = Configurator.getConfig().getTemporaryFolder().to(dirName);
+                        {
+                            path.extract(temp, null);
 
-                        var files = temp.getFiles();
-                        if (files.size() == 1 && files.get(0).isDirectory()){
-                            dirName = files.get(0).getName();
-                            files.get(0).move(temp);
+                            var files = temp.getFiles();
+                            if (files.size() == 1 && files.get(0).isDirectory()){
+                                dirName = files.get(0).getName();
+                                files.get(0).move(temp);
+                            }
                         }
-                    }
 
-                    var world = World.fromGzip(null, temp.to("level.dat"));
+                        var world = World.fromGzip(null, temp.to("level.dat"));
 
-                    String name = world.levelName;
-                    final String finalDirName = dirName;
+                        String name = world.levelName;
+                        final String finalDirName = dirName;
 
-                    if (name == null){
-                        temp.delete();
-                        continue;
-                    }
-
-                    if (saves.getFiles().stream().anyMatch(x -> x.getName().equals(finalDirName))){
-                        final var result = UI.runSync(() -> CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translateFormat("world.ask.overwrite", finalDirName))
-                                .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
-                                .executeForResult()
-                                .map(CMsgBox.Result::result));
-
-                        if (result == null){
+                        if (name == null){
                             temp.delete();
                             continue;
                         }
-                        final var confirmation = result.orElse(null);
 
-                        if (confirmation == null || confirmation == CMsgBox.ResultType.CANCEL){
-                            temp.delete();
-                            continue;
+                        if (saves.getFiles().stream().anyMatch(x -> x.getName().equals(finalDirName))){
+                            final var result = UI.runSync(() -> CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translateFormat("world.ask.overwrite", finalDirName))
+                                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
+                                    .executeForResult()
+                                    .map(CMsgBox.Result::result));
+
+                            if (result == null){
+                                temp.delete();
+                                continue;
+                            }
+                            final var confirmation = result.orElse(null);
+
+                            if (confirmation == null || confirmation == CMsgBox.ResultType.CANCEL){
+                                temp.delete();
+                                continue;
+                            }
+                            else if (confirmation.isPositive()){
+                                saves.to(finalDirName).delete();
+                            }
+                            else{
+                                String salt = String.valueOf(Instant.now().toEpochMilli());
+                                dirName = finalDirName + salt;
+                            }
                         }
-                        else if (confirmation.isPositive()){
-                            saves.to(finalDirName).delete();
-                        }
-                        else{
-                            String salt = String.valueOf(Instant.now().toEpochMilli());
-                            dirName = finalDirName + salt;
-                        }
+
+                        arr.add(name);
+                        temp.move(saves.to(StrUtil.pure(dirName)));
+                    } catch (StopException ignored) {
+                        return;
+                    } catch (IOException e) {
+                        Logger.getLogger().log("World " + path + " cannot be moved.", e);
                     }
-
-                    arr.add(name);
-                    temp.move(saves.to(StrUtil.pure(dirName)));
                 }
-
 
                 //Profiler.getProfiler().setProfile(profile.getName(), null);
                 if (!arr.isEmpty()){

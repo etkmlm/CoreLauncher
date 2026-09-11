@@ -2,6 +2,10 @@ package com.laeben.corelauncher.minecraft.modding.entity.resource;
 
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
+import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.Tool;
+import com.laeben.corelauncher.api.entity.FileCheckMode;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeFile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeResource;
 import com.laeben.corelauncher.minecraft.modding.entity.ModSource;
@@ -17,6 +21,7 @@ import com.laeben.corelauncher.util.entity.ImageTask;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class CResource implements Comparable<CResource> {
     public static final class CResourceFactory implements JsonDeserializer<CResource> {
@@ -67,6 +72,8 @@ public class CResource implements Comparable<CResource> {
     public Object fileId;
     public String fileUrl;
     public String fileName;
+    public long fileSize;
+    public String fileHash;
     public boolean disabled;
 
     public transient String targetVersionId;
@@ -184,9 +191,6 @@ public class CResource implements Comparable<CResource> {
 
             p.setFile(CResource.fromRinthFile(v.getFile(), v.getPublished()));
         }
-        else{
-            int a = 0;
-        }
 
         p.setSource(ModSource.Type.MODRINTH);
 
@@ -228,6 +232,8 @@ public class CResource implements Comparable<CResource> {
         res.forgeModules = file.getModules();
         res.dependencies = file.getDependencies().stream().map(x -> CResource.asDependency(x.modId)).toList();
         res.fileDate = file.fileDate;
+        res.fileSize = file.fileLength;
+        res.fileHash = file.getHash(CurseForgeFile.HashAlg.SHA1);
 
         res.setSource(ModSource.Type.CURSEFORGE);
 
@@ -241,6 +247,8 @@ public class CResource implements Comparable<CResource> {
         res.fileUrl = file.url;
         res.fileName = file.filename;
         res.forgeModules = List.of();
+        res.fileSize = file.size;
+        res.fileHash = file.hashes != null ? file.hashes.sha1 : null;
 
         res.setSource(ModSource.Type.MODRINTH);
 
@@ -275,8 +283,10 @@ public class CResource implements Comparable<CResource> {
     }*/
 
     public void setFile(CResource file){
-        fileId = file.id;
+        fileId = file.fileId;
         fileDate = file.fileDate;
+        fileSize = file.fileSize;
+        fileHash = file.fileHash;
         fileUrl = file.fileUrl;
         fileName = file.fileName;
         forgeModules = file.forgeModules;
@@ -322,6 +332,15 @@ public class CResource implements Comparable<CResource> {
         return this.id != null && (this.id.equals(id) || ((this.id instanceof Double || this.id instanceof Integer) && id instanceof Integer i && getIntId() == i));
     }
 
+    /**
+     * Checks the availability and integrity of the resource file.
+     * Uses {@link Tool#checkFileIntegrity(Path, long, String, FileCheckMode)} function.
+     * @see Tool
+     */
+    public boolean checkFile(Path path, FileCheckMode mode) throws StopException {
+        return Tool.checkFileIntegrity(path, fileSize, fileHash, mode);
+    }
+
     @Override
     public int compareTo(CResource o){
         return fileDate == null || o.fileDate == null ? -1 : fileDate.compareTo(o.fileDate);
@@ -329,6 +348,6 @@ public class CResource implements Comparable<CResource> {
 
     @Override
     public int hashCode(){
-        return -1;
+        return Objects.hash(id, fileId);
     }
 }

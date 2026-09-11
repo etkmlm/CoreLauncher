@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
@@ -41,6 +42,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+
+import java.io.IOException;
 
 public class SettingsPage extends HandlerController {
     public static final String KEY = "pgsettings";
@@ -381,7 +384,14 @@ public class SettingsPage extends HandlerController {
                 return;
             }
 
-            options.copy(Configurator.getConfig().getLauncherPath().to("options.txt"));
+            try {
+                options.copy(Configurator.getConfig().getLauncherPath().to("options.txt"));
+            } catch (IOException e) {
+                Logger.getLogger().log("Error while saving options. ", e);
+                return;
+            } catch (StopException ignored) {
+                return;
+            }
             Main.getMain().announceLater(Translator.translate("profile.options.title"), Translator.translate("profile.options.okDefault"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
         });
 

@@ -1,10 +1,17 @@
 package com.laeben.corelauncher.api;
 
+import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.entity.FileCheckMode;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.ui.Controller;
 import com.laeben.corelauncher.ui.entity.LScene;
+import com.laeben.corelauncher.util.entity.LogType;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -12,6 +19,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 
 public class Tool {
@@ -199,5 +208,76 @@ public class Tool {
 
         var pattern = Pattern.compile(regex);
         return pattern.matcher(s).replaceAll("");
+    }
+
+    private static final long FNV_OFFSET = Long.parseUnsignedLong("14695981039346656037");
+    private static final long FNV_PRIME = 1099511628211L;
+
+    /**
+     * Hashes the given text with FNV-1a algorithm.
+     */
+    public static long hashFNV1A(String text){
+        long h = FNV_OFFSET;
+        for (char c : text.toCharArray()){
+            h = h ^ c;
+            h *= FNV_OFFSET;
+        }
+        return h;
+    }
+
+    /**
+     * Checks the given file with the SHA-1 hash.
+     */
+    public static boolean checkSHA1Hash(Path path, String hash){
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            return true;
+        }
+
+        final byte[] hashedFile;
+
+        try (final var file = new FileInputStream(path.toFile())){
+            final byte[] buffer = new byte[65536];
+            int read;
+            while ((read = file.read(buffer)) > 0){
+                digest.update(buffer, 0, read);
+            }
+
+            hashedFile = digest.digest();
+        } catch (IOException e) {
+            Logger.getLogger().log(LogType.WARN, "File ('" + path + "') SHA1 hash cannot be checked.");
+            return true;
+        }
+
+        if (hashedFile.length != hash.length() / 2) return false; // fast check
+
+        for(int i = 0; i < hash.length(); i+=2){
+            byte b = (byte)((Character.digit(hash.charAt(i), 16) << 4) | Character.digit(hash.charAt(i + 1), 16));
+            if (hashedFile[i / 2] != b) return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks the availability and integrity of an asset file.
+     * 1 - Existance (always)
+     * 2 - Size Check (only when size != 0 && mode != NONE)
+     * 3 - Hash Check (only when SHA1 != null and mode == COMPLETE)
+     * @param path local path
+     * @return is file available
+     */
+    public static boolean checkFileIntegrity(Path path, long size, String hash, FileCheckMode mode) throws StopException {
+        try {
+            return path.exists() && (mode == FileCheckMode.NONE || (
+                    (size == 0 || path.getSize() == size) &&
+                            (hash == null || mode != FileCheckMode.COMPLETE || checkSHA1Hash(path, hash)
+                            )));
+        } catch (IOException e) {
+            Logger.getLogger().log(path + " could not be checked for integrity", e);
+            return false;
+        }
     }
 }

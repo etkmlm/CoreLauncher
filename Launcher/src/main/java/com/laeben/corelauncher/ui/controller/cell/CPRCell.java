@@ -5,6 +5,7 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.api.Profiler;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
@@ -26,6 +27,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -97,7 +99,14 @@ public class CPRCell<T extends CResource> extends CCell<T> implements CLSelectab
         if (item == null)
             return;
 
-        Profiler.setResourceDisabled(profile, item, !item.disabled, true);
+        try {
+            Profiler.setResourceDisabled(profile, item, !item.disabled, true);
+        } catch (StopException ignored){
+
+        }
+        catch (IOException e){
+            Logger.getLogger().log(e);
+        }
         invalidateToggle();
     }
 
@@ -115,7 +124,7 @@ public class CPRCell<T extends CResource> extends CCell<T> implements CLSelectab
                 Main.getMain().announceLater(Translator.getTranslator().getTranslate("announce.info.update.title"), Translator.translateFormat("announce.info.update.mpcontent", item.name), Announcement.AnnouncementType.ERROR, Duration.seconds(4));
             }
 
-        } catch (NoConnectionException | HttpException | StopException ignored) {
+        } catch (NoConnectionException | HttpException | StopException | IOException ignored) {
             int m = 0;
         }
 

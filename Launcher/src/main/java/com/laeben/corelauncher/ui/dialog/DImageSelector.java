@@ -1,10 +1,12 @@
 package com.laeben.corelauncher.ui.dialog;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.ImageEntity;
-import com.laeben.corelauncher.api.util.NetUtil;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.dialog.entity.DialogResult;
@@ -140,7 +142,14 @@ public class DImageSelector extends CDialog<ImageEntity> {
                 }
             }
             else{
-                path.copy(Configurator.getConfig().getImagePath().to(path.getName()));
+                try {
+                    path.copy(Configurator.getConfig().getImagePath().to(path.getName()));
+                } catch (IOException e) {
+                    Logger.getLogger().log(e);
+                    return;
+                } catch (StopException ignored) {
+                    return;
+                }
                 setResult(ImageEntity.fromLocal(path.getName()));
             }
 

@@ -246,7 +246,7 @@ public class FilterSection<T> extends VBox {
     }
 
     public List<String> getSelectedChoices(){
-        return selected.stream().toList();
+        return List.copyOf(selected);
     }
 
     public T getState(String choiceId){

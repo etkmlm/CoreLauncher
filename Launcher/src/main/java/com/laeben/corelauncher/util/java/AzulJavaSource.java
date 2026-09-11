@@ -4,11 +4,14 @@ import com.google.gson.JsonArray;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.network.Network;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
+
+import java.io.IOException;
 
 public class AzulJavaSource implements JavaSource {
     private static final String ZULU = "https://api.azul.com/metadata/v1/zulu/packages/";
@@ -22,7 +25,7 @@ public class AzulJavaSource implements JavaSource {
     }
 
     @Override
-    public JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException {
+    public JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException, IOException, StopException {
         String url = String.format("%s?java_version=%s&os=%s&arch=%s&java_package_type=%s&javafx_bundled=false&availability_types=CA&release_status=ga&certifications=tck&page_size=1&archive_type=%s", ZULU, j.majorVersion, getZuluOS(os), arch, JavaManager.PACKAGE_TYPE, os == OS.WINDOWS ? "zip" : "tar_gz");
 
         var arr = GsonUtil.EMPTY_GSON.fromJson(Network.urlToString(url), JsonArray.class);
@@ -44,7 +47,7 @@ public class AzulJavaSource implements JavaSource {
     }
 
     @Override
-    public void extract(Path archive, JavaDownloadInfo info) {
+    public void extract(Path archive, JavaDownloadInfo info) throws StopException, IOException {
         archive.extract(null, null);
         if (info.os() != OS.OSX)
             return;

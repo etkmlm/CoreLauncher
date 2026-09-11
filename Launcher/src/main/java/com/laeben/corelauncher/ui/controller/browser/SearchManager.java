@@ -3,6 +3,8 @@ package com.laeben.corelauncher.ui.controller.browser;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.ModSource;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
+import com.laeben.corelauncher.ui.controller.browser.cell.ResourceCellItem;
+import com.laeben.corelauncher.ui.controller.browser.search.Search;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class SearchManager {
         }
     }
 
-    public List<ResourceCell.Link> search(String query, ResourceType type, Search search){
+    public List<ResourceCellItem> search(String query, ResourceType type, Search search){
         if (search != null){
             if (type == null)
                 return null;

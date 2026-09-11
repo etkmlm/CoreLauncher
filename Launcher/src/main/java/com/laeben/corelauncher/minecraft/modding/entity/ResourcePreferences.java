@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.modding.entity;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Tool;
@@ -11,6 +12,7 @@ import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.entity.LoaderVersion;
 
+import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ public class ResourcePreferences {
     public static ResourcePreferences getShaderPreferences(){
         if (SHADER_PREFERENCES == null)
             SHADER_PREFERENCES = ResourcePreferences.empty()
-                    .includeGameVersion(Vanilla.getVanilla().getLatestRelease())
+                    .includeGameVersion(Vanilla.getVanilla().getLatestRelease(null))
                     .includeLoaderType(LoaderType.FABRIC);
 
         return SHADER_PREFERENCES;
@@ -121,7 +123,7 @@ public class ResourcePreferences {
         return profile == null ? null : profile.get();
     }
 
-    public static Profile createProfileFromPreferences(ResourcePreferences prefs, ModResource res) throws PerformException, InvalidObjectException {
+    public static Profile createProfileFromPreferences(ResourcePreferences prefs, ModResource res) throws PerformException, InvalidObjectException, StopException {
         String versionId = null;
         if (prefs.hasGameVersions())
             versionId = prefs.getGameVersions().stream().max(Version.VersionIdComparator.INSTANCE).orElse(null);
@@ -132,48 +134,65 @@ public class ResourcePreferences {
         if (versionId == null)
             return null;
 
-        LoaderType loader;
+        List<LoaderType> loaders;
 
         if (prefs.hasLoaderTypes())
-            loader = prefs.getLoaderTypes().get(0);
+            loaders = prefs.getLoaderTypes();
         else{
             var availableLoaders = res.getLoaders(List.of(versionId));
             if (availableLoaders != null && availableLoaders.length > 0)
-                loader = availableLoaders[0];
+                loaders = List.of(availableLoaders);
             else
                 return null;
         }
 
         String name = res.getResourceType() == ResourceType.MODPACK ? Tool.beautifyString(res.getName(), Tool.ValidityDegree.HIGH) : null;
 
-        return createProfileFromPreferences(prefs, versionId, loader, name);
+        return createProfileFromPreferences(prefs, versionId, loaders, name);
     }
 
-    public static Profile createProfileFromPreferences(ResourcePreferences prefs, String versionId, LoaderType loader, String name) throws PerformException, InvalidObjectException {
-        if (loader == null)
-            loader = LoaderType.VANILLA;
+    public static Profile createProfileFromPreferences(ResourcePreferences prefs, String versionId, List<LoaderType> loaders, String name) throws PerformException, InvalidObjectException, StopException {
+        if (loaders == null)
+            loaders = List.of(LoaderType.VANILLA);
 
-        var wr = Loader.getLoader(loader.getIdentifier());
+        Loader loader = null;
         String loaderVersion = null;
-        if (loader != LoaderType.VANILLA){
-            var versions = ((Loader<LoaderVersion>)wr).getVersions(versionId);
-            if (versions != null && !versions.isEmpty())
-                loaderVersion = versions.get(0).getLoaderVersion();
 
-            if (loaderVersion == null){
-                throw new PerformException("There are no versions found for loader with identifier '" + loader + "'");
+        for (var loaderType : loaders) {
+            var wr = Loader.getLoader(loaderType.getIdentifier());
+
+            if (loaderType != LoaderType.VANILLA){
+                var versions = ((Loader<LoaderVersion>)wr).getVersions(versionId);
+                if (versions != null && !versions.isEmpty())
+                    loaderVersion = versions.get(0).getLoaderVersion();
+
+                if (loaderVersion != null) {
+                    loader = wr;
+                    break;
+                }
             }
         }
 
-        String finalLoaderVersion = loaderVersion;
+        if (loaderVersion == null){
+            throw new PerformException("There are no versions found for loaders '" + String.join(",", loaders.stream().map(LoaderType::getIdentifier).toList()) + "'");
+        }
+
+        final String finalLoaderVersion = loaderVersion;
+        final Loader finalLoader = loader;
 
         if (name == null)
-            name = StrUtil.toUpperFirst(loader.getIdentifier()) + " " + Translator.translate("profile");
+            name = StrUtil.toUpperFirst(loader.getType().getIdentifier()) + " " + Translator.translate("profile");
 
-        return Profiler.getProfiler().createAndSetProfile(Profiler.getProfiler().generateName(name), p ->
-                p.setVersionId(versionId)
-                        .setLoader(wr)
-                        .setLoaderVersion(finalLoaderVersion)
-        );
+        name = Profiler.getProfiler().generateName(name);
+
+        try {
+            return Profiler.getProfiler().createAndSetProfile(name, p ->
+                    p.setVersionId(versionId)
+                            .setLoader(finalLoader)
+                            .setLoaderVersion(finalLoaderVersion)
+            );
+        } catch (IOException e) {
+            throw new PerformException("Could not create profile " + name, e);
+        }
     }
 }

@@ -12,12 +12,15 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.minecraft.Loader;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.forge.installer.ForgeInstaller;
 import com.laeben.corelauncher.minecraft.loader.neoforge.entity.NeoForgeVersion;
+import com.laeben.corelauncher.minecraft.token.VersionToken;
 import com.laeben.corelauncher.util.GsonUtil;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -50,13 +53,13 @@ public class NeoForge extends Loader<NeoForgeVersion> {
     }
 
     @Override
-    public NeoForgeVersion getVersion(String id, String wrId) {
-        return getVersions(id).stream().filter(a -> a.getLoaderVersion().equals(wrId)).findFirst().orElse(null);
+    public NeoForgeVersion getVersion(String id, String wrId, RedownloadSettings redownloadSettings) {
+        return getVersions(id, redownloadSettings).stream().filter(a -> a.getLoaderVersion().equals(wrId)).findFirst().orElse(null);
     }
 
     @Override
-    public List<NeoForgeVersion> getAllVersions() {
-        if (!cache.isEmpty() && !redownSettings.hasClient())
+    public List<NeoForgeVersion> getAllVersions(RedownloadSettings redownloadSettings) {
+        if (!cache.isEmpty() && !redownloadSettings.hasClient())
             return cache;
 
         try {
@@ -64,9 +67,9 @@ public class NeoForge extends Loader<NeoForgeVersion> {
             cache.clear();
             cache.addAll(all.get("versions").getAsJsonArray().asList().stream().map(a -> new NeoForgeVersion(a.getAsString())).toList());
             Collections.reverse(cache);
-        } catch (NoConnectionException ignored) {
+        } catch (NoConnectionException | StopException ignored) {
             return getOfflineVersions();
-        } catch (HttpException e) {
+        } catch (HttpException | IOException e) {
             Logger.getLogger().log(e);
         }
 
@@ -78,21 +81,23 @@ public class NeoForge extends Loader<NeoForgeVersion> {
     }
 
     @Override
-    public List<NeoForgeVersion> getVersions(String versionId) {
+    public List<NeoForgeVersion> getVersions(String versionId, RedownloadSettings redownloadSettings) {
         logState("acqVersionForge - " + versionId);
 
-        return getAllVersions().stream().filter(a -> a.id.equals(versionId)).toList();
+        return getAllVersions(redownloadSettings).stream().filter(a -> a.id.equals(versionId)).toList();
     }
 
     @Override
-    public void install(NeoForgeVersion version) throws NoConnectionException, StopException, PerformException {
+    public void install(VersionToken<NeoForgeVersion> token) throws NoConnectionException, StopException, PerformException {
+        final NeoForgeVersion version = token.getVersion();
+
         var versionsPath = Configurator.getConfig().getGamePath().to("versions");
         var verPath = versionsPath.to(version.getJsonName());
         var verJsonPath = verPath.to(version.getJsonName() + ".json");
 
-        Vanilla.getVanilla().install(version);
+        Vanilla.getVanilla().install(token);
 
-        if (verJsonPath.exists() && !redownSettings.hasClient())
+        if (verJsonPath.exists() && !token.getRedownloadSettings().hasClient())
             return;
 
         String installerUrl = getNeoInstaller(version);
@@ -100,9 +105,9 @@ public class NeoForge extends Loader<NeoForgeVersion> {
         try{
             logState(".forge.state.neodownload");
             var path = Configurator.getConfig().getTemporaryFolder();
-            path = Network.download(NetworkToken.create(installerUrl, path, true), false);
+            path = Network.download(NetworkToken.create(installerUrl, path, true).syncWith(token));
 
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             var target = Configurator.getConfig().getGamePath().toFile();
@@ -128,8 +133,7 @@ public class NeoForge extends Loader<NeoForgeVersion> {
                 }
             }
             catch (Exception e){
-                Logger.getLogger().logHyph("ERRNEOFORGE " + version.getLoaderVersion());
-                Logger.getLogger().log(e);
+                Logger.getLogger().log("ERRNEOFORGE " + version.getLoaderVersion(), e);
                 logState(UNKNOWN_ERROR);
             }
 
@@ -156,7 +160,7 @@ public class NeoForge extends Loader<NeoForgeVersion> {
                 versionsPath.to(name).delete();
             }
         }
-        catch (StopException | PerformException e){
+        catch (StopException | NoConnectionException | PerformException e){
             throw e;
         }
         catch (Exception e){

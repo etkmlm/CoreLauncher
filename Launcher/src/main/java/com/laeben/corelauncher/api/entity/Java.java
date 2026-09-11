@@ -3,6 +3,7 @@ package com.laeben.corelauncher.api.entity;
 import com.laeben.core.entity.Path;
 import com.google.gson.*;
 import com.google.gson.annotations.SerializedName;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.util.entity.LogType;
 
@@ -29,7 +30,11 @@ public class Java {
             else
                 path = jsonElement.getAsString();
 
-            return new Java(name, Path.begin(java.nio.file.Path.of(path)));
+            try {
+                return new Java(name, Path.begin(java.nio.file.Path.of(path)));
+            } catch (StopException | IOException e) {
+                throw new JsonParseException("Java with name " + name + " cannot be parsed.", e);
+            }
         }
 
         @Override
@@ -69,7 +74,7 @@ public class Java {
         loaded = false;
     }
 
-    public Java(String name, Path path){
+    public Java(String name, Path path) throws StopException, IOException {
         this.name = name;
         this.path = path;
 
@@ -96,8 +101,13 @@ public class Java {
 
         var t = path.to("name.txt");
 
-        if (t.exists())
-            name = t.read();
+        if (t.exists()) {
+            try {
+                name = t.read();
+            } catch (IOException | StopException e) {
+                return loaded = false;
+            }
+        }
 
         String version = null;
         String arch;
@@ -182,7 +192,7 @@ public class Java {
         return name == null ? "Java " + majorVersion : name;
     }
 
-    public Java setName(String name){
+    public Java setName(String name) throws StopException, IOException {
         this.name = name;
 
         if (path != null)

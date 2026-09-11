@@ -21,6 +21,11 @@ import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.browser.*;
 import com.laeben.corelauncher.ui.control.*;
+import com.laeben.corelauncher.ui.controller.browser.cell.ResourceCell;
+import com.laeben.corelauncher.ui.controller.browser.cell.ResourceCellItem;
+import com.laeben.corelauncher.ui.controller.browser.search.CurseForgeSearch;
+import com.laeben.corelauncher.ui.controller.browser.search.ModrinthSearch;
+import com.laeben.corelauncher.ui.controller.browser.search.Search;
 import com.laeben.corelauncher.ui.entity.filter.FilterPreset;
 import com.laeben.corelauncher.ui.entity.filter.FilterSection;
 import com.laeben.corelauncher.util.ImageUtil;
@@ -52,7 +57,7 @@ public class BrowserPage extends HandlerController {
 
     private ResourceType mainType;
 
-    private final ObservableList<ResourceCell.Link> resources;
+    private final ObservableList<ResourceCellItem> resources;
     private final Timer searchTimer;
 
     public BrowserPage(){
@@ -148,7 +153,7 @@ public class BrowserPage extends HandlerController {
     @FXML
     private CField txtQuery;
     @FXML
-    private ListView<ResourceCell.Link> lvResources;
+    private ListView<ResourceCellItem> lvResources;
     @FXML
     private Label lblProfileName;
     @FXML
@@ -344,7 +349,7 @@ public class BrowserPage extends HandlerController {
         lvResources.scrollTo(0);
 
         var preset = filterPane.getPreset(filterPane.getLoadedPreset());
-        List<String> vers = profile != null ? null : filterPane.getPreset("pinned").getSection("version").getSelectedChoices();
+        List<String> selectedVersions = profile != null ? List.of() : filterPane.getPreset("pinned").getSection("version").getSelectedChoices();
 
         resources.clear();
 
@@ -362,15 +367,15 @@ public class BrowserPage extends HandlerController {
             }
             else{
                 versions = OptiFine.getOptiFine().getAllVersions().stream();
-                if (vers != null)
-                    versions = versions.filter(x -> vers.stream().anyMatch(x::checkId));
+                if (!selectedVersions.isEmpty())
+                    versions = versions.filter(x -> selectedVersions.stream().anyMatch(x::checkId));
 
                 preferences = ResourcePreferences.empty()
-                        .includeGameVersions(vers)
+                        .includeGameVersions(selectedVersions)
                         .includeLoaderTypes(List.of(LoaderType.OPTIFINE));
             }
 
-            resources.addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeLoaderVersion), y.checkForge(y.forgeLoaderVersion))).map(a -> new ResourceCell.Link(preferences, ResourceOpti.fromOptiVersion(a.id, a))).toList());
+            resources.addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeLoaderVersion), y.checkForge(y.forgeLoaderVersion))).map(a -> new ResourceCellItem(preferences, ResourceOpti.fromOptiVersion(a.id, a))).toList());
 
             return;
         }
@@ -381,7 +386,7 @@ public class BrowserPage extends HandlerController {
         if (side != null)
             search.setSides(side.getSelectedChoices());
 
-        search.setGameVersions(vers);
+        search.setGameVersions(selectedVersions);
 
         if (profile == null){
             FilterSection<LoaderType> sect = filterPane.getPreset("pinned").getSection("loader");

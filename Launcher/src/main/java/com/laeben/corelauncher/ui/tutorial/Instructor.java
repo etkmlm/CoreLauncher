@@ -2,6 +2,7 @@ package com.laeben.corelauncher.ui.tutorial;
 
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Translator;
@@ -17,6 +18,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.input.MouseButton;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,7 +93,7 @@ public class Instructor {
         currentStep = 0;
     }
 
-    public List<Tutorial> getOnlineTutorials() throws NoConnectionException, HttpException {
+    public List<Tutorial> getOnlineTutorials() throws NoConnectionException, HttpException, IOException, StopException {
         var xs = LauncherConfig.APPLICATION.getObjects("tutorials", GsonUtil.DEFAULT_GSON, Tutorial.class, null);
         if (xs == null)
             return List.of();

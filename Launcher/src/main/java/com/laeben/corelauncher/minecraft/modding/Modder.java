@@ -6,6 +6,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.util.events.BaseEvent;
@@ -15,9 +16,12 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
+import com.laeben.corelauncher.api.util.NetUtil;
+import com.laeben.corelauncher.event.bus.UIEventBus;
+import com.laeben.corelauncher.event.context.BasicActionContext;
 import com.laeben.corelauncher.minecraft.Loader;
+import com.laeben.corelauncher.minecraft.token.LaunchToken;
 import com.laeben.corelauncher.minecraft.loader.entity.LoaderVersion;
-import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
 import com.laeben.corelauncher.minecraft.modding.modrinth.Modrinth;
@@ -26,14 +30,13 @@ import com.laeben.corelauncher.ui.control.CMsgBox;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.api.entity.Logger;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.api.ui.UI;
 import javafx.scene.control.Alert;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -66,9 +69,6 @@ public class Modder {
     private static Modder instance;
     private final EventHandler<BaseEvent> handler;
 
-    private RedownloadSettings redownSettings;
-    private boolean stopRequested = false;
-
     public Modder(){
         handler = new EventHandler<>();
 
@@ -83,7 +83,7 @@ public class Modder {
         return instance;
     }
 
-    public List<Modpack> getModpackUpdates(Profile p, List<Modpack> resources) throws NoConnectionException, HttpException {
+    public List<Modpack> getModpackUpdates(Profile p, List<Modpack> resources) throws NoConnectionException, HttpException, StopException, IOException {
         var all = new ArrayList<Modpack>();
         var opt = ModSource.Options.create(p);
         for (var mp : resources){
@@ -98,7 +98,7 @@ public class Modder {
         return all;
     }
 
-    public Map<Object, List<CResource>> getUpdates(Profile p, List<CResource> resources) throws NoConnectionException, HttpException {
+    public Map<Object, List<CResource>> getUpdates(Profile p, List<CResource> resources) throws NoConnectionException, HttpException, StopException, IOException {
         //var forgeResources = resources.stream().filter(a -> !(a instanceof Modpack) && a.isForge() && (!(a instanceof ModpackContent mpc) || mpc.getModpackId() == null)).map(CResource::getIntId).toList();
         //var rinthResources = resources.stream().filter(a -> !(a instanceof Modpack) && a.isModrinth() && (!(a instanceof ModpackContent mpc) || mpc.getModpackId() == null)).toList();
 
@@ -127,7 +127,7 @@ public class Modder {
         return all.stream().filter(a -> !resources.contains(a)).collect(Collectors.groupingBy(CResource::getId));
     }
 
-    public List<CResource> getUpdate(Profile p, CResource m) throws NoConnectionException, HttpException {
+    public List<CResource> getUpdate(Profile p, CResource m) throws NoConnectionException, HttpException, StopException, IOException {
         if (m instanceof ModpackContent mc && mc.getModpackId() != null)
             return null;
 
@@ -138,7 +138,7 @@ public class Modder {
         return m.getSource().getCoreResource(m.getId(), opt);
     }
 
-    public CResource fill(Profile p, CResource m) throws NoConnectionException, HttpException {
+    public CResource fill(Profile p, CResource m) throws NoConnectionException, HttpException, StopException, IOException {
         if (m.id == null)
             return m;
 
@@ -147,12 +147,14 @@ public class Modder {
         return all == null ? m : all.get(0);
     }
 
-    public void installMods(Profile p, List<Mod> mods) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
-        var path = p.getPath().to("mods");
+    public void installMods(LaunchToken token, List<Mod> mods) throws NoConnectionException, StopException {
+        final var profile = token.getProfile();
+        final var path = token.getProfile().getPath().to("mods");
         int i = 0;
         int size = mods.size();
+
         for (var a : mods.stream().toList()){
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             //handler.execute(new KeyEvent(".!" + a.name + "$,resource.progress;" + (++i) + ";" + size));
@@ -164,7 +166,7 @@ public class Modder {
             }
 
             var pxx = path.to(a.fileName);
-            if (pxx.exists() && !redownSettings.hasMods() && pxx.getSize() > 0)
+            if (!token.getRedownloadSettings().hasMods() && a.checkFile(pxx, token.getFileCheckMode()))
                 continue;
 
             if (a.fileUrl == null){
@@ -172,55 +174,55 @@ public class Modder {
                 continue;
             }
 
-            String url = a.fileUrl;
-            if (url.startsWith("OptiFine")){
-                var f = OptiFine.getOptiFine().getVersion(p.getVersionId(), url);
-                if (f == null){
-                    Logger.getLogger().logDebug("ERR");
+            try{
+                String url = a.fileUrl;
+                if (url.startsWith("OptiFine")){
+                    var f = OptiFine.getOptiFine().getVersion(profile.getVersionId(), url, token.getRedownloadSettings());
+                    if (f == null){
+                        Logger.getLogger().logDebug("ERR");
+                        continue;
+                    }
+                    OptiFine.installForge(f, path, token);
                     continue;
                 }
-                OptiFine.installForge(f, path);
-                continue;
-            }
 
-            if (NetUtil.download(NetworkToken.create(url, path.to(a.fileName), false)) != null)
-                continue;
+                if (Network.download(token.toNetworkToken(url, path.to(a.fileName), false)) != null)
+                    continue;
 
-            var up = fill(p, a);
-            if (url.equals(up.fileUrl))
-                continue;
+                var up = fill(profile, a);
+                if (url.equals(up.fileUrl))
+                    continue;
 
-            UI.runAsync(() -> {
-                remove(p, a);
-                try {
-                    include(p, List.of(up));
-                } catch (NoConnectionException | HttpException e) {
-                    Logger.getLogger().log(e);
-                }
-                catch (StopException ignored){
+                UI.runAsync(() -> {
+                    remove(profile, a);
+                    try {
+                        include(profile, List.of(up));
+                    } catch (NoConnectionException | HttpException e) {
+                        Logger.getLogger().log(e);
+                    }
+                    catch (StopException ignored){
 
-                }
-            });
+                    }
+                });
 
-            try{
-                if (NetUtil.download(NetworkToken.create(up.fileUrl, path.to(up.fileName), false)) == null){
-                    var x = Modrinth.getModrinth().getProjectVersions(a.name, List.of(p.getVersionId()), List.of(p.getLoader().getType()));
+                if (Network.download(token.toNetworkToken(up.fileUrl, path.to(up.fileName), false)) == null){
+                    var x = Modrinth.getModrinth().getProjectVersions(a.name, List.of(profile.getVersionId()), List.of(profile.getLoader().getType()));
                     var s = x.stream().flatMap(f -> f.getFiles().stream()).filter(f -> f.filename != null && f.filename.equals(a.fileName)).findFirst();
 
                     if (s.isEmpty()){
                         Logger.getLogger().logDebug("ERR");
                         continue;
                     }
-                    NetUtil.download(NetworkToken.create(s.get().url, path.to(a.fileName), false));
+                    Network.download(token.toNetworkToken(s.get().url, path.to(a.fileName), false));
                 }
             }
-            catch (HttpException e){
-                Logger.getLogger().log( LogType.ERROR, "Error while installing mod: " + up.name);
+            catch (HttpException | IOException e){
+                Logger.getLogger().log("Error while installing mod: " + a.name, e);
             }
         }
     }
 
-    public ModInfo getModFromJarFile(Path p){
+    public ModInfo getModFromJarFile(Path p) throws IOException, StopException {
         LoaderType type = null;
         String versionId = null;
         String name = null;
@@ -315,12 +317,12 @@ public class Modder {
         return new ModInfo(name, type, versionId, loader, version);
     }
 
-    public void installResourcepacks(Profile p, List<Resourcepack> rs) throws NoConnectionException, StopException {
-        var path = p.getPath().to("resourcepacks");
+    public void installResourcepacks(LaunchToken token, List<Resourcepack> rs) throws NoConnectionException, StopException {
+        var path = token.getProfile().getPath().to("resourcepacks");
         int i = 0;
         int size = rs.size();
         for (var pack : rs){
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             handler.execute(new KeyEvent(String.format("%s %d/%d", pack.name, ++i, size)));
@@ -330,7 +332,7 @@ public class Modder {
                 continue;
             }
             var px = path.to(pack.fileName);
-            if (px.exists() && !redownSettings.hasResourcePacks() && px.getSize() > 0)
+            if (!token.getRedownloadSettings().hasResourcePacks() && pack.checkFile(px, token.getFileCheckMode()))
                 continue;
 
             if (pack.fileUrl == null){
@@ -339,22 +341,22 @@ public class Modder {
             }
 
             try{
-                NetUtil.download(NetworkToken.create(pack.fileUrl, px, false));
+                Network.download(token.toNetworkToken(pack.fileUrl, px, false));
             }
-            catch (HttpException e){
-                Logger.getLogger().log( LogType.ERROR, "Error while installing resourcepack: " + pack.name);
+            catch (HttpException | IOException e){
+                Logger.getLogger().log("Error while installing resourcepack: " + pack.name, e);
             }
         }
     }
 
-    public void installWorlds(Profile p, List<World> ws) throws NoConnectionException, StopException {
-        var worlds = p.getPath().to("saves");
+    public void installWorlds(LaunchToken token, List<World> ws) throws NoConnectionException, StopException {
+        var worlds = token.getProfile().getPath().to("saves");
 
         int i = 0;
         int size = ws.size();
 
         for (var w : ws){
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             handler.execute(new KeyEvent(String.format("%s %d/%d", w.name, ++i, size)));
@@ -371,44 +373,45 @@ public class Modder {
                 continue;
             }
 
-            Path zip = null;
             try{
-                zip = NetUtil.download(NetworkToken.create(w.fileUrl, worlds.to(w.fileName), false));
-            }
-            catch (HttpException e){
-                Logger.getLogger().log( LogType.ERROR, "Error while installing world: " + w.name);
-            }
-            if (zip == null)
-                continue;
+                Path zip = Network.download(token.toNetworkToken(w.fileUrl, worlds.to(w.fileName), false));
 
-            var folder = zip.getZipMainFolder();
+                var folder = zip.getZipMainFolder();
 
-            if (folder == null){
-                w.name = w.fileName.split("\\.")[0];
-                zip.extract(worlds.to(w.name), null);
-            }
-            else{
-                zip.extract(worlds, null);
-                w.name = StrUtil.pure(folder);
-            }
+                if (folder == null){
+                    w.name = w.fileName.split("\\.")[0];
+                    zip.extract(worlds.to(w.name), null);
+                }
+                else{
+                    zip.extract(worlds, null);
+                    w.name = StrUtil.pure(folder);
+                }
 
-            zip.delete();
+                zip.delete();
+            }
+            catch (HttpException | IOException e){
+                Logger.getLogger().log("Error while installing world: " + w.name, e);
+            }
 
             //World.fromGzip(w, worlds.to(w.name, "level.dat"));
         }
 
-        Profiler.getProfiler().setProfile(p.getName(), null);
+        Profiler.getProfiler().setProfile(token.getProfile().getName(), null);
     }
 
-    public void installModpacks(Profile p, List<Modpack> mps) throws NoConnectionException, HttpException, StopException {
-        var path = p.getPath();
+    public void installModpacks(LaunchToken token, List<Modpack> mps) throws NoConnectionException, StopException {
+        var path = token.getProfile().getPath();
 
         for (var mp : mps){
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             handler.execute(new KeyEvent(RESOURCE_INSTALL + mp.name));
-            mp.getSource().extractModpack(mp, path, false);
+            try {
+                mp.getSource().extractModpack(mp, path, false, token.getOnProgress(), token);
+            } catch (HttpException | IOException e) {
+                Logger.getLogger().log("Error while installing modpack: " + mp.name, e);
+            }
             /*if (mp.isForge())
                 CurseForge.getForge().extractModpack(path, mp);
             else if (mp.isModrinth())
@@ -421,27 +424,27 @@ public class Modder {
      * <br/><br/>
      * <b>Profile have to be saved after this function.</b>
      */
-    public int includeModpack(Profile p, Modpack mp, IncludeMode mode) throws NoConnectionException, HttpException, StopException {
+    public int includeModpack(Profile p, Modpack mp, IncludeMode mode, ProgressFunction onProgress) throws NoConnectionException, HttpException, StopException, IOException {
         var path = p.getPath();
 
         var oldMp = p.getAllResources().stream().filter(a -> a.isSameResource(mp)).findFirst();
         oldMp.ifPresent(a -> remove(p, a));
 
-        mp.getSource().applyModpack(mp, path, ModSource.Options.create(p));
+        mp.getSource().applyModpack(mp, path, ModSource.Options.create(p).useProgressLogging(onProgress));
 
         boolean check = mode == IncludeMode.OVERWRITE_PROFILE || mode == IncludeMode.DEFAULT && checkModpackOverride(p, mp);
 
-        EventHandler.disable();
+        UIEventBus.disable();
 
         int total = 0;
 
-        total += include(p, mp.mods, IncludeMode.IGNORE_PROFILE);
-        total += include(p, mp.resources, IncludeMode.IGNORE_PROFILE);
-        total += include(p, mp.shaders, IncludeMode.IGNORE_PROFILE);
+        total += include(p, mp.mods, IncludeMode.IGNORE_PROFILE, onProgress);
+        total += include(p, mp.resources, IncludeMode.IGNORE_PROFILE, onProgress);
+        total += include(p, mp.shaders, IncludeMode.IGNORE_PROFILE, onProgress);
 
-        EventHandler.enable();
+        UIEventBus.enable();
 
-        handler.execute(new KeyEvent(EventHandler.STOP));
+        onProgress.onContext(BasicActionContext.STOP);
 
         if (mp.logoUrl != null && !mp.logoUrl.isEmpty() && p.getIcon() == null){
             ImageCacheManager.remove(p);
@@ -488,12 +491,12 @@ public class Modder {
         return result;
     }
 
-    public void installShaders(Profile p, List<Shader> shs) throws NoConnectionException, FileNotFoundException, StopException {
-        var path = p.getPath().to("shaderpacks");
+    public void installShaders(LaunchToken token, List<Shader> shs) throws NoConnectionException, StopException {
+        var path = token.getProfile().getPath().to("shaderpacks");
         int i = 0;
         int size = shs.size();
         for (var shader : shs){
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             handler.execute(new KeyEvent(String.format("%s %d/%d", shader.name, ++i, size)));
@@ -503,7 +506,7 @@ public class Modder {
                 continue;
             }
             var pxx = path.to(shader.fileName);
-            if (pxx.exists() && !redownSettings.hasShaders() && pxx.getSize() > 0)
+            if (!token.getRedownloadSettings().hasShaders() && shader.checkFile(pxx, token.getFileCheckMode()))
                 continue;
 
             if (shader.fileUrl == null){
@@ -512,10 +515,10 @@ public class Modder {
             }
 
             try{
-                Network.download(NetworkToken.create(shader.fileUrl, pxx, false), true);
+                Network.download(NetworkToken.create(shader.fileUrl, pxx, false).withLogging(token.getOnProgress()).syncWith(token));
             }
-            catch (HttpException e){
-                Logger.getLogger().log( LogType.ERROR, "Error while installing shader: " + shader.name);
+            catch (HttpException | IOException e){
+                Logger.getLogger().log("Error while installing shader: " + shader.name, e);
             }
 
         }
@@ -529,7 +532,19 @@ public class Modder {
      * @return count of included resources
      */
     public <T extends CResource> int include(Profile p, List<T> resources) throws NoConnectionException, HttpException, StopException{
-        return include(p, resources, IncludeMode.DEFAULT);
+        return include(p, resources, null);
+    }
+
+    /**
+     * Includes the given resources into the profile.
+     * Force include is false.
+     * @param p target profile
+     * @param resources resources to be included
+     * @param onProgress progress function
+     * @return count of included resources
+     */
+    public <T extends CResource> int include(Profile p, List<T> resources, ProgressFunction onProgress) throws NoConnectionException, HttpException, StopException{
+        return include(p, resources, IncludeMode.DEFAULT, onProgress);
     }
 
     /**
@@ -539,7 +554,7 @@ public class Modder {
      * @param mode include behavior
      * @return count of included resources
      */
-    public <T extends CResource> int include(Profile p, List<T> resources, IncludeMode mode) throws NoConnectionException, HttpException, StopException {
+    public <T extends CResource> int include(Profile p, List<T> resources, IncludeMode mode, ProgressFunction onProgress) throws NoConnectionException, HttpException, StopException {
         int count = 0;
 
         String newVersionId = null;
@@ -552,7 +567,12 @@ public class Modder {
                 continue;
 
             if (r.getType() == ResourceType.MODPACK){
-                count += includeModpack(p, (Modpack)r, mode);
+                try {
+                    count += includeModpack(p, (Modpack)r, mode, onProgress);
+                } catch (IOException e) {
+                    Logger.getLogger().logHyph("Error while including modpack: " + r.name);
+                    Logger.getLogger().log(e);
+                }
                 continue;
             }
 
@@ -660,17 +680,5 @@ public class Modder {
 
         if (triggerSet)
             Profiler.getProfiler().setProfile(profile.getName(), null);
-    }
-
-    public void useRedownloadSettings(RedownloadSettings settings){
-        this.redownSettings = settings;
-    }
-
-    public void setStopRequested(boolean val){
-        stopRequested = val;
-    }
-
-    public boolean isStopRequested(){
-        return stopRequested;
     }
 }

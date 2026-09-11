@@ -1,4 +1,4 @@
-package com.laeben.corelauncher.ui.controller.browser;
+package com.laeben.corelauncher.ui.controller.browser.cell;
 
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.ui.UI;

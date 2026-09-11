@@ -1,29 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CProgressBorder?>
+<?import com.laeben.corelauncher.ui.control.CShapefulButton?>
 <?import com.laeben.corelauncher.ui.control.CView?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
-<HBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      spacing="10" prefHeight="175" fx:id="root" alignment="CENTER" stylesheets="@../../style/cells/resource.css">
-    <CView fitWidth="72" fitHeight="72" fx:id="icon"/>
-    <VBox HBox.hgrow="ALWAYS">
-        <HBox fx:id="header" alignment="CENTER_LEFT" spacing="10">
-            <Label wrapText="true" fx:id="lblName"/>
-            <HBox fx:id="badges" spacing="6" alignment="CENTER_LEFT">
+<?import javafx.scene.text.*?>
+<CProgressBorder xmlns="http://javafx.com/javafx"
+                 xmlns:fx="http://javafx.com/fxml"
+                 prefHeight="175" fx:id="root" strokeWidth="4" stylesheets="@../../style/cells/resource.css">
+    <child>
+        <HBox fx:id="content" spacing="16" alignment="CENTER">
+            <CView fitWidth="72" fitHeight="72" fx:id="icon"/>
+            <VBox HBox.hgrow="ALWAYS" spacing="8">
+                <VBox fillWidth="false">
+                    <HBox fx:id="header" spacing="8" alignment="CENTER_LEFT">
+                        <Label wrapText="true" fx:id="lblName"/>
+                        <Text text="•" style="-fx-fill: -text-fill; -fx-font-size: 20pt"/>
+                        <Text fx:id="lblAuthor"/>
+                        <HBox fx:id="badges" spacing="8" alignment="CENTER_LEFT"/>
+                    </HBox>
+                </VBox>
+                <Label fx:id="lblDate" />
+                <TextFlow fx:id="flowDesc">
+                    <Text fx:id="lblDesc" VBox.vgrow="ALWAYS"/>
+                </TextFlow>
+                <FlowPane fx:id="categories" vgap="8" hgap="8" alignment="CENTER_LEFT"/>
+            </VBox>
 
+            <HBox fillHeight="false" alignment="CENTER">
+                <VBox fx:id="info" spacing="16" alignment="CENTER">
+                    <CShapefulButton fx:id="btnInstall" styleClass="transparent" StackPane.alignment="CENTER"/>
+                    <Text fx:id="lblStatus"/>
+                </VBox>
             </HBox>
         </HBox>
-        <Rectangle height="3"/>
-        <Label fx:id="lblAuthor"/>
-        <Rectangle height="5"/>
-        <TextArea wrapText="true" fx:id="txtDesc" editable="false"/>
-        <Rectangle height="10"/>
-        <TextArea wrapText="true" fx:id="txtCategory" editable="false"/>
-    </VBox>
-    <CButton fx:id="btnMore" styleClass="transparent" text="..." />
-    <CButton fx:id="btnInstall" styleClass="transparent" text="+" />
-</HBox>
+    </child>
+</CProgressBorder>

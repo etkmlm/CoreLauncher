@@ -10,6 +10,7 @@ import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
+import com.laeben.corelauncher.api.entity.FileCheckMode;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -20,6 +21,7 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.discord.Discord;
 import com.laeben.corelauncher.discord.entity.Activity;
 import com.laeben.corelauncher.minecraft.Launcher;
+import com.laeben.corelauncher.minecraft.token.LaunchToken;
 import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.entity.ExecutionInfo;
@@ -42,7 +44,6 @@ import javafx.scene.control.Alert;
 import javafx.util.Duration;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.URISyntaxException;
@@ -74,8 +75,8 @@ public class CoreLauncher {
             if (SYSTEM_OS == OS.WINDOWS)
                 s = s.substring(1);
             p = Path.begin(java.nio.file.Path.of(s));
-            if (p.isDirectory())
-                p = null;
+            /*if (p.isDirectory())
+                p = null;*/
         }
         catch (Exception e){
             e.printStackTrace(System.out);
@@ -256,10 +257,10 @@ public class CoreLauncher {
                         return;
                     Logger.getLogger().log((Exception) oe.getValue());
                 }
-                else if (oe.getKey().equals(LaebenApp.NET_EXCEPTION)){
+                /*else if (oe.getKey().equals(LaebenApp.NET_EXCEPTION)){
                     String[] spl = oe.getValue().toString().split("\\$\\$\\$");
                     Logger.getLogger().logDebug(LogType.ERROR, "Error on request to " + spl[0] + ": " + spl[1]);
-                }
+                }*/
             }
         }, false);
         //
@@ -309,7 +310,7 @@ public class CoreLauncher {
                         }
                         return true;
                     });
-                    Launcher.getLauncher().prepare(profile);
+                    Launcher.getLauncher().prepare(LaunchToken.create(profile, FileCheckMode.ONLY_SIZE, null, ((current, total, context) -> Logger.getLogger().logDebug("Progress " + current + " / " + total)))); //TODO from configurator
                     Launcher.getLauncher().launch(ExecutionInfo.fromProfile(profile));
                 }
                 catch (Throwable e){
@@ -341,7 +342,7 @@ public class CoreLauncher {
 
     public static class FileList extends ArrayList<LaebenAppFile> {}
 
-    public static void updateCheck() throws NoConnectionException, HttpException {
+    public static void updateCheck() throws NoConnectionException, HttpException, IOException, StopException {
         LaebenAppFile latest = LauncherConfig.APPLICATION.getLatest();
 
         if (latest != null && LauncherConfig.VERSION < latest.version() && Configurator.getConfig().isEnabledAutoUpdate()){
@@ -353,9 +354,9 @@ public class CoreLauncher {
                 var n = CoreLauncher.LAUNCHER_PATH.to("clnew.jar");
                 new Thread(() -> {
                     try{
-                        Network.download(NetworkToken.create(latest.url(), n, false), true);
+                        Network.download(NetworkToken.create(latest.url(), n, false).withLogging(Main.getProgressHandler()));
                     }
-                    catch (NoConnectionException | StopException | HttpException | FileNotFoundException e){
+                    catch (NoConnectionException | StopException | HttpException | IOException e){
                         return;
                     }
 
@@ -384,9 +385,9 @@ public class CoreLauncher {
         List<com.laeben.core.entity.Announcement> announcements;
         try {
             announcements = LauncherConfig.APPLICATION.getAnnouncements();
-        } catch (NoConnectionException ignored) {
+        } catch (NoConnectionException | StopException ignored) {
             return;
-        } catch (HttpException e) {
+        } catch (HttpException | IOException e) {
             Logger.getLogger().log(e);
             return;
         }

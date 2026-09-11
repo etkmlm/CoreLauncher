@@ -2,8 +2,10 @@ package com.laeben.corelauncher.web.cache;
 
 import com.google.gson.*;
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.Configurator;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.CookieStore;
 import java.net.HttpCookie;
@@ -117,12 +119,17 @@ public class JSONCacheStore implements CookieStore {
         if (filePath == null)
             filePath = filePath();
 
-        cookies = gson.fromJson(filePath.read(), Map.class);
+        try {
+            cookies = gson.fromJson(filePath.read(), Map.class);
+        } catch (IOException | StopException e) {
+            cookies = null;
+        }
+
         if (cookies == null)
             cookies = new HashMap<>();
     }
 
-    public void save(){
+    public void save() throws StopException, IOException {
         if (filePath == null || cookies == null)
             return;
 

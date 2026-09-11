@@ -3,38 +3,38 @@
 <?import com.laeben.corelauncher.ui.control.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Rectangle?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            prefHeight="450.0" prefWidth="600.0" styleClass="dialog-content">
-    <CButton fx:id="btnClose" text="X" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="5" style="-fx-background-color: transparent;-fx-font-size: 13pt;"/>
-    <CView fx:id="icon" fitWidth="128" fitHeight="128" AnchorPane.topAnchor="15" AnchorPane.leftAnchor="15" />
-    <Label fx:id="lblName" AnchorPane.topAnchor="15" AnchorPane.leftAnchor="153" AnchorPane.rightAnchor="70" text="Name" style="-fx-font-size: 15pt; -fx-font-weight: bold" />
-    <TextArea fx:id="txtDesc" editable="false" AnchorPane.leftAnchor="153" AnchorPane.topAnchor="50" AnchorPane.rightAnchor="15" prefHeight="100"/>
-
-    <ScrollPane fx:id="scroll" AnchorPane.rightAnchor="15" AnchorPane.leftAnchor="15" AnchorPane.bottomAnchor="15" AnchorPane.topAnchor="160" fitToWidth="true" VBox.vgrow="ALWAYS" maxWidth="Infinity">
-        <VBox>
-            <HBox fx:id="mpButtonContainer">
-                <CButton fx:id="btnModpack" style="-fx-font-size: 12pt;" text="%mods.detailed"/>
-                <Rectangle width="10"/>
-                <CWorker fx:id="wModpack"/>
-            </HBox>
-            <VBox fx:id="mpContentContainer" visible="false" managed="false">
-                <Label text="%mods.content" style="-fx-font-size: 14pt; -fx-font-weight: bold" />
-                <Rectangle height="10"/>
-                <TextArea editable="false" fx:id="txtModpackContent"/>
-            </VBox>
-            <Rectangle height="8"/>
-            <VBox>
-                <HBox>
-                    <Label text="%mods.all.versions" style="-fx-font-size: 14pt; -fx-font-weight: bold" />
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <TextField fx:id="txtSearchVersion"/>
-                </HBox>
-                <Rectangle height="5"/>
-                <CList fx:id="lvVersions" />
-            </VBox>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      prefHeight="600.0" prefWidth="720.0" style="-fx-padding: 16px;" spacing="8" styleClass="dialog-content">
+    <HBox spacing="8">
+        <CView fx:id="icon" fitWidth="144" fitHeight="144" />
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblName" text="Name" style="-fx-font-size: 15pt; -fx-font-weight: bold" />
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" maxWidth="Infinity">
+                <TextFlow>
+                    <Text fx:id="txtDesc" style="-fx-font-size: 13pt; -fx-fill: -text-fill"/>
+                </TextFlow>
+            </ScrollPane>
         </VBox>
-    </ScrollPane>
-
-</AnchorPane>
+        <CButton fx:id="btnClose" text="X" style="-fx-background-color: transparent;-fx-font-size: 13pt;"/>
+    </HBox>
+    <HBox fx:id="navContainer" spacing="8" alignment="CENTER">
+        <CButton fx:id="btnNavVersions" text="%mods.all.versions"/>
+        <CButton fx:id="btnNavMods" text="%mods.type.mods"/>
+        <CButton fx:id="btnNavResources" text="%mods.type.resources"/>
+        <CButton fx:id="btnNavShaders" text="%mods.type.shaders"/>
+        <CWorker fx:id="wModpack"/>
+    </HBox>
+    <TextField fx:id="txtSearch" style="-fx-background-color: transparent;" promptText="%search"/>
+    <ListView fx:id="lvModpackContent" style="-fx-background-color: transparent"/>
+    <ListView fx:id="lvVersions" style="-fx-background-color: transparent"/>
+    <HBox fx:id="statusContainer" visible="false" managed="false" spacing="16" alignment="CENTER">
+        <VBox HBox.hgrow="ALWAYS" spacing="4" alignment="CENTER_LEFT">
+            <Label fx:id="lblStatus"/>
+            <ProgressBar fx:id="progress" maxWidth="Infinity" progress="0"/>
+        </VBox>
+        <CButton fx:id="btnCancel" text="%option.cancel"/>
+    </HBox>
+</VBox>

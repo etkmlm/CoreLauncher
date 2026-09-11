@@ -1,6 +1,10 @@
 package com.laeben.corelauncher.api.util;
 
+import com.laeben.core.concurrency.CancellableToken;
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
+import com.laeben.core.network.Network;
 import com.laeben.corelauncher.api.util.entity.NetParcel;
 
 import java.util.ArrayList;
@@ -16,32 +20,52 @@ public abstract class CargoNet {
 
     private final ExecutorService executor;
 
+    private final CancellableToken<?> cancellableToken;
+    private final ProgressFunction onProgress;
+
     public CargoNet(int size) {
-        executor = Executors.newFixedThreadPool(size);
-        parcels = new ArrayList<>();
+        this.executor = Executors.newFixedThreadPool(size);
+        this.parcels = new ArrayList<>();
+        this.cancellableToken = null;
+        this.onProgress = null;
+    }
+
+    public CargoNet(int size, CancellableToken<?> cancellableToken){
+        this.executor = Executors.newFixedThreadPool(size);
+        this.parcels = new ArrayList<>();
+        this.cancellableToken = cancellableToken;
+        this.onProgress = null;
+    }
+
+    public CargoNet(int size, ProgressFunction onProgress, CancellableToken<?> cancellableToken){
+        this.executor = Executors.newFixedThreadPool(size);
+        this.parcels = new ArrayList<>();
+        this.cancellableToken = cancellableToken;
+        this.onProgress = onProgress;
     }
 
     public void add(NetParcel parcel) {
         parcels.add(parcel);
-        executor.submit(() -> {
+        final var future = executor.submit(() -> {
             Path result = null;
             Exception ex = null;
-            try{
-                result = NetUtil.download(parcel.toToken());
-            }
-            catch (Exception e){
+            try {
+                result = Network.download(parcel.toToken().withLogging(onProgress).syncWith(cancellableToken));
+            } catch (Exception e) {
                 ex = e;
             }
-            if (ex == null){
+            if (ex == null) {
                 parcel.markAsDone();
-                //System.out.println("X");
                 if (parcel.getOnFinish() != null)
                     parcel.getOnFinish().run();
-            }
-            else
+            } else
                 parcel.markAsException(ex);
 
-            onParcelDone(parcel, result, ++done, parcels.size());
+            try {
+                onParcelDone(parcel, result, ++done, parcels.size());
+            } catch (StopException e) {
+                terminate();
+            }
         });
     }
 
@@ -49,9 +73,15 @@ public abstract class CargoNet {
         executor.shutdownNow();
     }
 
-    public boolean await() throws InterruptedException {
+    public boolean await() throws StopException {
         executor.shutdown();
-        boolean o = executor.awaitTermination(1, TimeUnit.DAYS);
+        boolean o;
+        try {
+            o = executor.awaitTermination(1, TimeUnit.DAYS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new StopException();
+        }
 
         done = 0;
 
@@ -69,5 +99,5 @@ public abstract class CargoNet {
         return parcels;
     }
 
-    public abstract void onParcelDone(NetParcel p, Path path, int done, int total);
+    public abstract void onParcelDone(NetParcel p, Path path, int done, int total) throws StopException;
 }

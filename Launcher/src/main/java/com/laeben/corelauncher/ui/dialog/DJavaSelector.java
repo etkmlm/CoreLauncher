@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.ui.dialog;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -19,6 +20,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public class DJavaSelector extends CDialog<DJavaSelector.Result> {
@@ -83,9 +85,16 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
         btnApply.enableTransparentAnimation();
         btnApply.setOnMouseClicked(a -> {
             if (selectedJava != null){
-                if (txtName.getText() != null && !txtName.getText().isBlank())
-                    selectedJava.setName(txtName.getText());
-                close(new Result(selectedJava, null));
+                if (txtName.getText() != null && !txtName.getText().isBlank()) {
+                    try {
+                        selectedJava.setName(txtName.getText());
+                        close(new Result(selectedJava, null));
+                    } catch (StopException ignored) {
+
+                    } catch (IOException e) {
+                        Logger.getLogger().log(e);
+                    }
+                }
                 return;
             }
 

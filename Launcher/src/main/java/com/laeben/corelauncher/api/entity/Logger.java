@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.api.entity;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.util.entity.LogType;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
 
+@SuppressWarnings({"JavaPrintToLogpoint", "CallToPrintStackTrace"})
 public class Logger {
     private static Logger instance;
     private static final String logLines = generateHyph(10);
@@ -74,8 +76,14 @@ public class Logger {
 
     private void log(String content){
         System.out.println(content);
-        if (Configurator.getConfig() != null && logDir != null && Configurator.getConfig().getLogMode())
-            todayLogFile().append("\n[" + getTime() + "] " + content);
+        if (Configurator.getConfig() != null && logDir != null && Configurator.getConfig().getLogMode()) {
+            try {
+                todayLogFile().append("\n[" + getTime() + "] " + content);
+            } catch (IOException | StopException e) {
+                System.out.println("Logging cannot be performed.");
+                e.printStackTrace();
+            }
+        }
     }
 
     public void log(LogType type, String content){
@@ -94,6 +102,11 @@ public class Logger {
             log(type, content);
         else if (LauncherConfig.USE_DETAILED_LOGGING)
             System.out.println(generate(type, content));
+    }
+
+    public void log(String message, Throwable e){
+        logHyph(message);
+        log(e);
     }
 
     public void log(Throwable e){

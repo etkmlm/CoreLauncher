@@ -1,7 +1,8 @@
-package com.laeben.corelauncher.ui.controller.browser;
+package com.laeben.corelauncher.ui.controller.browser.search;
 
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeLoader;
@@ -9,7 +10,9 @@ import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ModsSearchSor
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeSearchRequest;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeSearchResponse;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
+import com.laeben.corelauncher.ui.controller.browser.cell.ResourceCellItem;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -104,12 +107,12 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
         return totalPages;
     }
 
-    public List<ResourceCell.Link> search(String query){
+    public List<ResourceCellItem> search(String query){
         request.setSearchFilter(query);
         CurseForgeSearchResponse sData = null;
         try{
             sData = CurseForge.getForge().search(request);
-        } catch (NoConnectionException | HttpException ignored) {
+        } catch (NoConnectionException | HttpException | IOException | StopException ignored) {
 
         }
 
@@ -135,6 +138,6 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
                 prefs.includeLoaderTypes(List.of(CurseForgeLoader.Type.toLoaderType(request.modLoaderType)));
         }
 
-        return sData.data.stream().map(x -> new ResourceCell.Link(prefs, x)).toList();
+        return sData.data.stream().map(x -> new ResourceCellItem(prefs, x)).toList();
     }
 }

@@ -5,10 +5,12 @@ import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.fabric.Fabric;
 import com.laeben.corelauncher.minecraft.loader.fabric.entity.FabricVersion;
+import com.laeben.corelauncher.minecraft.token.VersionToken;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -23,7 +25,7 @@ public class Quilt extends Fabric<QuiltVersion> {
     }
 
     @Override
-    public String getInstaller(){
+    public String getInstaller(RedownloadSettings redownloadSettings){
         return "https://quiltmc.org/api/v1/download-latest-installer/java-universal";
     }
 
@@ -38,23 +40,25 @@ public class Quilt extends Fabric<QuiltVersion> {
     }
 
     @Override
-    public void install(QuiltVersion v) throws NoConnectionException, StopException {
-        Vanilla.getVanilla().install(v);
+    public void install(VersionToken<QuiltVersion> token) throws NoConnectionException, StopException {
+        Vanilla.getVanilla().install(token);
+
+        QuiltVersion version = token.getVersion();
 
         var gameDir = Configurator.getConfig().getGamePath();
-        String jsonName = v.getJsonName();
+        String jsonName = version.getJsonName();
         var temp = Configurator.getConfig().getTemporaryFolder();
         var jsonPath = gameDir.to("versions", jsonName, jsonName + ".json");
         var clientPath = gameDir.to("versions", jsonName, jsonName + ".jar");
-        if (clientPath.exists() && !redownSettings.hasClient())
+        if (clientPath.exists() && !token.getRedownloadSettings().hasClient())
             return;
 
         try{
             logState(".quilt.state.download");
-            String installer = getInstaller();
-            var path = Network.download(NetworkToken.create(installer, temp.to("quiltinstaller.jar"), false), false);
+            String installer = getInstaller(token.getRedownloadSettings());
+            var path = Network.download(NetworkToken.create(installer, temp.to("quiltinstaller.jar"), false).syncWith(token));
 
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             logState(".quilt.state.install");
@@ -62,7 +66,7 @@ public class Quilt extends Fabric<QuiltVersion> {
                 var process = new ProcessBuilder()
                         .command(JavaManager.getDefault().getWindowExecutable().toString(),
                                 "-jar", path.toString(),
-                                "install", "client", v.id, v.getLoaderVersion(),
+                                "install", "client", version.id, version.getLoaderVersion(),
                                 "--install-dir=" + gameDir,
                                 "--no-profile")
                         .inheritIO()
@@ -70,7 +74,7 @@ public class Quilt extends Fabric<QuiltVersion> {
                 process.waitFor();
             }
             catch (Exception e){
-                Logger.getLogger().logHyph("ERRQUILT " + v.getLoaderVersion());
+                Logger.getLogger().logHyph("ERRQUILT " + version.getLoaderVersion());
                 Logger.getLogger().log(e);
                 logState(UNKNOWN_ERROR);
             }
@@ -79,14 +83,16 @@ public class Quilt extends Fabric<QuiltVersion> {
 
             path.delete();
 
-            v = GsonUtil.DEFAULT_GSON.fromJson(jsonPath.read(), FabricVersion.class).setLoaderVersion(v.getLoaderVersion());
-            downloadLibraries(v);
+            version = GsonUtil.DEFAULT_GSON.fromJson(jsonPath.read(), FabricVersion.class).setLoaderVersion(version.getLoaderVersion());
 
+            downloadLibraries(VersionToken.create(version, token.getFileCheckMode(), token.getRedownloadSettings(), token.getOnProgress()).syncWith(token));
+        }
+        catch (StopException | NoConnectionException e){
+            throw e;
         }
         catch (Exception e){
             Logger.getLogger().log(e);
         }
-
     }
 
 

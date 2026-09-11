@@ -19,6 +19,7 @@ import com.laeben.corelauncher.minecraft.entity.Version;
 import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
+import com.laeben.corelauncher.minecraft.token.VersionToken;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -28,6 +29,7 @@ import com.google.gson.*;
 import javafx.scene.image.Image;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -46,8 +48,6 @@ public abstract class Loader<H extends Version> {
     protected EventHandler<BaseEvent> handler;
 
     // not null
-    protected RedownloadSettings redownSettings = RedownloadSettings.none();
-    protected boolean stopRequested;
 
     public Loader(){
         handler = new EventHandler<>();
@@ -55,14 +55,6 @@ public abstract class Loader<H extends Version> {
 
     public static List<String> getLoaders(){
         return Arrays.stream(LoaderType.values()).map(LoaderType::getIdentifier).toList();
-    }
-
-    public boolean isStopRequested(){
-        return stopRequested;
-    }
-
-    public void setStopRequested(boolean val){
-        stopRequested = val;
     }
 
     public EventHandler<BaseEvent> getHandler(){
@@ -75,11 +67,15 @@ public abstract class Loader<H extends Version> {
         handler.execute(new KeyEvent(key));
     }
 
-    protected boolean checkLen(String url, Path file){
+    protected boolean checkLen(String url, Path file) throws StopException {
         try{
             return !Network.check() || Network.getContentLength(url) == file.getSize();
         }
         catch (NoConnectionException e){
+            return true;
+        }
+        catch (IOException e){
+            Logger.getLogger().log(e);
             return true;
         }
     }
@@ -88,31 +84,39 @@ public abstract class Loader<H extends Version> {
         return Configurator.getConfig().getGamePath();
     }
 
-    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude, CargoNet cargo) {
+    private void downloadLibraryAsset(Asset asset, Path libDir, Path nativeDir, List<String> exclude, CargoNet cargo, VersionToken token) throws StopException {
         Path libPath = libDir.to(asset.path.split("/"));
-        if (!libPath.exists() || (asset.size != 0 && asset.size != libPath.getSize())/* || !checkLen(asset.url, libPath)*/ || redownSettings.hasLibraries())
+        if (token.getRedownloadSettings().hasLibraries() || !asset.checkAsset(libPath, token.getFileCheckMode()))
         {
             var parcel = NetParcel.create(asset.url, libPath, false).setState(asset);
             if (exclude != null)
-                parcel.setOnFinish(() -> libPath.extract(nativeDir, exclude));
+                parcel.setOnFinish(() -> {
+                    try {
+                        libPath.extract(nativeDir, exclude);
+                    } catch (StopException ignored) {
+
+                    } catch (IOException e) {
+                        Logger.getLogger().log("Library " + libPath + " was failed to extract.", e);
+                    }
+                });
             cargo.add(parcel);
-            //NetUtil.download(asset.url, libPath, false, true);
+            //Network.download(asset.url, libPath, false, true);
         }
         else if (exclude != null)
         {
-            libPath.extract(nativeDir, exclude);
+            try {
+                libPath.extract(nativeDir, exclude);
+            } catch (IOException e) {
+                Logger.getLogger().log("Library " + libPath + " was failed to extract.", e);
+            }
         }
     }
 
-    protected Path generateProfileInfo(Path target){
+    protected Path generateProfileInfo(Path target) throws StopException, IOException {
         var profileInfo = target.to("launcher_profiles.json");
         profileInfo.write("{\"profiles\":{}}");
 
         return profileInfo;
-    }
-
-    public void useRedownloadSettings(RedownloadSettings settings){
-        this.redownSettings = settings == null ? RedownloadSettings.none() : settings;
     }
 
     protected void setupLauncherLibraries(){
@@ -132,22 +136,24 @@ public abstract class Loader<H extends Version> {
         }
     }
 
-    protected void downloadLibraries(Version v) throws StopException, NoConnectionException {
+    protected void downloadLibraries(VersionToken<H> token) throws StopException, NoConnectionException {
         Logger.getLogger().logDebug("Retrieving libraries...");
 
+        final Version version = token.getVersion();
+
         Path libDir = getGameDir().to("libraries");
-        Path nativeDir = getGameDir().to("versions", v.getJsonName(), "natives");
+        Path nativeDir = getGameDir().to("versions", version.getJsonName(), "natives");
 
         logState(LIBRARY_LOAD);
 
         setupLauncherLibraries();
 
-        var cargo = new CargoNet(Configurator.getConfig().getDownloadThreadsCount()) {
+        var cargo = new CargoNet(Configurator.getConfig().getDownloadThreadsCount(), token.getOnProgress(), token) {
             @Override
             public void onParcelDone(NetParcel p, Path path, int done, int total) {
                 var lib = p.<Asset>getState();
 
-                if ((!p.isSuccessful() && p.getException() instanceof StopException) || stopRequested){
+                if ((!p.isSuccessful() && p.getException() instanceof StopException) || token.shouldStop()){
                     terminate();
                 }
 
@@ -155,12 +161,12 @@ public abstract class Loader<H extends Version> {
             }
         };
 
-        if (v.libraries == null)
+        if (version.libraries == null)
             return;
 
-        for(var lib : v.libraries)
+        for(var lib : version.libraries)
         {
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
             try{
                 Logger.getLogger().logDebug("LIB: " + lib.name);
@@ -175,10 +181,10 @@ public abstract class Loader<H extends Version> {
                 var nativeAsset = lib.getNativeAsset();
 
                 if (mainAsset != null)
-                    downloadLibraryAsset(mainAsset, libDir, nativeDir, null, cargo);
+                    downloadLibraryAsset(mainAsset, libDir, nativeDir, null, cargo, token);
 
                 if (nativeAsset != null)
-                    downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude, cargo);
+                    downloadLibraryAsset(nativeAsset, libDir, nativeDir, lib.extract == null ? new ArrayList<>() : lib.extract.exclude, cargo, token);
 
                 Logger.getLogger().logDebug("OK\n");
             }
@@ -215,10 +221,10 @@ public abstract class Loader<H extends Version> {
         }
     }
 
-    protected void downloadAssets(Version v) throws StopException, NoConnectionException {
+    protected void downloadAssets(VersionToken<H> token) throws StopException, NoConnectionException {
         Logger.getLogger().logDebug("Retrieving assets...");
 
-        var vIndex = v.getAssetIndex();
+        var vIndex = token.getVersion().getAssetIndex();
 
         Path assetDir = getGameDir().to("assets", "objects");
         Path fileDir = getGameDir().to("assets", "indexes");
@@ -226,10 +232,9 @@ public abstract class Loader<H extends Version> {
         Path legacyDir = getGameDir().to("assets", "virtual", "legacy");
         Path veryLegacyDir = getGameDir().to("assets", "virtual", "verylegacy");
 
-
         AssetIndex index;
 
-        if (stopRequested)
+        if (token.shouldStop())
             throw new StopException();
 
         try{
@@ -263,9 +268,9 @@ public abstract class Loader<H extends Version> {
 
         long stamp = System.currentTimeMillis();
 
-        var cargo = new CargoNet(Configurator.getConfig().getDownloadThreadsCount()) {
+        var cargo = new CargoNet(Configurator.getConfig().getDownloadThreadsCount(), token.getOnProgress(), token) {
             @Override
-            public void onParcelDone(NetParcel p, Path path, int done, int size) {
+            public void onParcelDone(NetParcel p, Path path, int done, int size) throws StopException {
                 var asset = p.<Asset>getState();
                 logState(asset.path + " " + done + "/" + size);
 
@@ -275,6 +280,44 @@ public abstract class Loader<H extends Version> {
                     return;
                 }
 
+                try {
+                    if (vIndex.isLegacy()){
+                        var f = legacyDir.to(asset.path);
+                        if (!f.exists())
+                            path.copy(f);
+                    }
+                    else if (vIndex.isVeryLegacy()){
+                        var f = veryLegacyDir.to(asset.path);
+                        if (!f.exists())
+                            path.copy(f);
+                    }
+                }
+                catch (IOException e){
+                    Logger.getLogger().logHyph("Could not move asset from url: " + p.getUrl());
+                    Logger.getLogger().log(e);
+                }
+            }
+        };
+
+        int count = index.objects.size();
+        int i = 1;
+        for (var asset : index.objects)
+        {
+            if (token.shouldStop())
+                throw new StopException();
+
+            String hash = asset.SHA1;
+            String nhash = hash.substring(0, 2);
+            String url = ASSET_URL + nhash + "/" + hash;
+
+            Path path = assetDir.to(nhash, hash);
+            if (token.getRedownloadSettings().hasAssets() || !asset.checkAsset(path, token.getFileCheckMode())){
+                cargo.add(NetParcel.create(url, path.forceSetDir(false), false).setState(asset));
+                //Network.download(url, path.forceSetDir(false), false, true);
+                continue;
+            }
+
+            try{
                 if (vIndex.isLegacy()){
                     var f = legacyDir.to(asset.path);
                     if (!f.exists())
@@ -286,35 +329,8 @@ public abstract class Loader<H extends Version> {
                         path.copy(f);
                 }
             }
-        };
-
-        int count = index.objects.size();
-        int i = 1;
-        for (var asset : index.objects)
-        {
-            if (stopRequested)
-                throw new StopException();
-
-            String hash = asset.SHA1;
-            String nhash = hash.substring(0, 2);
-            String url = ASSET_URL + nhash + "/" + hash;
-
-            Path path = assetDir.to(nhash, hash);
-            if (!path.exists() || (asset.size != 0 && path.getSize() != asset.size) || redownSettings.hasAssets()){
-                cargo.add(NetParcel.create(url, path.forceSetDir(false), false).setState(asset));
-                //NetUtil.download(url, path.forceSetDir(false), false, true);
-                continue;
-            }
-
-            if (vIndex.isLegacy()){
-                var f = legacyDir.to(asset.path);
-                if (!f.exists())
-                    path.copy(f);
-            }
-            else if (vIndex.isVeryLegacy()){
-                var f = veryLegacyDir.to(asset.path);
-                if (!f.exists())
-                    path.copy(f);
+            catch (IOException e) {
+                Logger.getLogger().log("Could not move asset from path: " + path, e);
             }
 
             //Logger.getLogger().logDebug((i++) + " / " + count);
@@ -417,8 +433,17 @@ public abstract class Loader<H extends Version> {
 
     public abstract LoaderType getType();
     public abstract H getVersionFromIdentifier(String identifier, String inherits);
-    public abstract H getVersion(String id, String wrId);
-    public abstract List<H> getAllVersions();
-    public abstract List<H> getVersions(String id);
-    public abstract void install(H v) throws NoConnectionException, StopException, PerformException;
+    public abstract H getVersion(String id, String wrId, RedownloadSettings redownloadSettings);
+    public H getVersion(String id, String wrId) {
+        return getVersion(id, wrId, RedownloadSettings.none());
+    }
+    public abstract List<H> getAllVersions(RedownloadSettings redownloadSettings);
+    public List<H> getAllVersions() {
+        return getAllVersions(RedownloadSettings.none());
+    }
+    public abstract List<H> getVersions(String id, RedownloadSettings redownloadSettings);
+    public List<H> getVersions(String id) {
+        return getVersions(id, RedownloadSettings.none());
+    }
+    public abstract void install(VersionToken<H> token) throws NoConnectionException, StopException, PerformException;
 }

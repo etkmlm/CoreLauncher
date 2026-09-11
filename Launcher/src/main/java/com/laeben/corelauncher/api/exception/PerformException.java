@@ -7,8 +7,17 @@ public class PerformException extends Exception{
         super(key);
     }
 
+    public PerformException(String key, Throwable cause) {
+        super(key, cause);
+    }
+
     public PerformException(String key, Object value){
         super(key);
+        this.value = value;
+    }
+
+    public PerformException(String key, Object value, Throwable cause){
+        super(key, cause);
         this.value = value;
     }
 

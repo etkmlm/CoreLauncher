@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.web;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.ui.controller.page.WebPage;
 import com.laeben.corelauncher.web.cache.JSONCacheStore;
@@ -8,6 +9,7 @@ import javafx.concurrent.Worker;
 import javafx.scene.web.WebView;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.net.CookieStore;
 import java.util.function.Consumer;
 
@@ -64,7 +66,13 @@ public class WebComplex {
                 onLocationChanged.accept(new LocationChangedEvent(this, oldValue == null ? null : oldValue.getDocumentURI(), newValue == null ? null : newValue.getDocumentURI()));
 
             if (cookieStore instanceof JSONCacheStore jcs) {
-                jcs.save();
+                try {
+                    jcs.save();
+                } catch (StopException ignored) {
+
+                } catch (IOException e) {
+                    Logger.getLogger().log(e);
+                }
             }
         });
 

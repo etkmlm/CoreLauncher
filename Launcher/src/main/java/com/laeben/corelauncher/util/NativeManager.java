@@ -4,13 +4,15 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.network.Network;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.OS;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.corelauncher.api.util.entity.NetParcel;
 import com.laeben.corelauncher.util.entity.LogType;
+
+import java.io.IOException;
 
 public class NativeManager {
     private static final String LINUX_EXT = "so";
@@ -38,7 +40,7 @@ public class NativeManager {
      * @param module ex: javafx-controls
      * @param version ex: 21.0.7
      */
-    public static void downloadModule(String pkg, String module, String version) throws NoConnectionException, HttpException, StopException {
+    public static void downloadModule(String pkg, String module, String version) throws NoConnectionException, HttpException, StopException, IOException {
         final String extension = getExtension();
 
         final Path folder = Configurator.getConfig().getNativesPath();
@@ -60,7 +62,7 @@ public class NativeManager {
         Logger.getLogger().log(LogType.INFO, "Downloading module %s from package %s with version %s, URL = '%s'".formatted(module, pkg, version, url));
 
         var parcel = NetParcel.create(url, jarPath, false);
-        var path = NetUtil.download(parcel.toToken());
+        var path = Network.download(parcel.toToken());
         path.extract(exDir, null);
 
         for(var file : exDir.getFiles()){

@@ -6,7 +6,9 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.Launcher;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.entity.Version;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
+import com.laeben.corelauncher.minecraft.token.VersionToken;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.entity.Path;
@@ -20,7 +22,7 @@ public class Custom extends Loader<Version> {
     }
 
     @Override
-    public Version getVersion(String id, String wrId) {
+    public Version getVersion(String id, String wrId, RedownloadSettings redownloadSettings) {
         try{
             return GsonUtil.DEFAULT_GSON.fromJson(Configurator.getConfig().getGamePath().to("versions", wrId, wrId + ".json").read(), Version.class);
         }
@@ -36,21 +38,21 @@ public class Custom extends Loader<Version> {
     }
 
     @Override
-    public List<Version> getAllVersions() {
+    public List<Version> getAllVersions(RedownloadSettings redownloadSettings) {
         return null;
     }
 
     @Override
-    public List<Version> getVersions(String id) {
+    public List<Version> getVersions(String id, RedownloadSettings redownloadSettings) {
         return null;
     }
 
     @Override
-    public void install(Version v) throws NoConnectionException, StopException {
-        logState(Launcher.PREPARE + v.id);
+    public void install(VersionToken token) throws NoConnectionException, StopException {
+        logState(Launcher.PREPARE + token.getVersion().id);
 
-        downloadLibraries(v);
-        downloadAssets(v);
+        downloadLibraries(token);
+        downloadAssets(token);
     }
 
 

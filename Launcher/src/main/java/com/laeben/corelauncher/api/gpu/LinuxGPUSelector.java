@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.api.gpu;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.gpu.entity.GPUDisplay;
 import com.laeben.corelauncher.api.gpu.entity.GPUType;
 
@@ -27,7 +28,7 @@ public class LinuxGPUSelector {
         };
     }
 
-    public static List<GPUDisplay> getGPUDisplays(){
+    public static List<GPUDisplay> getGPUDisplays() throws IOException, StopException {
         var list = new ArrayList<GPUDisplay>();
 
         if (!DRM_PATH.exists()) return DEFAULT_DISPLAYS;

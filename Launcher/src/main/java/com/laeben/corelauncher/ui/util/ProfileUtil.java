@@ -2,6 +2,7 @@ package com.laeben.corelauncher.ui.util;
 
 import com.google.gson.*;
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -22,6 +23,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,10 +50,13 @@ public class ProfileUtil {
     }
 
     public static void exportJson(Profile profile, Path to){
-        String read = Profiler.verifyProfileJsonIcon(profile);
         try{
+            String read = Profiler.verifyProfileJsonIcon(profile);
             to.write(read);
             //profileJson.copy(Path.begin(file.toPath()));
+        }
+        catch (StopException ignored){
+
         }
         catch (Exception e){
             Logger.getLogger().log(e);
@@ -82,7 +87,14 @@ public class ProfileUtil {
                 var icon = GsonUtil.DEFAULT_GSON.fromJson(js.get("icon"), ImageEntity.class);
                 if (!icon.isNetwork() && icon.getUrl() == null){
                     var pa = icon.getPath(Configurator.getConfig().getImagePath());
-                    icon = pa.exists() ? ImageEntity.fromBase64(ImageCacheManager.encodeImage(pa)) : null;
+                    try {
+                        icon = pa.exists() ? ImageEntity.fromBase64(ImageCacheManager.encodeImage(pa)) : null;
+                    } catch (StopException ignored) {
+                        icon = null;
+                    } catch (IOException e) {
+                        Logger.getLogger().log("Icon could not be exported for profile " + p.getName(), e);
+                        icon = null;
+                    }
                 }
                 js.add("icon", GsonUtil.DEFAULT_GSON.toJsonTree(icon));
             }
@@ -95,10 +107,12 @@ public class ProfileUtil {
             var path = Path.begin(file.toPath());
             path.write(GsonUtil.DEFAULT_GSON.toJson(json));
         }
+        catch (StopException ignored){
+
+        }
         catch (Exception e){
             Logger.getLogger().log(e);
         }
-
     }
 
     public static void backup(Profile profile, Window w){
@@ -126,14 +140,23 @@ public class ProfileUtil {
         if (file == null)
             return;
         new Thread(() -> {
-            try{
-                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.info.backup.profiles.begin", profiles.size()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
-                profiles.forEach(a -> Profiler.backup(a, Path.begin(file.toPath()).to(a.getName() + ".zip")));
-                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.info.backup.profiles.end", profiles.size()), Announcement.AnnouncementType.INFO), Duration.millis(1500) ));
+            UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.info.backup.profiles.begin", profiles.size()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
+            int count = 0;
+            for (var a : profiles){
+                try{
+                    Profiler.backup(a, Path.begin(file.toPath()).to(a.getName() + ".zip"));
+                    count++;
+                }
+                catch (StopException ignored){
+                    return;
+                }
+                catch (Exception e){
+                    Logger.getLogger().log(e);
+                }
             }
-            catch (Exception e){
-                Logger.getLogger().log(e);
-            }
+
+            final int backedUp = count;
+            UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.info.backup.profiles.end", backedUp), Announcement.AnnouncementType.INFO), Duration.millis(1500) ));
         }).start();
     }
 
@@ -154,20 +177,29 @@ public class ProfileUtil {
 
         new Thread(() -> {
             UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.misc.object", obj.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
-            var path = Path.begin(file.toPath());
-            var tempFolder = path.parent().to(name);
-            for (var p : obj.getProfiles()){
-                var px = tempFolder.to(p.getName());
-                p.getPath().copy(px);
-                px.to("profile.json").write(Profiler.verifyProfileJsonIcon(p));
+            try{
+                var path = Path.begin(file.toPath());
+                var tempFolder = path.parent().to(name);
+                for (var p : obj.getProfiles()){
+                    var px = tempFolder.to(p.getName());
+                    p.getPath().copy(px);
+                    px.to("profile.json").write(Profiler.verifyProfileJsonIcon(p));
+                }
+                tempFolder.zip(path);
+                tempFolder.delete();
             }
-            tempFolder.zip(path);
-            tempFolder.delete();
+            catch (StopException ignored){
+                return;
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+                return;
+            }
             UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.misc.object", obj.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
         }).start();
     }
 
-    public static void importO(Path p, double x, double y){
+    public static void importO(Path p, double x, double y) throws StopException, IOException {
         var temp = Configurator.getConfig().getTemporaryFolder();
 
         if (p.isDirectory())
@@ -276,9 +308,11 @@ public class ProfileUtil {
 
         try {
             Profiler.createShortcut(p, Path.begin(file.toPath()));
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             Logger.getLogger().log(LogType.ERROR, "Cannot create a shortcut: The launcher does not running from a JAR file!");
             //Logger.getLogger().log(e);
+        } catch (StopException ignored) {
+
         }
     }
 }

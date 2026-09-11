@@ -1,6 +1,7 @@
 package com.laeben.corelauncher.api;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.api.annotation.ReturnsNull;
 import com.laeben.corelauncher.api.entity.ImageEntity;
@@ -26,8 +27,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 
 public class Profiler {
     public static final String PROFILE_CREATE = "profileCreate";
@@ -72,12 +71,15 @@ public class Profiler {
      * @param oldGamePath the old game path
      */
     public void moveProfiles(Path oldGamePath){
-        try{
-            oldGamePath.to("launcher", "profiles").getFiles().forEach(x -> x.copy(profilesDir.to(x.getName())));
+        for (var x : oldGamePath.to("launcher", "profiles").getFiles()){
+            try{
+                x.copy(profilesDir.to(x.getName()));
+            }
+            catch (Exception e){
+                Logger.getLogger().log(e);
+            }
         }
-        catch (Exception e){
-            Logger.getLogger().log(e);
-        }
+
     }
 
 
@@ -85,7 +87,7 @@ public class Profiler {
      * Create a shortcut of your profile to desired destination. Apply the profile image if it is possible.
      * @param destination shortcut path
      */
-    public static void createShortcut(Profile p, Path destination) throws URISyntaxException {
+    public static void createShortcut(Profile p, Path destination) throws URISyntaxException, StopException, IOException {
         var javaPath = Path.begin(OSUtil.getJavaFile(OSUtil.getRunningJavaDir().toString(), true));
 
         Path iconPath;
@@ -130,7 +132,7 @@ public class Profiler {
      * @param p the profile
      * @param to target zip file
      */
-    public static void backup(Profile p, Path to){
+    public static void backup(Profile p, Path to) throws IOException, StopException {
         var path = p.getPath();
         var jsPath = path.to("profile.json");
 
@@ -142,7 +144,7 @@ public class Profiler {
         jsPath.write(first);
     }
 
-    public static void setResourceDisabled(Profile p, CResource resource, boolean disabled, boolean save){
+    public static void setResourceDisabled(Profile p, CResource resource, boolean disabled, boolean save) throws IOException, StopException {
         if (resource.getType() == ResourceType.MODPACK || resource.getType() == ResourceType.WORLD) // not for these :)
             return;
 
@@ -161,7 +163,7 @@ public class Profiler {
             UI.runAsync(p::save);
     }
 
-    private Profile importFromBackup(Path p){
+    private Profile importFromBackup(Path p) throws IOException, StopException {
         var profile = Profile.PROFILE_GSON.fromJson(p.read(), Profile.class);
         String gen = generateName(profile.getName());
         p.parent().move(profilesDir.to(gen));
@@ -177,7 +179,7 @@ public class Profiler {
      * Import profile from the zip or JSON file.
      * @param path zip or JSON file
      */
-    public List<Profile> importFromPath(Path path, Predicate<Profile> determineOverwrite){
+    public List<Profile> importFromPath(Path path, Predicate<Profile> determineOverwrite) throws IOException, StopException {
         var ext = path.getExtension();
         var tempProfiles = Configurator.getConfig().getTemporaryFolder();
 
@@ -281,7 +283,7 @@ public class Profiler {
         return false;
     }
 
-    public static String verifyProfileJsonIcon(Profile profile){
+    public static String verifyProfileJsonIcon(Profile profile) throws IOException, StopException {
         var json = profile.getPath().to("profile.json");
         String read;
         if (profile.getIcon() != null && !profile.getIcon().isNetwork() && profile.getIcon().getUrl() == null){
@@ -352,18 +354,30 @@ public class Profiler {
     }
 
     public void reload(){
-        try{
-            profiles = (ArrayList<Profile>) profilesDir.getFiles().stream()
+        final var profiles = new ArrayList<Profile>();
+        for (final var path : profilesDir.getFiles()){
+            final Profile profile;
+            try{
+                profile = Profile.fromFolder(path);
+            }
+            catch (IOException e) {
+                Logger.getLogger().log("Profile could not be loaded.", e);
+                continue;
+            } catch (StopException e) {
+                break;
+            }
+            if (profile == null || profile.isMeta()) continue;
+
+            profiles.add(profile);
+        }
+            /*profiles = (ArrayList<Profile>) profilesDir.getFiles().stream()
                     //.sorted(Comparator.comparingLong(a -> a.toFile().lastModified()))
                     .map(Profile::fromFolder)
                     .filter(x -> x != null && !x.isMeta()) // folders without profile.json ignored
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList());*/
 
-            handler.execute(new ChangeEvent(EventHandler.RELOAD, null, null));
-        }
-        catch (Exception e){
-            Logger.getLogger().log(e);
-        }
+        this.profiles = profiles;
+        handler.execute(new ChangeEvent(EventHandler.RELOAD, null, null));
     }
 
     public Profile copyProfile(Profile p){
@@ -375,7 +389,7 @@ public class Profiler {
     }
 
     @ReturnsNull
-    public Profile createProfile(String name) throws InvalidObjectException {
+    public Profile createProfile(String name) throws IOException, StopException {
         if (profilesDir.getFiles().stream().anyMatch(x -> x.getName().equals(name)))
             return null;
 
@@ -392,7 +406,7 @@ public class Profiler {
      * @return the profile
      * @throws UnsupportedOperationException if the profile was existing first but then disappeared??
      */
-    public Profile createAndSetProfile(String name, Consumer<Profile> set) throws InvalidObjectException {
+    public Profile createAndSetProfile(String name, Consumer<Profile> set) throws IOException, StopException {
         var profile = createProfile(name);
         if (profile == null)
             profile = getProfile(name);
@@ -412,8 +426,8 @@ public class Profiler {
         handler.execute(new ChangeEvent(PROFILE_DELETE, p, null));
     }
 
-    public Profile generateDefaultProfile() throws InvalidObjectException {
-        var release = Vanilla.getVanilla().getLatestRelease();
+    public Profile generateDefaultProfile() throws IOException, StopException {
+        var release = Vanilla.getVanilla().getLatestRelease(null);
         if (release == null)
             Logger.getLogger().log(LogType.WARN, "Latest release is null!");
         return createAndSetProfile(Translator.translate("profile.defaultName"), a -> {

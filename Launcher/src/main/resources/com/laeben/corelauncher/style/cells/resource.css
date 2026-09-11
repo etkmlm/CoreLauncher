@@ -1,7 +1,16 @@
-#root{
-    -fx-background-color: #232323aa;
+#content{
+    -fx-background-color: #212121;
     -fx-background-radius: 16px;
     -fx-padding: 16px;
+}
+
+#root{
+
+}
+
+#root .progress{
+    -fx-background-color: #074343aa;
+    -fx-background-radius: 16px;
 }
 
 .cbutton{
@@ -18,50 +27,83 @@
 }
 
 #btnInstall{
-    -fx-font-size: 40pt;
+    -shape-fill: -text-fill;
+    -shape: -shape-add;
+    -shape-width: 32px;
+    -shape-height: 32px;
+    -fx-max-width: 72px;
+    -fx-max-height: 72px;
 }
 
 /*noinspection CssInvalidPseudoSelector*/
 #btnInstall:installed{
-    -fx-font-size: 28pt;
+    -shape-width: 32px;
+    -shape-height: 8px;
+    -shape: -shape-dash;
 }
 
-#btnMore{
-    -fx-font-size: 18pt;
+/*noinspection CssInvalidPseudoSelector*/
+#btnInstall:installing{
+    -shape-width: 28px;
+    -shape-height: 28px;
+    -shape: -shape-cancel;
 }
 
-#btnMore {
-    -fx-alignment: center;
-    -fx-padding: -5px 0 0 0;
+.catbox{
+    -fx-font-size: 12pt;
+    -fx-padding: 6px;
+    -fx-background-radius: 6px;
+    /*-fx-background-color: #232323;*/
 }
 
 #lblName{
     -fx-font-size: 15pt;
     -fx-font-weight: bold;
-    -fx-background-color: #202020;
+}
+
+#info{
     -fx-background-radius: 8px;
-    -fx-padding: 5px;
+    -fx-min-width: 120px;
+}
+
+/*noinspection CssInvalidPseudoSelector*/
+#info:installing{
+    -fx-background-color: #044040aa;
+    -fx-padding: 16 32 16 32!important;
+    -fx-min-width: 240px;
+}
+
+#lblStatus{
+    -fx-fill: -text-fill;
+    -fx-font-weight: bold;
+}
+
+#header{
+    -fx-background-radius: 8px;
+    -fx-padding: 6 6 6 10;
+}
+
+#header:hover{
+    -fx-background-color: #303a3a;
 }
 
 #lblAuthor{
+    -fx-font-size: 14pt;
+    -fx-fill: -text-fill;
+}
+
+#lblDate{
     -fx-font-size: 12pt;
-    -fx-padding: 0 0 0 5px;
+    -fx-padding: 0 0 0 4;
 }
 
-#txtDesc{
-    -fx-font-size: 10pt;
+#flowDesc{
+    -fx-background-color: #202525;
+    -fx-padding: 12 8 12 8;
+    -fx-background-radius: 8px;
 }
 
-.text-area{
-    -fx-min-width: 1!important;
-    -fx-pref-width: 50px!important;
-}
-
-#txtCategory{
-    -fx-font-size: 10pt;
-    -fx-padding: 0 0 0 10px;
-}
-
-#lblName:hover{
-    -fx-background-color: #303a3a;
+#lblDesc{
+    -fx-font-size: 12pt;
+    -fx-fill: -text-fill;
 }

@@ -7,11 +7,13 @@ import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.Loader;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.forge.entity.FArtifact;
 import com.laeben.corelauncher.minecraft.loader.forge.entity.ForgeVersion;
 import com.laeben.corelauncher.minecraft.loader.forge.installer.ForgeInstaller;
+import com.laeben.corelauncher.minecraft.token.VersionToken;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.util.NetUtil;
@@ -33,12 +35,12 @@ public class Forge extends Loader<ForgeVersion> {
     }
 
     @Override
-    public ForgeVersion getVersion(String id, String wrId){
-        return getVersions(id).stream().filter(x -> x.getLoaderVersion().equals(wrId)).findFirst().orElse(null);
+    public ForgeVersion getVersion(String id, String wrId, RedownloadSettings redownloadSettings){
+        return getVersions(id, redownloadSettings).stream().filter(x -> x.getLoaderVersion().equals(wrId)).findFirst().orElse(null);
     }
 
     @Override
-    public List<ForgeVersion> getAllVersions() {
+    public List<ForgeVersion> getAllVersions(RedownloadSettings redownloadSettings) {
         return null;
     }
 
@@ -62,10 +64,10 @@ public class Forge extends Loader<ForgeVersion> {
     }
 
     @Override
-    public List<ForgeVersion> getVersions(String versionId) {
+    public List<ForgeVersion> getVersions(String versionId, RedownloadSettings redownloadSettings) {
         logState("acqVersionForge - " + versionId);
 
-        if (cache.containsKey(versionId) && !redownSettings.hasClient())
+        if (cache.containsKey(versionId) && !redownloadSettings.hasClient())
             return cache.get(versionId);
 
         cache.remove(versionId);
@@ -123,14 +125,17 @@ public class Forge extends Loader<ForgeVersion> {
     }
 
     @Override
-    public void install(ForgeVersion version) throws NoConnectionException, StopException, PerformException {
+    public void install(VersionToken<ForgeVersion> token) throws NoConnectionException, StopException, PerformException {
         var versionsPath = Configurator.getConfig().getGamePath().to("versions");
+
+        final ForgeVersion version = token.getVersion();
+
         var verPath = versionsPath.to(version.getJsonName());
         var verJsonPath = verPath.to(version.getJsonName() + ".json");
 
-        Vanilla.getVanilla().install(version);
+        Vanilla.getVanilla().install(token);
 
-        if (verJsonPath.exists() && !redownSettings.hasClient())
+        if (verJsonPath.exists() && !token.getRedownloadSettings().hasClient())
             return;
 
         var art = version.fArtifacts.stream().filter(x -> x.type == FArtifact.Type.INSTALLER).findFirst().orElse(null);
@@ -140,9 +145,9 @@ public class Forge extends Loader<ForgeVersion> {
         try{
             logState(".forge.state.download");
             var path = Configurator.getConfig().getTemporaryFolder();
-            path = Network.download(NetworkToken.create(art.getUrl(), path, true), false);
+            path = Network.download(NetworkToken.create(art.getUrl(), path, true).syncWith(token));
 
-            if (stopRequested)
+            if (token.shouldStop())
                 throw new StopException();
 
             var target = Configurator.getConfig().getGamePath().toFile();
@@ -164,8 +169,7 @@ public class Forge extends Loader<ForgeVersion> {
                 }
             }
             catch (Exception e){
-                Logger.getLogger().logHyph("ERRFORGE " + version.getLoaderVersion());
-                Logger.getLogger().log(e);
+                Logger.getLogger().log("ERRFORGE " + version.getLoaderVersion(), e);
                 logState(UNKNOWN_ERROR);
             }
 
@@ -192,7 +196,7 @@ public class Forge extends Loader<ForgeVersion> {
                 versionsPath.to(name).delete();
             }
         }
-        catch (StopException | PerformException e){
+        catch (StopException | NoConnectionException | PerformException e){
             throw e;
         }
         catch (Exception e){

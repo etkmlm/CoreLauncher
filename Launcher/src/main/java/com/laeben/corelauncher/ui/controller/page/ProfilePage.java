@@ -39,6 +39,7 @@ import javafx.scene.input.TransferMode;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -252,9 +253,15 @@ public class ProfilePage extends HandlerController {
             }
 
             var p2 = profile.getPath().to("options.txt");
-            p1.copy(p2);
+            try {
+                p1.copy(p2);
 
-            Main.getMain().announceLater(Translator.translate("profile.options.title"), Translator.translateFormat("profile.options.ok", prf.getName()), Announcement.AnnouncementType.INFO, Duration.seconds(3));
+                Main.getMain().announceLater(Translator.translate("profile.options.title"), Translator.translateFormat("profile.options.ok", prf.getName()), Announcement.AnnouncementType.INFO, Duration.seconds(3));
+            } catch (IOException e) {
+                Logger.getLogger().log(e);
+            } catch (StopException ignored) {
+
+            }
         }, true);
 
         menu.addItem(ImageCacheManager.getImage("update.png", 32), UPDATE_ALL, Translator.translate("mods.all.update"), a ->
@@ -298,7 +305,12 @@ public class ProfilePage extends HandlerController {
             dragMode(false);
 
             var files = a.getDragboard().getFiles().stream().map(x -> Path.begin(x.toPath())).toList();
-            var result = MultipleBrowserPage.loadFromPath(profile.getLoader().getType(), files);
+            MultipleBrowserPage.LocalResult result;
+            try {
+                result = MultipleBrowserPage.loadFromPath(profile.getLoader().getType(), files);
+            } catch (StopException ignored) {
+                return;
+            }
 
             if (result.found().isEmpty()){
                 Main.getMain().announceLater(Translator.translate("error.oops"), Translator.translate("import.error.incompatible"), Announcement.AnnouncementType.ERROR, Duration.seconds(2));
@@ -378,14 +390,21 @@ public class ProfilePage extends HandlerController {
 
             UI.runAsync(() -> setProfile(profile));
 
-        } catch (NoConnectionException | HttpException | StopException ignored) {
+        } catch (NoConnectionException | HttpException | StopException | IOException ignored) {
 
         }
     }
 
     private <T extends CResource> void setSelectedResourcesDisabled(CList<T> list, boolean disabled){
         for (var x : list.getSelectedItems()){
-            Profiler.setResourceDisabled(profile, x, disabled, false);
+            try {
+                Profiler.setResourceDisabled(profile, x, disabled, false);
+            } catch (IOException e) {
+                Logger.getLogger().log(e);
+                continue;
+            } catch (StopException ignored) {
+                break;
+            }
             for (var a : list.getList().getChildren()){
                 if (a instanceof CPRCell<?> cpr && x.equals(cpr.getItem())){
                     cpr.invalidateToggle();

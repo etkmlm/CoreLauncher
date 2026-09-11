@@ -71,7 +71,7 @@ public class JavaPage extends HandlerController {
             else {
                 new Thread(() -> {
                     try {
-                        JavaManager.getManager().downloadAndInclude(null, j.info());
+                        JavaManager.getManager().downloadAndInclude(null, j.info(), Main.getProgressHandler()); // TODO replace with local progress
                     }
                     catch (NoConnectionException | StopException e){
                         Main.getMain().announceLater(e, Duration.seconds(2));

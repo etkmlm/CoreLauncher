@@ -18,8 +18,8 @@ import com.laeben.corelauncher.minecraft.modding.entity.resource.World;
 import com.laeben.corelauncher.minecraft.loader.forge.Forge;
 import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
-import com.laeben.corelauncher.ui.controller.browser.CResourceCell;
-import com.laeben.corelauncher.ui.controller.browser.Search;
+import com.laeben.corelauncher.ui.controller.browser.cell.CResourceCell;
+import com.laeben.corelauncher.ui.controller.browser.search.Search;
 import com.laeben.corelauncher.ui.controller.browser.SearchManager;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.api.ui.UI;
@@ -34,6 +34,7 @@ import javafx.scene.control.TextArea;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -138,7 +139,7 @@ public class MultipleBrowserPage extends HandlerController {
         return s;
     }
 
-    public static LocalResult loadFromPath(LoaderType type, List<Path> files){
+    public static LocalResult loadFromPath(LoaderType type, List<Path> files) throws StopException {
         var mods = new ArrayList<Modder.ModInfo>();
         var un = new ArrayList<Path>();
         var invalid = new ArrayList<Modder.ModInfo>();
@@ -152,7 +153,12 @@ public class MultipleBrowserPage extends HandlerController {
                 continue;
             }
 
-            var mod = Modder.getModder().getModFromJarFile(f);
+            Modder.ModInfo mod = null;
+            try {
+                mod = Modder.getModder().getModFromJarFile(f);
+            } catch (IOException e) {
+                Logger.getLogger().log("Could not be loaded mod file " + f, e);
+            }
             if (mod == null){
                 un.add(f);
                 continue;
@@ -210,7 +216,7 @@ public class MultipleBrowserPage extends HandlerController {
                         continue;
                     }
 
-                    var res = x.get(0).resource();
+                    var res = x.get(0).getResource();
 
                     var resources = res.getSourceType().getSource().getCoreResource(res, ModSource.Options.create(profile).dependencies(true));
                     if (resources == null || resources.isEmpty()){
@@ -296,7 +302,11 @@ public class MultipleBrowserPage extends HandlerController {
 
             var path = Path.begin(file.toPath());
 
-            loadFromResult(loadFromPath(profile.getLoader().getType(), path.getFiles()));
+            try {
+                loadFromResult(loadFromPath(profile.getLoader().getType(), path.getFiles()));
+            } catch (StopException ignored) {
+
+            }
             //var files = ps.stream().filter(x -> x.getExtension() != null && x.getExtension().equals("jar")).map(x -> x.getNameWithoutExtension().split("-")[0]).toList();
             //files.forEach(this::println);
         });

@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.api;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.entity.*;
@@ -12,6 +13,7 @@ import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 import javafx.scene.paint.Color;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
@@ -105,7 +107,15 @@ public class Configurator {
         }
         configLoadIndex++;
         if (configFilePath.exists()){
-            var read = configFilePath.read();
+            String read;
+            try {
+                read = configFilePath.read();
+            } catch (IOException e) {
+                Logger.getLogger().log("Error while loading config file " + configFilePath, e);
+                return false;
+            } catch (StopException ignored) {
+                return false;
+            }
             Logger.getLogger().logDebug("Loading config from: " + read);
             config = gson.fromJson(read, Config.class);
             cache.reloadUI();

@@ -1,7 +1,10 @@
 package com.laeben.corelauncher.api.shortcut.osx;
 
 import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
+
+import java.io.IOException;
 
 public class OSXShortcut implements Shortcut {
     private static final OSXShortcut INSTANCE = new OSXShortcut();
@@ -19,7 +22,7 @@ public class OSXShortcut implements Shortcut {
             """;
 
     @Override
-    public void create(Path shortcutPath, Path targetPath, Path workingDirectory, Path iconPath, String arguments) {
+    public void create(Path shortcutPath, Path targetPath, Path workingDirectory, Path iconPath, String arguments) throws StopException, IOException {
         var write = String.format(TEMPLATE, workingDirectory, targetPath, arguments);
         shortcutPath.write(write);
     }

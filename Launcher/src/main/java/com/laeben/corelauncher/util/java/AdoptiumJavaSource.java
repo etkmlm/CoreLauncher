@@ -4,17 +4,20 @@ import com.google.gson.JsonArray;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.network.Network;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.util.GsonUtil;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 
+import java.io.IOException;
+
 public class AdoptiumJavaSource implements JavaSource {
     private static final String ADOPTIUM = "https://api.adoptium.net/v3/assets/latest/";
 
     @Override
-    public JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException {
+    public JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException, IOException, StopException {
         if (arch != null){
             if (arch.equals("amd64"))
                 arch = "x64";
@@ -42,7 +45,7 @@ public class AdoptiumJavaSource implements JavaSource {
     }
 
     @Override
-    public void extract(Path archive, JavaDownloadInfo info){
+    public void extract(Path archive, JavaDownloadInfo info) throws StopException, IOException {
         archive.extract(null, null);
         if (info.os() != OS.OSX)
             return;

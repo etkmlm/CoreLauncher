@@ -2,6 +2,7 @@ package com.laeben.corelauncher.util.java;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.util.events.KeyEvent;
@@ -21,6 +22,7 @@ import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -105,14 +107,14 @@ public class JavaManager {
         return new Java(Path.begin(OSUtil.getRunningJavaDir()));
     }
 
-    public JavaDownloadInfo getJavaInfo(Java j, String arch, OS os) throws NoConnectionException {
+    public JavaDownloadInfo getJavaInfo(Java j, String arch, OS os) throws NoConnectionException, StopException {
         if (j.majorVersion == 0)
             return null;
 
         try{
             return source.getJavaInfo(j, os, arch);
         }
-        catch (NoConnectionException e){
+        catch (NoConnectionException | StopException e){
             throw e;
         }
         catch (Exception e){
@@ -135,7 +137,7 @@ public class JavaManager {
      * @param java version info
      * @param info download info
      */
-    public void downloadAndInclude(Java java, JavaDownloadInfo info) throws NoConnectionException, StopException {
+    public void downloadAndInclude(Java java, JavaDownloadInfo info, ProgressFunction onProgress) throws NoConnectionException, StopException {
         if (info == null)
             info = getJavaInfo(java, CoreLauncher.SYSTEM_OS_ARCH, CoreLauncher.SYSTEM_OS);
 
@@ -156,7 +158,7 @@ public class JavaManager {
             break;
         }
 
-        var j = downloadAndExtract(info, javaDir, existsPath);
+        var j = downloadAndExtract(info, javaDir, existsPath, onProgress);
         if (j == null)
             return;
         javaVersions.add(j);
@@ -171,7 +173,7 @@ public class JavaManager {
      * @param existsPath possible existing instance to delete after download completed
      * @return downloaded instance
      */
-    public Java downloadAndExtract(JavaDownloadInfo info, Path targetDir, Path existsPath) throws NoConnectionException, StopException {
+    public Java downloadAndExtract(JavaDownloadInfo info, Path targetDir, Path existsPath, ProgressFunction onProgress) throws NoConnectionException, StopException {
         if (info == null)
             return null;
 
@@ -179,7 +181,7 @@ public class JavaManager {
             if (Main.getMain() != null)
                 Main.getMain().setPrimaryStatus(Translator.translateFormat("java.downloading", info.name()));
 
-            var file = Network.download(NetworkToken.create(info.url(), targetDir, true), true);
+            var file = Network.download(NetworkToken.create(info.url(), targetDir, true).withLogging(onProgress));
 
             if (existsPath != null) // handling existing java version before extracting the file
                 existsPath.delete();
@@ -229,7 +231,7 @@ public class JavaManager {
         }
     }
 
-    public boolean renameCustomJava(Java j, String name){
+    public boolean renameCustomJava(Java j, String name) throws StopException, IOException {
         if (javaVersions.stream().noneMatch(x -> x.equals(j)) || javaVersions.stream().anyMatch(a -> a.getName() == null || a.getName().equals(name)))
             return false;
 

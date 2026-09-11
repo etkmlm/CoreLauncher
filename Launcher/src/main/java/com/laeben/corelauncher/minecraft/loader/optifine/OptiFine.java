@@ -1,12 +1,18 @@
 package com.laeben.corelauncher.minecraft.loader.optifine;
 
+import com.laeben.core.concurrency.CancellableToken;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
+import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.Configurator;
+import com.laeben.corelauncher.api.entity.Java;
+import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.minecraft.Loader;
+import com.laeben.corelauncher.minecraft.loader.entity.RedownloadSettings;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.loader.Vanilla;
 import com.laeben.corelauncher.minecraft.loader.optifine.entity.OptiVersion;
@@ -17,9 +23,11 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.laeben.corelauncher.minecraft.token.VersionToken;
+import com.laeben.corelauncher.util.java.JavaManager;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -45,9 +53,9 @@ public class OptiFine extends Loader<OptiVersion> {
     }
 
     @Override
-    public OptiVersion getVersion(String id, String wrId) {
+    public OptiVersion getVersion(String id, String wrId, RedownloadSettings redownloadSettings) {
         logState("acqVersionOptiFine - " + id);
-        var version = getAllVersions().stream().filter(x -> x.checkId(id) && x.getLoaderVersion().equals(wrId)).findFirst().orElse(null);
+        var version = getAllVersions(redownloadSettings).stream().filter(x -> x.checkId(id) && x.getLoaderVersion().equals(wrId)).findFirst().orElse(null);
         if (version == null)
             return null;
 
@@ -73,9 +81,8 @@ public class OptiFine extends Loader<OptiVersion> {
     }
 
     @Override
-    public List<OptiVersion> getAllVersions() {
-
-        if (!cache.isEmpty() && !redownSettings.hasClient())
+    public List<OptiVersion> getAllVersions(RedownloadSettings redownloadSettings) {
+        if (!cache.isEmpty() && !redownloadSettings.hasClient())
             return cache;
         cache.clear();
 
@@ -116,9 +123,9 @@ public class OptiFine extends Loader<OptiVersion> {
     }
 
     @Override
-    public List<OptiVersion> getVersions(String id) {
+    public List<OptiVersion> getVersions(String id, RedownloadSettings redownloadSettings) {
         logState("acqVersionOptiFine - " + id);
-        return getAllVersions().stream().filter(x -> x.checkId(id)).toList();
+        return getAllVersions(redownloadSettings).stream().filter(x -> x.checkId(id)).toList();
     }
 
     @Override
@@ -128,54 +135,59 @@ public class OptiFine extends Loader<OptiVersion> {
         return identifier.toLowerCase().contains("optifine") ? new OptiVersion(inherits, identifier.split("-")[1].replace('_', ' ')) : null;
     }
 
-    public static void installForge(OptiVersion get, Path modsFolder) throws NoConnectionException, StopException, HttpException, FileNotFoundException {
+    public static void installForge(OptiVersion get, Path modsFolder, CancellableToken<?> token) throws NoConnectionException, StopException, HttpException, IOException {
         instance.refreshUrl(get);
 
         var path = Configurator.getConfig().getTemporaryFolder();
         String fileName = get.getJsonName() + ".jar";
-        path = Network.download(NetworkToken.create(get.url, path.to(fileName), false), false);
+        path = Network.download(NetworkToken.create(get.url, path.to(fileName), false).syncWith(token));
 
         path.move(modsFolder.to(fileName));
     }
 
-    @Override
-    public void install(OptiVersion v) throws StopException, NoConnectionException {
-        Vanilla.getVanilla().install(v);
+    private void installV1(Path path, Path gameDir) throws Exception {
+        try(URLClassLoader loader = new URLClassLoader(new URL[]{path.toFile().toURI().toURL()})){
+            var installer = loader.loadClass("optifine.Installer");
+            var doInstall = installer.getMethod("doInstall", File.class);
 
-        var gameDir = Configurator.getConfig().getGamePath();
-        String name = v.getJsonName();
-        var jsonPath = gameDir.to("versions", name, name + ".json");
-        var clientPath = gameDir.to("versions", name, name + ".jar");
-        if (clientPath.exists() && !redownSettings.hasClient())
-            return;
+            doInstall.invoke(null, gameDir.toFile());
+        }
+    }
 
+    private int installV2(Path path, Path gameDir, ProgressFunction onProgress) throws NoConnectionException, StopException, PerformException, IOException { // java 21 installation
+        Java java21 = Java.fromVersion(21);
+        Java java = JavaManager.getManager().tryGet(java21);
+        if (java == null){
+            JavaManager.getManager().downloadAndInclude(java21, null, onProgress);
+            java = JavaManager.getManager().tryGet(java21);
+        }
+
+        if (java == null) throw new PerformException("Installing OptiFine with V2 failed: Java cannot be found.");
+
+        String classPath = CoreLauncher.LAUNCHER_EXECUTE_PATH.toFile().getAbsolutePath() + File.pathSeparator + path.toFile().getAbsolutePath();
+
+        var process = new ProcessBuilder(
+            java.getExecutable().toString(),
+            "-cp",
+            classPath,
+            OptiFineV2Injector.class.getName(),
+            gameDir.toFile().getAbsolutePath()
+        ).inheritIO().start();
+
+        int code;
+        try {
+            code = process.waitFor();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new StopException();
+        }
+
+        return code;
+    }
+
+    private void cleanupInstall(Path path, Path profileInfo, Path jsonPath) throws PerformException {
         try{
-            logState(".optifine.state.download");
-
-            var profileInfo = generateProfileInfo(gameDir);
-            var path = Configurator.getConfig().getTemporaryFolder();
-
-            refreshUrl(v); // We need to refresh it
-
-            path = Network.download(NetworkToken.create(v.url, path.to(clientPath.getName()), false), false);
-
-            if (stopRequested)
-                throw new StopException();
-
-            logState(".optifine.state.install");
-            try(URLClassLoader loader = new URLClassLoader(new URL[]{path.toFile().toURI().toURL()})){
-                var installer = loader.loadClass("optifine.Installer");
-                var doInstall = installer.getMethod("doInstall", File.class);
-
-                doInstall.invoke(null, gameDir.toFile());
-            }
-            catch (Exception e){
-                Logger.getLogger().log(e);
-                logState(UNKNOWN_ERROR);
-            }
-
             path.delete();
-
 
             Gson gson = new GsonBuilder().disableHtmlEscaping().create();
             var f = gson.fromJson(profileInfo.read(), JsonObject.class);
@@ -198,7 +210,60 @@ public class OptiFine extends Loader<OptiVersion> {
             }
         }
         catch (Exception e){
+            throw new PerformException("OptiFine installation could not be cleaned up", e);
+        }
+    }
+
+    @Override
+    public void install(VersionToken<OptiVersion> token) throws StopException, NoConnectionException, PerformException {
+        final OptiVersion version = token.getVersion();
+
+        Vanilla.getVanilla().install(token);
+
+        var gameDir = Configurator.getConfig().getGamePath();
+        String name = version.getJsonName();
+        var jsonPath = gameDir.to("versions", name, name + ".json");
+        var clientPath = gameDir.to("versions", name, name + ".jar");
+        if (clientPath.exists() && !token.getRedownloadSettings().hasClient())
+            return;
+
+        Path path = null;
+        Path profileInfo = null;
+
+        try{
+            logState(".optifine.state.download");
+
+            profileInfo = generateProfileInfo(gameDir);
+
+            refreshUrl(version); // We need to refresh it
+
+            path = Network.download(NetworkToken.create(version.url, Configurator.getConfig().getTemporaryFolder().to(clientPath.getName()), false).syncWith(token));
+
+            if (token.shouldStop())
+                throw new StopException();
+
+            logState(".optifine.state.install");
+
+            try{
+                installV1(path, gameDir);
+            }
+            catch (UnsupportedClassVersionError err){
+                Logger.getLogger().logHyph("OptiFine V1 installation is not supported, trying V2");
+                int code = installV2(path, gameDir, token.getOnProgress());
+                if (code != 0){
+                    throw new PerformException("OptiFine installation could not be installed with output code: " + code);
+                }
+            }
+        }
+        catch (StopException | NoConnectionException | PerformException e){
+            throw e;
+        }
+        catch (Exception e){
             Logger.getLogger().log(e);
+            logState(UNKNOWN_ERROR);
+        }
+        finally {
+            if (path != null && profileInfo != null) cleanupInstall(path, profileInfo, jsonPath);
         }
 
         logState(LAUNCH_FINISH);

@@ -87,4 +87,13 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.minecraft.modding.entity.resource;
     opens com.laeben.corelauncher.util.java;
     opens com.laeben.corelauncher.util.java.entity;
+    opens com.laeben.corelauncher.minecraft.token;
+    exports com.laeben.corelauncher.ui.controller.main;
+    opens com.laeben.corelauncher.ui.controller.main;
+    exports com.laeben.corelauncher.ui.controller.browser.cell;
+    opens com.laeben.corelauncher.ui.controller.browser.cell;
+    exports com.laeben.corelauncher.ui.controller.browser.search;
+    opens com.laeben.corelauncher.ui.controller.browser.search;
+    exports com.laeben.corelauncher.ui.dialog.modselector;
+    opens com.laeben.corelauncher.ui.dialog.modselector;
 }

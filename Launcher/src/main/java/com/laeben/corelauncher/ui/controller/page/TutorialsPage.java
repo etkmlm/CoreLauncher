@@ -2,6 +2,7 @@ package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.ui.control.CField;
@@ -13,6 +14,7 @@ import com.laeben.corelauncher.ui.tutorial.entity.Tutorial;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 
+import java.io.IOException;
 import java.util.List;
 
 public class TutorialsPage extends HandlerController {
@@ -32,9 +34,9 @@ public class TutorialsPage extends HandlerController {
         List<Tutorial> tutorials = List.of();
         try {
             tutorials = Main.getMain().getInstructor().getOnlineTutorials();
-        } catch (NoConnectionException ignored) {
+        } catch (NoConnectionException | StopException ignored) {
 
-        } catch (HttpException e) {
+        } catch (HttpException | IOException e) {
             Logger.getLogger().log(e);
         }
 

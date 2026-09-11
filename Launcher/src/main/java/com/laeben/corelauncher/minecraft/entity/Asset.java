@@ -1,9 +1,16 @@
 package com.laeben.corelauncher.minecraft.entity;
 
+import com.google.gson.annotations.SerializedName;
+import com.laeben.core.entity.Path;
+import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.Tool;
+import com.laeben.corelauncher.api.entity.FileCheckMode;
+
 import java.util.regex.Pattern;
 
 public class Asset {
     public String id;
+    @SerializedName("sha1")
     public String SHA1;
     public int size;
     public int totalSize;
@@ -64,7 +71,6 @@ public class Asset {
     public Asset(String path, String url){
         this.url = url;
         this.path = path;
-        size = -1;
     }
 
     public boolean isLegacy(){
@@ -73,5 +79,15 @@ public class Asset {
 
     public boolean isVeryLegacy(){
         return id.equals("pre-1.6");
+    }
+
+
+    /**
+     * Checks the availability and integrity of the asset file.
+     * Uses {@link Tool#checkFileIntegrity(Path, long, String, FileCheckMode)} function.
+     * @see Tool
+     */
+    public boolean checkAsset(Path assetPath, FileCheckMode mode) throws StopException {
+        return Tool.checkFileIntegrity(assetPath, size, SHA1, mode);
     }
 }

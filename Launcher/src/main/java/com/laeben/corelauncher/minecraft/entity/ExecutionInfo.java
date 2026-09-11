@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.minecraft.entity;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -17,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,7 +71,7 @@ public class ExecutionInfo{
         }
 
         GPUType gpuType = profile.getGPUType();
-        if (gpuType == null) gpuType = Configurator.getConfig().getGPUType();
+        if (gpuType == null || gpuType == GPUType.DEFAULT) gpuType = Configurator.getConfig().getGPUType();
 
         return new ExecutionInfo(profile.getName(), profile.getLoader().getVersion(profile.getVersionId(), profile.getLoaderVersion()), profile.getUser(), profile.getJava(), profile.getPath(), gpuType, concat.generate().toArray(new String[0]));
     }
@@ -103,7 +105,7 @@ public class ExecutionInfo{
         private final ArgumentConcat jvmArguments;
         private final ArgumentConcat gameArguments;
 
-        public LaunchInfo() throws VersionNotFoundException {
+        public LaunchInfo() throws VersionNotFoundException, IOException, StopException {
             var gameDir = Configurator.getConfig().getGamePath();
             versionDir = gameDir.to("versions", version.id);
             nativePath = versionDir.to("natives");

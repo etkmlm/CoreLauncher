@@ -31,19 +31,22 @@ public class ImageUtil {
 
     private static final Executor asyncExecutor = Executors.newSingleThreadExecutor();
 
+    private static final String UNSUPPORTED_CODE = "VP8_STATUS_UNSUPPORTED_FEATURE";
+
     public static Image getImageSync(ImageTask task, boolean useDefault){
         asyncExecutor.execute(task);
         try {
             return task.get();
         } catch (InterruptedException | ExecutionException e) {
-            Logger.getLogger().log(e);
+            if (!e.getMessage().contains(UNSUPPORTED_CODE))
+                Logger.getLogger().log(e);
             return useDefault ? getDefaultImage(task.getRequestedWidth()) : null;
         }
     }
     public static void getImageAsync(ImageTask task, Consumer<Image> onDone, boolean useDefault){
         task.setOnSucceeded(a -> onDone.accept(task.getValue()));
         task.setOnFailed(e -> {
-            if (!(e.getSource().getException() instanceof IIOException iio && (iio.getCause() instanceof FileNotFoundException || iio.getCause() instanceof UnknownHostException))){
+            if (!(e.getSource().getException() instanceof IOException io && io.getMessage().startsWith("Decode") || e.getSource().getException() instanceof IIOException iio && (iio.getCause() instanceof FileNotFoundException || iio.getCause() instanceof UnknownHostException))){
                 Logger.getLogger().log(e.getSource().getException());
             }
 
@@ -144,6 +147,8 @@ public class ImageUtil {
     }
 
     private static Image awtToFXImage(java.awt.Image img, double w, double h) {
+        if (img == null) return null;
+
         if (w >= 0)
             img = img.getScaledInstance((int)w, (int)h, java.awt.Image.SCALE_FAST);
 

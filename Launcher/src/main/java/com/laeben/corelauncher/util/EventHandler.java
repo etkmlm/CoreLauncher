@@ -1,6 +1,5 @@
 package com.laeben.corelauncher.util;
 
-import com.laeben.core.network.Network;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.corelauncher.api.ui.UI;
 
@@ -10,10 +9,6 @@ public class EventHandler<T extends BaseEvent> extends com.laeben.core.util.Even
     public static final String START = "start";
 
     private static boolean overrideExecution = false;
-
-    static {
-        Network.getHandler().setExecuteReg(EventHandler::er);
-    }
 
     private static <T extends BaseEvent> void er(ExReg<T> reg){
         if (reg.reg().isAsync())

@@ -1,11 +1,13 @@
 package com.laeben.corelauncher.ui.util;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.api.gpu.LinuxGPUSelector;
 import com.laeben.corelauncher.api.gpu.WindowsGPUSelector;
 import com.laeben.corelauncher.api.gpu.entity.GPUDisplay;
 
+import java.io.IOException;
 import java.util.List;
 
 public class GPUUtil {
@@ -19,7 +21,7 @@ public class GPUUtil {
         return display.displayName();
     }
 
-    public static List<GPUDisplay> getAllGPUTypes(){
+    public static List<GPUDisplay> getAllGPUTypes() throws IOException, StopException {
         return switch (OS.getSystemOS()){
             case WINDOWS -> WindowsGPUSelector.getGPUDisplays();
             case LINUX -> LinuxGPUSelector.getGPUDisplays();

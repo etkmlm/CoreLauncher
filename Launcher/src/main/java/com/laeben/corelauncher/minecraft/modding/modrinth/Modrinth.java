@@ -2,25 +2,29 @@ package com.laeben.corelauncher.minecraft.modding.modrinth;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.laeben.core.concurrency.CancellableToken;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.RequestParameter;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
+import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.network.requester.RequesterFactory;
-import com.laeben.corelauncher.api.util.NetUtil;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.*;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.*;
+import com.laeben.corelauncher.minecraft.modding.event.ModdingContext;
 import com.laeben.corelauncher.minecraft.modding.modrinth.entity.*;
-import com.laeben.corelauncher.ui.controller.browser.ModrinthSearch;
-import com.laeben.corelauncher.ui.controller.browser.Search;
+import com.laeben.corelauncher.ui.controller.browser.search.ModrinthSearch;
+import com.laeben.corelauncher.ui.controller.browser.search.Search;
 import com.laeben.corelauncher.util.*;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -63,7 +67,7 @@ public class Modrinth implements ModSource {
      * @param search parameters
      * @return response
      */
-    public ModrinthSearchResponse search(ModrinthSearchRequest search) throws NoConnectionException, HttpException {
+    public ModrinthSearchResponse search(ModrinthSearchRequest search) throws NoConnectionException, HttpException, IOException, StopException {
         var str = factory.create()
                 .to("/v2/search")
                 .withParams(search.getParams())
@@ -77,7 +81,7 @@ public class Modrinth implements ModSource {
      * @param ids project ids
      * @return found projects
      */
-    public List<ModrinthResource> getResources(List<String> ids) throws NoConnectionException, HttpException {
+    public List<ModrinthResource> getResources(List<String> ids) throws NoConnectionException, HttpException, IOException, StopException {
         var str = factory.create()
                 .to("/v2/projects")
                 .withParam(new RequestParameter("ids", StrUtil.jsArray(ids)).markAsEscapable())
@@ -89,7 +93,7 @@ public class Modrinth implements ModSource {
     }
 
     @Override
-    public Path extractModpack(Modpack mp, Path path, boolean overwriteManifest) throws NoConnectionException, HttpException, StopException {
+    public Path extractModpack(Modpack mp, Path path, boolean overwriteManifest, ProgressFunction onProgress, CancellableToken<?> token) throws NoConnectionException, HttpException, StopException, IOException {
         var zip = path.to("mpInfo.zip");
         String name = StrUtil.pure(mp.name);
         var tempDir = path.to(name);
@@ -98,14 +102,19 @@ public class Modrinth implements ModSource {
             manifest.delete();
 
         if (!manifest.exists()){
-            var ppp = NetUtil.download(NetworkToken.create(mp.fileUrl, zip, false));
-            //Modder.getModder().getHandler().execute(new KeyEvent("stop"));
-            zip.extract(tempDir, null);
-            assert ppp != null;
-            ppp.delete();
-            tempDir.to("modrinth.index.json").move(manifest);
-            tempDir.to("overrides").move(path);
-            tempDir.delete();
+            Path ppp = null;
+            try{
+                ppp = Network.download(NetworkToken.create(mp.fileUrl, zip, false).withLogging(onProgress).syncWith(token));
+                //Modder.getModder().getHandler().execute(new KeyEvent("stop"));
+                onProgress.onContext(ModdingContext.EXTRACTING_MODPACK);
+                zip.extract(tempDir, null);
+                tempDir.to("modrinth.index.json").move(manifest);
+                tempDir.to("overrides").move(path);
+            }
+            finally {
+                if (ppp != null) ppp.delete();
+                tempDir.delete();
+            }
         }
 
         return manifest;
@@ -116,7 +125,7 @@ public class Modrinth implements ModSource {
      * @param versionIds version entity ids
      * @return full-loaded version entities
      */
-    public List<Version> getVersions(List<String> versionIds) throws NoConnectionException, HttpException {
+    public List<Version> getVersions(List<String> versionIds) throws NoConnectionException, HttpException, IOException, StopException {
         var str = factory.create()
                 .to("/v2/versions")
                 .withParam(new RequestParameter("ids", StrUtil.jsArray(versionIds)).markAsEscapable())
@@ -125,14 +134,14 @@ public class Modrinth implements ModSource {
         return processVersions(str);
     }
 
-    public List<CResource> getDependenciesFromVersion(Version v, ModrinthResource res, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getDependenciesFromVersion(Version v, ModrinthResource res, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
         if (opt.getIncludeSelf() && res == null)
             res = getResources(List.of(v.projectId)).get(0);
 
         var projects = new ArrayList<>();
         var versions = new ArrayList<String>();
         for (var dep : v.getDependencies()){
-            if (!dep.isRequired() && !dep.isEmbedded())
+            if (!dep.isRequired() && !dep.isEmbedded() || opt.wasIdHandled(dep.projectId))
                 continue;
             if (dep.versionId != null)
                 versions.add(dep.versionId);
@@ -141,8 +150,10 @@ public class Modrinth implements ModSource {
         }
 
         var all = new ArrayList<CResource>();
-        if (opt.getIncludeSelf())
+        if (opt.getIncludeSelf()){
+            opt.handleId(res.id);
             all.add(CResource.fromRinthResourceGeneric(res, v));
+        }
 
         if (opt.doesAllowOverwrite() && !res.getResourceType().isGlobal()) // disable overwrite to force other dependencies to obey the first preferences
             opt = opt.cloneFromPlatform().allowOverwrite(false);
@@ -156,6 +167,9 @@ public class Modrinth implements ModSource {
         var vers = getVersions(versions);
         var prs = getResources(vers.stream().map(a -> a.projectId).toList());
         for (var ve : vers){
+            if (opt.wasIdHandled(ve.projectId)) continue;
+            opt.handleId(ve.projectId);
+
             var r = prs.stream().filter(a -> a.getId().equals(ve.projectId)).findFirst();
             if (r.isEmpty())
                 continue;
@@ -176,7 +190,7 @@ public class Modrinth implements ModSource {
      * @param loaders loaders
      * @return full-loaded version entities
      */
-    public List<Version> getProjectVersions(String rId, List<String> versionIds, List<LoaderType> loaders) throws NoConnectionException, HttpException {
+    public List<Version> getProjectVersions(String rId, List<String> versionIds, List<LoaderType> loaders) throws NoConnectionException, HttpException, IOException, StopException {
         var str = factory.create()
                 .to("/v2/project/" + rId + "/version");
 
@@ -252,7 +266,7 @@ public class Modrinth implements ModSource {
      * Get all categories from Modrinth.
      * @return categories
      */
-    public List<ModrinthCategory> getAllCategories() throws NoConnectionException, HttpException {
+    public List<ModrinthCategory> getAllCategories() throws NoConnectionException, HttpException, IOException, StopException {
         var str = factory.create()
                 .to("/v2/tag/category")
                 .getString();
@@ -272,15 +286,15 @@ public class Modrinth implements ModSource {
     public void reload(){
         try{
             categories = getAllCategories();
-        } catch (NoConnectionException | HttpException e) {
+        } catch (NoConnectionException | HttpException | IOException | StopException e) {
             categories = List.of();
         }
 
     }
 
     @Override
-    public List<CResource> getCoreResources(List<Object> ids, Options opt) throws NoConnectionException, HttpException {
-        var resources = getResources(ids.stream().map(Object::toString).toList());
+    public List<CResource> getCoreResources(List<Object> ids, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
+        var resources = getResources(opt.streamIdList(ids).map(Object::toString).toList());
         List<CResource> all;
         if (opt.useMeta() && !opt.getIncludeDependencies() && !opt.getAggregateModpack())
             all = resources.stream().map(a -> (CResource)CResource.fromRinthResourceGeneric(a, null)).toList();
@@ -291,6 +305,7 @@ public class Modrinth implements ModSource {
                 /*var v = vers.stream().filter(a -> a.projectId.equals(r.getId())).findFirst();
                 if (v.isEmpty())
                     continue;*/
+                if (opt.wasIdHandled(r.id)) continue;
                 var v = opt.doesAllowOverwrite() ? getNewestVersionOfProject(r, null, null) : getNewestVersionOfProject(r, opt.getVersionIds(), opt.getLoaders());
                 if (v == null)
                     continue;
@@ -301,14 +316,16 @@ public class Modrinth implements ModSource {
 
                 if (opt.getIncludeDependencies() || (opt.getAggregateModpack() && r.getResourceType() == ResourceType.MODPACK))
                     all.addAll(getDependenciesFromVersion(v, r, opt.self(true)));
-                else
+                else{
+                    opt.handleId(r.id);
                     all.add(CResource.fromRinthResourceGeneric(r, v));
+                }
             }
         }
         return all;
     }
 
-    private Version getNewestVersionOfProject(ModrinthResource r, List<String> versionIds, List<LoaderType> loaders) throws NoConnectionException, HttpException {
+    private Version getNewestVersionOfProject(ModrinthResource r, List<String> versionIds, List<LoaderType> loaders) throws NoConnectionException, HttpException, IOException, StopException {
         /*List<Version> vs = r.versions == null || r.versions.isEmpty() ?
                 getProjectVersions(r.id, vId, loader) :
                 getVersions(List.of(r.versions.get(0)));*/
@@ -319,21 +336,22 @@ public class Modrinth implements ModSource {
     }
 
     @Override
-    public List<CResource> getCoreResource(Object id, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getCoreResource(Object id, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
         var rs = getResources(List.of(id.toString()));
         return rs.isEmpty() ? null : getCoreResource(rs.get(0), opt);
     }
 
     @Override
-    public List<CResource> getAllCoreResources(Object id, Options opt) throws NoConnectionException, HttpException {
-        var res = getResources(List.of(id.toString()));
-        if (res.isEmpty())
+    public List<CResource> getAllCoreResources(Object id, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
+        var res = opt.wasIdHandled(id) ? null : getResources(List.of(id.toString()));
+        if (res == null || res.isEmpty())
             return null;
         return getAllCoreResources(res, opt);
     }
 
     @Override
-    public List<CResource> getAllCoreResources(ModResource res, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getAllCoreResources(ModResource res, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
+        opt.handleId(res.getId());
         var versions = getProjectVersions(res.getId().toString(), opt.getVersionIds(), opt.getLoaders());
         return versions.stream().map(a -> (CResource)CResource.fromRinthResourceGeneric((ModrinthResource) res, a)).toList();
     }
@@ -367,8 +385,8 @@ public class Modrinth implements ModSource {
     }
 
     @Override
-    public List<CResource> getCoreResource(ModResource res, Options opt) throws NoConnectionException, HttpException {
-        if (!(res instanceof ModrinthResource r))
+    public List<CResource> getCoreResource(ModResource res, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
+        if (!(res instanceof ModrinthResource r) || opt.wasIdHandled(r.id))
             return null;
 
         Version v;
@@ -382,11 +400,16 @@ public class Modrinth implements ModSource {
         else
             v = getNewestVersionOfProject(r, opt.getVersionIds(), opt.getLoaders());
 
-        return ((opt.getAggregateModpack() && res.getResourceType() == ResourceType.MODPACK) || opt.getIncludeDependencies()) && v != null ? getDependenciesFromVersion(v, r, opt) : List.of(CResource.fromRinthResourceGeneric(r, v));
+        if (((opt.getAggregateModpack() && res.getResourceType() == ResourceType.MODPACK) || opt.getIncludeDependencies()) && v != null)
+            return getDependenciesFromVersion(v, r, opt);
+        else{
+            opt.handleId(r.id);
+            return List.of(CResource.fromRinthResourceGeneric(r, v));
+        }
     }
 
     @Override
-    public List<CResource> getDependencies(List<CResource> crs, Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getDependencies(List<CResource> crs, Options opt) throws NoConnectionException, HttpException, IOException, StopException {
         var projects = new ArrayList<>();
         var versions = new ArrayList<String>();
 
@@ -394,21 +417,30 @@ public class Modrinth implements ModSource {
             if (v.dependencies == null)
                 continue;
             for (var dep : v.dependencies){
-                if (dep.id != null)
-                    projects.add(dep.id.toString());
+                if (dep.id != null){
+                    if (!opt.wasIdHandled(dep.id))
+                        projects.add(dep.id.toString());
+                }
                 else
                     versions.add(dep.fileId.toString());
             }
         }
 
         var all = new ArrayList<CResource>();
-        if (opt.getIncludeSelf())
-            all.addAll(crs);
+        if (opt.getIncludeSelf()){
+            for (var v : crs){
+                opt.handleId(v.id);
+                all.add(v);
+            }
+        }
         all.addAll(getCoreResources(projects, opt));
 
         var vers = getVersions(versions);
         var prs = getResources(vers.stream().map(a -> a.projectId).toList());
         for (var ve : vers){
+            if (opt.wasIdHandled(ve.projectId)) continue;
+            opt.handleId(ve.projectId);
+
             var r = prs.stream().filter(a -> a.getId().equals(ve.projectId)).findFirst();
             if (r.isEmpty())
                 continue;
@@ -432,7 +464,9 @@ public class Modrinth implements ModSource {
     }
 
     @Override
-    public void applyModpack(Modpack mp, Path path, Options opt) throws NoConnectionException, HttpException, StopException {
+    public void applyModpack(Modpack mp, Path path, Options opt) throws NoConnectionException, HttpException, StopException, IOException {
+        opt.getOnProgress().onContext(ModdingContext.RETRIEVING_MODPACK_DETAILS);
+
         mp.mods = new ArrayList<>();
         mp.resources = new ArrayList<>();
         mp.shaders = new ArrayList<>();
@@ -443,7 +477,7 @@ public class Modrinth implements ModSource {
         var vId = opt.getVersionId();
         var loader = opt.getLoaderType();
 
-        var all = new ArrayList<>(getCoreResources(mp.dependencies.stream().filter(x -> x.id != null).map(x -> x.id).toList(), Options.create(vId, loader)));
+        var all = new ArrayList<>(getCoreResources(mp.dependencies.stream().filter(x -> x.id != null).map(x -> x.id).toList(), Options.create(vId, loader).useCancellationToken(opt.getCancellationToken())));
 
         for (var a : vDeps){
             var p = pDeps.stream().filter(x -> x.getId().equals(a.projectId)).findFirst().orElse(null);
@@ -460,7 +494,7 @@ public class Modrinth implements ModSource {
             all.add(res);
         }
 
-        var mf = gson.fromJson(extractModpack(mp, path, true).read(), JsonObject.class);
+        var mf = gson.fromJson(extractModpack(mp, path, true, opt.getOnProgress(), opt.getCancellationToken()).read(), JsonObject.class);
         String key;
 
         key = loader.getIdentifier();
@@ -488,6 +522,8 @@ public class Modrinth implements ModSource {
             }
         }
 
+        opt.getOnProgress().onContext(ModdingContext.APPLYING_MODPACK);
+
         for (var a : all){
             if (a instanceof Mod m)
                 mp.mods.add(m);
@@ -512,7 +548,7 @@ public class Modrinth implements ModSource {
     }
 
 
-    public List<CResource> getPreferredShaderMod(Options opt) throws NoConnectionException, HttpException {
+    public List<CResource> getPreferredShaderMod(Options opt) throws NoConnectionException, HttpException, IOException, StopException {
         return getCoreResource(PREFERRED_SHADER_MOD, opt);
     }
 }

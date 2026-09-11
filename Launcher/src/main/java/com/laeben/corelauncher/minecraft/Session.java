@@ -1,11 +1,13 @@
 package com.laeben.corelauncher.minecraft;
 
+import com.laeben.core.entity.exception.StopException;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.core.entity.Path;
 import com.laeben.corelauncher.api.socket.entity.CLPacket;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -96,7 +98,7 @@ public class Session {
         stopRequested = true;
     }
 
-    private void log(String prefix, String line){
+    private void log(String prefix, String line) throws IOException, StopException {
         String msg = "[S" + sessionId + prefix + "] " + line;
         System.out.println(msg);
         logFile.append("\n" + msg);
