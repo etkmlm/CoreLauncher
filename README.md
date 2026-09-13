@@ -30,3 +30,18 @@ Create a profile, select you loader, customize your resources, and play!
 ## How can I use it?
 
 You can find the detailed guide [here](https://google.com).
+
+## Building from source
+
+Requires JDK 17+
+
+```
+./mvnw clean install
+```
+
+This builds all modules (`CLFixer`, `Launcher`, `CLPatcher`, `ExampleExtension`) in order and installs them to your local `~/.m2` repository.
+The launcher jar is produced at `Launcher/target/Launcher-<version>.jar`, run it directly with:
+
+```
+java -jar Launcher/target/Launcher-<version>.jar
+```
