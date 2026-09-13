@@ -23,7 +23,7 @@
 }
 
 .cbutton:hover{
-    -fx-background-color: #101010aa;
+    -fx-background-color: -dark-hover-fill;
 }
 
 #btnInstall{

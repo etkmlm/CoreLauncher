@@ -87,7 +87,7 @@
         <dependency>
             <groupId>com.github.etkmlm</groupId>
             <artifactId>LaebenJAppCore</artifactId>
-            <version>master-ad7986cedb-1</version>
+            <version>master-13b1164f84-1</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

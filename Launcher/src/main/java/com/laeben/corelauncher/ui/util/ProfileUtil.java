@@ -3,6 +3,8 @@ package com.laeben.corelauncher.ui.util;
 import com.google.gson.*;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -31,6 +33,11 @@ import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
 public class ProfileUtil {
+    /**
+     * Exports a profile, utilizes a dialog, unlike {@link #exportJson(Profile, Path)}.
+     * @param profile target profile
+     * @param w window for the dialog
+     */
     public static void export(Profile profile, Window w){
         var chooser = new FileChooser();
         chooser.setInitialFileName(profile.getName() + ".json");
@@ -41,6 +48,11 @@ public class ProfileUtil {
         exportJson(profile, Path.begin(file.toPath()));
     }
 
+    /**
+     * Exports multiple profiles into separate JSON files.
+     * @param profiles target profiles
+     * @param w window for the dialog
+     */
     public static void export(List<Profile> profiles, Window w){
         var chooser = new DirectoryChooser();
         var file = chooser.showDialog(w);
@@ -49,9 +61,14 @@ public class ProfileUtil {
         profiles.forEach(a -> exportJson(a, Path.begin(file.toPath()).to(a.getName() + ".json")));
     }
 
+    /**
+     * Exports a profile.
+     * @param profile target profile
+     * @param to exact JSON path to write
+     */
     public static void exportJson(Profile profile, Path to){
         try{
-            String read = Profiler.verifyProfileJsonIcon(profile);
+            String read = Profiler.getBackupProfileJson(profile);
             to.write(read);
             //profileJson.copy(Path.begin(file.toPath()));
         }
@@ -63,6 +80,11 @@ public class ProfileUtil {
         }
     }
 
+    /**
+     * Exports a float dock object (including groups) into a single JSON file.
+     * @param obj object
+     * @param w window for the dialog
+     */
     public static void export(FDObject obj, Window w){
         if (obj.isSingle()){
             export(obj.getProfiles().get(0), w);
@@ -115,36 +137,50 @@ public class ProfileUtil {
         }
     }
 
-    public static void backup(Profile profile, Window w){
+    /**
+     * Backs up a profile.
+     * <br/>
+     * Uses nested awaiting.
+     * @param w window for the dialog
+     */
+    public static Tasker.TaskRecord backup(Profile profile, Window w){
         var chooser = new FileChooser();
         chooser.setInitialFileName(profile.getName() + ".zip");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
         var file = chooser.showSaveDialog(w);
         if (file == null)
-            return;
-        new Thread(() -> {
+            return null;
+
+        return Tasker.getDefault().awaitNested(() -> {
             try{
                 UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.misc.profile", profile.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
-                Profiler.backup(profile, Path.begin(file.toPath()));
+                Profiler.backup(profile, Path.begin(file.toPath()), null); // TODO implement progress panel
                 UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.misc.profile", profile.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500) ));
             }
             catch (Exception e){
                 Logger.getLogger().log(e);
             }
-        }).start();
+        });
     }
 
-    public static void backup(List<Profile> profiles, Window w){
+    /**
+     * Backs up multiple profiles.
+     * <br/>
+     * Uses nested awaiting.
+     * @param w window for the dialog
+     */
+    public static Tasker.TaskRecord backup(List<Profile> profiles, Window w){
         var chooser = new DirectoryChooser();
         var file = chooser.showDialog(w);
         if (file == null)
-            return;
-        new Thread(() -> {
+            return null;
+
+        return Tasker.getDefault().await(() -> {
             UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.info.backup.profiles.begin", profiles.size()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
             int count = 0;
             for (var a : profiles){
                 try{
-                    Profiler.backup(a, Path.begin(file.toPath()).to(a.getName() + ".zip"));
+                    Profiler.backup(a, Path.begin(file.toPath()).to(a.getName() + ".zip"), null); // TODO implement progress panel
                     count++;
                 }
                 catch (StopException ignored){
@@ -157,14 +193,18 @@ public class ProfileUtil {
 
             final int backedUp = count;
             UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.info.backup.profiles.end", backedUp), Announcement.AnnouncementType.INFO), Duration.millis(1500) ));
-        }).start();
+        });
     }
 
-    public static void backup(FDObject obj, Window w){
-        if (obj.isSingle()){
-            backup(obj.getProfiles().get(0), w);
-            return;
-        }
+    /**
+     * Backs up a float dock object.
+     * <br/>
+     * Uses nested awaiting.
+     * @param obj object
+     * @param w window for the dialog
+     */
+    public static Tasker.TaskRecord backup(FDObject obj, Window w){
+        if (obj.isSingle()) return backup(obj.getProfiles().get(0), w);
 
         var chooser = new FileChooser();
         String name = StrUtil.pure(obj.getName().trim());
@@ -172,10 +212,9 @@ public class ProfileUtil {
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
         var file = chooser.showSaveDialog(w);
         if (file == null)
-            return;
+            return null;
 
-
-        new Thread(() -> {
+        return Tasker.getDefault().awaitNested(() -> {
             UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.started"), Translator.translateFormat("announce.misc.object", obj.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
             try{
                 var path = Path.begin(file.toPath());
@@ -183,9 +222,9 @@ public class ProfileUtil {
                 for (var p : obj.getProfiles()){
                     var px = tempFolder.to(p.getName());
                     p.getPath().copy(px);
-                    px.to("profile.json").write(Profiler.verifyProfileJsonIcon(p));
+                    px.to("profile.json").write(Profiler.getBackupProfileJson(p));
                 }
-                tempFolder.zip(path);
+                tempFolder.zip(path, null); // TODO implement progress panel
                 tempFolder.delete();
             }
             catch (StopException ignored){
@@ -196,52 +235,99 @@ public class ProfileUtil {
                 return;
             }
             UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.backup.completed"), Translator.translateFormat("announce.misc.object", obj.getName()), Announcement.AnnouncementType.INFO), Duration.millis(1500)));
-        }).start();
+        });
     }
 
-    public static void importO(Path p, double x, double y) throws StopException, IOException {
+    /**
+     * Imports an object. (ZIP backup or JSON export)
+     * <br/>
+     * Uses nested awaiting.
+     * @param files files to be imported from
+     * @param x target dock x
+     * @param y target dock y
+     */
+    public static Tasker.TaskRecord importO(List<Path> files, double x, double y){
+        return Tasker.getDefault().awaitNested(() -> {
+            UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.started"), Translator.translateFormat("announce.info.import.importing", files.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+            int c = 0;
+            for (var path : files){
+                try{
+                    importO(path, x, y, null); // TODO implement progress panel
+                    c++;
+                }
+                catch (CancellationException ignored){
+                    break;
+                }
+                catch (Exception e){
+                    Logger.getLogger().log(e);
+                }
+            }
+            int fC = c;
+            UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.completed"), Translator.translateFormat("announce.info.import.imported", fC), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
+        });
+    }
+
+
+    /**
+     * Imports an object. (ZIP backup or JSON export)
+     * <br/>
+     * Uses nested awaiting.
+     * @param p path to be imported from
+     * @param x target dock x
+     * @param y target dock y
+     * @param onProgress progress function
+     * @exception UnsupportedOperationException if the path was other than ZIP or JSON
+     */
+    public static Tasker.TaskRecord importO(Path p, double x, double y, ProgressFunction onProgress) throws Exception {
         var temp = Configurator.getConfig().getTemporaryFolder();
 
         if (p.isDirectory())
-            return;
+            return null;
 
-        if (p.getExtension().equals("zip")){
-            p.extract(temp, null);
-            String name = p.getFirstZipEntry().replace("/", "");
-            var exPath = temp.to(name);
-            if (exPath.to("profile.json").exists()){
-                /*String gen = Profiler.getProfiler().generateName(name);
-                exPath.move(Profiler.profilesDir().to(gen));*/
-                Profiler.getProfiler().importFromPath(exPath, ProfileUtil::determineProfileOverwrite);
+        return Tasker.getDefault().awaitNested(() -> {
+            if (p.getExtension().equals("zip")){
+                p.extract(temp, null, onProgress);
+                String name = p.getFirstZipEntry().replace("/", "");
+                var exPath = temp.to(name);
+                if (exPath.to("profile.json").exists()){
+                    /*String gen = Profiler.getProfiler().generateName(name);
+                    exPath.move(Profiler.profilesDir().to(gen));*/
+                    Profiler.getProfiler().importFromPath(exPath, ProfileUtil::determineProfileOverwrite);
+                }
+                else{
+                    var ps = Profiler.getProfiler().importFromPath(exPath, ProfileUtil::determineProfileOverwrite);
+                    String gen = FloatDock.getDock().generateName(name);
+                    var group = FDObject.createGroup(ps, x, y, gen);
+                    FloatDock.getDock().place(group, false);
+                }
             }
-            else{
-                var ps = Profiler.getProfiler().importFromPath(exPath, ProfileUtil::determineProfileOverwrite);
-                String gen = FloatDock.getDock().generateName(name);
-                var group = FDObject.createGroup(ps, x, y, gen);
-                FloatDock.getDock().place(group, false);
+            else if (p.getExtension().equals("json")){
+                var obj = Profile.PROFILE_GSON.fromJson(p.read(), JsonObject.class);
+                if (obj.has("type") && obj.get("type").getAsInt() == 1){
+                    var profiles = obj.get("profiles").getAsJsonArray().asList().stream().map(a -> GsonUtil.DEFAULT_GSON.fromJson(a, Profile.class)).toList();
+                    Profiler.getProfiler().importProfiles(profiles, ProfileUtil::determineProfileOverwrite);
+
+                    String name = obj.get("name").getAsString();
+                    String gen = FloatDock.getDock().generateName(name);
+                    var group = FDObject.createGroup(profiles, x, y, gen);
+                    FloatDock.getDock().place(group, false);
+                    return null;
+                }
+
+                Profiler.getProfiler().importFromPath(p, ProfileUtil::determineProfileOverwrite);
             }
+            else throw new UnsupportedOperationException();
 
-            return;
-        }
-
-        if (!p.getExtension().equals("json"))
-            return;
-
-        var obj = Profile.PROFILE_GSON.fromJson(p.read(), JsonObject.class);
-        if (obj.has("type") && obj.get("type").getAsInt() == 1){
-            var profiles = obj.get("profiles").getAsJsonArray().asList().stream().map(a -> GsonUtil.DEFAULT_GSON.fromJson(a, Profile.class)).toList();
-            Profiler.getProfiler().importProfiles(profiles, ProfileUtil::determineProfileOverwrite);
-
-            String name = obj.get("name").getAsString();
-            String gen = FloatDock.getDock().generateName(name);
-            var group = FDObject.createGroup(profiles, x, y, gen);
-            FloatDock.getDock().place(group, false);
-            return;
-        }
-
-        Profiler.getProfiler().importFromPath(p, ProfileUtil::determineProfileOverwrite);
+            return null;
+        });
     }
 
+    /**
+     * Determines the profile overwriting supported with UI dialogs.
+     * <br/>
+     * Can be executed outside the UI thread.
+     * @param p the profile to be overwritten
+     */
     private static boolean determineProfileOverwrite(Profile p) {
         if (Configurator.getConfig().isOverwriteImportedEnabled())
             return true;
@@ -297,6 +383,9 @@ public class ProfileUtil {
         return r;
     }
 
+    /**
+     * Creates an OS shortcut of a profile.
+     */
     public static void createShortcut(Profile p, Window w){
         var chooser = new FileChooser();
         String extension = Shortcut.getExtension(OS.getSystemOS());

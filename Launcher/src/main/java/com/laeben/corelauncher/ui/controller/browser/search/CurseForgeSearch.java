@@ -3,6 +3,7 @@ package com.laeben.corelauncher.ui.controller.browser.search;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.CurseForgeLoader;
@@ -107,7 +108,7 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
         return totalPages;
     }
 
-    public List<ResourceCellItem> search(String query){
+    public List<ResourceCellItem> search(String query, Tasker installationTasker){
         request.setSearchFilter(query);
         CurseForgeSearchResponse sData = null;
         try{
@@ -138,6 +139,6 @@ public class CurseForgeSearch implements Search<ModsSearchSortField> {
                 prefs.includeLoaderTypes(List.of(CurseForgeLoader.Type.toLoaderType(request.modLoaderType)));
         }
 
-        return sData.data.stream().map(x -> new ResourceCellItem(prefs, x)).toList();
+        return sData.data.stream().map(x -> new ResourceCellItem(prefs, x, installationTasker)).toList();
     }
 }

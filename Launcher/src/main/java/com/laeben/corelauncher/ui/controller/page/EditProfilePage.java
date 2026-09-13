@@ -568,6 +568,8 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         else
             tempProfile.setCustomUser(Account.fromUsername(txtAccount.getText()).setOnline(chkAccOnline.isSelected()));
 
+        tempProfile.setLoaderVersion(cbLoaderVersion.getValue());
+
         boolean check1 = tempProfile.getVersionId() == null || tempProfile.getVersionId().isBlank();
         boolean check2 = tempProfile.getLoader() != null && !(tempProfile.getLoader() instanceof Vanilla) && (tempProfile.getLoaderVersion() == null || tempProfile.getLoaderVersion().isBlank() || tempProfile.getLoaderVersion().equals("..."));
         if (check1 || check2){
@@ -577,8 +579,6 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
                     Announcement.AnnouncementType.ERROR), Duration.seconds(2));
             return;
         }
-
-        tempProfile.setLoaderVersion(cbLoaderVersion.getValue());
 
         if (!name.equals(profile.getName()) && Profiler.getProfiler().getProfile(name) != null) {
             Main.getMain().getAnnouncer().announce(new Announcement(

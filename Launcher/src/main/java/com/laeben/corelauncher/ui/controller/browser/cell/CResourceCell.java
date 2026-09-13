@@ -1,41 +1,63 @@
 package com.laeben.corelauncher.ui.controller.browser.cell;
 
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.api.util.OSUtil;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.ui.control.CButton;
 import com.laeben.corelauncher.ui.control.CView;
+import com.laeben.corelauncher.util.entity.LogType;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.TextArea;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 
-import java.awt.*;
-import java.net.URI;
 import java.util.function.Consumer;
 
 public class CResourceCell extends ListCell<CResource> {
 
     private final Node node;
-    private Consumer<CResourceCell> onDelete;
+    private Consumer<CResource> onDelete;
 
     public CResourceCell(){
         node = UI.getUI().load(CoreLauncherFX.class.getResource("layout/cells/cresource.fxml"), this);
+        setPrefWidth(0);
+
+        header.setOnMouseClicked(a -> {
+            if (getItem() == null || getItem().resourceUrl == null)
+                return;
+
+            try {
+                OSUtil.openURL(getItem().resourceUrl);
+            } catch (Exception e) {
+                Logger.getLogger().log(LogType.WARN, "Unable to open URL: " + getItem().resourceUrl);
+                Logger.getLogger().log(e);
+            }
+        });
+
+        btnDelete.setOnMouseClicked(a -> {
+            if (onDelete != null)
+                onDelete.accept(getItem());
+        });
     }
 
     @FXML
-    public CView icon;
+    private CView icon;
     @FXML
-    public Label lblName;
+    private HBox header;
     @FXML
-    public Label lblAuthor;
+    private Label lblName;
     @FXML
-    public TextArea txtDesc;
+    private Label lblAuthor;
     @FXML
-    public CButton btnDelete;
+    private Text txtDesc;
+    @FXML
+    private CButton btnDelete;
     
-    public CResourceCell setOnDelete(Consumer<CResourceCell> onDelete){
+    public CResourceCell setOnDelete(Consumer<CResource> onDelete){
         this.onDelete = onDelete;
 
         return this;
@@ -43,6 +65,8 @@ public class CResourceCell extends ListCell<CResource> {
 
     @Override
     protected void updateItem(CResource item, boolean empty) {
+        super.updateItem(item, false);
+
         if (empty || item == null){
             setGraphic(null);
             return;
@@ -52,27 +76,9 @@ public class CResourceCell extends ListCell<CResource> {
         icon.setImageAsync(item.getIcon());
         lblName.setText(item.name);
 
-        lblName.setOnMouseClicked(a -> {
-            if (!Desktop.isDesktopSupported() || item.resourceUrl == null)
-                return;
-
-            new Thread(() -> {
-                try {
-                    Desktop.getDesktop().browse(new URI(item.resourceUrl));
-                } catch (Exception ignored) {
-
-                }
-            }).start();
-        });
-
         lblAuthor.setText(item.authors == null ? null : String.join(",", item.authors));
         txtDesc.setText(item.desc);
-        btnDelete.setOnMouseClicked(a -> {
-            if (onDelete != null)
-                onDelete.accept(this);
-        });
 
-        super.updateItem(item, false);
         setGraphic(node);
     }
 }

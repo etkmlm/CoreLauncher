@@ -5,6 +5,7 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.api.Profiler;
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.Translator;
@@ -163,7 +164,7 @@ public class CPRCell<T extends CResource> extends CCell<T> implements CLSelectab
         btnUpdate.setOnMouseClicked(a -> {
             a.consume();
             if (onAction == null || onAction.test((ValueEvent) new ValueEvent(UPDATE, item).setSource(this)))
-                new Thread(() -> toggleUpdate(profile, item)).start();
+                Tasker.getDefault().await(() -> toggleUpdate(profile, item));
         });
         btnRemove.setOnMouseClicked(a -> {
             a.consume();

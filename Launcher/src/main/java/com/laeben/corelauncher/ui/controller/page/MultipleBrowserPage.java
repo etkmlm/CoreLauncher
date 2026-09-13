@@ -190,9 +190,9 @@ public class MultipleBrowserPage extends HandlerController {
         btnSearch.enableTransparentAnimation();
 
         lvResources.setItems(resources);
-        lvResources.setCellFactory(x -> new CResourceCell().setOnDelete(a -> resources.remove(a.getItem())));
+        lvResources.setCellFactory(x -> new CResourceCell().setOnDelete(resources::remove));
 
-        worker.begin().withTask(a -> new Task<>() {
+        worker.begin().handleCancellation(true).withTask(a -> new Task<>() {
             @Override
             protected Result call() throws Exception {
                 var text = txtQuery.getText();
@@ -207,7 +207,9 @@ public class MultipleBrowserPage extends HandlerController {
                 int size = lines.size();
 
                 for (var line : lines) {
-                    var x = manager.search(line, cbMainType.getSelectedItem(), getSearch());
+                    if (a.getCancellableToken().shouldStop()) throw new StopException();
+
+                    var x = manager.search(line, cbMainType.getSelectedItem(), getSearch(), null);
 
                     a.setTaskStatus(i++ + " / " + size);
 
@@ -218,7 +220,7 @@ public class MultipleBrowserPage extends HandlerController {
 
                     var res = x.get(0).getResource();
 
-                    var resources = res.getSourceType().getSource().getCoreResource(res, ModSource.Options.create(profile).dependencies(true));
+                    var resources = res.getSourceType().getSource().getCoreResource(res, ModSource.Options.create(profile).useCancellationToken(a.getCancellableToken()).dependencies(true));
                     if (resources == null || resources.isEmpty()){
                         secondary.add(line);
                         continue;

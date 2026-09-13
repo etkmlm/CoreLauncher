@@ -4,6 +4,7 @@ import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
@@ -59,12 +60,14 @@ public class BrowserPage extends HandlerController {
 
     private final ObservableList<ResourceCellItem> resources;
     private final Timer searchTimer;
+    private final Tasker installationTasker;
 
     public BrowserPage(){
         super(KEY);
         resources = FXCollections.observableArrayList();
 
         searchTimer = new Timer();
+        installationTasker = new Tasker();
     }
 
     private void reloadTitle(Profile p){
@@ -375,7 +378,7 @@ public class BrowserPage extends HandlerController {
                         .includeLoaderTypes(List.of(LoaderType.OPTIFINE));
             }
 
-            resources.addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeLoaderVersion), y.checkForge(y.forgeLoaderVersion))).map(a -> new ResourceCellItem(preferences, ResourceOpti.fromOptiVersion(a.id, a))).toList());
+            resources.addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeLoaderVersion), y.checkForge(y.forgeLoaderVersion))).map(a -> new ResourceCellItem(preferences, ResourceOpti.fromOptiVersion(a.id, a), installationTasker)).toList());
 
             return;
         }
@@ -409,7 +412,7 @@ public class BrowserPage extends HandlerController {
         else
             search.setLoaders(null);
 
-        resources.addAll(search.search(query));
+        resources.addAll(search.search(query, installationTasker));
 
         lblNotFound.setVisible(resources.isEmpty());
 
@@ -445,6 +448,7 @@ public class BrowserPage extends HandlerController {
 
     @Override
     public void dispose(){
+        installationTasker.dispose();
         paginator.setOnPageChange(null);
         filterPane.dispose();
         super.dispose();

@@ -5,9 +5,7 @@ import com.laeben.core.util.events.KeyEvent;
 import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.Configurator;
-import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.api.ui.entity.GrabVector;
-import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.FloatDock;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
@@ -25,7 +23,6 @@ import com.laeben.corelauncher.ui.util.ProfileUtil;
 import com.laeben.corelauncher.util.BoundUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import javafx.animation.ScaleTransition;
-import com.laeben.corelauncher.api.ui.UI;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.input.*;
@@ -37,7 +34,6 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
 public class MainPage extends HandlerController {
@@ -465,26 +461,7 @@ public class MainPage extends HandlerController {
 
             var list = (List<File>) content;
 
-            new Thread(() -> {
-                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.started"), Translator.translateFormat("announce.info.import.importing", list.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
-                int c = 0;
-                for (var f : list){
-                    var path = Path.begin(f.toPath());
-
-                    try{
-                        ProfileUtil.importO(path, a.getSceneX(), a.getSceneY());
-                        c++;
-                    }
-                    catch (CancellationException ignored){
-                        break;
-                    }
-                    catch (Exception e){
-                        Logger.getLogger().log(e);
-                    }
-                }
-                int fC = c;
-                UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.completed"), Translator.translateFormat("announce.info.import.imported", fC), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
-            }).start();
+            ProfileUtil.importO(list.stream().map(f -> Path.begin(f.toPath())).toList(), a.getSceneX(), a.getSceneY());
         });
 
 

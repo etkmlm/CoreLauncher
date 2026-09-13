@@ -1,9 +1,11 @@
 package com.laeben.corelauncher.api.socket;
 
-import com.laeben.core.util.events.ValueEvent;
+import com.laeben.core.concurrency.CancellableToken;
+import com.laeben.core.event.context.ValueContext;
+import com.laeben.core.event.type.ValueEvent;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.socket.entity.CLPacket;
-import com.laeben.corelauncher.util.EventHandler;
+import com.laeben.corelauncher.event.bus.FrequentEventBus;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CLCommunicator {
-    public static final String RECEIVE = "receive";
+    public static final ValueContext RECEIVE = new ValueContext("Receive", null);
 
     private static CLCommunicator instance;
 
@@ -23,8 +25,9 @@ public class CLCommunicator {
     private final int port;
     private final List<Socket> sockets;
 
-    private final EventHandler<ValueEvent> handler;
+    private final FrequentEventBus<ValueContext, ValueEvent> eventBus;
 
+    private CancellableToken<?> cancellableToken;
     private boolean isRunning;
     private boolean killed;
 
@@ -34,7 +37,7 @@ public class CLCommunicator {
         this.port = port;
         sockets = new ArrayList<>();
 
-        handler = new EventHandler<>();
+        eventBus = new FrequentEventBus<>();
 
         instance = this;
     }
@@ -43,15 +46,24 @@ public class CLCommunicator {
         return instance;
     }
 
-    public EventHandler<ValueEvent> getHandler(){
-        return handler;
+    public FrequentEventBus<ValueContext, ValueEvent> getHandler(){
+        return eventBus;
+    }
+
+    public void setCancellableToken(CancellableToken<?> cancellableToken){
+        assert cancellableToken != null;
+        this.cancellableToken = cancellableToken;
     }
 
     public void start(){
-        isRunning = true;
+        if (cancellableToken == null) cancellableToken = new CancellableToken<>();
+
         new Thread(() -> {
-            var intBuffer = ByteBuffer.allocate(4);
-            while (isRunning){
+            final var intBuffer = ByteBuffer.allocate(4);
+
+            isRunning = true;
+
+            while (!cancellableToken.shouldStop()){
                 Socket newSocket = null;
                 try {
                     if (!server.isBound())
@@ -76,7 +88,7 @@ public class CLCommunicator {
                         int size = intBuffer.put(0, s).getInt();
                         intBuffer.clear();
                         var pack = CLPacket.fromArrayBuffer(sock.getInputStream().readNBytes(size));
-                        handler.execute(new ValueEvent(RECEIVE, pack));
+                        eventBus.execute(new ValueEvent(RECEIVE, pack));
                     }
                     catch (SocketTimeoutException ignored){
 
@@ -104,6 +116,9 @@ public class CLCommunicator {
 
                 }
             }
+
+            isRunning = false;
+
             if (killed){
                 try {
                     server.close();
@@ -115,7 +130,8 @@ public class CLCommunicator {
     }
 
     public void stop(){
-        isRunning = false;
+        assert this.cancellableToken != null;
+        this.cancellableToken.stop();
     }
 
     public void kill(){

@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller.browser.search;
 
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.modding.entity.ModSide;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
@@ -18,5 +19,5 @@ public interface Search<T extends Enum> {
     void setLoaders(List<LoaderType> loaders);
     void reset();
     int getTotalPages();
-    List<ResourceCellItem> search(String query);
+    List<ResourceCellItem> search(String query, Tasker installationTasker);
 }

@@ -8,6 +8,7 @@ import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.network.Network;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Account;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.TokenInfo;
@@ -306,7 +307,7 @@ public class Authenticator {
         }
 
         if (download){
-            new Thread(() -> {
+            Tasker.getDefault().await(() -> {
                 String c = null;
 
                 try {
@@ -322,7 +323,7 @@ public class Authenticator {
                     c = CODE_STOP;
                 }
                 imitateCodeRedirect(redirect, c);
-            }).start();
+            });
             throw new StopException();
         }
 

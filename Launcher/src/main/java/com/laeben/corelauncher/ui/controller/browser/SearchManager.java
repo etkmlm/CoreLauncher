@@ -1,5 +1,6 @@
 package com.laeben.corelauncher.ui.controller.browser;
 
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.ModSource;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
@@ -28,12 +29,12 @@ public class SearchManager {
         }
     }
 
-    public List<ResourceCellItem> search(String query, ResourceType type, Search search){
+    public List<ResourceCellItem> search(String query, ResourceType type, Search search, Tasker installationTasker){
         if (search != null){
             if (type == null)
                 return null;
             search.setMainType(type);
-            return search.search(query);
+            return search.search(query, installationTasker);
         }
 
         for (int i = 0; i < regex.size(); i++) {
@@ -44,7 +45,7 @@ public class SearchManager {
             var n = searches.get(i);
             if (type != null)
                 n.setMainType(type);
-            return n.search(query);
+            return n.search(query, installationTasker);
         }
 
         return null;

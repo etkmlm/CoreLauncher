@@ -2,6 +2,7 @@ package com.laeben.corelauncher.api;
 
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.api.annotation.ReturnsNull;
 import com.laeben.corelauncher.api.entity.ImageEntity;
@@ -131,17 +132,20 @@ public class Profiler {
      * Backup the profile to the target zip file.
      * @param p the profile
      * @param to target zip file
+     * @param onProgress progress function
      */
-    public static void backup(Profile p, Path to) throws IOException, StopException {
+    public static void backup(Profile p, Path to, ProgressFunction onProgress) throws IOException, StopException {
         var path = p.getPath();
         var jsPath = path.to("profile.json");
+        var tempJsPath = Configurator.getConfigurator().newTempFile();
 
         String first = jsPath.read();
-        String json = verifyProfileJsonIcon(p);
+        String json = getBackupProfileJson(p);
 
+        jsPath.move(tempJsPath);
         jsPath.write(json);
-        path.zip(to);
-        jsPath.write(first);
+        path.zip(to, onProgress);
+        tempJsPath.move(jsPath);
     }
 
     public static void setResourceDisabled(Profile p, CResource resource, boolean disabled, boolean save) throws IOException, StopException {
@@ -283,7 +287,12 @@ public class Profiler {
         return false;
     }
 
-    public static String verifyProfileJsonIcon(Profile profile) throws IOException, StopException {
+    /**
+     * Compresses the profile icon if it is located in the local storage.
+     * @param profile target profile
+     * @return the compatible read profile JSON
+     */
+    public static String getBackupProfileJson(Profile profile) throws IOException, StopException {
         var json = profile.getPath().to("profile.json");
         String read;
         if (profile.getIcon() != null && !profile.getIcon().isNetwork() && profile.getIcon().getUrl() == null){

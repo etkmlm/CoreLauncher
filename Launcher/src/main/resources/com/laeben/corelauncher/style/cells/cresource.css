@@ -1,0 +1,29 @@
+#root{
+    -fx-padding: 16px;
+}
+
+#header{
+    -fx-background-radius: 8px;
+    -fx-padding: 8 16 8 16;
+}
+
+#header:hover{
+    -fx-background-color: #303a3a;
+}
+
+#lblName{
+    -fx-font-weight: bold;
+}
+
+#txtDesc{
+    -fx-font-size: 12pt;
+    -fx-fill: -text-fill;
+}
+
+#btnDelete{
+    -fx-background-color: transparent;
+}
+
+#btnDelete:hover{
+    -fx-background-color: -dark-hover-fill;
+}

@@ -3,6 +3,7 @@ package com.laeben.corelauncher.ui.controller.browser.search;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
 import com.laeben.corelauncher.minecraft.modding.entity.ModSide;
@@ -135,7 +136,7 @@ public class ModrinthSearch implements Search<Index> {
         return totalPages;
     }
 
-    public List<ResourceCellItem> search(String query){
+    public List<ResourceCellItem> search(String query, Tasker installationTasker){
         request.setQuery(query);
         ModrinthSearchResponse resp = null;
         try{
@@ -172,7 +173,7 @@ public class ModrinthSearch implements Search<Index> {
             }
         }
 
-        return resp.hits.stream().map(x -> new ResourceCellItem(prefs, x)).toList();
+        return resp.hits.stream().map(x -> new ResourceCellItem(prefs, x, installationTasker)).toList();
     }
 
     public ModrinthSearchRequest getSearch(){

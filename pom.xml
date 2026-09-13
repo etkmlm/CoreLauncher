@@ -10,14 +10,13 @@
     <packaging>pom</packaging>
     <name>CoreLauncher</name>
     <modules>
-        <module>CLFixer</module>
         <module>Launcher</module>
         <module>CLPatcher</module>
         <module>ExampleExtension</module>
     </modules>
 
     <properties>
-        <launcher.version>1.1.9.5</launcher.version>
+        <launcher.version>1.1.9.6</launcher.version>
     </properties>
 
 </project>

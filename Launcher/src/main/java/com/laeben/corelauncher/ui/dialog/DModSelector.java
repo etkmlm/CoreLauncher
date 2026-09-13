@@ -45,10 +45,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Window;
 import org.apache.commons.lang3.Strings;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.InvalidObjectException;
-import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,8 +97,9 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
                 if (getItem().resource != null && getItem().resource.resourceUrl != null && a.getClickCount() >= 2){
                     try {
                         OSUtil.openURL(getItem().resource.resourceUrl);
-                    } catch (IOException ignored) {
-
+                    } catch (Exception e) {
+                        Logger.getLogger().log(LogType.WARN, "Unable to open URL: " + getItem().resource.resourceUrl);
+                        Logger.getLogger().log(e);
                     }
                 }
             });
@@ -459,16 +458,12 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
     }
 
     public void navigateWeb(){
-        if (!Desktop.isDesktopSupported())
-            return;
-
-        new Thread(() -> {
-            try {
-                Desktop.getDesktop().browse(new URI(resource.getURL()));
-            } catch (Exception ignored) {
-
-            }
-        }).start();
+        try {
+            OSUtil.openURL(resource.getURL());
+        } catch (Exception e) {
+            Logger.getLogger().log(LogType.WARN, "Unable to open URL: " + resource.getURL());
+            Logger.getLogger().log(e);
+        }
     }
 
     public Optional<ModSelection> select(CResource installed) throws NoConnectionException, HttpException, IOException, StopException {

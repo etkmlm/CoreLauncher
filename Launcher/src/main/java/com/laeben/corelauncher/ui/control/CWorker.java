@@ -1,9 +1,12 @@
 package com.laeben.corelauncher.ui.control;
 
 import com.laeben.core.concurrency.CancellableToken;
-import com.laeben.core.entity.exception.StopException;
+import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.ui.UI;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.scene.control.ProgressIndicator;
@@ -31,14 +34,29 @@ public class CWorker<T, H> extends StackPane {
     private Throwable e;
     private T value;
     private final ObjectProperty<H> status;
+    private final BooleanProperty allowCancellation;
+    private final BooleanProperty running;
 
     private Executor executor;
     private CancellableToken<?> cancellableToken;
-    private boolean isRunning;
     private Task<T> task;
+
     private final ProgressIndicator indicator;
+    private final CButton btnCancel;
 
     public CWorker(){
+        btnCancel = new CButton();
+        btnCancel.setMinWidth(120);
+        btnCancel.setManaged(false);
+        btnCancel.setVisible(false);
+        btnCancel.setId("btnCancel");
+        btnCancel.setText(Translator.translate("option.cancel"));
+        btnCancel.setOnMouseClicked(a -> {
+            if (cancellableToken != null) cancellableToken.stop();
+        });
+
+        running = new SimpleBooleanProperty();
+
         indicator = new ProgressIndicator();
         indicator.setPrefWidth(30);
         indicator.setPrefHeight(30);
@@ -50,7 +68,13 @@ public class CWorker<T, H> extends StackPane {
                 onStatus.accept(this);
         });
 
-        getChildren().add(indicator);
+        allowCancellation = new SimpleBooleanProperty();
+        final var cancelBinding = Bindings.createBooleanBinding(() -> allowCancellation.get() && isRunning() && isHover(), allowCancellation, running, hoverProperty());
+        btnCancel.visibleProperty().bind(cancelBinding);
+        btnCancel.managedProperty().bind(cancelBinding);
+        indicator.visibleProperty().bind(Bindings.createBooleanBinding(() -> !btnCancel.isVisible() && isRunning(), btnCancel.visibleProperty(), running));
+
+        getChildren().addAll(btnCancel, indicator);
     }
 
     private void ind(boolean v){
@@ -98,6 +122,11 @@ public class CWorker<T, H> extends StackPane {
         return this;
     }
 
+    public CWorker<T, H> handleCancellation(boolean value){
+        this.allowCancellation.setValue(value);
+        return this;
+    }
+
     public CWorker<T, H> finallyDo(Consumer<CWorker<T, H>> r){
         this.doFinally = r;
         return this;
@@ -126,12 +155,14 @@ public class CWorker<T, H> extends StackPane {
         task.setOnFailed(a -> {
             e = a.getSource().getException();
             UI.runAsync(() -> ind(false));
-            if (!(e instanceof StopException) && onFailed != null)
+            if (onFailed != null)
                 onFailed.accept(this);
             if (doFinally != null)
                 doFinally.accept(this);
 
-            isRunning = false;
+            if (cancellableToken.stopRequested()) cancellableToken = null;
+
+            running.setValue(false);
         });
         task.setOnSucceeded(a -> {
             value = (T)a.getSource().getValue();
@@ -141,7 +172,9 @@ public class CWorker<T, H> extends StackPane {
             if (doFinally != null)
                 doFinally.accept(this);
 
-            isRunning = false;
+            if (cancellableToken.stopRequested()) cancellableToken = null;
+
+            running.setValue(false);
         });
 
         this.task = task;
@@ -155,13 +188,13 @@ public class CWorker<T, H> extends StackPane {
     }
 
     public CancellableToken<?> getCancellableToken(){
-        if (cancellableToken == null || cancellableToken.stopRequested())
+        if (cancellableToken == null)
             cancellableToken = new CancellableToken<>();
         return cancellableToken;
     }
 
     public boolean isRunning(){
-        return isRunning;
+        return running.get();
     }
 
     public void run(){
@@ -170,7 +203,7 @@ public class CWorker<T, H> extends StackPane {
         UI.runAsync(() -> ind(true));
         if (executor == null)
             executor = Executors.newSingleThreadExecutor();
-        isRunning = true;
+        running.setValue(true);
         executor.execute(task);
     }
 }

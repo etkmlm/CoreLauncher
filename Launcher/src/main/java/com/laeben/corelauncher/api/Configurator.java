@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class Configurator {
@@ -200,6 +201,10 @@ public class Configurator {
         var vers = getConfig().getCustomJavaVersions();
         vers.removeIf(a -> !a.isLoaded());
         return vers;
+    }
+
+    public Path newTempFile(){
+        return config.getTemporaryFolder().to(UUID.randomUUID() + ".tmp");
     }
 
     public static Configurator getConfigurator(){

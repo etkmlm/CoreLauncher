@@ -993,8 +993,8 @@ public class Main extends HandlerController {
             else{
                 try {
                     OSUtil.openURL("https://github.com/etkmlm/CoreLauncher/issues");
-                } catch (IOException ignored) {
-
+                } catch (Exception e) {
+                    Logger.getLogger().log(e);
                 }
             }
         });

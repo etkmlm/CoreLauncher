@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 public class ResourceCellItem {
     private final ResourcePreferences preferences;
     private final ModResource resource;
+    private final Tasker tasker;
 
     private final ObjectProperty<CResource> existingResource;
     private final BooleanProperty installing;
@@ -43,9 +44,10 @@ public class ResourceCellItem {
 
     private Tasker.TaskRecord installationRecord;
 
-    public ResourceCellItem(ResourcePreferences preferences, ModResource resource){
+    public ResourceCellItem(ResourcePreferences preferences, ModResource resource, Tasker tasker){
         this.preferences = preferences;
         this.resource = resource;
+        this.tasker = tasker;
 
         this.existingResource = new SimpleObjectProperty<>();
         this.installing = new SimpleBooleanProperty();
@@ -217,6 +219,7 @@ public class ResourceCellItem {
             return;
         }
 
-        installationRecord = Tasker.getDefault().await(this::install).onFinished(() -> installationRecord = null);
+        if (tasker != null)
+            installationRecord = tasker.await(this::install).onFinished(() -> installationRecord = null);
     }
 }

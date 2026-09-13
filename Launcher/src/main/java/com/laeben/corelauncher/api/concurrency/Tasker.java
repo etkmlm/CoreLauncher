@@ -42,6 +42,17 @@ public class Tasker {
             final Thread got = thread.get();
             return got != null && !got.isInterrupted();
         }
+
+        @Override
+        public boolean equals(Object o) {
+            return this == o || o instanceof Thread t && this.thread.refersTo(t) || o instanceof TaskRecord r && r.thread.refersTo(this.thread.get());
+        }
+
+        @Override
+        public int hashCode(){
+            final var thread = this.thread.get();
+            return thread == null ? super.hashCode() : thread.hashCode();
+        }
     }
 
     private static final Tasker defaultTasker = new Tasker();
@@ -86,6 +97,51 @@ public class Tasker {
             runnable.run();
             return null;
         }, token);
+    }
+
+    /**
+     * Functions will behave synchronous inside another task created by the same tasker.
+     * Otherwise, they will be executed as a separate thread.
+     * @param runnable target runnable
+     * @return the record of the parent task or the new record
+     */
+    public TaskRecord awaitNested(Runnable runnable){
+        try {
+            return awaitNested(() -> {
+                runnable.run();
+                return null;
+            });
+        } catch (Exception ignored) {
+
+        }
+
+        throw new RuntimeException("Runnable thrown an exception!");
+    }
+
+    /**
+     * Functions will behave synchronous inside another task created by the same tasker.
+     * Otherwise, they will be executed as a separate thread.
+     * @param callable target callable
+     * @return the record of the parent task or the new record
+     * @throws Exception exception from the sync task
+     */
+    public TaskRecord awaitNested(Callable<Void> callable) throws Exception {
+        final var current = Thread.currentThread();
+        TaskRecord foundRecord = null;
+
+        for (var r : tasks){
+            if (r.thread.refersTo(current)) {
+                foundRecord = r;
+                break;
+            }
+        }
+
+        if (foundRecord != null){
+            callable.call();
+            return foundRecord;
+        }
+
+        return await(callable, null);
     }
 
     public TaskRecord await(Callable<Void> callable, CancellableToken<?> token){
