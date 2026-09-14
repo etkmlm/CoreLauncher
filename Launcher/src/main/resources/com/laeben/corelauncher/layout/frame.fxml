@@ -4,7 +4,11 @@
 <?import com.laeben.corelauncher.ui.control.CShapefulButton?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.laeben.corelauncher.ui.controller.Frame" stylesheets="@../style/frame.css" style="-fx-background-radius: 10px; -fx-border-radius: 10px; -fx-background-color: #101010;" minWidth="200">
+            fx:controller="com.laeben.corelauncher.ui.controller.Frame"
+            stylesheets="@../style/frame.css"
+            fx:id="frameRoot"
+            styleClass="frame-root"
+            minWidth="200">
     <StackPane fx:id="content" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0"/>
     <HBox AnchorPane.rightAnchor="4" AnchorPane.topAnchor="4" alignment="TOP_CENTER">
         <CShapefulButton styleClass="window-button" fx:id="btnMinimize"/>

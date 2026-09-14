@@ -1,3 +1,14 @@
+.frame-root {
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-background-color: #101010;
+}
+
+.frame-root.transparent-frame {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
 .window-button{
     -fx-background-color: transparent!important;
     -fx-background-radius: 8px;

@@ -4,9 +4,12 @@ import com.laeben.corelauncher.api.ui.Controller;
 import com.laeben.corelauncher.ui.control.CShapefulButton;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
 public class Frame extends Controller implements com.laeben.corelauncher.api.ui.entity.Frame {
+    @FXML
+    private AnchorPane frameRoot;
     @FXML
     private CShapefulButton btnClose;
     @FXML

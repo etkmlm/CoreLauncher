@@ -60,6 +60,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -216,11 +217,7 @@ public class Main extends HandlerController {
                     else
                         setUser(Configurator.getConfig().getUser().reload());
                 }
-                /*case Configurator.UI_PREFERENCE_CHANGE -> {
-                    var preference = (UIPreference) a.getNewValue();
-                    var key = a.getSource().toString();
-
-                }*/ // disabled currently
+                case Configurator.TRANSPARENT_MODE_CHANGE -> applyTransparentMode((Boolean) a.getNewValue());
             }
         }, true);
         Launcher.getLauncher().setOnAuthFail(v -> {
@@ -401,6 +398,33 @@ public class Main extends HandlerController {
         running.set(true);
 
         Tasker.getDefault().await(task, token);
+    }
+
+    /* TRANSPARENT MODE */
+
+    /**
+     * Toggles the live transparent window mode
+     */
+    public void applyTransparentMode(boolean enabled){
+        var stage = getStage();
+        if (stage != null && stage.getScene() != null) {
+            Parent frameRoot = stage.getScene().getRoot();
+            if (frameRoot != null) {
+                if (enabled) {
+                    if (!frameRoot.getStyleClass().contains("transparent-frame"))
+                        frameRoot.getStyleClass().add("transparent-frame");
+                } else {
+                    frameRoot.getStyleClass().remove("transparent-frame");
+                }
+            }
+        }
+
+        if (enabled) {
+            root.setBackground(null);
+            root.setStyle(null);
+        } else {
+            setBackground(Configurator.getConfig().getBackgroundImage());
+        }
     }
 
     /* ANNOUNCEMENT */
@@ -831,13 +855,19 @@ public class Main extends HandlerController {
     }
 
     private void setBackground(Path path) {
+        // transparent mode skips painting a wallpaper
+        if (Configurator.getConfig().isTransparentMode()) {
+            root.setBackground(null);
+            root.setStyle(null);
+            return;
+        }
         try {
             var background = new Background(new BackgroundImage(
                     new Image(path.toFile().toURI().toURL().toExternalForm()),
                     null,
                     null,
                     BackgroundPosition.CENTER,
-                    new BackgroundSize(root.getWidth(),root.getHeight(), false, false, true, true)));
+                    new BackgroundSize(root.getWidth(), root.getHeight(), false, false, true, true)));
             double r = 10;
             double w = 1300;
             double h = 800;

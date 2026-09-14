@@ -3,6 +3,7 @@ package com.laeben.corelauncher.api.ui;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncherFX;
+import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.ui.entity.Frame;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.ui.controller.Main;
@@ -113,6 +114,10 @@ public class UI {
             frameController.setContent(root);
             if (frameController instanceof Controller c)
                 c.setStage(stage);
+
+            // apply transparent frame class if the transparent mode is on
+            if (Configurator.getConfig().isTransparentMode())
+                frame.getStyleClass().add("transparent-frame");
 
             scene = new LScene(frame, loader.getController());
             stage.setStyle(StageStyle.TRANSPARENT)

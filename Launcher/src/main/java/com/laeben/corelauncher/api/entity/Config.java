@@ -38,6 +38,7 @@ public class Config {
     private boolean middlePaste;
     private boolean useExternalAuth;
     private boolean useEmbeddedBrowser;
+    private boolean transparentMode = false;
 
     /* Number Fields */
 
@@ -151,6 +152,7 @@ public class Config {
     public Path getBackgroundImage(){
         return backgroundImage != null ? (backgroundImage.exists() ? backgroundImage : null) : null;
     }
+    public boolean isTransparentMode() { return transparentMode; }
     public int getDefaultMaxRAM(){
         return defaultMaxRAM;
     }
@@ -249,6 +251,7 @@ public class Config {
     public void setBackgroundImage(Path img){
         this.backgroundImage = img;
     }
+    public void setTransparentMode(boolean v) { this.transparentMode = v; }
     public void setShowHelloDialog(boolean s){
         showHelloDialog = s;
     }
