@@ -5,7 +5,7 @@
 }
 
 .frame-root.transparent-frame {
-    -fx-background-color: transparent;
+    -fx-background-color: #00000020;
     -fx-border-color: transparent;
 }
 
