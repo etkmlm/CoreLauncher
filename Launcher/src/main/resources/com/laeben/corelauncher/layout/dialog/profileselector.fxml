@@ -10,7 +10,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             prefHeight="510.0" prefWidth="700.0" maxWidth="Infinity">
-    <CButton AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" prefWidth="48" prefHeight="48" fx:id="btnClose" style="-fx-font-size: 15pt;-fx-background-color: #00000001" text="X"/>
+    <CButton AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" prefWidth="48" prefHeight="48" fx:id="btnClose" style="-fx-font-size: 15pt;-fx-background-color: #00000001;-enable-transparent-animation: true;" text="X"/>
 
     <VBox styleClass="dialog-content" fx:id="pBox" maxWidth="Infinity" maxHeight="Infinity" AnchorPane.rightAnchor="40" AnchorPane.leftAnchor="40" AnchorPane.topAnchor="45" AnchorPane.bottomAnchor="30">
         <Pane fx:id="pa" managed="false" visible="false" prefWidth="200">

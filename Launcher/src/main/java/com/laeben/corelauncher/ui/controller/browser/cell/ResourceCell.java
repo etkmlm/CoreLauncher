@@ -5,7 +5,6 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.event.context.EventContext;
 import com.laeben.core.util.StrUtil;
-import com.laeben.corelauncher.CoreLauncherFX;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.Profile;
@@ -13,23 +12,20 @@ import com.laeben.corelauncher.api.util.DateUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.minecraft.modding.event.ModdingContext;
-import com.laeben.corelauncher.ui.control.CProgressBorder;
-import com.laeben.corelauncher.ui.control.CShapefulButton;
-import com.laeben.corelauncher.ui.control.CView;
+import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.browser.ResourceOpti;
+import com.laeben.corelauncher.ui.controller.cell.CVirtualCell;
 import com.laeben.corelauncher.ui.dialog.DModSelector;
 import com.laeben.corelauncher.api.ui.UI;
-import com.laeben.corelauncher.ui.entity.animation.ReverseBorderColorAnimation;
+import com.laeben.corelauncher.ui.animation.color.ReverseBorderColorAnimation;
 import com.laeben.corelauncher.ui.util.DisplayUtil;
 import com.laeben.corelauncher.util.ImageUtil;
-import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -42,14 +38,11 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class ResourceCell extends ListCell<ResourceCellItem> {
+public class ResourceCell extends CVirtualCell<ResourceCellItem> {
     public static final double CELL_HORIZONTAL_PADDING = 60;
     public static final PseudoClass INSTALLED =  PseudoClass.getPseudoClass("installed");
     public static final PseudoClass INSTALLING =  PseudoClass.getPseudoClass("installing");
     private static final String CATEGORY_BOX_STYLE_CLASS = "catbox";
-
-    private final Node gr;
-    private ResourceCellItem item;
 
     final SimpleBooleanProperty installing;
     final ObjectProperty<CResource> existingResource;
@@ -60,11 +53,12 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
     private DModSelector selector;
 
     public ResourceCell(){
-        setGraphic(gr = UI.getUI().load(CoreLauncherFX.class.getResource("layout/cells/resource.fxml"), this));
-        var rg = (Region)gr;
-        rg.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.SOLID, new CornerRadii(16), new BorderWidths(2))));
+        super("layout/cells/resource.fxml");
+
+        final var region = (Region) getRoot();
+        region.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.SOLID, new CornerRadii(16), new BorderWidths(2))));
         animation = new ReverseBorderColorAnimation();
-        animation.setNode(rg);
+        animation.setRegion(region);
         animation.setDuration(Duration.millis(2000));
         animation.setReverseDelay(100);
 
@@ -76,6 +70,7 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
     }
 
     /* Package-Private API */
+    private Translator.Cache statusCache;
     void onProgress(long current, long len, EventContext context){
         if (len == 0) len = 1;
         final long length = len;
@@ -84,7 +79,7 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
             root.setProgress(current * 1.0 / length);
             if (current == 0){
                 if (context instanceof ModdingContext ctx)
-                    setStatus(Translator.translate(ctx.getLabel()));
+                    setStatus((statusCache = Translator.Cache.translate(ctx.getLabel(), statusCache)).getTranslation());
                 else
                     setStatus(null);
             }
@@ -152,7 +147,7 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
     @FXML
     private Text lblDesc;
     @FXML
-    private CShapefulButton btnInstall;
+    private CButton btnInstall;
     @FXML
     private FlowPane categories;
     @FXML
@@ -168,23 +163,14 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
     @FXML
     private CProgressBorder root;
 
+    public void unbindItem(ResourceCellItem li){
+        li.unbindCell(this);
+    }
+
     @Override
-    protected void updateItem(ResourceCellItem li, boolean empty) {
-        super.updateItem(li, empty);
-
-        if (this.item != null)
-            this.item.unbindCell(this);
-
+    public void bindItem(ResourceCellItem li) {
         resetAnimation();
-
-        if (empty || li == null){
-            setGraphic(null);
-            this.item = null;
-            return;
-        }
-
-        this.item = li;
-        this.item.bindCell(this);
+        li.bindCell(this);
 
         var i = li.getResource();
         var prefs = li.getPreferences();
@@ -193,10 +179,6 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
         lblAuthor.setText(i.getAuthors() != null && i.getAuthors().length != 0 ? i.getAuthors()[0] : null);
         lblDate.setText(DateUtil.toString(i.getCreationDate(), Configurator.getConfig().getLanguage()));
 
-
-        setPrefWidth(0);
-        //prefWidthProperty().bind(getListView().widthProperty().subtract(CELL_HORIZONTAL_PADDING));
-        //txtCategory.setText(Translator.translateFormat("mods.category", i.getCategories() != null ? String.join(",", i.getCategories()) : ""));
         lblDesc.setText(StrUtil.sub(i.getDescription(), 0, 200));
 
         if (i.getIcon() != null && !i.getIcon().isEmpty()){
@@ -238,18 +220,7 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
             li.existingResource().set(prefs.getProfile() == null ? null : prefs.getProfile().getResource(i.getId()));
         if (!installing.get()) clearProgress();
 
-        /*if (existingResource.get() != null)
-            playAnimation(true);*/
-
         selector = null;
-
-        setGraphic(gr);
-    }
-
-    @Deprecated
-    public ResourceCell bindWidth(DoubleExpression p){
-        prefWidthProperty().bind(p);
-        return this;
     }
 
     public ResourceCell setOnNewProfileCreated(Consumer<Profile> onNewProfileCreated){
@@ -261,7 +232,7 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
     public void initialize(){
         icon.setCornerRadius(72, 72, 16);
         btnInstall.setOnMouseClicked(a -> {
-            if (a.getButton() == MouseButton.PRIMARY) item.performInstall();
+            if (a.getButton() == MouseButton.PRIMARY) getItem().performInstall();
         });
         header.setOnMouseClicked(a -> {
             if (a.getButton() == MouseButton.PRIMARY) showSelector();
@@ -273,13 +244,13 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
     }
 
     private void showSelector(){
-        if (item.getResource() instanceof ResourceOpti)
+        if (getItem().getResource() instanceof ResourceOpti)
             return;
 
-        final var exists = item.existingResource().get();
+        final var exists = getItem().existingResource().get();
 
         if (selector == null)
-            selector = new DModSelector<>(item.getResource(), item.getPreferences(), getScene() == null ? null : getScene().getWindow());
+            selector = new DModSelector<>(getItem().getResource(), getItem().getPreferences(), getScene() == null ? null : getScene().getWindow());
         Optional<DModSelector.ModSelection> r = Optional.empty();
         try {
             r = (Optional<DModSelector.ModSelection>)selector.select(exists);
@@ -299,7 +270,7 @@ public class ResourceCell extends ListCell<ResourceCellItem> {
             if (exists != null && g.resource() == null)
                 playAnimation(false);
 
-            item.existingResource().set(g.resource());
+            getItem().existingResource().set(g.resource());
 
             if (g.profile() != null){
                 Main.getMain().selectProfile(g.profile());

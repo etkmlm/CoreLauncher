@@ -11,7 +11,7 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             prefHeight="400.0" fx:id="root" prefWidth="600" stylesheets="@../../style/controls/iselector.css" styleClass="dialog-content">
-    <CButton prefWidth="48" prefHeight="48" text="X" fx:id="btnClose" AnchorPane.rightAnchor="16" AnchorPane.topAnchor="16"/>
+    <CButton prefWidth="48" prefHeight="48" text="X" fx:id="btnClose" styleClass="transparent" AnchorPane.rightAnchor="16" AnchorPane.topAnchor="16"/>
     <Label text="%imageselector.title" AnchorPane.topAnchor="24" AnchorPane.leftAnchor="16" style="-fx-font-size: 16pt"/>
 
     <VBox alignment="CENTER" AnchorPane.rightAnchor="8" AnchorPane.leftAnchor="8" AnchorPane.bottomAnchor="64" AnchorPane.topAnchor="64">

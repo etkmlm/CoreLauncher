@@ -75,7 +75,6 @@ public class DColorPicker extends CDialog<Color> {
             catch (Exception ignored){}
         });
 
-        btnClose.enableTransparentAnimation();
         btnClose.setOnMouseClicked(a -> {
             setResult(null);
             close();

@@ -22,10 +22,6 @@
     -fx-pref-height: 84px;
 }
 
-.cbutton:hover{
-    -fx-background-color: -dark-hover-fill;
-}
-
 #btnInstall{
     -shape-fill: -text-fill;
     -shape: -shape-add;

@@ -72,13 +72,11 @@ public class CNav extends VBox {
         return getChildren().size() < row + 1 ? generateRow() : (HBox) getChildren().get(row);
     }
 
-    private CShapefulButton getButton(String text, EventHandler<?super MouseEvent> click){
-        var btn = new CShapefulButton();
+    private CButton getButton(String text, EventHandler<?super MouseEvent> click){
+        var btn = new CButton();
         btn.setText(text);
         btn.getStyleClass().add("cnav-button");
         btn.setOnMouseClicked(click);
-        //btn.enableTransparentAnimation();
-        //btn.setStyle("-fx-background-color: transparent;-fx-font-size: 11.5pt");
         return btn;
     }
 

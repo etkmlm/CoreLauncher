@@ -108,8 +108,12 @@ public class World extends CResource{
         return levelName == null ? (name == null ? "" : name) : levelName;
     }
 
+    public String getUniqueIdentifier() {
+        return dirName != null ? dirName : getIdentifier();
+    }
+
     @Override
     public boolean equals(Object o){
-        return o instanceof World w && getIdentifier().equals(w.getIdentifier());
+        return o instanceof World w && getUniqueIdentifier().equals(w.getUniqueIdentifier());
     }
 }

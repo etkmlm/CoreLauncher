@@ -1,0 +1,49 @@
+#progress .progress{
+    -fx-background-color: #074343aa;
+    -fx-background-radius: 16px;
+}
+
+.orange{
+    -fx-background-color: #9e5808ef;
+}
+
+.red{
+    -fx-background-color: #562e75ef;
+}
+
+.green{
+    -fx-background-color: #206e64ef;
+}
+
+#btnAction.installing{
+    -shape: -shape-cancel;
+    -shape-width: 28px;
+    -shape-height: 28px;
+}
+
+#lblVersion{
+    -fx-font-size: 20pt;
+    -fx-text-fill: wheat;
+    -fx-background-radius: 16px;
+}
+
+#btnAction{
+    -shape: -shape-dash;
+    -shape-width: 28px;
+    -shape-height: 8px;
+
+    -fx-background-radius: 16px;
+    -fx-pref-width: 64px;
+    -fx-pref-height: 64px;
+}
+
+.text-field{
+    -fx-background-color: transparent!important;
+    -fx-font-size: 14pt;
+}
+
+#root{
+    -fx-padding: 16px;
+    -fx-background-color: -control-fill-secondary-solid;
+    -fx-background-radius: 16px;
+}

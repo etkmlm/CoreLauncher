@@ -51,6 +51,7 @@ import com.laeben.corelauncher.ui.util.DisplayUtil;
 import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.JavaManager;
+import com.laeben.corelauncher.util.java.event.JavaContext;
 import com.laeben.corelauncher.wrap.ExtensionWrapper;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
@@ -199,7 +200,7 @@ public class Main extends HandlerController {
             }
         }, true);
         registerHandler(JavaManager.getManager().getHandler(), a -> {
-            if (!a.getKey().equals(JavaManager.DOWNLOAD_COMPLETE))
+            if (!a.inContext(JavaContext.DOWNLOAD_COMPLETE))
                 return;
 
             refreshStates();
@@ -400,7 +401,7 @@ public class Main extends HandlerController {
 
         running.set(true);
 
-        Tasker.getDefault().await(task, token);
+        Tasker.getDefault().await(task, token, this);
     }
 
     /* ANNOUNCEMENT */

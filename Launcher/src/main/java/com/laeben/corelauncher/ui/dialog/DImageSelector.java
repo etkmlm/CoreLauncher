@@ -116,7 +116,6 @@ public class DImageSelector extends CDialog<ImageEntity> {
                 getView("wither_light.png")
         );
 
-        btnClose.enableTransparentAnimation();
         btnClose.setOnMouseClicked(a -> {
             setResult(null);
             close();

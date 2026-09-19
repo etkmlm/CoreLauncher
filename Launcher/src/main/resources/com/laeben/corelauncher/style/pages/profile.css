@@ -39,8 +39,8 @@
 }
 
 .resource-menu{
-    -fx-pref-width: 64px;
-    -fx-pref-height: 64px;
+    -fx-pref-width: 56px;
+    -fx-pref-height: 56px;
 
     -enable-transparent-animation: true;
     -fx-background-color: transparent;

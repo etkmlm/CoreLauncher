@@ -14,9 +14,8 @@ import com.laeben.corelauncher.minecraft.modding.Modder;
 import com.laeben.corelauncher.minecraft.modding.entity.ResourceType;
 import com.laeben.corelauncher.minecraft.modding.entity.resource.CResource;
 import com.laeben.corelauncher.ui.control.CMsgBox;
-import com.laeben.corelauncher.ui.control.CShapefulButton;
-import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CButton;
+import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.CView;
 import com.laeben.corelauncher.ui.entity.CLSelectable;
 import javafx.fxml.FXML;
@@ -72,7 +71,7 @@ public class CPRCell<T extends CResource> extends CCell<T> implements CLSelectab
         btnRemove.setStyle("-fx-background-color: transparent; -fx-font-size: 13pt");
         btnRemove.enableTransparentAnimation();
 
-        btnUpdate = new CShapefulButton();
+        btnUpdate = new CButton();
         btnUpdate.setStyle("-fx-background-color: transparent; -shape: -shape-update; -shape-width:12px;-shape-height:12px;-fx-spacing: 0");
         btnUpdate.enableTransparentAnimation();
 
@@ -91,7 +90,7 @@ public class CPRCell<T extends CResource> extends CCell<T> implements CLSelectab
 
     private final CButton toggle;
     private final CButton btnRemove;
-    private final CShapefulButton btnUpdate;
+    private final CButton btnUpdate;
 
     private Predicate<ValueEvent> onAction;
 

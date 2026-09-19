@@ -77,7 +77,6 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.ui.controller.browser;
     opens com.laeben.corelauncher.ui.controller.cell;
     opens com.laeben.corelauncher.ui.dialog;
-    opens com.laeben.corelauncher.ui.entity.animation;
 
     opens com.laeben.corelauncher.discord;
     opens com.laeben.corelauncher.discord.channel;
@@ -96,4 +95,7 @@ module com.laeben.corelauncher {
     opens com.laeben.corelauncher.ui.controller.browser.search;
     exports com.laeben.corelauncher.ui.dialog.modselector;
     opens com.laeben.corelauncher.ui.dialog.modselector;
+    opens com.laeben.corelauncher.ui.animation.color;
+    exports com.laeben.corelauncher.ui.controller.java.cell;
+    opens com.laeben.corelauncher.ui.controller.java.cell;
 }

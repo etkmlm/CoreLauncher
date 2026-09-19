@@ -1,8 +1,8 @@
 package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.Path;
-import com.laeben.core.entity.exception.StopException;
-import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.api.concurrency.TaskRecord;
+import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Configurator;
@@ -15,35 +15,87 @@ import com.laeben.corelauncher.ui.controller.HandlerController;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.ui.controller.worlds.cell.WorldCell;
+import com.laeben.corelauncher.ui.controller.worlds.cell.WorldCellItem;
 import com.laeben.corelauncher.util.ImageUtil;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.*;
 
 public class WorldsPage extends HandlerController {
     public static final String KEY = "pgworlds";
 
+    private final Tasker tasker;
+    private final ObjectProperty<WorldCellItem> selectedItem;
+
+    private final ChangeListener<TaskRecord> exportTaskListener;
+
     private Profile profile;
-    private final ObservableList<World> worlds;
 
     public WorldsPage(){
         super(KEY);
-        worlds = FXCollections.observableArrayList();
+
+        tasker = new Tasker();
+
+        selectedItem = new SimpleObjectProperty<>();
+
+        exportTaskListener = (ob, o, n) -> {
+            UI.runAsync(() -> setExportingState(n != null));
+        };
+
+        selectedItem.addListener(((observable, oldValue, item) -> {
+            final var world = item.getWorld();
+
+            if (oldValue != null) {
+                oldValue.exportRecord().removeListener(exportTaskListener);
+            }
+
+            if (world == null){
+                lblLevelName.setText(null);
+                lblDirName.setText(null);
+                lblSeed.setText(null);
+                lblDifficulty.setText(null);
+                lblGameType.setText(null);
+                lblSpawn.setText(null);
+                lblCheats.setText(null);
+                icon.setImage((Image) null);
+                setExportingState(false);
+                return;
+            }
+
+            item.exportRecord().addListener(exportTaskListener);
+            setExportingState(item.exportRecord().isRunning());
+
+            try(var stream = new FileInputStream(world.getWorldIcon().toFile())) {
+                var img = new Image(stream);
+                //var img2 = CoreLauncherFX.resizeImage(img, 0, 0, 64, 64, 32);
+                icon.setImage(img);
+
+            } catch (IOException e) {
+                icon.setImage(ImageUtil.getDefaultImage(128));
+            }
+
+            lblLevelName.setText(world.levelName);
+            lblDirName.setText(world.dirName);
+            lblSeed.setText(String.valueOf(world.seed));
+            lblDifficulty.setText(Translator.translate("world.difficulty." + world.difficulty.name().toLowerCase(Locale.US)));
+            lblGameType.setText(Translator.translate("world.type." + world.gameType.name().toLowerCase(Locale.US)));
+            lblSpawn.setText(world.worldSpawn.toString());
+            lblCheats.setText(world.allowCommands ? "+" : "-");
+        }));
 
         registerHandler(Profiler.getProfiler().getHandler(), a -> {
             if (a.getKey().equals(Profiler.PROFILE_UPDATE))
@@ -63,7 +115,7 @@ public class WorldsPage extends HandlerController {
     }
 
     public void reload(){
-        worlds.clear();
+        lvWorlds.getItems().clear();
         select(null);
 
         if (profile == null)
@@ -77,11 +129,11 @@ public class WorldsPage extends HandlerController {
         btnBack.setOnMouseClicked(a -> Main.getMain().replaceTab(this, "pages/profile", profile.getName(), true, ProfilePage.class).setProfile(profile));
         btnBack.setText("⤶ " + Translator.translate("option.back"));
 
-        worlds.addAll(profile.getLocalWorlds());
+        lvWorlds.getItems().addAll(profile.getLocalWorlds().stream().map(a -> new WorldCellItem(a, tasker, this::deleteDuplicate)).toList());
     }
 
     @FXML
-    private ListView<World> lvWorlds;
+    private CVirtualList<WorldCellItem> lvWorlds;
     @FXML
     private Label lblLevelName;
     @FXML
@@ -113,62 +165,55 @@ public class WorldsPage extends HandlerController {
     private Label lblProfileName;
 
     @FXML
-    private CWorker<Void, Void> worker;
+    private CButton btnCancelExport;
+    @FXML
+    private HBox exportContainer;
 
-    private World selectedWorld;
+    private void setExportingState(boolean s){
+        exportContainer.setVisible(s);
+        exportContainer.setManaged(s);
+    }
+
+    private void deleteDuplicate(String dirName){
+        if (dirName == null) return;
+        UI.runAsync(() -> lvWorlds.getItems().removeIf(a -> a.getWorld() != null && dirName.equals(a.getWorld().dirName)));
+    }
 
     @Override
     public void preInit() {
         icon.setCornerRadius(128, 128, 64);
         profileIcon.setCornerRadius(30, 30, 8);
 
-        lvWorlds.setItems(worlds);
-        lvWorlds.setCellFactory(a -> new ListCell<>() {
-            private World item;
-            {
-                setPrefWidth(0);
-                setOnMouseEntered(a -> {
-                    if (item != null)
-                        setText(item.dirName);
-                });
-                setOnMouseExited(a -> {
-                    if (item != null)
-                        setText(item.levelName);
-                });
-            }
+        lvWorlds.setCellFactory(() -> new WorldCell().setSelectionProperty(selectedItem));
 
-            @Override
-            protected void updateItem(World item, boolean empty) {
-                super.updateItem(item, empty);
-                this.item = item;
-                setText(item == null ? null : item.levelName);
-            }
+        btnCancelExport.setOnMouseClicked(a -> {
+            final var item = selectedItem.get();
+            if (item != null) item.exportRecord().cancelIfRunning();
         });
-        lvWorlds.getSelectionModel().selectedItemProperty().addListener((a, o, n) -> select(n));
 
         lblDirName.setOnMouseClicked(a -> {
-            if (selectedWorld == null)
+            if (getSelected() == null)
                 return;
 
-            OSUtil.open(profile.getPath().to("saves").to(selectedWorld.dirName).toFile());
+            OSUtil.open(profile.getPath().to("saves").to(getSelected().dirName).toFile());
         });
 
         lblSeed.setOnMouseClicked(a -> {
-            if (selectedWorld == null)
+            if (getSelected() == null)
                 return;
 
-            setClipboard(selectedWorld.seed);
+            setClipboard(getSelected().seed);
         });
 
         lblSpawn.setOnMouseClicked(a -> {
-            if (selectedWorld == null)
+            if (getSelected() == null)
                 return;
 
-            setClipboard(selectedWorld.worldSpawn.toString());
+            setClipboard(getSelected().worldSpawn.toString());
         });
 
         btnDelete.setOnMouseClicked(a -> {
-            if (selectedWorld == null)
+            if (getSelected() == null)
                 return;
 
             var r = showMsg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.ask"), Translator.translate("ask.sure"))
@@ -177,35 +222,28 @@ public class WorldsPage extends HandlerController {
             if (r.isEmpty() || r.get().result() != CMsgBox.ResultType.YES)
                 return;
 
-            profile.getPath().to("saves").to(selectedWorld.dirName).delete();
+            profile.getPath().to("saves").to(getSelected().dirName).delete();
 
             UI.runAsync(this::reload);
         });
 
         btnBackup.setTooltip(Translator.translate("profile.menu.backup"));
         btnBackup.setOnMouseClicked(a -> {
-            if (selectedWorld == null)
+            final var item = selectedItem.get();
+            if (item == null || item.getWorld() == null)
                 return;
 
             var worlds = profile.getPath().to("saves");
-            var worldFolder = worlds.to(selectedWorld.dirName);
-            if (!worldFolder.exists())
-                return;
 
             var chooser = new FileChooser();
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
-            chooser.setInitialFileName(selectedWorld.getIdentifier() + ".zip");
+            chooser.setInitialFileName(getSelected().getIdentifier() + ".zip");
             var f = chooser.showSaveDialog(btnBackup.getScene().getWindow());
             if (f == null)
                 return;
             var path = Path.begin(f.toPath());
-            worker.begin().withTask(k -> new Task() {
-                @Override
-                protected Void call() throws IOException, StopException {
-                    worldFolder.zip(path);
-                    return null;
-                }
-            }).onDone(x -> Main.getMain().announceLater(Translator.translate("world.title"), Translator.translateFormat("world.backup", selectedWorld.levelName), Announcement.AnnouncementType.INFO, Duration.seconds(2))).run();
+
+            item.handleWorldExport(path, worlds);
         });
 
 
@@ -226,112 +264,32 @@ public class WorldsPage extends HandlerController {
             Configurator.getConfig().setLastBackupPath(paths.get(0).parent());
             Configurator.save();
 
-            new Thread(() -> {
-                Main.getMain().announceLater(Translator.translate("world.title"), Translator.translate("world.import.start"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+            Main.getMain().announceLater(Translator.translate("world.title"), Translator.translate("world.import.start"), Announcement.AnnouncementType.INFO, Duration.seconds(2));
 
-                var saves = profile.getPath().to("saves");
-                var arr = new ArrayList<String>();
-                for (var path : paths){
-                    try{
-                        String dirName = path.getNameWithoutExtension();
-                        var temp = Configurator.getConfig().getTemporaryFolder().to(dirName);
-                        {
-                            path.extract(temp, null);
+            var saves = profile.getPath().to("saves");
+            //var arr = new ArrayList<String>();
+            for (var path : paths){
+                var item = new WorldCellItem(tasker, this::deleteDuplicate);
+                lvWorlds.getItems().add(item);
+                item.handleWorldImport(path, saves);
+            }
 
-                            var files = temp.getFiles();
-                            if (files.size() == 1 && files.get(0).isDirectory()){
-                                dirName = files.get(0).getName();
-                                files.get(0).move(temp);
-                            }
-                        }
-
-                        var world = World.fromGzip(null, temp.to("level.dat"));
-
-                        String name = world.levelName;
-                        final String finalDirName = dirName;
-
-                        if (name == null){
-                            temp.delete();
-                            continue;
-                        }
-
-                        if (saves.getFiles().stream().anyMatch(x -> x.getName().equals(finalDirName))){
-                            final var result = UI.runSync(() -> CMsgBox.msg(Alert.AlertType.CONFIRMATION, Translator.translate("ask.sure"), Translator.translateFormat("world.ask.overwrite", finalDirName))
-                                    .setButtons(CMsgBox.ResultType.YES, CMsgBox.ResultType.NO, CMsgBox.ResultType.CANCEL)
-                                    .executeForResult()
-                                    .map(CMsgBox.Result::result));
-
-                            if (result == null){
-                                temp.delete();
-                                continue;
-                            }
-                            final var confirmation = result.orElse(null);
-
-                            if (confirmation == null || confirmation == CMsgBox.ResultType.CANCEL){
-                                temp.delete();
-                                continue;
-                            }
-                            else if (confirmation.isPositive()){
-                                saves.to(finalDirName).delete();
-                            }
-                            else{
-                                String salt = String.valueOf(Instant.now().toEpochMilli());
-                                dirName = finalDirName + salt;
-                            }
-                        }
-
-                        arr.add(name);
-                        temp.move(saves.to(StrUtil.pure(dirName)));
-                    } catch (StopException ignored) {
-                        return;
-                    } catch (IOException e) {
-                        Logger.getLogger().log("World " + path + " cannot be moved.", e);
-                    }
-                }
-
-                //Profiler.getProfiler().setProfile(profile.getName(), null);
-                if (!arr.isEmpty()){
-                    UI.runAsync(this::reload);
-                    Main.getMain().announceLater(Translator.translate("world.title"), Translator.translateFormat("world.import.end", String.join(",", arr)), Announcement.AnnouncementType.INFO, Duration.seconds(2));
-                }
-            }).start();
+            //Profiler.getProfiler().setProfile(profile.getName(), null);
+            /*if (!arr.isEmpty()){
+                UI.runAsync(this::reload);
+                Main.getMain().announceLater(Translator.translate("world.title"), Translator.translateFormat("world.import.end", String.join(",", arr)), Announcement.AnnouncementType.INFO, Duration.seconds(2));
+            }*/
         });
+    }
+
+    public World getSelected(){
+        return selectedItem.get() == null ? null : selectedItem.get().getWorld();
+    }
+    public void select(World w){
+        selectedItem.set(new WorldCellItem(w, tasker, null));
     }
 
     public void setClipboard(Object text){
         Clipboard.getSystemClipboard().setContent(new HashMap<>(){{ put(DataFormat.PLAIN_TEXT, text.toString()); }});
-    }
-
-    public void select(World w){
-        selectedWorld = w;
-
-        if (w == null){
-            lblLevelName.setText(null);
-            lblDirName.setText(null);
-            lblSeed.setText(null);
-            lblDifficulty.setText(null);
-            lblGameType.setText(null);
-            lblSpawn.setText(null);
-            lblCheats.setText(null);
-            icon.setImage((Image) null);
-            return;
-        }
-
-        try(var stream = new FileInputStream(w.getWorldIcon().toFile())) {
-            var img = new Image(stream);
-            //var img2 = CoreLauncherFX.resizeImage(img, 0, 0, 64, 64, 32);
-            icon.setImage(img);
-
-        } catch (IOException e) {
-            icon.setImage(ImageUtil.getDefaultImage(128));
-        }
-
-        lblLevelName.setText(w.levelName);
-        lblDirName.setText(w.dirName);
-        lblSeed.setText(String.valueOf(w.seed));
-        lblDifficulty.setText(Translator.translate("world.difficulty." + w.difficulty.name().toLowerCase(Locale.US)));
-        lblGameType.setText(Translator.translate("world.type." + w.gameType.name().toLowerCase(Locale.US)));
-        lblSpawn.setText(w.worldSpawn.toString());
-        lblCheats.setText(w.allowCommands ? "+" : "-");
     }
 }

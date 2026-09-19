@@ -2,7 +2,6 @@ package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
-import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.LauncherConfig;
 import com.laeben.corelauncher.api.Tool;
@@ -30,6 +29,7 @@ import com.laeben.corelauncher.util.ImageCacheManager;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.core.entity.Path;
+import com.laeben.corelauncher.util.java.event.JavaContext;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -226,21 +226,16 @@ public class SettingsPage extends HandlerController {
         }, true);
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
-            if (!(a instanceof ChangeEvent ce))
-                return;
-
-            switch (a.getKey()){
-                case JavaManager.ADD -> {
-                    var java = (Java)ce.getNewValue();
-                    javas.add(java.toIdentifier());
-                }
-                case JavaManager.UPDATE -> reloadJava();
-                case JavaManager.DELETE -> {
-                    var java = (Java)ce.getOldValue();
-                    javas.remove(java.toIdentifier());
-                    if (java.toIdentifier().equals(cbJava.getValue()))
-                        cbJava.setValue("...");
-                }
+            if (a.inContext(JavaContext.ADD)){
+                var java = a.<Java>getSource();
+                javas.add(java.toIdentifier());
+            }
+            else if (a.inContext(JavaContext.UPDATE)) reloadJava();
+            else if (a.inContext(JavaContext.DELETE)){
+                var java = a.<Java>getSource();
+                javas.remove(java.toIdentifier());
+                if (java.toIdentifier().equals(cbJava.getValue()))
+                    cbJava.setValue("...");
             }
         }, true);
     }

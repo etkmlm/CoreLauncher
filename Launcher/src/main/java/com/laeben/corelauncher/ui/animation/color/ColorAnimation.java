@@ -1,15 +1,12 @@
-package com.laeben.corelauncher.ui.entity.animation;
+package com.laeben.corelauncher.ui.animation.color;
 
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
-import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 public abstract class ColorAnimation extends Transition {
-
     private int r,g,b;
-    private Region node;
 
     public ColorAnimation() {
         setInterpolator(Interpolator.EASE_IN);
@@ -21,10 +18,6 @@ public abstract class ColorAnimation extends Transition {
         this.b = (int)(c.getBlue() * 255);
     }
 
-    public void setNode(Region node) {
-        this.node = node;
-    }
-
     public void setDuration(Duration duration) {
         setCycleDuration(duration);
     }
@@ -32,8 +25,8 @@ public abstract class ColorAnimation extends Transition {
     @Override
     protected void interpolate(double frac) {
         var color = Color.rgb(r, g, b, frac / 2);
-        interpolateColor(node, color);
+        interpolateColor(color);
     }
 
-    protected abstract void interpolateColor(Region node, Color color);
+    protected abstract void interpolateColor(Color color);
 }

@@ -1,45 +1,46 @@
 package com.laeben.corelauncher.ui.controller.page;
 
-import com.laeben.core.entity.exception.NoConnectionException;
-import com.laeben.core.entity.exception.StopException;
-import com.laeben.core.util.events.ChangeEvent;
-import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.api.concurrency.TaskRecord;
+import com.laeben.corelauncher.api.concurrency.Tasker;
+import com.laeben.corelauncher.api.entity.Java;
+import com.laeben.corelauncher.ui.control.*;
 import com.laeben.corelauncher.ui.controller.HandlerController;
-import com.laeben.corelauncher.ui.controller.Main;
-import com.laeben.corelauncher.ui.controller.cell.CJava;
-import com.laeben.corelauncher.ui.control.CButton;
-import com.laeben.corelauncher.ui.control.CField;
-import com.laeben.corelauncher.ui.control.CList;
-import com.laeben.corelauncher.ui.control.CMsgBox;
+import com.laeben.corelauncher.ui.controller.java.cell.JavaCell;
 import com.laeben.corelauncher.ui.dialog.DJavaSelector;
 import com.laeben.corelauncher.ui.entity.EventFilter;
 import com.laeben.corelauncher.util.java.JavaManager;
+import com.laeben.corelauncher.util.java.event.JavaContext;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.Duration;
-
-import java.util.Locale;
+import org.apache.commons.lang3.Strings;
 
 public class JavaPage extends HandlerController {
     public static final String KEY = "pgjava";
 
+    private final Tasker tasker;
 
     public JavaPage() {
         super(KEY);
 
+        tasker = new Tasker();
+
+        registerHandler(tasker.getHandler(), a -> {
+            final var record = a.<TaskRecord>getSource();
+            btnCancel.setVisible(!tasker.isEmpty());
+        }, true);
+
         registerHandler(JavaManager.getManager().getHandler(), a -> {
-            if (!(a instanceof ChangeEvent ce))
-                return;
-            switch (a.getKey()){
-                case JavaManager.ADD -> {
-                    var f = (Java) ce.getNewValue();
-                    pList.getItems().add(f);
-                }
-                case JavaManager.DELETE -> pList.getItems().remove((Java) ce.getOldValue());
-                //case "update" -> pList.reload(false);
+            if (a.inContext(JavaContext.ADD)){
+                var f = a.<Java>getSource();
+                if (pList.getItems().stream().noneMatch(x -> f.equals(x.getJava()))) pList.getItems().add(new JavaCell.Item(f, tasker));
+            }
+            else if (a.inContext(JavaContext.DELETE)){
+                var f = a.<Java>getSource();
+                pList.getItems().removeIf(x -> f.equals(x.getJava()));
             }
         }, true);
     }
@@ -47,14 +48,24 @@ public class JavaPage extends HandlerController {
     @FXML
     private CField txtSearch;
     @FXML
-    private CList<Java> pList;
+    private CVirtualList<JavaCell.Item> pList;
     @FXML
     private CButton btnAdd;
+    @FXML
+    private CButton btnCancel;
+
+    private JavaCell.Item pushNewEmptyCell(){
+        var item = new JavaCell.Item(tasker);
+
+        pList.getItems().add(item);
+
+        return item;
+    }
 
     @Override
     public void preInit() {
-        pList.setFilterFactory(a -> a.input().getName().toLowerCase(Locale.getDefault()).contains(a.query().toLowerCase(Locale.getDefault())));
-        pList.setCellFactory(CJava::new);
+        pList.setFilterFactory(a -> Strings.CI.contains(a.input().getName(), a.query()));
+        pList.setCellFactory(JavaCell::new);
         pList.setSelectionEnabled(false);
 
         txtSearch.setFocusedAnimation(Duration.millis(200));
@@ -69,19 +80,12 @@ public class JavaPage extends HandlerController {
                 JavaManager.getManager().addCustomJava(j.local());
             }
             else {
-                new Thread(() -> {
-                    try {
-                        JavaManager.getManager().downloadAndInclude(null, j.info(), Main.getProgressHandler()); // TODO replace with local progress
-                    }
-                    catch (NoConnectionException | StopException e){
-                        Main.getMain().announceLater(e, Duration.seconds(2));
-                    }
-                }).start();
+                pushNewEmptyCell().handleJavaDownload(j.info());
             }
         });
+        btnCancel.setOnMouseClicked(a -> tasker.stopAll());
 
-        pList.getItems().setAll(JavaManager.getManager().getAllJavaVersions());
-        pList.load();
+        pList.getItems().setAll(JavaManager.getManager().getAllJavaVersions().stream().map(x -> new JavaCell.Item(x, tasker)).toList());
     }
 
     private void deleteSelectedJavaEntities(){
@@ -90,7 +94,10 @@ public class JavaPage extends HandlerController {
         if (!(h.isPresent() && h.get().result() == CMsgBox.ResultType.YES))
             return;
 
-        pList.getSelectedItems().forEach(x -> JavaManager.getManager().deleteJava(x));
+        pList.getSelectedItems().forEach(x -> {
+            if (x.isEmpty()) x.cancel();
+            else JavaManager.getManager().deleteJava(x.getJava());
+        });
 
         pList.getItems().removeAll(pList.getSelectedItems());
     }

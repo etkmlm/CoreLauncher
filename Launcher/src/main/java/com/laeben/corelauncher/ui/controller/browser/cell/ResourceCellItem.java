@@ -6,6 +6,7 @@ import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.event.context.EventContext;
 import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.corelauncher.api.Profiler;
+import com.laeben.corelauncher.api.concurrency.TaskRecord;
 import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.entity.Profile;
@@ -42,7 +43,7 @@ public class ResourceCellItem {
     private Consumer<Boolean> playAnimation;
     private Consumer<Profile> onNewProfileCreated;
 
-    private Tasker.TaskRecord installationRecord;
+    private TaskRecord installationRecord;
 
     public ResourceCellItem(ResourcePreferences preferences, ModResource resource, Tasker tasker){
         this.preferences = preferences;
@@ -63,8 +64,11 @@ public class ResourceCellItem {
 
     void bindCell(ResourceCell cell){
         cell.existingResource.bind(this.existingResource);
-        cell.installing.bind(this.installing);
-        this.onProgress = cell::onProgress;
+        if (resource.getResourceType() == ResourceType.MODPACK){
+            // progress only for modpack
+            cell.installing.bind(this.installing);
+            this.onProgress = cell::onProgress;
+        }
         this.playAnimation = cell::playAnimation;
         this.onNewProfileCreated = cell.onNewProfileCreated; // no memory leak - function is derived from parent classes
     }
@@ -75,7 +79,7 @@ public class ResourceCellItem {
         this.playAnimation = null;
     }
 
-    public Tasker.TaskRecord getInstallationRecord(){
+    public TaskRecord getInstallationRecord(){
         return installationRecord;
     }
 
@@ -220,6 +224,6 @@ public class ResourceCellItem {
         }
 
         if (tasker != null)
-            installationRecord = tasker.await(this::install).onFinished(() -> installationRecord = null);
+            installationRecord = tasker.await(this::install, null, this).onFinished(() -> installationRecord = null);
     }
 }

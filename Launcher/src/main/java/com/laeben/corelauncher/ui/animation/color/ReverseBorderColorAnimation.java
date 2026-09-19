@@ -1,4 +1,4 @@
-package com.laeben.corelauncher.ui.entity.animation;
+package com.laeben.corelauncher.ui.animation.color;
 
 import javafx.animation.Interpolator;
 

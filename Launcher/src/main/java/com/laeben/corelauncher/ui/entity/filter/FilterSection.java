@@ -115,7 +115,6 @@ public class FilterSection<T> extends VBox {
 
                 var btn = new CButton();
                 btn.getStyleClass().add("transparent");
-                btn.enableTransparentAnimation();
                 btn.setText("—");
                 btn.setOnMouseClicked(a -> setNodeSelected(hbox, false, section));
 

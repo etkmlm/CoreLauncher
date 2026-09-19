@@ -15,7 +15,6 @@ import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.FDObject;
 import com.laeben.corelauncher.api.entity.Profile;
-import com.laeben.corelauncher.ui.control.CShapefulButton;
 import com.laeben.corelauncher.ui.controller.Main;
 import com.laeben.corelauncher.ui.controller.page.EditProfilePage;
 import com.laeben.corelauncher.ui.controller.page.ProfilePage;
@@ -141,7 +140,7 @@ public abstract class CDockObject extends GridCell {
     @FXML
     private Pane innerPane;
     @FXML
-    protected CShapefulButton btnSelect;
+    protected CButton btnSelect;
 
     private boolean moving;
     private boolean exporting;

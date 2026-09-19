@@ -57,19 +57,15 @@
 }
 
 .clear-button{
-    -fx-background-image: url(../../images/delete.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-size: 36px;
-    -fx-background-position: center;
-    -fx-pref-width: 56px;
-    -fx-pref-height: 56px;
+    -shape: -shape-trash;
+    -shape-width: 32px;
+    -shape-height: 32px;
 }
 
 #btnSearch{
-    -fx-background-image: url(../../images/search.png);
-    -fx-background-repeat: no-repeat;
-    -fx-background-position: center;
-    -fx-background-size: 28px;
+    -shape: -shape-search;
+    -shape-width: 20px;
+    -shape-height: 48px;
 }
 
 .filter-combo-choice{

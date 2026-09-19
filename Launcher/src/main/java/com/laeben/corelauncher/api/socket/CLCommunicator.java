@@ -1,10 +1,10 @@
 package com.laeben.corelauncher.api.socket;
 
 import com.laeben.core.concurrency.CancellableToken;
-import com.laeben.core.event.context.ValueContext;
 import com.laeben.core.event.type.ValueEvent;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.socket.entity.CLPacket;
+import com.laeben.corelauncher.api.socket.event.CommunicatorContext;
 import com.laeben.corelauncher.event.bus.FrequentEventBus;
 
 import java.io.IOException;
@@ -17,15 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CLCommunicator {
-    public static final ValueContext RECEIVE = new ValueContext("Receive", null);
-
     private static CLCommunicator instance;
 
     private final ServerSocket server;
     private final int port;
     private final List<Socket> sockets;
 
-    private final FrequentEventBus<ValueContext, ValueEvent> eventBus;
+    private final FrequentEventBus<CommunicatorContext, ValueEvent<CommunicatorContext>> eventBus;
 
     private CancellableToken<?> cancellableToken;
     private boolean isRunning;
@@ -46,7 +44,7 @@ public class CLCommunicator {
         return instance;
     }
 
-    public FrequentEventBus<ValueContext, ValueEvent> getHandler(){
+    public FrequentEventBus<CommunicatorContext, ValueEvent<CommunicatorContext>> getHandler(){
         return eventBus;
     }
 
@@ -88,7 +86,7 @@ public class CLCommunicator {
                         int size = intBuffer.put(0, s).getInt();
                         intBuffer.clear();
                         var pack = CLPacket.fromArrayBuffer(sock.getInputStream().readNBytes(size));
-                        eventBus.execute(new ValueEvent(RECEIVE, pack));
+                        eventBus.execute(new ValueEvent(CommunicatorContext.RECEIVE, pack));
                     }
                     catch (SocketTimeoutException ignored){
 

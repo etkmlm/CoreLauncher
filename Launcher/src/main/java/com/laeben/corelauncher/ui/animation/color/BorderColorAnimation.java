@@ -1,9 +1,9 @@
-package com.laeben.corelauncher.ui.entity.animation;
+package com.laeben.corelauncher.ui.animation.color;
 
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
-public class BorderColorAnimation extends ColorAnimation{
+public class BorderColorAnimation extends RegionColorAnimation {
 
     private BorderWidths widths;
     private CornerRadii radii;

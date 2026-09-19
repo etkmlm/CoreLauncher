@@ -1,18 +1,18 @@
 package com.laeben.corelauncher.ui.controller;
 
 import com.laeben.corelauncher.api.ui.Controller;
-import com.laeben.corelauncher.ui.control.CShapefulButton;
+import com.laeben.corelauncher.ui.control.CButton;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 
 public class Frame extends Controller implements com.laeben.corelauncher.api.ui.entity.Frame {
     @FXML
-    private CShapefulButton btnClose;
+    private CButton btnClose;
     @FXML
-    private CShapefulButton btnMinimize;
+    private CButton btnMinimize;
     @FXML
-    private CShapefulButton btnMaximize;
+    private CButton btnMaximize;
     @FXML
     private StackPane content;
 

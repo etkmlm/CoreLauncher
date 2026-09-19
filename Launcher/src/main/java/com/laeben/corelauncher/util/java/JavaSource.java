@@ -4,6 +4,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.entity.OS;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
@@ -20,5 +21,5 @@ public interface JavaSource {
     }};
 
     JavaDownloadInfo getJavaInfo(Java j, OS os, String arch) throws NoConnectionException, HttpException, IOException, StopException;
-    void extract(Path archive, JavaDownloadInfo info) throws StopException, IOException;
+    void extract(Path archive, JavaDownloadInfo info, ProgressFunction onProgress) throws StopException, IOException;
 }

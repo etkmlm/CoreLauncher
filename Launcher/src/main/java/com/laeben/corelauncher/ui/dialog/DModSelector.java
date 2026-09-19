@@ -5,6 +5,7 @@ import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.event.context.EventContext;
 import com.laeben.corelauncher.api.Profiler;
+import com.laeben.corelauncher.api.concurrency.TaskRecord;
 import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Logger;
 import com.laeben.corelauncher.api.Translator;
@@ -37,8 +38,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -187,7 +186,7 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
     @FXML
     private Label lblStatus;
 
-    private Tasker.TaskRecord installRecord;
+    private TaskRecord installRecord;
 
     @FXML
     private HBox navContainer;
@@ -395,7 +394,6 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
             setResult(new ModSelection(installed.get(), newProfile));
             close();
         });
-        btnClose.enableTransparentAnimation();
 
         lblName.setCursor(Cursor.HAND);
         icon.setCursor(Cursor.HAND);

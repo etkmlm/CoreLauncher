@@ -37,7 +37,6 @@ public class DStartupConfigurator extends CDialog<Boolean>{
 
         getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
 
-        btnClose.enableTransparentAnimation();
         btnClose.setOnMouseClicked(a -> {
             setResult(true);
             close();
@@ -59,7 +58,6 @@ public class DStartupConfigurator extends CDialog<Boolean>{
             }
         });
 
-        btnApply.enableTransparentAnimation();
         btnApply.setOnMouseClicked(a -> {
             if (txtUsername.getText() == null || txtUsername.getText().isBlank()){
                 showMsg(Alert.AlertType.ERROR, Translator.translate("error.oops"), Translator.translate("error.username")).execute();

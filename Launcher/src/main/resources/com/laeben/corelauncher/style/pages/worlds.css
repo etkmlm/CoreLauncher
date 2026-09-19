@@ -5,7 +5,12 @@
 
 .panel{
     -fx-background-color: -control-fill-secondary;
-    -fx-background-radius: 10px;
+    -fx-background-radius: 16px;
+    -fx-padding: 16px;
+}
+
+#lvWorlds{
+    -fx-background-radius: 16px;
 }
 
 .list-cell{
@@ -47,20 +52,25 @@
 }
 
 #btnBackup{
-    -fx-background-image: url(../../images/backup.png);
-    -fx-background-position: center;
-    -fx-background-repeat: no-repeat;
+    -shape: -shape-backup;
+    -shape-width: 64px;
+    -shape-height: 28px;
 }
 
 #btnDelete{
-    -fx-background-image: url(../../images/delete.png);
-    -fx-background-position: center;
-    -fx-background-repeat: no-repeat;
+    -shape: -shape-trash;
+    -shape-width: 64px;
+    -shape-height: 36px;
 }
 
 #btnImport{
-    -fx-background-image: url(../../images/import.png);
-    -fx-background-position: center;
-    -fx-background-repeat: no-repeat;
-    -fx-background-size: 32px;
+    -shape: -shape-import;
+    -shape-width: 64px;
+    -shape-height: 64px;
+}
+
+#btnCancelExport{
+    -shape: -shape-cancel;
+    -shape-width: 24px;
+    -shape-height: 24px;
 }

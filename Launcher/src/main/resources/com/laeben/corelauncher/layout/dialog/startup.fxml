@@ -25,6 +25,6 @@
 
     </GridPane>
 
-    <CButton fx:id="btnApply" text="%option.apply" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10"/>
-    <CButton fx:id="btnClose" text="X" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10"/>
+    <CButton fx:id="btnApply" styleClass="transparent" text="%option.apply" AnchorPane.bottomAnchor="10" AnchorPane.rightAnchor="10"/>
+    <CButton fx:id="btnClose" styleClass="transparent" text="X" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10"/>
 </AnchorPane>

@@ -7,6 +7,7 @@ import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.ui.UI;
+import com.laeben.corelauncher.api.ui.entity.Announcement;
 import com.laeben.corelauncher.minecraft.modding.curseforge.CurseForge;
 import com.laeben.corelauncher.minecraft.modding.curseforge.entity.ModsSearchSortField;
 import com.laeben.corelauncher.minecraft.modding.entity.LoaderType;
@@ -30,11 +31,8 @@ import com.laeben.corelauncher.ui.controller.browser.search.Search;
 import com.laeben.corelauncher.ui.entity.filter.FilterPreset;
 import com.laeben.corelauncher.ui.entity.filter.FilterSection;
 import com.laeben.corelauncher.util.ImageUtil;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
@@ -58,16 +56,20 @@ public class BrowserPage extends HandlerController {
 
     private ResourceType mainType;
 
-    private final ObservableList<ResourceCellItem> resources;
     private final Timer searchTimer;
     private final Tasker installationTasker;
 
     public BrowserPage(){
         super(KEY);
-        resources = FXCollections.observableArrayList();
 
         searchTimer = new Timer();
         installationTasker = new Tasker();
+
+        registerHandler(installationTasker.getHandler(), a -> UI.runAsync(() -> {
+            boolean cancellable = !installationTasker.isEmpty() && installationTasker.getTasks().stream().anyMatch(x -> x.getOwner() != null && ((ResourceCellItem)x.getOwner()).getResource().getResourceType() == ResourceType.MODPACK);
+            btnCancel.setVisible(cancellable);
+            btnCancel.setManaged(cancellable);
+        }), false);
     }
 
     private void reloadTitle(Profile p){
@@ -96,7 +98,7 @@ public class BrowserPage extends HandlerController {
                         version = profile.getVersionId();
                         search.reset();
                         filterPane.clearSections();
-                        resources.clear();
+                        lvResources.getItems().clear();
                     }
                 }
                 else if (a.getKey().equals(Profiler.PROFILE_DELETE)){
@@ -156,7 +158,7 @@ public class BrowserPage extends HandlerController {
     @FXML
     private CField txtQuery;
     @FXML
-    private ListView<ResourceCellItem> lvResources;
+    private CVirtualList<ResourceCellItem> lvResources;
     @FXML
     private Label lblProfileName;
     @FXML
@@ -171,6 +173,8 @@ public class BrowserPage extends HandlerController {
     private HBox topBar;
     @FXML
     private Label lblNotFound;
+    @FXML
+    private CButton btnCancel;
 
     private boolean didFiltersChange = false;
     private long lastFilterChangeTime = 0;
@@ -207,13 +211,14 @@ public class BrowserPage extends HandlerController {
 
     @Override
     public void preInit() {
-        lvResources.setItems(resources);
         icon.setCornerRadius(30, 30, 8);
 
         filterPane.setOnAction(event -> {
             didFiltersChange = true;
             lastFilterChangeTime = System.currentTimeMillis();
         });
+
+        btnCancel.setOnMouseClicked(a -> installationTasker.stopAll());
 
         searchTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -314,7 +319,8 @@ public class BrowserPage extends HandlerController {
                         .defaultChoice("desc")
         );
 
-        lvResources.setCellFactory(a -> new ResourceCell().setOnNewProfileCreated(this::onProfileCreated));
+        lvResources.setNullModeEnabled(false);
+        lvResources.setCellFactory(() -> new ResourceCell().setOnNewProfileCreated(this::onProfileCreated));
 
         txtQuery.setOnKeyPressed(a -> {
             if (a.getCode() == KeyCode.ENTER){
@@ -349,12 +355,18 @@ public class BrowserPage extends HandlerController {
     private void search(String query){
         if (search == null)
             return;
-        lvResources.scrollTo(0);
+
+        if (!installationTasker.isEmpty()){
+            Main.getMain().announceLater(Translator.translate("error.oops"), Translator.translate("browser.cannotSearch"), Announcement.AnnouncementType.ERROR, Duration.seconds(2));
+            return;
+        }
+
+        lvResources.getList().scrollTo(0);
 
         var preset = filterPane.getPreset(filterPane.getLoadedPreset());
         List<String> selectedVersions = profile != null ? List.of() : filterPane.getPreset("pinned").getSection("version").getSelectedChoices();
 
-        resources.clear();
+        lvResources.getItems().clear();
 
         var maincat = preset.getSection("maincat");
         if (maincat.getSelectedChoice() != null && maincat.getSelectedChoice().equals("optifine")) {
@@ -378,7 +390,7 @@ public class BrowserPage extends HandlerController {
                         .includeLoaderTypes(List.of(LoaderType.OPTIFINE));
             }
 
-            resources.addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeLoaderVersion), y.checkForge(y.forgeLoaderVersion))).map(a -> new ResourceCellItem(preferences, ResourceOpti.fromOptiVersion(a.id, a), installationTasker)).toList());
+            lvResources.getItems().addAll(versions.sorted((x, y) -> Boolean.compare(x.checkForge(x.forgeLoaderVersion), y.checkForge(y.forgeLoaderVersion))).map(a -> new ResourceCellItem(preferences, ResourceOpti.fromOptiVersion(a.id, a), installationTasker)).toList());
 
             return;
         }
@@ -412,9 +424,9 @@ public class BrowserPage extends HandlerController {
         else
             search.setLoaders(null);
 
-        resources.addAll(search.search(query, installationTasker));
+        lvResources.getItems().addAll(search.search(query, installationTasker));
 
-        lblNotFound.setVisible(resources.isEmpty());
+        lblNotFound.setVisible(lvResources.getItems().isEmpty());
 
         paginator.setTotalPages(search.getTotalPages());
     }

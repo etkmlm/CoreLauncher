@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.laeben.corelauncher.ui.control.CButton?>
+<?import com.laeben.corelauncher.ui.control.CField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import com.laeben.corelauncher.ui.control.CProgressBorder?>
+<CProgressBorder
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        prefHeight="100" prefWidth="450" fx:id="progress" strokeWidth="4" stylesheets="@../../style/cells/java.css,@../../style/controls/clui.css">
+    <child>
+        <HBox alignment="CENTER_LEFT" spacing="20" fx:id="root">
+            <Label maxHeight="Infinity" fx:id="lblVersion" alignment="CENTER" text="17" prefWidth="100"/>
+            <Label HBox.hgrow="ALWAYS" maxWidth="Infinity" fx:id="lblStatus" visible="false" managed="false"/>
+            <VBox fx:id="infoContainer" HBox.hgrow="ALWAYS" maxWidth="Infinity" style="-fx-padding: 4px">
+                <CField promptText="%java.name" fx:id="txtName" />
+                <TextField fx:id="txtPath" editable="false" />
+            </VBox>
+            <CButton styleClass="transparent" fx:id="btnAction" />
+        </HBox>
+    </child>
+</CProgressBorder>

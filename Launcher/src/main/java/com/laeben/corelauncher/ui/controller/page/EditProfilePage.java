@@ -1,7 +1,6 @@
 package com.laeben.corelauncher.ui.controller.page;
 
 import com.laeben.core.entity.Path;
-import com.laeben.core.util.events.ChangeEvent;
 import com.laeben.corelauncher.api.Tool;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.gpu.entity.GPUDisplay;
@@ -31,6 +30,7 @@ import com.laeben.corelauncher.util.ImageUtil;
 import com.laeben.corelauncher.util.java.JavaManager;
 import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.util.NTSManager;
+import com.laeben.corelauncher.util.java.event.JavaContext;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -190,21 +190,16 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         loaderVersions.add("...");
 
         registerHandler(JavaManager.getManager().getHandler(), a -> {
-            if (!(a instanceof ChangeEvent ce))
-                return;
-
-            switch (a.getKey()){
-                case JavaManager.ADD -> {
-                    var java = (Java)ce.getNewValue();
-                    javaVersions.add(java.toIdentifier());
-                }
-                case JavaManager.UPDATE -> reloadJava();
-                case JavaManager.DELETE -> {
-                    var java = (Java)ce.getOldValue();
-                    javaVersions.remove(java.toIdentifier());
-                    if (java.toIdentifier().equals(cbJavaVersion.getValue()))
-                        cbJavaVersion.setValue("...");
-                }
+            if (a.inContext(JavaContext.ADD)){
+                var java = a.<Java>getSource();
+                javaVersions.add(java.toIdentifier());
+            }
+            else if (a.inContext(JavaContext.UPDATE)) reloadJava();
+            else if (a.inContext(JavaContext.DELETE)){
+                var java = a.<Java>getSource();
+                javaVersions.remove(java.toIdentifier());
+                if (java.toIdentifier().equals(cbJavaVersion.getValue()))
+                    cbJavaVersion.setValue("...");
             }
         }, true);
     }

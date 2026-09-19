@@ -31,21 +31,9 @@
         </HBox>
     </VBox>
     <HBox spacing="12" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10">
-        <CButton styleClass="profile-button" fx:id="btnWorlds">
-            <tooltip>
-                <Tooltip text="%world.worlds"/>
-            </tooltip>
-        </CButton>
-        <CButton styleClass="profile-button" fx:id="btnMultipleBrowser">
-            <tooltip>
-                <Tooltip text="%mods.all.multiple"/>
-            </tooltip>
-        </CButton>
-        <CButton styleClass="profile-button" fx:id="btnAddResource">
-            <tooltip>
-                <Tooltip text="%mods.browser"/>
-            </tooltip>
-        </CButton>
+        <CButton styleClass="profile-button" fx:id="btnWorlds" tooltip="%world.worlds"/>
+        <CButton styleClass="profile-button" fx:id="btnMultipleBrowser" tooltip="%mods.all.multiple"/>
+        <CButton styleClass="profile-button" fx:id="btnAddResource" tooltip="%mods.browser"/>
         <CMenu fx:id="menu" />
     </HBox>
 
@@ -61,7 +49,7 @@
             <!--<CVerticalList fx:id="lvModpacks"/>-->
         </VBox>
         <VBox fx:id="vResources" GridPane.columnIndex="1" GridPane.rowIndex="0">
-            <HBox spacing="8" alignment="CENTER_LEFT">
+            <HBox spacing="16" alignment="CENTER_LEFT">
                 <Label fx:id="lblResources" styleClass="header" text="%mods.type.resources"/>
                 <CButton fx:id="btnMenuResources" styleClass="resource-menu"/>
             </HBox>
@@ -69,7 +57,7 @@
             <!--<CVerticalList fx:id="lvResources"/>-->
         </VBox>
         <VBox fx:id="vShaders" GridPane.columnIndex="0" GridPane.rowIndex="1">
-            <HBox spacing="8" alignment="CENTER_LEFT">
+            <HBox spacing="16" alignment="CENTER_LEFT">
                 <Label fx:id="lblShaders" styleClass="header" text="%mods.type.shaders"/>
                 <CButton fx:id="btnMenuShaders" styleClass="resource-menu"/>
             </HBox>
@@ -83,7 +71,7 @@
             <!--<CVerticalList fx:id="lvWorlds"/>-->
         </VBox>
         <VBox fx:id="vMods" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2">
-            <HBox spacing="8" alignment="CENTER_LEFT">
+            <HBox spacing="16" alignment="CENTER_LEFT">
                 <Label fx:id="lblMods" styleClass="header" text="%mods.type.mods"/>
                 <CButton fx:id="btnMenuMods" styleClass="resource-menu"/>
             </HBox>

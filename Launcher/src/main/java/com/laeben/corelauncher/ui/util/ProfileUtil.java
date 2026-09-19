@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.event.function.ProgressFunction;
+import com.laeben.corelauncher.api.concurrency.TaskRecord;
 import com.laeben.corelauncher.api.concurrency.Tasker;
 import com.laeben.corelauncher.api.entity.*;
 import com.laeben.corelauncher.api.shortcut.Shortcut;
@@ -143,7 +144,7 @@ public class ProfileUtil {
      * Uses nested awaiting.
      * @param w window for the dialog
      */
-    public static Tasker.TaskRecord backup(Profile profile, Window w){
+    public static TaskRecord backup(Profile profile, Window w){
         var chooser = new FileChooser();
         chooser.setInitialFileName(profile.getName() + ".zip");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP", "*.zip"));
@@ -169,7 +170,7 @@ public class ProfileUtil {
      * Uses nested awaiting.
      * @param w window for the dialog
      */
-    public static Tasker.TaskRecord backup(List<Profile> profiles, Window w){
+    public static TaskRecord backup(List<Profile> profiles, Window w){
         var chooser = new DirectoryChooser();
         var file = chooser.showDialog(w);
         if (file == null)
@@ -203,7 +204,7 @@ public class ProfileUtil {
      * @param obj object
      * @param w window for the dialog
      */
-    public static Tasker.TaskRecord backup(FDObject obj, Window w){
+    public static TaskRecord backup(FDObject obj, Window w){
         if (obj.isSingle()) return backup(obj.getProfiles().get(0), w);
 
         var chooser = new FileChooser();
@@ -246,7 +247,7 @@ public class ProfileUtil {
      * @param x target dock x
      * @param y target dock y
      */
-    public static Tasker.TaskRecord importO(List<Path> files, double x, double y){
+    public static TaskRecord importO(List<Path> files, double x, double y){
         return Tasker.getDefault().awaitNested(() -> {
             UI.runAsync(() -> Main.getMain().getAnnouncer().announce(new Announcement(Translator.translate("announce.info.import.started"), Translator.translateFormat("announce.info.import.importing", files.size()), Announcement.AnnouncementType.INFO), Duration.seconds(2)));
             int c = 0;
@@ -278,7 +279,7 @@ public class ProfileUtil {
      * @param onProgress progress function
      * @exception UnsupportedOperationException if the path was other than ZIP or JSON
      */
-    public static Tasker.TaskRecord importO(Path p, double x, double y, ProgressFunction onProgress) throws Exception {
+    public static TaskRecord importO(Path p, double x, double y, ProgressFunction onProgress) throws Exception {
         var temp = Configurator.getConfig().getTemporaryFolder();
 
         if (p.isDirectory())

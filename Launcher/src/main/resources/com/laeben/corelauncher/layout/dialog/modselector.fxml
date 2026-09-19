@@ -35,6 +35,6 @@
             <Label fx:id="lblStatus"/>
             <ProgressBar fx:id="progress" maxWidth="Infinity" progress="0"/>
         </VBox>
-        <CButton fx:id="btnCancel" text="%option.cancel"/>
+        <CButton fx:id="btnCancel" text="%option.cancel" styleClass="transparent"/>
     </HBox>
 </VBox>

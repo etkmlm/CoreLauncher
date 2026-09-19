@@ -60,7 +60,6 @@ public class DResourceSelector extends CDialog<List<CResource>>{
 
         resources = new ArrayList<>();
 
-        btnSelectFile.enableTransparentAnimation();
         btnSelectFile.setOnMouseClicked(a -> {
             var chooser = new FileChooser();
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP / JAR", "*.zip", "*.jar"));
@@ -78,10 +77,8 @@ public class DResourceSelector extends CDialog<List<CResource>>{
             txtFileName.setText(file.getName());
         });
 
-        btnSave.enableTransparentAnimation();
         btnSave.setOnMouseClicked(a -> save());
 
-        btnDone.enableTransparentAnimation();
         btnDone.setOnMouseClicked(a -> {
             if (resources.isEmpty())
                 save();
@@ -92,7 +89,6 @@ public class DResourceSelector extends CDialog<List<CResource>>{
             close(resources);
         });
 
-        btnCancel.enableTransparentAnimation();
         btnCancel.setOnMouseClicked(a -> close(null));
 
         lblStatus.setIsEmpty(a -> a == null || a == 0);

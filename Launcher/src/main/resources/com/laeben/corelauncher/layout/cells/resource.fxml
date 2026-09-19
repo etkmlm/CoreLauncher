@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.laeben.corelauncher.ui.control.CProgressBorder?>
-<?import com.laeben.corelauncher.ui.control.CShapefulButton?>
+<?import com.laeben.corelauncher.ui.control.CButton?>
 <?import com.laeben.corelauncher.ui.control.CView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.*?>
@@ -30,7 +30,7 @@
 
             <HBox fillHeight="false" alignment="CENTER">
                 <VBox fx:id="info" spacing="16" alignment="CENTER">
-                    <CShapefulButton fx:id="btnInstall" styleClass="transparent" StackPane.alignment="CENTER"/>
+                    <CButton fx:id="btnInstall" styleClass="transparent" StackPane.alignment="CENTER"/>
                     <Text fx:id="lblStatus"/>
                 </VBox>
             </HBox>

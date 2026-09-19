@@ -63,12 +63,12 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
     public DJavaSelector(Window owner){
         super("layout/dialog/javaselector.fxml", true, owner);
 
-        btnClose.enableTransparentAnimation();
         btnClose.setOnMouseClicked(a -> close(null));
 
         worker.begin().withTask(a -> new Task<>() {
             @Override
             protected JavaDownloadInfo call() throws Exception {
+                spnMajor.commitValue();
                 return JavaManager.getManager().getJavaInfo(Java.fromVersion(spnMajor.getValue()), CoreLauncher.SYSTEM_OS_ARCH, CoreLauncher.SYSTEM_OS);
             }
         }).onDone(a -> {
@@ -82,7 +82,6 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
                 Logger.getLogger().log(a.getError());
         });
 
-        btnApply.enableTransparentAnimation();
         btnApply.setOnMouseClicked(a -> {
             if (selectedJava != null){
                 if (txtName.getText() != null && !txtName.getText().isBlank()) {
@@ -104,7 +103,6 @@ public class DJavaSelector extends CDialog<DJavaSelector.Result> {
 
         txtName.setFocusedAnimation(Duration.millis(200));
         txtPath.setCursor(Cursor.DEFAULT);
-        btnSelect.enableTransparentAnimation();
         btnSelect.setOnMouseClicked(a -> {
             var d = new DirectoryChooser().showDialog(btnSelect.getScene().getWindow());
             if (d == null)

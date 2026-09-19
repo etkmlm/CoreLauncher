@@ -2,10 +2,11 @@ package com.laeben.corelauncher.util.java;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.bus.EventBus;
 import com.laeben.core.event.function.ProgressFunction;
+import com.laeben.core.event.type.SimpleEvent;
 import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
-import com.laeben.core.util.events.KeyEvent;
 import com.laeben.corelauncher.CoreLauncher;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Logger;
@@ -15,12 +16,12 @@ import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.core.entity.Path;
-import com.laeben.core.util.events.ChangeEvent;
+import com.laeben.corelauncher.event.bus.FrequentEventBus;
 import com.laeben.corelauncher.ui.controller.Main;
-import com.laeben.corelauncher.util.EventHandler;
 import com.laeben.corelauncher.util.entity.LogType;
 import com.laeben.corelauncher.util.java.entity.JavaDownloadInfo;
 import com.laeben.corelauncher.util.java.entity.JavaSourceType;
+import com.laeben.corelauncher.util.java.event.JavaContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,11 +30,6 @@ import java.util.List;
 public class JavaManager {
     public static final String KEY = "jvman";
 
-    public static final String ADD = "add";
-    public static final String DELETE = "delete";
-    public static final String UPDATE = "update";
-    public static final String DOWNLOAD_COMPLETE = "down";
-
     public static final String PACKAGE_TYPE = "jre";
 
     private JavaSource source;
@@ -41,7 +37,7 @@ public class JavaManager {
 
     private static JavaManager instance;
 
-    private final EventHandler<KeyEvent> handler;
+    private final EventBus<JavaContext, SimpleEvent<JavaContext>> handler;
     private List<Java> javaVersions;
 
     private Path javaDir;
@@ -60,7 +56,7 @@ public class JavaManager {
             }
         }, false);
 
-        handler = new EventHandler<>();
+        handler = new FrequentEventBus<>();
 
         setSourceType(Configurator.getConfig().getJavaSourceType());
         instance = this;
@@ -72,7 +68,7 @@ public class JavaManager {
     public static Path javaDir(){
         return Configurator.getConfig().getLauncherPath().to("java");
     }
-    public EventHandler<KeyEvent> getHandler(){
+    public EventBus<JavaContext, SimpleEvent<JavaContext>> getHandler(){
         return handler;
     }
 
@@ -136,8 +132,9 @@ public class JavaManager {
      * One of {@link Java} or {@link JavaDownloadInfo} needs to be null.
      * @param java version info
      * @param info download info
+     * @return downloaded Java instance
      */
-    public void downloadAndInclude(Java java, JavaDownloadInfo info, ProgressFunction onProgress) throws NoConnectionException, StopException {
+    public Java downloadAndInclude(Java java, JavaDownloadInfo info, ProgressFunction onProgress) throws NoConnectionException, StopException {
         if (info == null)
             info = getJavaInfo(java, CoreLauncher.SYSTEM_OS_ARCH, CoreLauncher.SYSTEM_OS);
 
@@ -160,11 +157,13 @@ public class JavaManager {
 
         var j = downloadAndExtract(info, javaDir, existsPath, onProgress);
         if (j == null)
-            return;
+            return null;
         javaVersions.add(j);
 
         if (existsPath == null) // not necessary to call this in case it was overwritten on an existing java folder
-            handler.execute(new ChangeEvent(ADD, null, j));
+            handler.execute(new SimpleEvent<>(JavaContext.ADD).withSource(j));
+
+        return j;
     }
 
     /**
@@ -186,10 +185,10 @@ public class JavaManager {
             if (existsPath != null) // handling existing java version before extracting the file
                 existsPath.delete();
 
-            source.extract(file, info);
+            source.extract(file, info, onProgress);
             file.delete();
 
-            handler.execute(new KeyEvent(DOWNLOAD_COMPLETE));
+            handler.execute(new SimpleEvent<>(JavaContext.DOWNLOAD_COMPLETE));
 
             return new Java(info.displayName(), targetDir.to(info.name()));
         }
@@ -225,7 +224,7 @@ public class JavaManager {
                 Configurator.save();
             }
 
-            handler.execute(new ChangeEvent(DELETE, j, null));
+            handler.execute(new SimpleEvent<>(JavaContext.DELETE).withSource(j));
         }catch (Exception e){
             Logger.getLogger().log(e);
         }
@@ -238,7 +237,7 @@ public class JavaManager {
         j.setName(name);
         Configurator.save();
 
-        handler.execute(new ChangeEvent(UPDATE, null, j));
+        handler.execute(new SimpleEvent<>(JavaContext.UPDATE).withSource(j));
         return true;
     }
 
@@ -251,7 +250,7 @@ public class JavaManager {
         Configurator.getConfig().getCustomJavaVersions().add(j);
         Configurator.save();
 
-        handler.execute(new ChangeEvent(ADD, null, j));
+        handler.execute(new SimpleEvent<>(JavaContext.ADD).withSource(j));
         return true;
     }
 }

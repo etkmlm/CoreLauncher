@@ -160,7 +160,7 @@ public class CWorker<T, H> extends StackPane {
             if (doFinally != null)
                 doFinally.accept(this);
 
-            if (cancellableToken.stopRequested()) cancellableToken = null;
+            if (cancellableToken != null && cancellableToken.stopRequested()) cancellableToken = null;
 
             running.setValue(false);
         });
@@ -172,7 +172,7 @@ public class CWorker<T, H> extends StackPane {
             if (doFinally != null)
                 doFinally.accept(this);
 
-            if (cancellableToken.stopRequested()) cancellableToken = null;
+            if (cancellableToken != null && cancellableToken.stopRequested()) cancellableToken = null;
 
             running.setValue(false);
         });

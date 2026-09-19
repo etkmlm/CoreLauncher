@@ -2,10 +2,12 @@ package com.laeben.corelauncher.api.concurrency;
 
 import com.laeben.core.concurrency.CancellableToken;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.type.SimpleEvent;
+import com.laeben.corelauncher.api.concurrency.event.TaskContext;
 import com.laeben.corelauncher.api.entity.Logger;
+import com.laeben.corelauncher.event.bus.FrequentEventBus;
 import org.apache.commons.lang3.NotImplementedException;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,58 +16,34 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Tasker {
-    public static class TaskRecord{
-        private final WeakReference<Thread> thread;
-        private final CancellableToken<?> cancellableToken;
-        private Runnable onFinished;
-        public TaskRecord(Thread thread, CancellableToken<?> cancellableToken){
-            this.thread = new WeakReference<>(thread);
-            this.cancellableToken = cancellableToken;
-        }
-
-        public void stop(){
-            final Thread got = thread.get();
-            if (got != null) got.interrupt();
-            if (cancellableToken != null) cancellableToken.stop();
-        }
-
-        public TaskRecord onFinished(Runnable onFinished){
-            this.onFinished = onFinished;
-            return this;
-        }
-
-        public void onFinished(){
-            if (onFinished != null) onFinished.run();
-        }
-
-        public boolean isRunning(){
-            final Thread got = thread.get();
-            return got != null && !got.isInterrupted();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return this == o || o instanceof Thread t && this.thread.refersTo(t) || o instanceof TaskRecord r && r.thread.refersTo(this.thread.get());
-        }
-
-        @Override
-        public int hashCode(){
-            final var thread = this.thread.get();
-            return thread == null ? super.hashCode() : thread.hashCode();
-        }
-    }
-
     private static final Tasker defaultTasker = new Tasker();
     public static Tasker getDefault(){
         return defaultTasker;
     }
 
+    private final FrequentEventBus<TaskContext, SimpleEvent<TaskContext>> eventBus;
     private final ExecutorService executor;
     private final Set<TaskRecord> tasks;
 
     public Tasker(){
         executor = Executors.newFixedThreadPool(5);
         tasks = Collections.synchronizedSet(new HashSet<>());
+
+        eventBus = new FrequentEventBus<>();
+    }
+
+    public Set<TaskRecord> getTasks(){
+        return Collections.unmodifiableSet(tasks);
+    }
+    public boolean isEmpty(){
+        return tasks.isEmpty();
+    }
+    public int count(){
+        return tasks.size();
+    }
+
+    public FrequentEventBus<TaskContext, SimpleEvent<TaskContext>> getHandler(){
+        return eventBus;
     }
 
     public void enqueueTask(Callable<Void> callable){
@@ -80,23 +58,24 @@ public class Tasker {
 
     private void removeTask(Thread thread){
         for (TaskRecord task : tasks) {
-            if (task.thread.refersTo(thread)){
+            if (task.getThreadReference().refersTo(thread)){
                 task.onFinished();
                 tasks.remove(task);
+                eventBus.execute(new SimpleEvent<>(TaskContext.REMOVED).withSource(task));
                 break;
             }
         }
     }
 
     public TaskRecord await(Runnable runnable){
-        return await(runnable, null);
+        return await(runnable, null, null);
     }
 
-    public TaskRecord await(Runnable runnable, CancellableToken<?> token){
+    public TaskRecord await(Runnable runnable, CancellableToken<?> token, Object owner){
         return await(() -> {
             runnable.run();
             return null;
-        }, token);
+        }, owner, token);
     }
 
     /**
@@ -106,11 +85,22 @@ public class Tasker {
      * @return the record of the parent task or the new record
      */
     public TaskRecord awaitNested(Runnable runnable){
+        return awaitNested(runnable, null);
+    }
+
+    /**
+     * Functions will behave synchronous inside another task created by the same tasker.
+     * Otherwise, they will be executed as a separate thread.
+     * @param runnable target runnable
+     * @param owner task owner
+     * @return the record of the parent task or the new record
+     */
+    public TaskRecord awaitNested(Runnable runnable, Object owner){
         try {
             return awaitNested(() -> {
                 runnable.run();
                 return null;
-            });
+            }, owner);
         } catch (Exception ignored) {
 
         }
@@ -122,15 +112,16 @@ public class Tasker {
      * Functions will behave synchronous inside another task created by the same tasker.
      * Otherwise, they will be executed as a separate thread.
      * @param callable target callable
+     * @param owner task owner
      * @return the record of the parent task or the new record
      * @throws Exception exception from the sync task
      */
-    public TaskRecord awaitNested(Callable<Void> callable) throws Exception {
+    public TaskRecord awaitNested(Callable<Void> callable, Object owner) throws Exception {
         final var current = Thread.currentThread();
         TaskRecord foundRecord = null;
 
         for (var r : tasks){
-            if (r.thread.refersTo(current)) {
+            if (r.getThreadReference().refersTo(current)) {
                 foundRecord = r;
                 break;
             }
@@ -141,10 +132,21 @@ public class Tasker {
             return foundRecord;
         }
 
-        return await(callable, null);
+        return await(callable, owner, null);
     }
 
-    public TaskRecord await(Callable<Void> callable, CancellableToken<?> token){
+    /**
+     * Functions will behave synchronous inside another task created by the same tasker.
+     * Otherwise, they will be executed as a separate thread.
+     * @param callable target callable
+     * @return the record of the parent task or the new record
+     * @throws Exception exception from the sync task
+     */
+    public TaskRecord awaitNested(Callable<Void> callable) throws Exception {
+        return awaitNested(callable, null);
+    }
+
+    public TaskRecord await(Callable<Void> callable, Object owner, CancellableToken<?> token){
         var thread = new Thread(() -> {
             try{
                 callable.call();
@@ -159,8 +161,9 @@ public class Tasker {
                 removeTask(Thread.currentThread());
             }
         });
-        var record = new TaskRecord(thread, token);
+        var record = new TaskRecord(owner, thread, token);
         tasks.add(record);
+        eventBus.execute(new SimpleEvent<>(TaskContext.ADDED).withSource(record));
 
         thread.start();
 

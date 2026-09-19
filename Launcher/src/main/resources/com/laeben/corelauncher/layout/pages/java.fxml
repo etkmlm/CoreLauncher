@@ -2,20 +2,19 @@
 
 <?import com.laeben.corelauncher.ui.control.CButton?>
 <?import com.laeben.corelauncher.ui.control.CField?>
-<?import com.laeben.corelauncher.ui.control.CList?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Rectangle?>
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.laeben.corelauncher.ui.controller.page.JavaPage"
-            prefHeight="400.0" prefWidth="600.0" stylesheets="@../../style/controls/clui.css">
-    <VBox style="-fx-padding: 10px" maxWidth="Infinity" maxHeight="Infinity" AnchorPane.topAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0">
+<?import com.laeben.corelauncher.ui.control.CVirtualList?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.laeben.corelauncher.ui.controller.page.JavaPage"
+           stylesheets="@../../style/controls/clui.css" style="-fx-padding: 16px">
+    <VBox spacing="16">
         <CField fx:id="txtSearch" promptText="%search" style="-fx-background-color: #232323aa"/>
-        <Rectangle height="15"/>
-        <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true" hbarPolicy="NEVER">
-            <CList spacing="10" fx:id="pList"/>
-        </ScrollPane>
+        <CVirtualList spacing="10" fx:id="pList" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent!important;"/>
     </VBox>
-    <CButton fx:id="btnAdd" AnchorPane.bottomAnchor="15" AnchorPane.rightAnchor="15" styleClass="circle-button" text="+" style="-fx-font-size: 20pt" prefHeight="64" prefWidth="64"/>
-</AnchorPane>
+    <HBox maxWidth="-Infinity" maxHeight="-Infinity" spacing="16" StackPane.alignment="BOTTOM_RIGHT">
+        <CButton fx:id="btnCancel" visible="false" styleClass="circle-button" style="-shape: -shape-cancel; -shape-width: 24px; -shape-height: 24px;" prefHeight="64" prefWidth="64"/>
+        <CButton fx:id="btnAdd" styleClass="circle-button" style="-shape: -shape-add; -shape-width: 24px; -shape-height: 24px;" prefHeight="64" prefWidth="64"/>
+    </HBox>
+</StackPane>

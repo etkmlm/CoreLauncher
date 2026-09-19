@@ -6,6 +6,48 @@ import java.util.stream.Collectors;
 
 public class Translator {
 
+    public static class Cache{
+        private Translator translator;
+
+        public Cache(Translator translator) {
+            this.translator = translator;
+        }
+
+        public Cache(){
+
+        }
+
+        private String key;
+        private String translation;
+
+        private void translate(String key){
+            assert key != null;
+
+            if (this.key == null || !this.key.equals(key)) {
+                this.key = key;
+                this.translation = translator == null ? Translator.translate(key) : translator.getTranslate(key);
+            }
+        }
+
+        public static Cache translate(String key, Cache parent){
+            if (parent == null) parent = new Cache();
+
+            parent.translate(key);
+
+            return parent;
+        }
+
+        public String getTranslation(){
+            return translation;
+        }
+
+        public String getTranslation(String key){
+            translate(key);
+
+            return this.translation;
+        }
+    }
+
     private static Translator instance;
     private static final List<Function<Locale, ResourceBundle>> factories = new ArrayList<>();
 

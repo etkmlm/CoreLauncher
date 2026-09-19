@@ -5,6 +5,7 @@ import com.laeben.core.entity.Path;
 import com.laeben.core.entity.exception.HttpException;
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
+import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.core.network.Network;
 import com.laeben.corelauncher.api.entity.Java;
 import com.laeben.corelauncher.api.entity.OS;
@@ -47,16 +48,16 @@ public class AzulJavaSource implements JavaSource {
     }
 
     @Override
-    public void extract(Path archive, JavaDownloadInfo info) throws StopException, IOException {
-        archive.extract(null, null);
+    public void extract(Path archive, JavaDownloadInfo info, ProgressFunction onProgress) throws StopException, IOException {
+        archive.extract(null, null, onProgress);
         if (info.os() != OS.OSX)
             return;
 
         var folder = archive.parent().to(info.name());
         var home = folder.to(String.format("zulu-%d.%s", info.major(), JavaManager.PACKAGE_TYPE), "Contents", "Home");
         var temp = folder.parent().to("temp");
-        home.move(temp);
+        home.move(temp, onProgress);
         folder.delete();
-        temp.move(folder);
+        temp.move(folder, onProgress);
     }
 }

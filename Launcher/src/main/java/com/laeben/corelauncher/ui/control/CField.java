@@ -1,7 +1,7 @@
 package com.laeben.corelauncher.ui.control;
 
-import com.laeben.corelauncher.ui.entity.animation.BorderColorAnimation;
-import com.laeben.corelauncher.ui.entity.animation.ColorAnimation;
+import com.laeben.corelauncher.ui.animation.color.BorderColorAnimation;
+import com.laeben.corelauncher.ui.animation.color.RegionColorAnimation;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -11,7 +11,7 @@ import javafx.util.Duration;
 
 public class CField extends TextField {
 
-    private ColorAnimation focusedAnimation;
+    private RegionColorAnimation focusedAnimation;
     private final Rectangle n;
 
     private boolean enableBorderTracking;
@@ -46,7 +46,7 @@ public class CField extends TextField {
 
     public void setFocusedAnimation(Duration d){
         focusedAnimation = new BorderColorAnimation();
-        focusedAnimation.setNode(this);
+        focusedAnimation.setRegion(this);
         focusedAnimation.setDuration(d);
         enableBorderTracking = true;
     }
@@ -54,7 +54,7 @@ public class CField extends TextField {
     public void setFocusedAnimation(Color c, Duration d){
         focusedAnimation = new BorderColorAnimation();
         focusedAnimation.setColor(c);
-        focusedAnimation.setNode(this);
+        focusedAnimation.setRegion(this);
         focusedAnimation.setDuration(d);
     }
 }

@@ -200,8 +200,6 @@ public class DProfileSelector extends CDialog<DProfileSelector.Result> {
             }
         });
 
-        btnClose.enableTransparentAnimation();
-
         btnClose.setOnMouseClicked(a -> close(null));
 
         txtSearch.setOnKeyPressed(a -> {
