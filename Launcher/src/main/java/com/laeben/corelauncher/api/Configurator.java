@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 
 public class Configurator {
     public static final String BACKGROUND_CHANGE = "bgChange";
+    public static final String TRANSPARENT_MODE_CHANGE = "transModeChange";
     public static final String LANGUAGE_CHANGE = "langChange";
     public static final String USER_CHANGE = "userChange";
     public static final String GAME_PATH_CHANGE = "gamePathChange";
@@ -155,6 +156,13 @@ public class Configurator {
         handler.execute(new ChangeEvent(BACKGROUND_CHANGE, null, path));
     }
 
+    public void setTransparentMode(boolean enabled){
+        boolean old = config.isTransparentMode();
+        config.setTransparentMode(enabled);
+        save();
+        handler.execute(new ChangeEvent(TRANSPARENT_MODE_CHANGE, old, enabled));
+    }
+
     public void setLanguage(Locale l){
         var oldLang = config.getLanguage();
         config.setLanguage(l);
@@ -226,6 +234,7 @@ public class Configurator {
         handler.execute(new ChangeEvent(BACKGROUND_CHANGE, null, config.getBackgroundImage()));
         handler.execute(new ChangeEvent(USER_CHANGE, null, config.getUser()));
         handler.execute(new ChangeEvent(UI_PREFERENCE_CLEAR, null, null));
+        handler.execute(new ChangeEvent(TRANSPARENT_MODE_CHANGE, null, config.isTransparentMode()));
     }
 
     private boolean save(Config c){

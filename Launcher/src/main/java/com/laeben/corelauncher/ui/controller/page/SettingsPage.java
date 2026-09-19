@@ -87,6 +87,8 @@ public class SettingsPage extends HandlerController {
     @FXML
     private CheckBox chkHideAfter;
     @FXML
+    private CheckBox chkTransparentMode;
+    @FXML
     private CheckBox chkAutoUpdate;
     @FXML
     private CheckBox chkDebugLogMode;
@@ -457,6 +459,12 @@ public class SettingsPage extends HandlerController {
             Configurator.getConfig().setHideAfter(chkHideAfter.isSelected());
             Configurator.save();
         });
+        chkTransparentMode.selectedProperty().addListener(x -> {
+            boolean on = chkTransparentMode.isSelected();
+            Configurator.getConfigurator().setTransparentMode(on);
+            btnSelectBackground.setDisable(on);
+            txtCustomBackground.setDisable(on);
+        });
         chkAutoUpdate.selectedProperty().addListener(x -> {
             Configurator.getConfig().setAutoUpdate(chkAutoUpdate.isSelected());
             Configurator.save();
@@ -726,6 +734,9 @@ public class SettingsPage extends HandlerController {
             cbLanguage.setValue(c.getLanguage().getDisplayLanguage(c.getLanguage()));
             chkLogMode.setSelected(c.getLogMode());
             chkHideAfter.setSelected(c.hideAfter());
+            chkTransparentMode.setSelected(c.isTransparentMode());
+            btnSelectBackground.setDisable(c.isTransparentMode());
+            txtCustomBackground.setDisable(c.isTransparentMode());
             chkAutoUpdate.setSelected(c.isEnabledAutoUpdate());
             chkDebugLogMode.setSelected(c.getDebugLogMode());
             chkSelectPlay.setSelected(c.isEnabledSelectAndPlayDock());

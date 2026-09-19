@@ -217,11 +217,9 @@ public class Main extends HandlerController {
                     else
                         setUser(Configurator.getConfig().getUser().reload());
                 }
-                /*case Configurator.UI_PREFERENCE_CHANGE -> {
-                    var preference = (UIPreference) a.getNewValue();
-                    var key = a.getSource().toString();
-
-                }*/ // disabled currently
+                case Configurator.TRANSPARENT_MODE_CHANGE -> {
+                    if (getStage() != null && getStage().getFrame() instanceof Frame f) f.setTransparency((Boolean) a.getNewValue());
+                }
             }
         }, true);
         Launcher.getLauncher().setOnAuthFail(v -> {
@@ -832,22 +830,30 @@ public class Main extends HandlerController {
     }
 
     private void setBackground(Path path) {
-        try {
-            var background = new Background(new BackgroundImage(
-                    new Image(path.toFile().toURI().toURL().toExternalForm()),
-                    null,
-                    null,
-                    BackgroundPosition.CENTER,
-                    new BackgroundSize(root.getWidth(),root.getHeight(), false, false, true, true)));
-            double r = 10;
-            double w = 1300;
-            double h = 800;
-            root.setStyle("-fx-shape:\"M " + r + " 0 " + " L " + (w - r) + " " + "0" + " Q " + w + " 0 " + w + " " + r + " L " + w + " " + (h - r) + " Q " + w + " " + h + " " + (w - r) + " " + h + " L " + r + " " + h + " Q 0 " + h + " 0 " + (h - r) + " L 0 " + r + " Q 0 0 " + r + " 0 Z\"");
-            root.setBackground(background);
-        } catch (Exception e) {
-            root.setBackground(null);
-            root.setStyle(null);
+        // transparent mode skips painting a wallpaper
+        if (path != null && !Configurator.getConfig().isTransparentMode()){
+            try {
+                var background = new Background(new BackgroundImage(
+                        new Image(path.toFile().toURI().toURL().toExternalForm()),
+                        null,
+                        null,
+                        BackgroundPosition.CENTER,
+                        new BackgroundSize(root.getWidth(), root.getHeight(), false, false, true, true)));
+                double r = 10;
+                double w = 1300;
+                double h = 800;
+                root.setStyle("-fx-shape:\"M " + r + " 0 " + " L " + (w - r) + " " + "0" + " Q " + w + " 0 " + w + " " + r + " L " + w + " " + (h - r) + " Q " + w + " " + h + " " + (w - r) + " " + h + " L " + r + " " + h + " Q 0 " + h + " 0 " + (h - r) + " L 0 " + r + " Q 0 0 " + r + " 0 Z\"");
+                root.setBackground(background);
+
+                return;
+            } catch (Exception ignored) {
+
+            }
         }
+
+        // an exception has occurred, or the path was null
+        root.setBackground(null);
+        root.setStyle(null);
     }
 
     public EventHandler<KeyEvent> getHandler(){
@@ -1102,6 +1108,16 @@ public class Main extends HandlerController {
                 if (p.getCustomColor() != null)
                     mainTab.setHeaderColor(p.getCustomColor());
             }
+        }
+
+        if (getStage().getFrame() instanceof Frame f){
+            // transparency listener
+            f.transparencyProperty().addListener((o, ov, n) ->
+                setBackground(n ? null : Configurator.getConfig().getBackgroundImage())
+            );
+
+            // initial transparency
+            f.setTransparency(Configurator.getConfig().isTransparentMode());
         }
 
         setBackground(Configurator.getConfig().getBackgroundImage());

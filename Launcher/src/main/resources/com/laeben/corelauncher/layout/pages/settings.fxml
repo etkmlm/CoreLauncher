@@ -64,17 +64,20 @@
                 <TextField fx:id="txtCustomBackground" maxWidth="Infinity" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
                 <CButton styleClass="transparent" fx:id="btnSelectBackground" text="..." GridPane.columnIndex="3" GridPane.rowIndex="1"/>
 
-                <Label styleClass="property-key" text="%settings.gridSelectionColor" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <Region fx:id="cGridSelection" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                <Label styleClass="property-key" text="%settings.transparent" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <CheckBox fx:id="chkTransparentMode" GridPane.columnIndex="2" GridPane.rowIndex="2" />
 
-                <Label styleClass="property-key" text="%settings.scale" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                <Label styleClass="property-key" text="%settings.gridSelectionColor" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Region fx:id="cGridSelection" GridPane.columnIndex="2" GridPane.rowIndex="3" />
 
-                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="4" GridPane.hgrow="ALWAYS">
+                <Label styleClass="property-key" text="%settings.scale" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                <Spinner fx:id="txtScale" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+
+                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="5" GridPane.hgrow="ALWAYS">
                     <CButton fx:id="btnClearImages" text="%settings.images.clear" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                     <CWorker fx:id="workerImages"/>
                 </HBox>
-                <CButton fx:id="btnUIPrefs" maxWidth="Infinity" text="%settings.uiPrefs" GridPane.columnIndex="2" GridPane.rowIndex="5" GridPane.hgrow="ALWAYS"/>
+                <CButton fx:id="btnUIPrefs" maxWidth="Infinity" text="%settings.uiPrefs" GridPane.columnIndex="2" GridPane.rowIndex="6" GridPane.hgrow="ALWAYS"/>
             </GridPane>
         </VBox>
         <VBox>
