@@ -364,7 +364,7 @@ public class DModSelector<T extends ModResource> extends CDialog<DModSelector.Mo
                 .setInstalledProperty(installed)
                 .setOnInstallClicked(r -> {
                     if (installRecord != null) return;
-                    installRecord = Tasker.getDefault().await(() -> install(r)).onFinished(() -> installRecord = null);
+                    installRecord = Tasker.getDefault().await(() -> install(r), this, null).onFinished(() -> installRecord = null);
                 })
         );
         lvVersions.setItems(filteredVersions);

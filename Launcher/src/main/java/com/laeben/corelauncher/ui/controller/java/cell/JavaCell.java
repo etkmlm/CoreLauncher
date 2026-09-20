@@ -89,7 +89,7 @@ public class JavaCell extends CVirtualCell<JavaCell.Item> {
                 catch (NoConnectionException e){
                     Main.getMain().announceLater(e, Duration.seconds(2));
                 }
-            }));
+            }, this, null));
         }
     }
 

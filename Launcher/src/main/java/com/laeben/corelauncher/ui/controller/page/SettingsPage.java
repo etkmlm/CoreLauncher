@@ -110,12 +110,10 @@ public class SettingsPage extends HandlerController {
     private CheckBox chkMiddlePaste;
     @FXML
     private CheckBox chkOmitLibs;
-    /*@FXML
-    private CButton btnSaveRAM;
-    @FXML
-    private CButton btnReset;*/
     @FXML
     private CheckBox chkGamelog;
+    @FXML
+    private CheckBox chkDisableSSL;
     @FXML
     private Label lblVersion;
     @FXML
@@ -158,16 +156,11 @@ public class SettingsPage extends HandlerController {
     @FXML
     private Label lblAPIPort;
 
-    /*@FXML
-    private Spinner txtCommPort;*/
-
-
     private CButton btnSave;
 
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fThreads;
     private final SpinnerValueFactory.IntegerSpinnerValueFactory fScale;
 
-    //private final SpinnerValueFactory.IntegerSpinnerValueFactory fCommPort;
     private final ObservableList<String> languages;
     private final ObservableList<String> javas;
 
@@ -197,13 +190,6 @@ public class SettingsPage extends HandlerController {
 
         fScale = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
         fScale.setAmountToStepBy(1);
-        //fCommPort = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE);
-        //fCommPort.setAmountToStepBy(1);
-
-        /*fCommPort.valueProperty().addListener(a -> {
-            Configurator.getConfig().setCommPort(fCommPort.getValue());
-            Configurator.save();
-        });*/
 
         languages = FXCollections.observableList(Translator.getTranslator().getAllLanguages().stream().map(x -> x.getDisplayLanguage(x)).toList());
         javas = FXCollections.observableArrayList();
@@ -227,7 +213,7 @@ public class SettingsPage extends HandlerController {
             }
         }, true);
 
-        registerHandler(JavaManager.getManager().getHandler(), a -> {
+        registerUIHandler(JavaManager.getManager().getHandler(), a -> {
             if (a.inContext(JavaContext.ADD)){
                 var java = a.<Java>getSource();
                 javas.add(java.toIdentifier());
@@ -533,6 +519,10 @@ public class SettingsPage extends HandlerController {
             Configurator.getConfig().setOmitLauncherLibraries(chkOmitLibs.isSelected());
             Configurator.save();
         });
+        chkDisableSSL.selectedProperty().addListener(x -> {
+            needsToRestart = true;
+            tryToEnableSave();
+        });
 
         cGridSelection.setOnMouseClicked(a -> {
             var result = new DColorPicker(Configurator.getCache().getDockSelectionColor(), getStage()).pickColor();
@@ -660,6 +650,7 @@ public class SettingsPage extends HandlerController {
             Configurator.getConfig().setDownloadThreadsCount(fThreads.getValue());
             Configurator.getConfig().setDefaultMinRAM(ram.getMin());
             Configurator.getConfig().setDefaultMaxRAM(ram.getMax());
+            Configurator.getConfig().setDisableSSL(chkDisableSSL.isSelected());
             Configurator.save();
 
             btnSave.setVisible(false);
@@ -725,8 +716,6 @@ public class SettingsPage extends HandlerController {
             sldRAM.setValue(ram.getMax());
             fThreads.setValue(c.getDownloadThreadsCount());
             fScale.setValue(c.getUIScale());
-            //fCommPort.setValue(c.getCommPort());
-            //sldRAM.setValue(c.getDefaultMaxRAM());
             chkOldReleases.setSelected(c.isShowOldReleases());
             chkShowSnaps.setSelected(c.isShowSnapshots());
             chkPlaceDock.setSelected(c.shouldPlaceNewProfileToDock());
@@ -753,7 +742,6 @@ public class SettingsPage extends HandlerController {
             cGridSelection.setBackground(new Background(new BackgroundFill(Configurator.getCache().getDockSelectionColor(), new CornerRadii(8), null)));
 
             chkInGameRPC.setDisable(c.isDisabledRPC());
-            //txtCommPort.setDisable(c.isDisabledRPC());
             chkDiscordEnable.setSelected(!c.isDisabledRPC());
             chkInGameRPC.setSelected(c.isEnabledInGameRPC());
 

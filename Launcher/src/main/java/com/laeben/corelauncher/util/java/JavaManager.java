@@ -2,7 +2,6 @@ package com.laeben.corelauncher.util.java;
 
 import com.laeben.core.entity.exception.NoConnectionException;
 import com.laeben.core.entity.exception.StopException;
-import com.laeben.core.event.bus.EventBus;
 import com.laeben.core.event.function.ProgressFunction;
 import com.laeben.core.event.type.SimpleEvent;
 import com.laeben.core.network.Network;
@@ -37,7 +36,7 @@ public class JavaManager {
 
     private static JavaManager instance;
 
-    private final EventBus<JavaContext, SimpleEvent<JavaContext>> handler;
+    private final FrequentEventBus<JavaContext, SimpleEvent<JavaContext>> handler;
     private List<Java> javaVersions;
 
     private Path javaDir;
@@ -68,7 +67,7 @@ public class JavaManager {
     public static Path javaDir(){
         return Configurator.getConfig().getLauncherPath().to("java");
     }
-    public EventBus<JavaContext, SimpleEvent<JavaContext>> getHandler(){
+    public FrequentEventBus<JavaContext, SimpleEvent<JavaContext>> getHandler(){
         return handler;
     }
 

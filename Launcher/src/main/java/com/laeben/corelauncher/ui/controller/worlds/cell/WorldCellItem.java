@@ -100,7 +100,7 @@ public class WorldCellItem {
                     timer = null;
                 }
             }
-        }));
+        }, this, null));
     }
 
     public ProgressTimer getTimer() {
@@ -183,7 +183,7 @@ public class WorldCellItem {
                     timer = null;
                 }
             }
-        }));
+        }, this, null));
     }
 
     public World getWorld() {

@@ -224,6 +224,6 @@ public class ResourceCellItem {
         }
 
         if (tasker != null)
-            installationRecord = tasker.await(this::install, null, this).onFinished(() -> installationRecord = null);
+            installationRecord = tasker.await(this::install, this, null).onFinished(() -> installationRecord = null);
     }
 }

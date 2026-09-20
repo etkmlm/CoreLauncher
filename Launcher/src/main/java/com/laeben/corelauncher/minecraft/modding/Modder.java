@@ -17,7 +17,7 @@ import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.util.NetUtil;
-import com.laeben.corelauncher.event.bus.UIEventBus;
+import com.laeben.corelauncher.event.bus.FrequentEventBus;
 import com.laeben.corelauncher.event.context.BasicActionContext;
 import com.laeben.corelauncher.minecraft.Loader;
 import com.laeben.corelauncher.minecraft.token.LaunchToken;
@@ -434,7 +434,7 @@ public class Modder {
 
         boolean check = mode == IncludeMode.OVERWRITE_PROFILE || mode == IncludeMode.DEFAULT && checkModpackOverride(p, mp);
 
-        UIEventBus.disable();
+        FrequentEventBus.disable();
 
         int total = 0;
 
@@ -442,7 +442,7 @@ public class Modder {
         total += include(p, mp.resources, IncludeMode.IGNORE_PROFILE, onProgress);
         total += include(p, mp.shaders, IncludeMode.IGNORE_PROFILE, onProgress);
 
-        UIEventBus.enable();
+        FrequentEventBus.enable();
 
         onProgress.onContext(BasicActionContext.STOP);
 

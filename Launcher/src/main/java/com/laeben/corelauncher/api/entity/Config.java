@@ -38,7 +38,8 @@ public class Config {
     private boolean middlePaste;
     private boolean useExternalAuth;
     private boolean useEmbeddedBrowser;
-    private boolean transparentMode = false;
+    private boolean transparentMode;
+    private boolean disableSSL;
 
     /* Number Fields */
 
@@ -215,6 +216,9 @@ public class Config {
     public Locale getLanguage(){
         return language == null ? Locale.getDefault() : language;
     }
+    public boolean isDisabledSSL(){
+        return disableSSL;
+    }
 
     /* Setters */
 
@@ -330,5 +334,8 @@ public class Config {
     }
     public void setDisableSelectNewProfile(boolean disableSelectNewProfile) {
         this.disableSelectNewProfile = disableSelectNewProfile;
+    }
+    public void setDisableSSL(boolean value){
+        this.disableSSL = value;
     }
 }

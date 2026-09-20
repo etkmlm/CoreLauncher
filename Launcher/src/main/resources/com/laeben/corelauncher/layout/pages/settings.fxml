@@ -183,21 +183,24 @@
                 <Label styleClass="property-key" text="%settings.searchBrowserManually" GridPane.columnIndex="1" GridPane.rowIndex="9" />
                 <CheckBox fx:id="chkSearchBrowserManually" GridPane.columnIndex="2" GridPane.rowIndex="9" />
 
-                <Label styleClass="property-key" text="%settings.threads" GridPane.columnIndex="1" GridPane.rowIndex="10">
+                <Label styleClass="property-key" text="%settings.disableSSL" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+                <CheckBox fx:id="chkDisableSSL" GridPane.columnIndex="2" GridPane.rowIndex="10" />
+
+                <Label styleClass="property-key" text="%settings.threads" GridPane.columnIndex="1" GridPane.rowIndex="11">
                     <tooltip>
                         <Tooltip text="%settings.tip.threads"/>
                     </tooltip>
                 </Label>
-                <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="10" />
+                <Spinner fx:id="txtThreads" editable="true" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="11" />
 
-                <Label styleClass="property-key" text="%settings.curseApi" GridPane.columnIndex="1" GridPane.rowIndex="11" />
-                <TextField fx:id="txtCurseForgeKey" minWidth="160" GridPane.columnIndex="2" GridPane.rowIndex="11"/>
+                <Label styleClass="property-key" text="%settings.curseApi" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+                <TextField fx:id="txtCurseForgeKey" minWidth="160" GridPane.columnIndex="2" GridPane.rowIndex="12"/>
 
-                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="12" GridPane.hgrow="ALWAYS">
+                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="Infinity" GridPane.columnIndex="2" GridPane.rowIndex="13" GridPane.hgrow="ALWAYS">
                     <CButton fx:id="btnCheckUpdate" text="%settings.update" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
                     <CWorker fx:id="workerUpdate"/>
                 </HBox>
-                <CButton fx:id="btnGC" maxWidth="Infinity" text="%settings.gc" GridPane.columnIndex="2" GridPane.rowIndex="13" GridPane.hgrow="ALWAYS"/>
+                <CButton fx:id="btnGC" maxWidth="Infinity" text="%settings.gc" GridPane.columnIndex="2" GridPane.rowIndex="14" GridPane.hgrow="ALWAYS"/>
             </GridPane>
         </VBox>
 
@@ -217,11 +220,6 @@
 
                 <Label styleClass="property-key" text="%settings.inGameRPC" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <CheckBox fx:id="chkInGameRPC" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-
-                <!--<Label styleClass="property-key" text="%settings.commPort" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <Spinner fx:id="txtCommPort" maxWidth="Infinity" prefHeight="30" GridPane.columnIndex="2" GridPane.rowIndex="2" />-->
-                <!--<Label styleClass="property-key" text="%settings.debugLogMode" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <CheckBox fx:id="chkDebugLogMode" GridPane.columnIndex="2" GridPane.rowIndex="2" />-->
             </GridPane>
         </VBox>
     </VBox>

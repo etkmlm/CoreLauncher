@@ -204,7 +204,7 @@ public class Main extends HandlerController {
                 return;
 
             refreshStates();
-        }, true);
+        }, false);
         registerHandler(Launcher.getLauncher().getHandler(), this::onGeneralEvent, true);
         registerHandler(Vanilla.getVanilla().getHandler(), this::onGeneralEvent, true);
         registerHandler(Modder.getModder().getHandler(), this::onGeneralEvent, true);
@@ -399,7 +399,7 @@ public class Main extends HandlerController {
 
         running.set(true);
 
-        Tasker.getDefault().await(task, token, this);
+        Tasker.getDefault().await(task, this, token);
     }
 
     /* ANNOUNCEMENT */

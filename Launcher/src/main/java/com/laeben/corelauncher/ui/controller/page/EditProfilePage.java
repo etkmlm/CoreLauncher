@@ -189,7 +189,7 @@ public class EditProfilePage extends HandlerController implements FocusLimiter {
         loaderVersions = FXCollections.observableArrayList();
         loaderVersions.add("...");
 
-        registerHandler(JavaManager.getManager().getHandler(), a -> {
+        registerUIHandler(JavaManager.getManager().getHandler(), a -> {
             if (a.inContext(JavaContext.ADD)){
                 var java = a.<Java>getSource();
                 javaVersions.add(java.toIdentifier());

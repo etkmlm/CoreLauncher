@@ -3,6 +3,7 @@ package com.laeben.corelauncher.util;
 import com.laeben.core.util.events.BaseEvent;
 import com.laeben.corelauncher.api.ui.UI;
 
+@Deprecated
 public class EventHandler<T extends BaseEvent> extends com.laeben.core.util.EventHandler<T> {
     public static final String RELOAD = "reload";
     public static final String STOP = "stop";

@@ -1,6 +1,5 @@
 package com.laeben.corelauncher;
 
-import com.laeben.core.LaebenApp;
 import com.laeben.core.concurrency.CancellableToken;
 import com.laeben.core.entity.LaebenAppFile;
 import com.laeben.core.entity.exception.HttpException;
@@ -9,7 +8,6 @@ import com.laeben.core.entity.exception.StopException;
 import com.laeben.core.network.Network;
 import com.laeben.core.network.entity.NetworkToken;
 import com.laeben.core.util.events.KeyEvent;
-import com.laeben.core.util.events.ValueEvent;
 import com.laeben.corelauncher.api.entity.FileCheckMode;
 import com.laeben.corelauncher.api.exception.PerformException;
 import com.laeben.corelauncher.api.ui.UI;
@@ -45,7 +43,6 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.BindException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -154,18 +151,21 @@ public class CoreLauncher {
         SYSTEM_OS_ARCH = arch == null ? (SYSTEM_OS_64 ? "x64" : "x86") : arch;
         // ------------------
 
-        Network.patchSSL();
-
-        if (listArgs.contains("--offline"))
-            Network.setOffline(true);
-
         var cfg = new Configurator(LAUNCHER_PATH);
 
         if (!cfg.reloadConfig()){
-            Logger.getLogger().log(LogType.ERROR,"FATAL: Couldn't load configuration file, launcher will close...");
+            Logger.getLogger().log(LogType.ERROR,"FATAL: Couldn't load configuration file, check file permissions. Launcher will close...");
             System.exit(-1);
             return;
         }
+
+        if (Configurator.getConfig().isDisabledSSL() || listArgs.contains("--no-ssl")){
+            Network.patchSSL();
+            Logger.getLogger().log(LogType.WARN, "SSL certificate verification disabled.");
+        }
+
+        if (listArgs.contains("--offline"))
+            Network.setOffline(true);
 
         var natives = Configurator.getConfig().getNativesPath();
         if (natives.exists() && !listArgs.contains("--natives")){
@@ -218,50 +218,13 @@ public class CoreLauncher {
         // Launcher Web API Listener
         APIListener.start(mainToken);
 
-        /*try{
-            new CLCommunicator(9845).start();
-        }
-        catch (Exception e){
-            Logger.getLogger().log(e);
-        }*/
-
         Discord.getDiscord().setActivity(Activity.setForIdling());
 
-        /*CLCommunicator.getCommunicator().getHandler().addHandler("clauncher", a -> {
-            if (!a.getKey().equals(CLCommunicator.EVENT_RECEIVE))
-                return;
-            var packet = (CLPacket)a.getValue();
-            switch (packet.getType()){
-                case LAUNCH, HANDSHAKE -> {
-
-                }
-                case STATUS -> {
-                    var p = new CLStatusPacket(packet);
-                    Discord.getDiscord().setActivity(x -> {
-                        x.state = p.getType().name();
-                        x.details = p.getData();
-                    });
-                }
-            }
-        }, true);*/
         Configurator.getConfigurator().getHandler().addHandler("logger", (a) -> {
             if (!a.getKey().equals(Configurator.GAME_PATH_CHANGE))
                 return;
 
             Logger.getLogger().setLogDir(getLogDir());
-        }, false);
-        LaebenApp.getHandler().addHandler(KEY, a -> {
-            if (a instanceof ValueEvent oe){
-                if (oe.getKey().equals(LaebenApp.EXCEPTION)){
-                    if (oe.getValue() instanceof BindException) // it is not necessary
-                        return;
-                    Logger.getLogger().log((Exception) oe.getValue());
-                }
-                /*else if (oe.getKey().equals(LaebenApp.NET_EXCEPTION)){
-                    String[] spl = oe.getValue().toString().split("\\$\\$\\$");
-                    Logger.getLogger().logDebug(LogType.ERROR, "Error on request to " + spl[0] + ": " + spl[1]);
-                }*/
-            }
         }, false);
         //
 

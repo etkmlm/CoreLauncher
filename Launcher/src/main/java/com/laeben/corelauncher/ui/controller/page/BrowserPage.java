@@ -4,7 +4,9 @@ import com.laeben.core.util.StrUtil;
 import com.laeben.corelauncher.api.Configurator;
 import com.laeben.corelauncher.api.Profiler;
 import com.laeben.corelauncher.api.Translator;
+import com.laeben.corelauncher.api.concurrency.TaskRecord;
 import com.laeben.corelauncher.api.concurrency.Tasker;
+import com.laeben.corelauncher.api.concurrency.event.TaskContext;
 import com.laeben.corelauncher.api.entity.Profile;
 import com.laeben.corelauncher.api.ui.UI;
 import com.laeben.corelauncher.api.ui.entity.Announcement;
@@ -58,6 +60,7 @@ public class BrowserPage extends HandlerController {
 
     private final Timer searchTimer;
     private final Tasker installationTasker;
+    private int modpackInstallationCount;
 
     public BrowserPage(){
         super(KEY);
@@ -65,11 +68,18 @@ public class BrowserPage extends HandlerController {
         searchTimer = new Timer();
         installationTasker = new Tasker();
 
-        registerHandler(installationTasker.getHandler(), a -> UI.runAsync(() -> {
-            boolean cancellable = !installationTasker.isEmpty() && installationTasker.getTasks().stream().anyMatch(x -> x.getOwner() != null && ((ResourceCellItem)x.getOwner()).getResource().getResourceType() == ResourceType.MODPACK);
-            btnCancel.setVisible(cancellable);
-            btnCancel.setManaged(cancellable);
-        }), false);
+        registerUIHandler(installationTasker.getHandler(), a -> UI.runAsync(() -> {
+            final var record = a.<TaskRecord>getSource();
+
+            if (installationTasker.isEmpty()) modpackInstallationCount = 0;
+            else if (record.getOwner() instanceof ResourceCellItem rci && rci.getResource().getResourceType() == ResourceType.MODPACK) {
+                if (a.inContext(TaskContext.ADDED)) modpackInstallationCount++;
+                else if (a.inContext(TaskContext.REMOVED)) modpackInstallationCount--;
+            }
+
+            btnCancel.setVisible(modpackInstallationCount > 0);
+            btnCancel.setManaged(modpackInstallationCount > 0);
+        }), true);
     }
 
     private void reloadTitle(Profile p){

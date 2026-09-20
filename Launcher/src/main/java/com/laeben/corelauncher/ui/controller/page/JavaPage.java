@@ -28,12 +28,12 @@ public class JavaPage extends HandlerController {
 
         tasker = new Tasker();
 
-        registerHandler(tasker.getHandler(), a -> {
+        registerUIHandler(tasker.getHandler(), a -> {
             final var record = a.<TaskRecord>getSource();
             btnCancel.setVisible(!tasker.isEmpty());
         }, true);
 
-        registerHandler(JavaManager.getManager().getHandler(), a -> {
+        registerUIHandler(JavaManager.getManager().getHandler(), a -> {
             if (a.inContext(JavaContext.ADD)){
                 var f = a.<Java>getSource();
                 if (pList.getItems().stream().noneMatch(x -> f.equals(x.getJava()))) pList.getItems().add(new JavaCell.Item(f, tasker));

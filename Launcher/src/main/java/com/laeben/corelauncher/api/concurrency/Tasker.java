@@ -71,7 +71,7 @@ public class Tasker {
         return await(runnable, null, null);
     }
 
-    public TaskRecord await(Runnable runnable, CancellableToken<?> token, Object owner){
+    public TaskRecord await(Runnable runnable, Object owner, CancellableToken<?> token){
         return await(() -> {
             runnable.run();
             return null;
